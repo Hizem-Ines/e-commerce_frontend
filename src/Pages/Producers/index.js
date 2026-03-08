@@ -31,17 +31,10 @@ const Producers = () => {
                         >
                             <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent group-hover:border-emerald-500 group-hover:-translate-y-1 group-hover:shadow-xl transition-all duration-300">
 
-                                {/* BANDEAU */}
-                                <div className="h-16 bg-gradient-to-r from-emerald-600 to-teal-600 relative">
-                                    <div className="absolute inset-0 opacity-20" style={{
-                                        backgroundImage: 'radial-gradient(circle at 20px 20px, white 2px, transparent 0)',
-                                        backgroundSize: '40px 40px'
-                                    }} />
-                                </div>
 
                                 <div className="px-5 pb-5">
                                     {/* AVATAR */}
-                                    <div className="flex items-end justify-between -mt-8 mb-4">
+                                    <div className="flex items-end justify-between -mt-1 mb-4">
     <div className="w-14 h-14 bg-white rounded-xl shadow-md flex items-center justify-center text-2xl border-4 border-white">
                                             {producteur.icone}
                                         </div>

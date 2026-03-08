@@ -49,17 +49,10 @@ const ProducerDetail = () => {
                 {/* CARTE PROFIL */}
                 <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-hidden mb-8">
 
-                    {/* BANDEAU VERT */}
-                    <div className="h-16 bg-gradient-to-r from-emerald-600 to-teal-600 relative">
-                    <div className="absolute inset-0 opacity-20" style={{
-                        backgroundImage: 'radial-gradient(circle at 20px 20px, white 2px, transparent 0)',
-                        backgroundSize: '40px 40px'
-                    }} />
-                </div>
-
+    
                 <div className="px-8 pb-8">
                     {/* AVATAR */}
-                <div className="flex items-end justify-between -mt-10 mb-6">
+                <div className="flex items-end justify-between -mt-1 mb-6">
                 <div className="w-20 h-20 bg-white rounded-2xl shadow-lg flex items-center justify-center text-4xl border-4 border-white">
                                 {producteur.icone}
                             </div>
