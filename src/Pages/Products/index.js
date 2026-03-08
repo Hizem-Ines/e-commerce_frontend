@@ -1,15 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
-import { nouveautes, tendances } from '../../data/products';
-import categories from '../../data/categories';
 import formatPrice from '../../utils/formatPrice';
+import API from '../../api/axios';
 import { BsStars } from "react-icons/bs";
 import { FiHeart } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
-
-const tousProduits = [...nouveautes, ...tendances];
 
 const Products = () => {
     const { ajouterAuPanier } = useCart();
@@ -20,18 +17,49 @@ const Products = () => {
     const [prixMax, setPrixMax] = useState('');
     const [noteMin, setNoteMin] = useState(0);
 
-    const produitsFiltres = tousProduits
+    // ✅ Nouveau — données depuis le backend
+    const [produits, setProduits] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    // ✅ Charger produits et catégories depuis l'API
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [produitsRes, categoriesRes] = await Promise.all([
+                    API.get('/products'),
+                    API.get('/categories')
+                ]);
+
+ console.log('produits:', produitsRes.data);      // ← ajoute ça
+            console.log('categories:', categoriesRes.data);  // ← ajoute ça
+
+
+             setProduits(produitsRes.data.products);        // ← .products
+setCategories(categoriesRes.data.categories);
+            } catch (err) {
+                setError("Erreur lors du chargement des produits");
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
+
+    const produitsFiltres = produits
         .filter((p) => {
-            const matchCategorie = categorieActive === 'Tous' || p.region === categorieActive;
-            const matchPrixMin = prixMin === '' || p.prix >= parseFloat(prixMin);
-            const matchPrixMax = prixMax === '' || p.prix <= parseFloat(prixMax);
-            const matchNote = p.note >= noteMin;
+            const matchCategorie = categorieActive === 'Tous' || p.category_id === categorieActive;
+            const matchPrixMin = prixMin === '' || p.price >= parseFloat(prixMin);
+            const matchPrixMax = prixMax === '' || p.price <= parseFloat(prixMax);
+            const matchNote = p.ratings >= noteMin;
             return matchCategorie && matchPrixMin && matchPrixMax && matchNote;
         })
         .sort((a, b) => {
-            if (tri === 'prix-asc') return a.prix - b.prix;
-            if (tri === 'prix-desc') return b.prix - a.prix;
-            if (tri === 'note') return b.note - a.note;
+            if (tri === 'prix-asc') return a.price - b.price;
+            if (tri === 'prix-desc') return b.price - a.price;
+            if (tri === 'note') return b.ratings - a.ratings;
             return 0;
         });
 
@@ -42,6 +70,21 @@ const Products = () => {
         setPrixMax('');
         setNoteMin(0);
     };
+
+    // ✅ États de chargement et erreur
+    if (loading) return (
+        <div className="min-h-screen bg-[#fdf6ec] flex items-center justify-center">
+            <p className="text-emerald-600 font-bold text-lg animate-pulse">
+                Chargement des produits...
+            </p>
+        </div>
+    );
+
+    if (error) return (
+        <div className="min-h-screen bg-[#fdf6ec] flex items-center justify-center">
+            <p className="text-red-500 font-bold">{error}</p>
+        </div>
+    );
 
     return (
         <div className="bg-[#fdf6ec] min-h-screen py-12">
@@ -149,14 +192,14 @@ const Products = () => {
                                     {categories.map((cat) => (
                                         <button
                                             key={cat.id}
-                                            onClick={() => setCategorieActive(cat.nom)}
+                                            onClick={() => setCategorieActive(cat.id)}
                                             className={`text-left px-3 py-2 rounded-xl text-sm font-semibold transition-colors duration-200 ${
-                                                categorieActive === cat.nom
+                                                categorieActive === cat.id
                                                     ? 'bg-emerald-600 text-white'
                                                     : 'bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-emerald-600'
                                             }`}
                                         >
-                                            {cat.icone} {cat.nom}
+                                            {cat.name}
                                         </button>
                                     ))}
                                 </div>
@@ -188,9 +231,18 @@ const Products = () => {
                                         {/* IMAGE */}
                                         <Link to={`/produits/${produit.id}`} className="no-underline">
                                             <div className="relative h-44 bg-[#ecfdf5] flex items-center justify-center cursor-pointer">
-                                                <span className="text-6xl">{produit.image}</span>
+                                                {/* ✅ Vraie image ou placeholder */}
+                                                {produit.images && produit.images[0] ? (
+                                                    <img
+                                                        src={produit.images[0]}
+                                                        alt={produit.name}
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <span className="text-6xl">🛍️</span>
+                                                )}
                                                 <span className="absolute bottom-3 right-3 bg-white/90 text-xs font-bold px-3 py-1 rounded-full">
-                                                    ⭐ {produit.note}
+                                                    ⭐ {produit.ratings || '0'}
                                                 </span>
                                             </div>
                                         </Link>
@@ -200,14 +252,12 @@ const Products = () => {
                                             <div className="flex items-start justify-between mb-2">
                                                 <Link to={`/produits/${produit.id}`} className="no-underline flex-1">
                                                     <h3 className="text-sm font-bold text-[#2c2c2c] hover:text-emerald-600 transition-colors duration-200">
-                                                        {produit.nom}
+                                                        {produit.name}
                                                     </h3>
                                                 </Link>
-                                                {/* BOUTON COEUR */}
                                                 <button
                                                     onClick={() => toggleFavori(produit)}
                                                     className="ml-2 p-1.5 rounded-full hover:bg-red-50 transition-colors duration-200 shrink-0"
-                                                    aria-label="Ajouter aux favoris"
                                                 >
                                                     {estFavori(produit.id)
                                                         ? <FaHeart size={16} className="text-red-500" />
@@ -217,20 +267,17 @@ const Products = () => {
                                             </div>
 
                                             <div className="flex items-center gap-2 mb-3 flex-wrap">
-                                                <Link
-                                                    to={`/producteurs/${encodeURIComponent(produit.producteur)}`}
-                                                    className="bg-[#d1fae5] text-emerald-600 text-xs font-bold px-3 py-1 rounded-full no-underline hover:bg-emerald-200 transition-colors duration-200"
-                                                >
-                                                    {produit.producteur}
-                                                </Link>
+                                                <span className="bg-[#d1fae5] text-emerald-600 text-xs font-bold px-3 py-1 rounded-full">
+                                                    {produit.supplier_name || 'Fournisseur'}
+                                                </span>
                                                 <span className="text-xs text-black/50">
-                                                    📍 {produit.region}
+                                                    {produit.ethical_info ? `🌿 ${produit.ethical_info}` : ''}
                                                 </span>
                                             </div>
 
                                             <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                                                 <span className="text-lg font-extrabold text-emerald-600">
-                                                    {formatPrice(produit.prix)}
+                                                    {formatPrice(produit.price || 0)}
                                                 </span>
                                                 <button
                                                     onClick={() => ajouterAuPanier(produit)}
@@ -245,7 +292,6 @@ const Products = () => {
                             </div>
                         )}
                     </div>
-
                 </div>
             </div>
         </div>

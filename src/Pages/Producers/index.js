@@ -1,9 +1,43 @@
 import { Link } from 'react-router-dom';
-import { producteurs } from '../../data/producers';
+import { useState, useEffect } from 'react';
 import { MdVerified } from 'react-icons/md';
 import { FaStar } from 'react-icons/fa';
+import API from '../../api/axios';
 
 const Producers = () => {
+    const [producteurs, setProducteurs] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchProducteurs = async () => {
+            try {
+                const res = await API.get('/suppliers');
+                setProducteurs(res.data.suppliers);
+            } catch (err) {
+                setError("Erreur lors du chargement des producteurs");
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProducteurs();
+    }, []);
+
+    if (loading) return (
+        <div className="min-h-screen bg-[#fdf6ec] flex items-center justify-center">
+            <p className="text-emerald-600 font-bold text-lg animate-pulse">
+                Chargement des producteurs...
+            </p>
+        </div>
+    );
+
+    if (error) return (
+        <div className="min-h-screen bg-[#fdf6ec] flex items-center justify-center">
+            <p className="text-red-500 font-bold">{error}</p>
+        </div>
+    );
+
     return (
         <div className="bg-[#fdf6ec] min-h-screen py-12">
             <div className="container mx-auto px-4">
@@ -17,7 +51,7 @@ const Producers = () => {
                         Rencontrez nos Artisans
                     </h1>
                     <p className="text-black/50 max-w-xl mx-auto">
-                        Des producteurs passionnés qui cultivent et fabriquent avec amour les meilleurs produits de Tunisie
+                        Des producteurs passionnés qui cultivent et fabriquent avec amour les meilleurs produits
                     </p>
                 </div>
 
@@ -26,7 +60,7 @@ const Producers = () => {
                     {producteurs.map((producteur) => (
                         <Link
                             key={producteur.id}
-                            to={`/producteurs/${encodeURIComponent(producteur.nom)}`}
+                            to={`/producteurs/${encodeURIComponent(producteur.slug)}`}
                             className="no-underline group"
                         >
                             <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent group-hover:border-emerald-500 group-hover:-translate-y-1 group-hover:shadow-xl transition-all duration-300">
@@ -42,39 +76,53 @@ const Producers = () => {
                                 <div className="px-5 pb-5">
                                     {/* AVATAR */}
                                     <div className="flex items-end justify-between -mt-8 mb-4">
-    <div className="w-14 h-14 bg-white rounded-xl shadow-md flex items-center justify-center text-2xl border-4 border-white">
-                                            {producteur.icone}
+                                        <div className="w-14 h-14 bg-white rounded-xl shadow-md flex items-center justify-center text-2xl border-4 border-white overflow-hidden">
+                                            {producteur.images?.[0]?.url ? (
+                                                <img src={producteur.images[0].url} alt={producteur.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <span>🏭</span>
+                                            )}
                                         </div>
                                         <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-full mb-1">
                                             <FaStar size={12} className="text-yellow-400" />
-                                            <span className="text-xs font-bold text-yellow-700">{producteur.note}</span>
+                                            <span className="text-xs font-bold text-yellow-700">5.0</span>
                                         </div>
                                     </div>
 
                                     {/* INFOS */}
                                     <h3 className="text-lg font-bold text-[#2c2c2c] mb-1 group-hover:text-emerald-600 transition-colors duration-200">
-                                        {producteur.nom}
+                                        {producteur.name}
                                     </h3>
                                     <p className="text-xs text-black/50 mb-3">
-                                        📍 {producteur.region} · {producteur.specialite}
+                                        📍 {producteur.address || 'Adresse non renseignée'}
                                     </p>
                                     <p className="text-sm text-black/60 leading-relaxed mb-4 line-clamp-2">
-                                        {producteur.description}
+                                        {producteur.description || 'Aucune description disponible'}
                                     </p>
 
-                                    {/* CERTIFICATIONS */}
-                                    <div className="flex gap-2 mb-4 flex-wrap">
-                                        {producteur.certifications.map((cert) => (
-                                            <span key={cert} className="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
-                                                <MdVerified size={10} /> {cert}
+                                    {/* CONTACT */}
+                                    {producteur.contact && (
+                                        <div className="flex gap-2 mb-4">
+                                            <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                                                <MdVerified size={10} /> Vérifié
                                             </span>
-                                        ))}
-                                    </div>
+                                        </div>
+                                    )}
 
-                                    {/* STATS */}
+                                    {/* FOOTER */}
                                     <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                                        <span className="text-xs text-black/40">{producteur.nbAvis} avis</span>
-                                        <span className="bg-emerald-600 group-hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300">
+                                        {producteur.website && (
+                                            <a
+                                                href={producteur.website}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                onClick={e => e.stopPropagation()}
+                                                className="text-xs text-black/40 hover:text-emerald-600 no-underline transition-colors"
+                                            >
+                                                🌐 Site web
+                                            </a>
+                                        )}
+                                        <span className="bg-emerald-600 group-hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300 ml-auto">
                                             Voir le profil →
                                         </span>
                                     </div>
@@ -83,7 +131,6 @@ const Producers = () => {
                         </Link>
                     ))}
                 </div>
-
             </div>
         </div>
     );

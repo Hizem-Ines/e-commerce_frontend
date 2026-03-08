@@ -1,5 +1,5 @@
 const formatPrice = (prix) => {
-    return `${prix.toFixed(2)} DT`;
+    return `${parseFloat(prix || 0).toFixed(2)} DT`;
 };
 
 export default formatPrice;
