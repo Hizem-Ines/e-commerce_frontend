@@ -5,6 +5,7 @@ import { FiHeart } from "react-icons/fi";
 import { useCart } from '../../../context/CartContext';
 import { useWishlist } from '../../../context/WishlistContext';
 import formatPrice from '../../../utils/formatPrice';
+import { useAuth } from '../../../context/authContext';
 
 const Logo = () => (
     <Link to="/" className="shrink-0 no-underline flex items-center gap-2">
@@ -28,6 +29,7 @@ const Logo = () => (
 const Header = () => {
     const { totalArticles, totalPrix } = useCart();
     const { totalFavoris } = useWishlist();
+    const { user, logout } = useAuth();
 
     return (
         <div className="bg-emerald-600">
@@ -62,9 +64,26 @@ const Header = () => {
                         </Link>
 
                         {/* COMPTE */}
-                        <Link to="/connexion" className="border border-white/30 rounded-full w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 transition no-underline">
+                        {user ? (
+                            <div className="flex items-center gap-2">
+                                <span className="text-white text-sm font-semibold hidden md:block">
+                                    {user.name}
+                                </span>
+                                <button
+                                    onClick={logout}
+                                className="border border-white/30 rounded-full px-3 py-1.5 text-white text-xs font-bold hover:bg-white/10 transition"
+                                >
+                                    Déconnexion
+                                </button>
+                            </div>
+                        ) : (
+                        <Link
+                            to="/connexion"
+                            className="border border-white/30 rounded-full w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 transition no-underline"
+                        >
                             <FiUser size={20} />
                         </Link>
+                        )}
 
                         {/* PANIER */}
                         <Link to="/panier" className="flex items-center gap-2 no-underline">
