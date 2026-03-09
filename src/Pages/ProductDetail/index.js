@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import formatPrice from '../../utils/formatPrice';
-import API from '../../api/axios';
+import API from '../../services/api';
 import { FiHeart } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
 

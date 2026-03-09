@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
 import { FiUser } from "react-icons/fi";
 import { BsFillBasket3Fill } from "react-icons/bs";
-import { FaAngleDown } from "react-icons/fa6";
 import { FiHeart } from "react-icons/fi";
 import { useCart } from '../../../context/CartContext';
 import { useWishlist } from '../../../context/WishlistContext';
 import formatPrice from '../../../utils/formatPrice';
+import { useAuth } from '../../../context/authContext';
 
 const Logo = () => (
     <Link to="/" className="shrink-0 no-underline flex items-center gap-2">
@@ -29,6 +29,7 @@ const Logo = () => (
 const Header = () => {
     const { totalArticles, totalPrix } = useCart();
     const { totalFavoris } = useWishlist();
+    const { user, logout } = useAuth();
 
     return (
         <div className="bg-emerald-600">
@@ -36,14 +37,6 @@ const Header = () => {
                 <div className="flex items-center py-3 gap-4">
 
                     <Logo />
-
-                    <button className="flex items-center gap-2 border border-white/30 rounded-xl px-4 py-2 text-white shrink-0 hover:bg-white/10 transition">
-                        <div className="flex flex-col text-left">
-                            <span className="text-white/70 text-xs">Votre région</span>
-                            <span className="text-white font-bold text-sm">Tunisie</span>
-                        </div>
-                        <FaAngleDown className="text-white/80 ml-1" />
-                    </button>
 
                     <div className="flex-1 flex items-center bg-white/15 border border-white/30 rounded-full px-4 py-2 gap-2">
                         <input
@@ -71,9 +64,26 @@ const Header = () => {
                         </Link>
 
                         {/* COMPTE */}
-                        <button className="border border-white/30 rounded-full w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 transition">
+                        {user ? (
+                            <div className="flex items-center gap-2">
+                                <span className="text-white text-sm font-semibold hidden md:block">
+                                    {user.name}
+                                </span>
+                                <button
+                                    onClick={logout}
+                                className="border border-white/30 rounded-full px-3 py-1.5 text-white text-xs font-bold hover:bg-white/10 transition"
+                                >
+                                    Déconnexion
+                                </button>
+                            </div>
+                        ) : (
+                        <Link
+                            to="/connexion"
+                            className="border border-white/30 rounded-full w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 transition no-underline"
+                        >
                             <FiUser size={20} />
-                        </button>
+                        </Link>
+                        )}
 
                         {/* PANIER */}
                         <Link to="/panier" className="flex items-center gap-2 no-underline">
