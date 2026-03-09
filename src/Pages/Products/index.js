@@ -35,7 +35,6 @@ const Products = () => {
  console.log('produits:', produitsRes.data);      // ← ajoute ça
             console.log('categories:', categoriesRes.data);  // ← ajoute ça
 
-
              setProduits(produitsRes.data.products);        // ← .products
 setCategories(categoriesRes.data.categories);
             } catch (err) {
@@ -232,11 +231,14 @@ setCategories(categoriesRes.data.categories);
                                         <Link to={`/produits/${produit.id}`} className="no-underline">
                                             <div className="relative h-44 bg-[#ecfdf5] flex items-center justify-center cursor-pointer">
                                                 {/* ✅ Vraie image ou placeholder */}
+
+
                                                 {produit.images && produit.images[0] ? (
                                                     <img
                                                         src={produit.images[0]}
                                                         alt={produit.name}
                                                         className="h-full w-full object-cover"
+                                                        
                                                     />
                                                 ) : (
                                                     <span className="text-6xl">🛍️</span>
@@ -245,6 +247,7 @@ setCategories(categoriesRes.data.categories);
                                                     ⭐ {produit.ratings || '0'}
                                                 </span>
                                             </div>
+                                            
                                         </Link>
 
                                         {/* INFOS */}
