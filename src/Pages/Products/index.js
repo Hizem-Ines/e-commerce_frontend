@@ -1,46 +1,73 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
-import { nouveautes, tendances } from '../../data/products';
-import categories from '../../data/categories';
+import { getAllProducts } from '../../services/productService';
+import { getAllCategories } from '../../services/categoryService';
 import formatPrice from '../../utils/formatPrice';
 import { BsStars } from "react-icons/bs";
 import { FiHeart } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
 
-const tousProduits = [...nouveautes, ...tendances];
-
 const Products = () => {
     const { ajouterAuPanier } = useCart();
     const { toggleFavori, estFavori } = useWishlist();
-    const [categorieActive, setCategorieActive] = useState('Tous');
+
+    const [produits, setProduits] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [totalPages, setTotalPages] = useState(1);
+    const [page, setPage] = useState(1);
+
+    // Filtres
     const [tri, setTri] = useState('defaut');
     const [prixMin, setPrixMin] = useState('');
     const [prixMax, setPrixMax] = useState('');
-    const [noteMin, setNoteMin] = useState(0);
+    const [noteMin, setNoteMin] = useState('');
+    const [categorieId, setCategorieId] = useState('');
 
-    const produitsFiltres = tousProduits
-        .filter((p) => {
-            const matchCategorie = categorieActive === 'Tous' || p.region === categorieActive;
-            const matchPrixMin = prixMin === '' || p.prix >= parseFloat(prixMin);
-            const matchPrixMax = prixMax === '' || p.prix <= parseFloat(prixMax);
-            const matchNote = p.note >= noteMin;
-            return matchCategorie && matchPrixMin && matchPrixMax && matchNote;
-        })
-        .sort((a, b) => {
-            if (tri === 'prix-asc') return a.prix - b.prix;
-            if (tri === 'prix-desc') return b.prix - a.prix;
-            if (tri === 'note') return b.note - a.note;
-            return 0;
-        });
+    useEffect(() => {
+        const fetchProduits = async () => {
+            setLoading(true);
+            try {
+                const res = await getAllProducts({
+                    category_id: categorieId,
+                    min_price: prixMin,
+                    max_price: prixMax,
+                    ratings: noteMin,
+                    page,
+                });
+                setProduits(res.data.products);
+                setTotalPages(res.data.totalPages);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProduits();
+    }, [categorieId, prixMin, prixMax, noteMin, page]);
+
+    useEffect(() => {
+        getAllCategories()
+            .then(res => setCategories(res.data.categories))
+            .catch(err => console.error(err));
+    }, []);
+
+    const produitsTries = [...produits].sort((a, b) => {
+        if (tri === 'prix-asc') return a.min_price - b.min_price;
+        if (tri === 'prix-desc') return b.min_price - a.min_price;
+        if (tri === 'note') return b.ratings - a.ratings;
+        return 0;
+    });
 
     const resetFiltres = () => {
-        setCategorieActive('Tous');
         setTri('defaut');
         setPrixMin('');
         setPrixMax('');
-        setNoteMin(0);
+        setNoteMin('');
+        setCategorieId('');
+        setPage(1);
     };
 
     return (
@@ -54,7 +81,7 @@ const Products = () => {
                             Tous les Produits
                         </h1>
                         <p className="text-black/50">
-                            {produitsFiltres.length} produit{produitsFiltres.length > 1 ? 's' : ''} trouvé{produitsFiltres.length > 1 ? 's' : ''}
+                            {produits.length} produit{produits.length > 1 ? 's' : ''} trouvé{produits.length > 1 ? 's' : ''}
                         </p>
                     </div>
                     <button className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-6 py-3 rounded-full shadow-lg hover:shadow-emerald-300/40 transition-all duration-300 group">
@@ -119,9 +146,9 @@ const Products = () => {
                                     {[0, 3, 4, 4.5, 5].map((note) => (
                                         <button
                                             key={note}
-                                            onClick={() => setNoteMin(note)}
+                                            onClick={() => setNoteMin(note === 0 ? '' : note)}
                                             className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold transition-colors duration-200 ${
-                                                noteMin === note
+                                                (note === 0 && noteMin === '') || noteMin === note
                                                     ? 'bg-emerald-600 text-white'
                                                     : 'bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-emerald-600'
                                             }`}
@@ -137,9 +164,9 @@ const Products = () => {
                                 <h4 className="text-xs font-bold text-black/40 uppercase tracking-wider mb-3">Catégories</h4>
                                 <div className="flex flex-col gap-1.5">
                                     <button
-                                        onClick={() => setCategorieActive('Tous')}
+                                        onClick={() => setCategorieId('')}
                                         className={`text-left px-3 py-2 rounded-xl text-sm font-semibold transition-colors duration-200 ${
-                                            categorieActive === 'Tous'
+                                            categorieId === ''
                                                 ? 'bg-emerald-600 text-white'
                                                 : 'bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-emerald-600'
                                         }`}
@@ -149,14 +176,14 @@ const Products = () => {
                                     {categories.map((cat) => (
                                         <button
                                             key={cat.id}
-                                            onClick={() => setCategorieActive(cat.nom)}
+                                            onClick={() => setCategorieId(cat.id)}
                                             className={`text-left px-3 py-2 rounded-xl text-sm font-semibold transition-colors duration-200 ${
-                                                categorieActive === cat.nom
+                                                categorieId === cat.id
                                                     ? 'bg-emerald-600 text-white'
                                                     : 'bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-emerald-600'
                                             }`}
                                         >
-                                            {cat.icone} {cat.nom}
+                                            {cat.name}
                                         </button>
                                     ))}
                                 </div>
@@ -166,7 +193,12 @@ const Products = () => {
 
                     {/* GRILLE PRODUITS */}
                     <div className="flex-1">
-                        {produitsFiltres.length === 0 ? (
+                        {loading ? (
+                            <div className="text-center py-20">
+                                <div className="text-6xl mb-4 animate-spin">🌿</div>
+                                <p className="text-black/50 font-semibold">Chargement...</p>
+                            </div>
+                        ) : produitsTries.length === 0 ? (
                             <div className="text-center py-20">
                                 <div className="text-6xl mb-4">🔍</div>
                                 <h3 className="text-xl font-bold text-[#2c2c2c] mb-2">Aucun produit trouvé</h3>
@@ -179,73 +211,109 @@ const Products = () => {
                                 </button>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {produitsFiltres.map((produit) => (
-                                    <div
-                                        key={produit.id}
-                                        className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent hover:border-emerald-500 hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
-                                    >
-                                        {/* IMAGE */}
-                                        <Link to={`/produits/${produit.id}`} className="no-underline">
-                                            <div className="relative h-44 bg-[#ecfdf5] flex items-center justify-center cursor-pointer">
-                                                <span className="text-6xl">{produit.image}</span>
-                                                <span className="absolute bottom-3 right-3 bg-white/90 text-xs font-bold px-3 py-1 rounded-full">
-                                                    ⭐ {produit.note}
-                                                </span>
-                                            </div>
-                                        </Link>
+                            <>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {produitsTries.map((produit) => (
+                                        <div
+                                            key={produit.id}
+                                            className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent hover:border-emerald-500 hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
+                                        >
+                                            {/* IMAGE */}
+                                            <Link to={`/produits/${produit.id}`} className="no-underline">
+                                                <div className="relative h-44 bg-[#ecfdf5] flex items-center justify-center cursor-pointer">
+                                                    {produit.thumbnail?.[0]?.url ? (
+                                                        <img
+                                                            src={produit.thumbnail[0].url}
+                                                            alt={produit.name}
+                                                        className="h-full w-full object-cover"
+                                                        />
+                                                        ) : (
+                                                    <div className="flex flex-col items-center justify-center gap-2">
+                                                        <span className="text-5xl">🌿</span>
+                                                        <span className="text-xs text-black/30 font-semibold">Pas d'image</span>
+                                                    </div>
+                                                    )}
+                                                    <span className="absolute bottom-3 right-3 bg-white/90 text-xs font-bold px-3 py-1 rounded-full">
+                                                        ⭐ {produit.ratings || 'N/A'}
+                                                    </span>
+                                                </div>
+                                            </Link>
 
-                                        {/* INFOS */}
-                                        <div className="p-4">
-                                            <div className="flex items-start justify-between mb-2">
-                                                <Link to={`/produits/${produit.id}`} className="no-underline flex-1">
-                                                    <h3 className="text-sm font-bold text-[#2c2c2c] hover:text-emerald-600 transition-colors duration-200">
-                                                        {produit.nom}
-                                                    </h3>
-                                                </Link>
-                                                {/* BOUTON COEUR */}
-                                                <button
-                                                    onClick={() => toggleFavori(produit)}
-                                                    className="ml-2 p-1.5 rounded-full hover:bg-red-50 transition-colors duration-200 shrink-0"
-                                                    aria-label="Ajouter aux favoris"
-                                                >
-                                                    {estFavori(produit.id)
-                                                        ? <FaHeart size={16} className="text-red-500" />
-                                                        : <FiHeart size={16} className="text-gray-400 hover:text-red-400" />
-                                                    }
-                                                </button>
-                                            </div>
+                                            {/* INFOS */}
+                                            <div className="p-4">
+                                                <div className="flex items-start justify-between mb-2">
+                                                    <Link to={`/produits/${produit.id}`} className="no-underline flex-1">
+                                                        <h3 className="text-sm font-bold text-[#2c2c2c] hover:text-emerald-600 transition-colors duration-200">
+                                                            {produit.name}
+                                                        </h3>
+                                                    </Link>
+                                                    <button
+                                                        onClick={() => toggleFavori(produit)}
+                                                        className="ml-2 p-1.5 rounded-full hover:bg-red-50 transition-colors duration-200 shrink-0"
+                                                    >
+                                                        {estFavori(produit.id)
+                                                            ? <FaHeart size={16} className="text-red-500" />
+                                                            : <FiHeart size={16} className="text-gray-400 hover:text-red-400" />
+                                                        }
+                                                    </button>
+                                                </div>
 
-                                            <div className="flex items-center gap-2 mb-3 flex-wrap">
-                                                <Link
-                                                    to={`/producteurs/${encodeURIComponent(produit.producteur)}`}
-                                                    className="bg-[#d1fae5] text-emerald-600 text-xs font-bold px-3 py-1 rounded-full no-underline hover:bg-emerald-200 transition-colors duration-200"
-                                                >
-                                                    {produit.producteur}
-                                                </Link>
-                                                <span className="text-xs text-black/50">
-                                                    📍 {produit.region}
-                                                </span>
-                                            </div>
+                                                <div className="flex items-center gap-2 mb-3 flex-wrap">
+                                                    {produit.supplier_name && (
+                                                        <Link
+                                                            to={`/producteurs/${produit.supplier_slug || encodeURIComponent(produit.supplier_name)}`}
+                                                            className="bg-[#d1fae5] text-emerald-600 text-xs font-bold px-3 py-1 rounded-full no-underline hover:bg-emerald-200 transition-colors duration-200"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            {produit.supplier_name}
+                                                        </Link>
+                                                    )}
+                                                    {produit.category_name && (
+                                                        <span className="text-xs text-black/50">
+                                                            {produit.category_name}
+                                                        </span>
+                                                    )}
+                                                </div>
 
-                                            <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                                                <span className="text-lg font-extrabold text-emerald-600">
-                                                    {formatPrice(produit.prix)}
-                                                </span>
-                                                <button
-                                                    onClick={() => ajouterAuPanier(produit)}
-                                                    className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300"
-                                                >
-                                                    Ajouter
-                                                </button>
+                                                <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                                                    <span className="text-lg font-extrabold text-emerald-600">
+                                                        {produit.min_price
+                                                            ? formatPrice(parseFloat(produit.min_price))
+                                                            : 'Prix N/A'}
+                                                    </span>
+                                                    <button
+                                                        onClick={() => ajouterAuPanier(produit)}
+                                                        className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300"
+                                                    >
+                                                        Ajouter
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
+                                    ))}
+                                </div>
+
+                                {/* PAGINATION */}
+                                {totalPages > 1 && (
+                                    <div className="flex justify-center gap-2 mt-10">
+                                        {[...Array(totalPages)].map((_, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => setPage(i + 1)}
+                                                className={`w-10 h-10 rounded-full font-bold text-sm transition-all duration-200 ${
+                                                    page === i + 1
+                                                        ? 'bg-emerald-600 text-white'
+                                                        : 'bg-white text-black/50 hover:bg-emerald-100'
+                                                }`}
+                                            >
+                                                {i + 1}
+                                            </button>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
+                                )}
+                            </>
                         )}
                     </div>
-
                 </div>
             </div>
         </div>
