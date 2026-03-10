@@ -14,30 +14,25 @@ const ProductDetail = () => {
     const [quantite, setQuantite] = useState(1);
     const [ajoute, setAjoute] = useState(false);
 
-    // ✅ Nouveau — données depuis le backend
     const [produit, setProduit] = useState(null);
     const [similaires, setSimilaires] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // ✅ Variante sélectionnée (prix, stock, attributs)
     const [varianteSelectionnee, setVarianteSelectionnee] = useState(null);
 
     useEffect(() => {
         const fetchProduit = async () => {
             try {
                 setLoading(true);
-                // Fetch produit détaillé
                 const res = await API.get(`/products/${id}`);
                 const data = res.data.product;
                 setProduit(data);
 
-                // Sélectionner la première variante par défaut
                 if (data.variants && data.variants.length > 0) {
                     setVarianteSelectionnee(data.variants[0]);
                 }
 
-                // Fetch produits similaires (même catégorie)
                 const similairesRes = await API.get(
                     `/products?category_id=${data.category_id}`
                 );
@@ -69,7 +64,6 @@ const ProductDetail = () => {
         setTimeout(() => setAjoute(false), 2000);
     };
 
-    // ── États loading / error / not found ──
     if (loading) return (
         <div className="min-h-screen bg-[#fdf6ec] flex items-center justify-center">
             <p className="text-emerald-600 font-bold text-lg animate-pulse">
@@ -93,16 +87,15 @@ const ProductDetail = () => {
         </div>
     );
 
-    // Prix à afficher — variante sélectionnée ou min_price
-    const prixAffiche = varianteSelectionnee?.price || produit.min_price || 0;
-    const stockDisponible = varianteSelectionnee?.stock || 0;
+    const prixAffiche      = varianteSelectionnee?.price || produit.min_price || 0;
+    const stockDisponible  = varianteSelectionnee?.stock || 0;
 
     return (
         <div className="bg-[#fdf6ec] min-h-screen py-12">
             <div className="container mx-auto px-4">
 
                 {/* FIL D'ARIANE */}
-                <div className="flex items-center gap-2 text-sm text-black/50 mb-8">
+                <div className="flex items-center gap-2 text-sm text-black/50 mb-8 flex-wrap">
                     <Link to="/" className="hover:text-emerald-600 no-underline transition-colors duration-200">
                         Accueil
                     </Link>
@@ -110,6 +103,19 @@ const ProductDetail = () => {
                     <Link to="/produits" className="hover:text-emerald-600 no-underline transition-colors duration-200">
                         Produits
                     </Link>
+                    {/* ✅ Catégorie parente dans le fil d'ariane si elle existe */}
+                    {produit.parent_category_name && (
+                        <>
+                            <span>›</span>
+                            <span className="text-black/40">{produit.parent_category_name}</span>
+                        </>
+                    )}
+                    {produit.category_name && (
+                        <>
+                            <span>›</span>
+                            <span className="text-black/40">{produit.category_name}</span>
+                        </>
+                    )}
                     <span>›</span>
                     <span className="text-[#2c2c2c] font-semibold">{produit.name}</span>
                 </div>
@@ -137,11 +143,25 @@ const ProductDetail = () => {
                             {/* BADGES + COEUR */}
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex gap-2 flex-wrap">
+
+                                    {/* ✅ Badge fournisseur cliquable via supplier_slug */}
                                     {produit.supplier_name && (
-                                        <span className="bg-[#d1fae5] text-emerald-600 text-xs font-bold px-3 py-1 rounded-full">
-                                            {produit.supplier_name}
-                                        </span>
+                                        produit.supplier_slug ? (
+                                            <Link
+                                                to={`/fournisseurs/${produit.supplier_slug}`}
+                                                className="no-underline"
+                                            >
+                                                <span className="bg-[#d1fae5] text-emerald-600 text-xs font-bold px-3 py-1 rounded-full hover:bg-emerald-600 hover:text-white transition-colors duration-200 cursor-pointer">
+                                                    {produit.supplier_name}
+                                                </span>
+                                            </Link>
+                                        ) : (
+                                            <span className="bg-[#d1fae5] text-emerald-600 text-xs font-bold px-3 py-1 rounded-full">
+                                                {produit.supplier_name}
+                                            </span>
+                                        )
                                     )}
+
                                     {produit.category_name && (
                                         <span className="bg-[#f9f5f0] text-black/50 text-xs font-semibold px-3 py-1 rounded-full">
                                             {produit.category_name}
@@ -172,7 +192,7 @@ const ProductDetail = () => {
                                 </span>
                                 <span className="text-black/40 text-sm">/ 5.0</span>
                                 <span className="text-black/40 text-sm">
-                                    ({produit.review_count || 0} avis)
+                                    ({produit.reviews?.length || 0} avis)
                                 </span>
                             </div>
 
@@ -188,7 +208,32 @@ const ProductDetail = () => {
                                 </div>
                             )}
 
-                            {/* ✅ VARIANTES */}
+                            {/* ✅ INFO FOURNISSEUR — affiché si les infos existent */}
+                            {(produit.supplier_website || produit.supplier_address) && (
+                                <div className="bg-[#f9f5f0] rounded-xl px-4 py-3 mb-6 text-sm text-black/60">
+                                    <p className="font-bold text-[#2c2c2c] mb-1">
+                                        🏭 À propos du fournisseur
+                                    </p>
+                                    {produit.supplier_description && (
+                                        <p className="mb-1">{produit.supplier_description}</p>
+                                    )}
+                                    {produit.supplier_address && (
+                                        <p>📍 {produit.supplier_address}</p>
+                                    )}
+                                    {produit.supplier_website && (
+                                        <a
+                                            href={produit.supplier_website}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-emerald-600 font-semibold hover:underline"
+                                        >
+                                            🌐 Visiter le site
+                                        </a>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* VARIANTES */}
                             {produit.variants && produit.variants.length > 1 && (
                                 <div className="mb-6">
                                     <h4 className="text-sm font-bold text-black/60 mb-3">
@@ -279,6 +324,59 @@ const ProductDetail = () => {
                     </div>
                 </div>
 
+                {/* ✅ AVIS CLIENTS — utilise produit.reviews retourné par le backend */}
+                {produit.reviews && produit.reviews.length > 0 && (
+                    <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-8 mb-12">
+                        <h2 className="text-2xl font-bold font-serif text-[#2c2c2c] mb-6">
+                            Avis clients ({produit.reviews.length})
+                        </h2>
+                        <div className="flex flex-col gap-5">
+                            {produit.reviews.map((avis) => (
+                                <div
+                                    key={avis.review_id}
+                                    className="border-b border-gray-100 pb-5 last:border-none last:pb-0"
+                                >
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-3">
+                                            {/* Avatar ou initiale */}
+                                            {avis.reviewer?.avatar ? (
+                                                <img
+                                                    src={avis.reviewer.avatar}
+                                                    alt={avis.reviewer.name}
+                                                    className="w-9 h-9 rounded-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-600 font-bold flex items-center justify-center text-sm">
+                                                    {avis.reviewer?.name?.[0]?.toUpperCase() || '?'}
+                                                </div>
+                                            )}
+                                            <span className="font-bold text-[#2c2c2c] text-sm">
+                                                {avis.reviewer?.name || 'Anonyme'}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-yellow-400 text-sm">
+                                                {'⭐'.repeat(Math.floor(avis.rating))}
+                                            </span>
+                                            <span className="text-xs text-black/40 ml-1">
+                                                {avis.rating}/5
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <p className="text-black/60 text-sm leading-relaxed ml-12">
+                                        {avis.comment}
+                                    </p>
+                                    <p className="text-xs text-black/30 ml-12 mt-1">
+                                        {new Date(avis.created_at).toLocaleDateString('fr-FR', {
+                                            day: 'numeric', month: 'long', year: 'numeric'
+                                        })}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* PRODUITS SIMILAIRES */}
                 {similaires.length > 0 && (
                     <div>
@@ -300,12 +398,24 @@ const ProductDetail = () => {
                                         )}
                                     </div>
                                     <div className="p-3">
-                                        <h3 className="text-xs font-bold text-[#2c2c2c] mb-2 line-clamp-2">
+                                        <h3 className="text-xs font-bold text-[#2c2c2c] mb-1 line-clamp-2">
                                             {p.name}
                                         </h3>
-                                        <span className="text-sm font-extrabold text-emerald-600">
+                                        {/* ✅ Fournisseur cliquable dans les similaires aussi */}
+                                        {p.supplier_slug && (
+                                            <Link
+                                                to={`/fournisseurs/${p.supplier_slug}`}
+                                                className="no-underline"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <span className="text-xs text-emerald-600 font-semibold hover:underline">
+                                                    {p.supplier_name}
+                                                </span>
+                                            </Link>
+                                        )}
+                                        <p className="text-sm font-extrabold text-emerald-600 mt-1">
                                             {formatPrice(p.min_price || 0)}
-                                        </span>
+                                        </p>
                                     </div>
                                 </Link>
                             ))}

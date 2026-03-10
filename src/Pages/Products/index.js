@@ -17,13 +17,11 @@ const Products = () => {
     const [prixMax, setPrixMax] = useState('');
     const [noteMin, setNoteMin] = useState(0);
 
-    // ✅ Nouveau — données depuis le backend
     const [produits, setProduits] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // ✅ Charger produits et catégories depuis l'API
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -31,12 +29,8 @@ const Products = () => {
                     API.get('/products'),
                     API.get('/categories')
                 ]);
-
- console.log('produits:', produitsRes.data);      // ← ajoute ça
-            console.log('categories:', categoriesRes.data);  // ← ajoute ça
-
-             setProduits(produitsRes.data.products);        // ← .products
-setCategories(categoriesRes.data.categories);
+                setProduits(produitsRes.data.products);
+                setCategories(categoriesRes.data.categories);
             } catch (err) {
                 setError("Erreur lors du chargement des produits");
                 console.error(err);
@@ -50,14 +44,16 @@ setCategories(categoriesRes.data.categories);
     const produitsFiltres = produits
         .filter((p) => {
             const matchCategorie = categorieActive === 'Tous' || p.category_id === categorieActive;
-            const matchPrixMin = prixMin === '' || p.price >= parseFloat(prixMin);
-            const matchPrixMax = prixMax === '' || p.price <= parseFloat(prixMax);
+            // ✅ min_price au lieu de p.price (prix de la variante la moins chère)
+            const matchPrixMin = prixMin === '' || parseFloat(p.min_price) >= parseFloat(prixMin);
+            const matchPrixMax = prixMax === '' || parseFloat(p.min_price) <= parseFloat(prixMax);
             const matchNote = p.ratings >= noteMin;
             return matchCategorie && matchPrixMin && matchPrixMax && matchNote;
         })
         .sort((a, b) => {
-            if (tri === 'prix-asc') return a.price - b.price;
-            if (tri === 'prix-desc') return b.price - a.price;
+            // ✅ Tri sur min_price au lieu de price
+            if (tri === 'prix-asc') return parseFloat(a.min_price) - parseFloat(b.min_price);
+            if (tri === 'prix-desc') return parseFloat(b.min_price) - parseFloat(a.min_price);
             if (tri === 'note') return b.ratings - a.ratings;
             return 0;
         });
@@ -70,7 +66,6 @@ setCategories(categoriesRes.data.categories);
         setNoteMin(0);
     };
 
-    // ✅ États de chargement et erreur
     if (loading) return (
         <div className="min-h-screen bg-[#fdf6ec] flex items-center justify-center">
             <p className="text-emerald-600 font-bold text-lg animate-pulse">
@@ -230,15 +225,12 @@ setCategories(categoriesRes.data.categories);
                                         {/* IMAGE */}
                                         <Link to={`/produits/${produit.id}`} className="no-underline">
                                             <div className="relative h-44 bg-[#ecfdf5] flex items-center justify-center cursor-pointer">
-                                                {/* ✅ Vraie image ou placeholder */}
-
-
-                                                {produit.images && produit.images[0] ? (
+                                                {/* ✅ thumbnail = première image de la première variante (retournée par le backend) */}
+                                                {produit.thumbnail && produit.thumbnail[0] ? (
                                                     <img
-                                                        src={produit.images[0]}
+                                                        src={produit.thumbnail[0].url}
                                                         alt={produit.name}
                                                         className="h-full w-full object-cover"
-                                                        
                                                     />
                                                 ) : (
                                                     <span className="text-6xl">🛍️</span>
@@ -247,7 +239,6 @@ setCategories(categoriesRes.data.categories);
                                                     ⭐ {produit.ratings || '0'}
                                                 </span>
                                             </div>
-                                            
                                         </Link>
 
                                         {/* INFOS */}
@@ -270,18 +261,38 @@ setCategories(categoriesRes.data.categories);
                                             </div>
 
                                             <div className="flex items-center gap-2 mb-3 flex-wrap">
-                                                <span className="bg-[#d1fae5] text-emerald-600 text-xs font-bold px-3 py-1 rounded-full">
-                                                    {produit.supplier_name || 'Fournisseur'}
-                                                </span>
+                                                {/* ✅ Badge fournisseur cliquable grâce au supplier_slug */}
+                                                {produit.supplier_slug ? (
+                                                    <Link
+                                                        to={`/fournisseurs/${produit.supplier_slug}`}
+                                                        className="no-underline"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        <span className="bg-[#d1fae5] text-emerald-600 text-xs font-bold px-3 py-1 rounded-full hover:bg-emerald-600 hover:text-white transition-colors duration-200 cursor-pointer">
+                                                            {produit.supplier_name}
+                                                        </span>
+                                                    </Link>
+                                                ) : (
+                                                    <span className="bg-[#d1fae5] text-emerald-600 text-xs font-bold px-3 py-1 rounded-full">
+                                                        {produit.supplier_name || 'Fournisseur'}
+                                                    </span>
+                                                )}
                                                 <span className="text-xs text-black/50">
                                                     {produit.ethical_info ? `🌿 ${produit.ethical_info}` : ''}
                                                 </span>
                                             </div>
 
                                             <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                                                <span className="text-lg font-extrabold text-emerald-600">
-                                                    {formatPrice(produit.price || 0)}
-                                                </span>
+                                                <div>
+                                                    {/* ✅ Prix depuis min_price (variante la moins chère) */}
+                                                    <span className="text-lg font-extrabold text-emerald-600">
+                                                        {formatPrice(produit.min_price || 0)}
+                                                    </span>
+                                                    {/* ✅ "à partir de" si le produit a plusieurs variantes à prix différents */}
+                                                    {produit.min_price !== produit.max_price && (
+                                                        <span className="text-xs text-black/40 block">à partir de</span>
+                                                    )}
+                                                </div>
                                                 <button
                                                     onClick={() => ajouterAuPanier(produit)}
                                                     className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300"
