@@ -28,8 +28,8 @@ function App() {
                                 <Route path="/produits/:id" element={<ProductDetail />} />
                                 <Route path="/panier" element={<Cart />} />
                                 <Route path="/favoris" element={<Wishlist />} />
-                                <Route path="/producteurs" element={<Producers />} />
-                                <Route path="/producteurs/:nom" element={<ProducerDetail />} />
+                     <Route path="/fournisseurs" element={<Producers />} />
+<Route path="/fournisseurs/:slug" element={<ProducerDetail />} />
                                 <Route path="*" element={<NotFound />} />
                             </Route>
                         </Routes>
