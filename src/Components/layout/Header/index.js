@@ -1,7 +1,7 @@
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiUser } from "react-icons/fi";
+import { FiUser, FiHeart, FiLogOut, FiSettings } from "react-icons/fi";
 import { BsFillBasket3Fill } from "react-icons/bs";
-import { FiHeart } from "react-icons/fi";
 import { useCart } from '../../../context/CartContext';
 import { useWishlist } from '../../../context/WishlistContext';
 import formatPrice from '../../../utils/formatPrice';
@@ -30,6 +30,19 @@ const Header = () => {
     const { totalArticles, totalPrix } = useCart();
     const { totalFavoris } = useWishlist();
     const { user, logout } = useAuth();
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    // Fermer le dropdown si on clique ailleurs
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     return (
         <div className="bg-emerald-600">
@@ -65,24 +78,61 @@ const Header = () => {
 
                         {/* COMPTE */}
                         {user ? (
-                            <div className="flex items-center gap-2">
-                                <span className="text-white text-sm font-semibold hidden md:block">
-                                    {user.name}
-                                </span>
+                            <div className="relative" ref={dropdownRef}>
                                 <button
-                                    onClick={logout}
-                                className="border border-white/30 rounded-full px-3 py-1.5 text-white text-xs font-bold hover:bg-white/10 transition"
+                                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                                    className="flex items-center gap-2 border border-white/30 rounded-full px-3 py-2 text-white hover:bg-white/10 transition"
                                 >
-                                    Déconnexion
+                                    <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-black">
+                                        {user.avatar ? (
+                                            <img src={user.avatar} alt={user.name} className="w-full h-full object-cover rounded-full" />
+                                        ) : (
+                                            user.name?.[0]?.toUpperCase()
+                                        )}
+                                    </div>
+                                    <span className="text-sm font-semibold hidden md:block">{user.name}</span>
+                                    <span className="text-xs opacity-60">{dropdownOpen ? '▲' : '▼'}</span>
                                 </button>
+
+                                {/* DROPDOWN */}
+                                {dropdownOpen && (
+                                    <div className="absolute right-0 top-12 bg-white rounded-2xl shadow-xl border border-gray-100 w-48 z-50 overflow-hidden">
+                                        <div className="px-4 py-3 border-b border-gray-100">
+                                            <p className="font-bold text-sm text-[#2c2c2c]">{user.name}</p>
+                                            <p className="text-xs text-black/40 truncate">{user.email}</p>
+                                        </div>
+                                        <Link
+                                            to="/profil"
+                                            onClick={() => setDropdownOpen(false)}
+                                            className="flex items-center gap-3 px-4 py-3 text-sm text-[#2c2c2c] hover:bg-emerald-50 hover:text-emerald-600 transition no-underline"
+                                        >
+                                            <FiSettings size={15} /> Mon profil
+                                        </Link>
+                                        {user.role === 'admin' && (
+                                            <Link
+                                                to="/admin"
+                                                onClick={() => setDropdownOpen(false)}
+                                                className="flex items-center gap-3 px-4 py-3 text-sm text-[#2c2c2c] hover:bg-emerald-50 hover:text-emerald-600 transition no-underline"
+                                            >
+                                                👑 Dashboard Admin
+                                            </Link>
+                                        )}
+                                        <button
+                                            onClick={() => { logout(); setDropdownOpen(false); }}
+                                            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition border-t border-gray-100"
+                                        >
+                                            <FiLogOut size={15} /> Déconnexion
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         ) : (
-                        <Link
-                            to="/connexion"
-                            className="border border-white/30 rounded-full w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 transition no-underline"
-                        >
-                            <FiUser size={20} />
-                        </Link>
+                            <Link
+                                to="/connexion"
+                                className="border border-white/30 rounded-full w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 transition no-underline"
+                            >
+                                <FiUser size={20} />
+                            </Link>
                         )}
 
                         {/* PANIER */}

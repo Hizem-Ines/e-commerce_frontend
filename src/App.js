@@ -13,6 +13,8 @@ import Auth from './Pages/Auth';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { AuthProvider } from './context/authContext';
+import Profile from './Pages/Profile';
+import VerifyEmail from './Pages/VerifyEmail';
 
 function App() {
     return (
@@ -22,6 +24,7 @@ function App() {
                     <WishlistProvider>
                         <Routes>
                             <Route path="/connexion" element={<Auth />} />
+                            <Route path="/verify-email/:token" element={<VerifyEmail />} />
                             <Route element={<Layout />}>
                                 <Route path="/" element={<Home />} />
                                 <Route path="/produits" element={<Products />} />
@@ -30,6 +33,7 @@ function App() {
                                 <Route path="/favoris" element={<Wishlist />} />
                                 <Route path="/producteurs" element={<Producers />} />
                                 <Route path="/producteurs/:nom" element={<ProducerDetail />} />
+                                <Route path="/profil" element={<Profile />} /> 
                                 <Route path="*" element={<NotFound />} />
                             </Route>
                         </Routes>
