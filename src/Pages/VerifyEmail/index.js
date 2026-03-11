@@ -1,29 +1,43 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { verifyEmail } from '../../services/authService';
 import { useAuth } from '../../context/authContext';
 
 const VerifyEmail = () => {
     const { token } = useParams();
-    const { login } = useAuth();
     const navigate = useNavigate();
-    const [status, setStatus] = useState('loading'); // loading | success | error
+    const { loginSuccess } = useAuth(); // ✅ récupère l'user après vérification
+    const [status, setStatus] = useState('loading');
     const [message, setMessage] = useState('');
+    const called = useRef(false);
 
     useEffect(() => {
-    const verify = async () => {
-        try {
-            await verifyEmail(token);
-            setStatus('success');
-            setTimeout(() => navigate('/'), 3000);
-        } catch (err) {
-            setStatus('error');
-            setMessage(err.response?.data?.message || 'Lien invalide ou expiré');
-        }
-    };
-    verify();
-// eslint-disable-next-line react-hooks/exhaustive-deps
-}, [token]);
+        if (called.current) return;
+        called.current = true;
+
+        const verify = async () => {
+            try {
+                await verifyEmail(decodeURIComponent(token));
+                await loginSuccess(); // ✅ met à jour l'user dans le context → connecté automatiquement
+                setStatus('success');
+                setTimeout(() => navigate('/'), 3000);
+            } catch (err) {
+                const msg = err.response?.data?.message || '';
+
+                if (msg.toLowerCase().includes('déjà vérifié')) {
+                    setStatus('success');
+                    setTimeout(() => navigate('/'), 2000);
+                    return;
+                }
+
+                setStatus('error');
+                setMessage(msg || 'Lien invalide ou expiré');
+            }
+        };
+
+        verify();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [token]);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-6">
@@ -61,7 +75,7 @@ const VerifyEmail = () => {
                             Email vérifié !
                         </h2>
                         <p className="text-black/50 text-sm mb-6">
-                            Votre compte est activé. Vous allez être redirigé vers l'accueil...
+                            Votre compte est activé. Vous êtes maintenant connecté(e) !
                         </p>
                         <div className="w-full bg-gray-100 rounded-full h-2 mb-6">
                             <div className="bg-emerald-600 h-2 rounded-full animate-pulse" style={{ width: '100%' }}></div>
