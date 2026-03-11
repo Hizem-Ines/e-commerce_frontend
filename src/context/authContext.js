@@ -1,5 +1,10 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { getMe, login as loginService, logout as logoutService, register as registerService } from '../services/authService';
+import {
+    getMe,
+    login as loginService,
+    logout as logoutService,
+    register as registerService
+} from '../services/authService';
 
 const AuthContext = createContext();
 
@@ -30,8 +35,18 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
+    // Utilisé après Google OAuth pour récupérer l'utilisateur connecté
+    const loginSuccess = async () => {
+        try {
+            const res = await getMe();
+            setUser(res.data.user);
+        } catch {
+            setUser(null);
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, register, logout, loginSuccess }}>
             {!loading && children}
         </AuthContext.Provider>
     );

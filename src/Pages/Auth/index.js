@@ -44,6 +44,9 @@ const Auth = () => {
                     name: `${formData.prenom} ${formData.nom}`,
                     email: formData.email,
                     password: formData.password,
+                    phone: formData.telephone,
+                    address: formData.adresse,
+                    city: formData.ville,
                 });
                 alert('Compte créé ! Vérifiez votre email pour activer votre compte.');
                 setIsLogin(true);

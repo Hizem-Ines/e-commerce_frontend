@@ -48,22 +48,24 @@ const Profile = () => {
     };
 
     const handleProfileSubmit = async (e) => {
-        e.preventDefault();
-        setLoadingProfile(true);
-        try {
-            const formData = new FormData();
-            formData.append('name', profileData.name);
-            if (fileInputRef.current?.files[0]) {
-                formData.append('avatar', fileInputRef.current.files[0]);
-            }
-            await updateProfile(formData);
-            showSuccess('Profil mis à jour avec succès !');
-        } catch (err) {
-            showError(err.response?.data?.message || 'Erreur lors de la mise à jour');
-        } finally {
-            setLoadingProfile(false);
+    e.preventDefault();
+    setLoadingProfile(true);
+    try {
+        const formData = new FormData();
+        formData.append('name', profileData.name);
+        formData.append('phone', profileData.phone);    
+        formData.append('address', profileData.address); 
+        if (fileInputRef.current?.files[0]) {
+            formData.append('avatar', fileInputRef.current.files[0]);
         }
-    };
+        await updateProfile(formData);
+        showSuccess('Profil mis à jour avec succès !');
+    } catch (err) {
+        showError(err.response?.data?.message || 'Erreur lors de la mise à jour');
+    } finally {
+        setLoadingProfile(false);
+    }
+};
 
     const handlePasswordSubmit = async (e) => {
         e.preventDefault();
