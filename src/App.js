@@ -15,6 +15,9 @@ import { WishlistProvider } from './context/WishlistContext';
 import { AuthProvider } from './context/authContext';
 import Profile from './Pages/Profile';
 import VerifyEmail from './Pages/VerifyEmail';
+import ForgotPassword from './Pages/Auth/Forgotpassword';
+import ResetPassword  from './Pages/Auth/Resetpassword';
+import LoginSuccess from './Pages/Auth/LoginSuccess';
 
 function App() {
     return (
@@ -25,6 +28,9 @@ function App() {
                         <Routes>
                             <Route path="/connexion" element={<Auth />} />
                             <Route path="/verify-email/:token" element={<VerifyEmail />} />
+                            <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} /> 
+                            <Route path="/reset-password/:token" element={<ResetPassword />} /> 
+                            <Route path="/login/success" element={<LoginSuccess />} />
                             <Route element={<Layout />}>
                                 <Route path="/" element={<Home />} />
                                 <Route path="/produits" element={<Products />} />
@@ -33,7 +39,7 @@ function App() {
                                 <Route path="/favoris" element={<Wishlist />} />
                                 <Route path="/producteurs" element={<Producers />} />
                                 <Route path="/producteurs/:nom" element={<ProducerDetail />} />
-                                <Route path="/profil" element={<Profile />} /> 
+                                <Route path="/profil" element={<Profile />} />
                                 <Route path="*" element={<NotFound />} />
                             </Route>
                         </Routes>
