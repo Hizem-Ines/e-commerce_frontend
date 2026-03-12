@@ -57,42 +57,50 @@ const Auth = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-6">
-            <div className="max-w-5xl w-full grid grid-cols-2 bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center p-6"
+            style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #fef2f2 50%, #f0fdf4 100%)' }}>
+
+            <div className="max-w-5xl w-full grid grid-cols-2 bg-white rounded-3xl overflow-hidden"
+                style={{ boxShadow: '0 25px 60px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04)' }}>
 
                 {/* ===== COLONNE GAUCHE — FORMULAIRE ===== */}
                 <div className="p-10 overflow-y-auto max-h-screen">
 
                     {/* LOGO */}
                     <Link to="/" className="flex items-center gap-3 mb-8 no-underline">
-                        <div className="bg-gradient-to-br from-emerald-600 to-teal-600 p-3 rounded-2xl shadow-lg">
+                        <div className="relative p-3 rounded-2xl shadow-lg"
+                            style={{ background: 'linear-gradient(135deg, #166534, #15803d)' }}>
                             <span className="text-2xl">🧺</span>
+                            {/* Point rouge accent sur le logo */}
+                            <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white"
+                                style={{ background: '#e63946' }}></span>
                         </div>
                         <div>
-                            <h1 className="text-2xl font-black text-emerald-600 tracking-widest font-serif">GOFFA</h1>
-                            <p className="text-xs text-emerald-500 font-semibold tracking-wider">artisanat tunisien</p>
+                            <h1 className="text-2xl font-black tracking-widest font-serif"
+                                style={{ color: '#166534' }}>
+                                GOF<span style={{ color: '#e63946' }}>FA</span>
+                            </h1>
+                            <p className="text-xs font-semibold tracking-wider" style={{ color: '#4ade80' }}>artisanat tunisien</p>
                         </div>
                     </Link>
 
                     {/* TOGGLE */}
-                    <div className="flex bg-gray-100 rounded-full p-1 mb-8">
+                    <div className="flex rounded-full p-1 mb-8" style={{ background: '#f3f4f6' }}>
                         <button
                             onClick={() => setIsLogin(true)}
                             className={`flex-1 py-3 rounded-full font-bold text-sm transition-all duration-300 ${
-                                isLogin
-                                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg'
-                                    : 'text-gray-500 hover:text-gray-700'
+                                isLogin ? 'text-white shadow-lg' : 'text-gray-500 hover:text-gray-700'
                             }`}
+                            style={isLogin ? { background: 'linear-gradient(135deg, #166534, #15803d)' } : {}}
                         >
                             Connexion
                         </button>
                         <button
                             onClick={() => setIsLogin(false)}
                             className={`flex-1 py-3 rounded-full font-bold text-sm transition-all duration-300 ${
-                                !isLogin
-                                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg'
-                                    : 'text-gray-500 hover:text-gray-700'
+                                !isLogin ? 'text-white shadow-lg' : 'text-gray-500 hover:text-gray-700'
                             }`}
+                            style={!isLogin ? { background: 'linear-gradient(135deg, #166534, #15803d)' } : {}}
                         >
                             Créer un compte
                         </button>
@@ -119,14 +127,17 @@ const Auth = () => {
                                 <div>
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">Prénom</label>
                                     <div className="relative">
-                                        <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                        <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#e63946' }} />
                                         <input
                                             type="text"
                                             name="prenom"
                                             value={formData.prenom}
                                             onChange={handleChange}
                                             placeholder="Votre prénom"
-                                            className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
+                                            className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
+                                            style={{ border: '2px solid #e5e7eb' }}
+                                            onFocus={e => e.target.style.borderColor = '#166534'}
+                                            onBlur={e => e.target.style.borderColor = '#e5e7eb'}
                                             required={!isLogin}
                                         />
                                     </div>
@@ -134,14 +145,17 @@ const Auth = () => {
                                 <div>
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">Nom</label>
                                     <div className="relative">
-                                        <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                        <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#e63946' }} />
                                         <input
                                             type="text"
                                             name="nom"
                                             value={formData.nom}
                                             onChange={handleChange}
                                             placeholder="Votre nom"
-                                            className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
+                                            className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
+                                            style={{ border: '2px solid #e5e7eb' }}
+                                            onFocus={e => e.target.style.borderColor = '#166534'}
+                                            onBlur={e => e.target.style.borderColor = '#e5e7eb'}
                                             required={!isLogin}
                                         />
                                     </div>
@@ -153,14 +167,17 @@ const Auth = () => {
                         <div>
                             <label className="block text-xs font-bold text-gray-600 mb-1.5">Email</label>
                             <div className="relative">
-                                <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#e63946' }} />
                                 <input
                                     type="email"
                                     name="email"
                                     value={formData.email}
                                     onChange={handleChange}
                                     placeholder="votre.email@exemple.com"
-                                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
+                                    className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
+                                    style={{ border: '2px solid #e5e7eb' }}
+                                    onFocus={e => e.target.style.borderColor = '#166534'}
+                                    onBlur={e => e.target.style.borderColor = '#e5e7eb'}
                                     required
                                 />
                             </div>
@@ -171,14 +188,17 @@ const Auth = () => {
                             <div>
                                 <label className="block text-xs font-bold text-gray-600 mb-1.5">Téléphone</label>
                                 <div className="relative">
-                                    <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                    <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#e63946' }} />
                                     <input
                                         type="tel"
                                         name="telephone"
                                         value={formData.telephone}
                                         onChange={handleChange}
                                         placeholder="+216 XX XXX XXX"
-                                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
+                                        className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
+                                        style={{ border: '2px solid #e5e7eb' }}
+                                        onFocus={e => e.target.style.borderColor = '#166534'}
+                                        onBlur={e => e.target.style.borderColor = '#e5e7eb'}
                                         required={!isLogin}
                                     />
                                 </div>
@@ -189,14 +209,17 @@ const Auth = () => {
                         <div>
                             <label className="block text-xs font-bold text-gray-600 mb-1.5">Mot de passe</label>
                             <div className="relative">
-                                <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#e63946' }} />
                                 <input
                                     type={showPassword ? 'text' : 'password'}
                                     name="password"
                                     value={formData.password}
                                     onChange={handleChange}
                                     placeholder="••••••••"
-                                    className="w-full pl-10 pr-10 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
+                                    className="w-full pl-10 pr-10 py-3 rounded-xl text-sm transition focus:outline-none"
+                                    style={{ border: '2px solid #e5e7eb' }}
+                                    onFocus={e => e.target.style.borderColor = '#166534'}
+                                    onBlur={e => e.target.style.borderColor = '#e5e7eb'}
                                     required
                                 />
                                 <button
@@ -214,14 +237,17 @@ const Auth = () => {
                             <div>
                                 <label className="block text-xs font-bold text-gray-600 mb-1.5">Confirmer le mot de passe</label>
                                 <div className="relative">
-                                    <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                    <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#e63946' }} />
                                     <input
                                         type={showPassword ? 'text' : 'password'}
                                         name="confirmPassword"
                                         value={formData.confirmPassword}
                                         onChange={handleChange}
                                         placeholder="••••••••"
-                                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
+                                        className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
+                                        style={{ border: '2px solid #e5e7eb' }}
+                                        onFocus={e => e.target.style.borderColor = '#166534'}
+                                        onBlur={e => e.target.style.borderColor = '#e5e7eb'}
                                         required={!isLogin}
                                     />
                                 </div>
@@ -234,14 +260,17 @@ const Auth = () => {
                                 <div>
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">Adresse</label>
                                     <div className="relative">
-                                        <FiMapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                        <FiMapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#e63946' }} />
                                         <input
                                             type="text"
                                             name="adresse"
                                             value={formData.adresse}
                                             onChange={handleChange}
                                             placeholder="Rue, numéro..."
-                                            className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
+                                            className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
+                                            style={{ border: '2px solid #e5e7eb' }}
+                                            onFocus={e => e.target.style.borderColor = '#166534'}
+                                            onBlur={e => e.target.style.borderColor = '#e5e7eb'}
                                         />
                                     </div>
                                 </div>
@@ -251,7 +280,10 @@ const Auth = () => {
                                         name="ville"
                                         value={formData.ville}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
+                                        className="w-full px-4 py-3 rounded-xl text-sm transition focus:outline-none"
+                                        style={{ border: '2px solid #e5e7eb' }}
+                                        onFocus={e => e.target.style.borderColor = '#166534'}
+                                        onBlur={e => e.target.style.borderColor = '#e5e7eb'}
                                         required={!isLogin}
                                     >
                                         <option value="">Ville</option>
@@ -276,10 +308,10 @@ const Auth = () => {
                         {isLogin && (
                             <div className="flex items-center justify-between">
                                 <label className="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" className="w-4 h-4 accent-emerald-600" />
+                                    <input type="checkbox" className="w-4 h-4" style={{ accentColor: '#166534' }} />
                                     <span className="text-xs text-gray-600">Se souvenir de moi</span>
                                 </label>
-                                <button type="button" className="text-xs text-emerald-600 font-semibold hover:text-emerald-700">
+                                <button type="button" onClick={() => navigate('/mot-de-passe-oublie')} className="text-xs font-bold hover:underline" style={{ color: '#e63946' }}>
                                     Mot de passe oublié ?
                                 </button>
                             </div>
@@ -288,20 +320,26 @@ const Auth = () => {
                         {/* CGV */}
                         {!isLogin && (
                             <label className="flex items-start gap-2 cursor-pointer">
-                                <input type="checkbox" className="w-4 h-4 accent-emerald-600 mt-0.5" required />
+                                <input type="checkbox" className="w-4 h-4 mt-0.5" style={{ accentColor: '#166534' }} required />
                                 <span className="text-xs text-gray-600">
                                     J'accepte les{' '}
-                                    <button type="button" className="text-emerald-600 font-semibold hover:underline">CGV</button>
+                                    <button type="button" className="font-semibold hover:underline" style={{ color: '#e63946' }}>CGV</button>
                                     {' '}et la{' '}
-                                    <button type="button" className="text-emerald-600 font-semibold hover:underline">Politique de Confidentialité</button>
+                                    <button type="button" className="font-semibold hover:underline" style={{ color: '#e63946' }}>Politique de Confidentialité</button>
                                 </span>
                             </label>
                         )}
 
-                        {/* BOUTON SUBMIT */}
+                        {/* BOUTON SUBMIT — dégradé vert foncé → rouge */}
                         <button
                             type="submit"
-                            className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white py-4 rounded-xl font-bold text-base transition-all duration-300 shadow-lg hover:shadow-emerald-300/40 hover:scale-105"
+                            className="w-full text-white py-4 rounded-xl font-bold text-base transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                            style={{
+                                background: 'linear-gradient(135deg, #166534, #15803d)',
+                                boxShadow: '0 4px 20px rgba(22, 101, 52, 0.4)'
+                            }}
+                            onMouseEnter={e => e.target.style.boxShadow = '0 8px 30px rgba(22, 101, 52, 0.6)'}
+                            onMouseLeave={e => e.target.style.boxShadow = '0 4px 20px rgba(22, 101, 52, 0.4)'}
                         >
                             {isLogin ? 'Se connecter →' : 'Créer mon compte →'}
                         </button>
@@ -319,7 +357,8 @@ const Auth = () => {
                     <div className="space-y-3">
                         <button
                             onClick={() => window.location.href = 'http://localhost:5000/api/auth/google'}
-                            className="w-full border-2 border-gray-200 py-3 rounded-xl font-semibold text-gray-700 hover:bg-gray-50 transition flex items-center justify-center gap-3 text-sm"
+                            className="w-full py-3 rounded-xl font-semibold text-gray-700 hover:bg-gray-50 transition flex items-center justify-center gap-3 text-sm"
+                            style={{ border: '2px solid #e5e7eb' }}
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24">
                                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -329,30 +368,33 @@ const Auth = () => {
                             </svg>
                             Continuer avec Google
                         </button>
-                        <button className="w-full border-2 border-gray-200 py-3 rounded-xl font-semibold text-gray-700 hover:bg-gray-50 transition flex items-center justify-center gap-3 text-sm">
-                            <svg className="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24">
-                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                            </svg>
-                            Continuer avec Facebook
-                        </button>
                     </div>
 
                 </div>
 
                 {/* ===== COLONNE DROITE — VISUEL ===== */}
-                <div className="bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 p-10 flex flex-col justify-between text-white relative overflow-hidden">
+                <div className="p-10 flex flex-col justify-between text-white relative overflow-hidden"
+                    style={{ background: 'linear-gradient(160deg, #14532d 0%, #166534 60%, #15803d 100%)' }}>
 
-                    {/* MOTIF */}
+                    {/* MOTIF GÉOMÉTRIQUE */}
                     <div className="absolute inset-0 opacity-10" style={{
                         backgroundImage: 'radial-gradient(circle at 20px 20px, white 2px, transparent 0)',
                         backgroundSize: '40px 40px'
                     }} />
 
+                    {/* ACCENT ROUGE — cercle décoratif */}
+                    <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-20"
+                        style={{ background: '#e63946', filter: 'blur(60px)', transform: 'translate(30%, -30%)' }} />
+                    <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full opacity-15"
+                        style={{ background: '#e63946', filter: 'blur(50px)', transform: 'translate(-30%, 30%)' }} />
+
                     <div className="relative z-10">
 
                         {/* BADGE */}
-                        <div className="inline-block bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-bold mb-6">
-                            {isLogin ? '🌟 Bon retour parmi nous !' : '🎉 Rejoignez notre communauté'}
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold mb-6"
+                            style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#e63946' }}></span>
+                            {isLogin ? 'Bon retour parmi nous !' : 'Rejoignez notre communauté'}
                         </div>
 
                         {/* TITRE */}
@@ -361,7 +403,7 @@ const Auth = () => {
                                 ? 'Vos produits artisanaux vous attendent !'
                                 : 'Commencez votre voyage artisanal'}
                         </h2>
-                        <p className="text-emerald-100 mb-8 text-base">
+                        <p className="mb-8 text-base opacity-80">
                             {isLogin
                                 ? 'Accédez à votre panier, vos favoris et votre historique de commandes'
                                 : 'Découvrez des milliers de produits artisanaux et naturels de Tunisie'}
@@ -370,18 +412,19 @@ const Auth = () => {
                         {/* AVANTAGES */}
                         <div className="space-y-4">
                             {[
-                                { icone: <FiShoppingCart className="w-5 h-5" />, titre: 'Commandez facilement', desc: 'Des milliers de produits artisanaux livrés chez vous' },
-                                { icone: <FiHeart className="w-5 h-5" />, titre: 'Favoris & Historique', desc: 'Retrouvez vos produits préférés en un clic' },
-                                { icone: <FiTrendingUp className="w-5 h-5" />, titre: 'Offres exclusives', desc: 'Accédez aux promotions réservées aux membres' },
-                                { icone: <FiShield className="w-5 h-5" />, titre: '100% Sécurisé', desc: 'Vos données sont protégées et cryptées' },
+                                { icone: <FiShoppingCart className="w-5 h-5" />, titre: 'Commandez facilement', desc: 'Des milliers de produits artisanaux livrés chez vous', accent: false },
+                                { icone: <FiHeart className="w-5 h-5" />, titre: 'Favoris & Historique', desc: 'Retrouvez vos produits préférés en un clic', accent: true },
+                                { icone: <FiTrendingUp className="w-5 h-5" />, titre: 'Offres exclusives', desc: 'Accédez aux promotions réservées aux membres', accent: false },
+                                { icone: <FiShield className="w-5 h-5" />, titre: '100% Sécurisé', desc: 'Vos données sont protégées et cryptées', accent: true },
                             ].map((item, i) => (
                                 <div key={i} className="flex items-start gap-3">
-                                    <div className="bg-white/20 p-2 rounded-xl shrink-0">
+                                    <div className="p-2 rounded-xl shrink-0"
+                                        style={{ background: item.accent ? 'rgba(230,57,70,0.3)' : 'rgba(255,255,255,0.15)' }}>
                                         {item.icone}
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-sm mb-0.5">{item.titre}</h3>
-                                        <p className="text-emerald-100 text-xs">{item.desc}</p>
+                                        <p className="text-xs opacity-70">{item.desc}</p>
                                     </div>
                                 </div>
                             ))}
@@ -389,21 +432,25 @@ const Auth = () => {
                     </div>
 
                     {/* STATS */}
-                    <div className="relative z-10 grid grid-cols-3 gap-4 pt-8 border-t border-white/20">
+                    <div className="relative z-10 grid grid-cols-3 gap-4 pt-8"
+                        style={{ borderTop: '1px solid rgba(255,255,255,0.2)' }}>
                         {[
-                            { chiffre: '5000+', label: 'Produits bio' },
-                            { chiffre: '15K+', label: 'Clients satisfaits' },
-                            { chiffre: '98%', label: 'Satisfaction' },
+                            { chiffre: '5000+', label: 'Produits bio', rouge: false },
+                            { chiffre: '15K+', label: 'Clients satisfaits', rouge: true },
+                            { chiffre: '98%', label: 'Satisfaction', rouge: false },
                         ].map((stat, i) => (
                             <div key={i} className="text-center">
-                                <div className="text-2xl font-black mb-1">{stat.chiffre}</div>
-                                <div className="text-xs text-emerald-100">{stat.label}</div>
+                                <div className="text-2xl font-black mb-1"
+                                    style={{ color: stat.rouge ? '#fca5a5' : 'white' }}>
+                                    {stat.chiffre}
+                                </div>
+                                <div className="text-xs opacity-70">{stat.label}</div>
                             </div>
                         ))}
                     </div>
 
                     {/* DÉCORATION */}
-                    <div className="absolute bottom-0 right-0 text-8xl opacity-10">🧺</div>
+                    <div className="absolute bottom-4 right-6 text-8xl opacity-10 select-none">🧺</div>
                 </div>
 
             </div>
