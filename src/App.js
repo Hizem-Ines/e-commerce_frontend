@@ -14,7 +14,7 @@ import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { AuthProvider } from './context/authContext';
 import Profile from './Pages/Profile';
-import VerifyEmail from './Pages/VerifyEmail';
+import VerifyEmail from './Pages/Auth/VerifyEmail'
 import ForgotPassword from './Pages/Auth/Forgotpassword';
 import ResetPassword  from './Pages/Auth/Resetpassword';
 import LoginSuccess from './Pages/Auth/LoginSuccess';
