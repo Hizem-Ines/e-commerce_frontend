@@ -46,13 +46,16 @@ const ProductDetail = () => {
             .catch(err => console.error(err));
     }, [id]);
 
-    const handleAjouter = () => {
-        for (let i = 0; i < quantite; i++) {
-            ajouterAuPanier({ ...produit, varianteActive });
-        }
+    const handleAjouter = async () => {
+    if (!varianteActive?.id) return;
+    try {
+        await ajouterAuPanier(varianteActive.id, quantite);
         setAjoute(true);
         setTimeout(() => setAjoute(false), 2000);
-    };
+    } catch (err) {
+        alert(err.message);
+    }
+};
 
     if (loading) {
         return (
