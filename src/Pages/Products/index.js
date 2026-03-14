@@ -8,9 +8,10 @@ import formatPrice from '../../utils/formatPrice';
 import { BsStars } from "react-icons/bs";
 import { FiHeart } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const Products = () => {
-    const { ajouterAuPanier } = useCart();
+    const navigate = useNavigate(); 
     const { toggleFavori, estFavori } = useWishlist();
 
     const [produits, setProduits] = useState([]);
@@ -282,10 +283,10 @@ const Products = () => {
                                                             : 'Prix N/A'}
                                                     </span>
                                                     <button
-                                                        onClick={() => ajouterAuPanier(produit)}
+                                                        onClick={() => navigate(`/produits/${produit.id}`)}
                                                         className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300"
                                                     >
-                                                        Ajouter
+                                                            Voir le produit
                                                     </button>
                                                 </div>
                                             </div>

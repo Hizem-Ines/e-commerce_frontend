@@ -47,12 +47,21 @@ const ProductDetail = () => {
     }, [id]);
 
     const handleAjouter = () => {
-        for (let i = 0; i < quantite; i++) {
-            ajouterAuPanier({ ...produit, varianteActive });
-        }
-        setAjoute(true);
-        setTimeout(() => setAjoute(false), 2000);
-    };
+    if (!varianteActive?.id) return;
+ 
+    ajouterAuPanier({
+        variant_id:   varianteActive.id,
+        product_name: produit.name,
+        price:        varianteActive.price,
+        image:        varianteActive.images?.[0]?.url || null,
+        attributes:   varianteActive.attributes || [],
+        stock:        varianteActive.stock,
+    }, quantite);
+ 
+    setAjoute(true);
+    setTimeout(() => setAjoute(false), 2000);
+};
+ 
 
     if (loading) {
         return (

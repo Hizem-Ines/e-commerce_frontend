@@ -1,53 +1,76 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const CartContext = createContext();
 
-export const CartProvider = ({ children }) => {
-    const [panier, setPanier] = useState([]);
+const CART_KEY = 'goffa_cart';
 
-    // Ajouter un produit
-    const ajouterAuPanier = (produit) => {
-        setPanier((prev) => {
-            const existe = prev.find((item) => item.id === produit.id);
+// ── Helpers localStorage ────────────────────────────
+const loadCart = () => {
+    try {
+        const data = localStorage.getItem(CART_KEY);
+        return data ? JSON.parse(data) : [];
+    } catch {
+        return [];
+    }
+};
+
+const saveCart = (items) => {
+    localStorage.setItem(CART_KEY, JSON.stringify(items));
+};
+
+export const CartProvider = ({ children }) => {
+    const [panier, setPanier] = useState(loadCart);
+
+    // ── Sync localStorage à chaque changement ───────
+    useEffect(() => {
+        saveCart(panier);
+    }, [panier]);
+
+    // ── Ajouter au panier ────────────────────────────
+    // item doit contenir : { variant_id, product_name, price, image, attributes, stock }
+    const ajouterAuPanier = (item, quantity = 1) => {
+        setPanier(prev => {
+            const existe = prev.find(i => i.variant_id === item.variant_id);
             if (existe) {
-                return prev.map((item) =>
-                    item.id === produit.id
-                        ? { ...item, quantite: item.quantite + 1 }
-                        : item
+                return prev.map(i =>
+                    i.variant_id === item.variant_id
+                        ? { ...i, quantity: Math.min(i.quantity + quantity, i.stock || 99) }
+                        : i
                 );
             }
-            return [...prev, { ...produit, quantite: 1 }];
+            return [...prev, { ...item, quantity }];
         });
     };
 
-    // Retirer un produit
-    const retirerDuPanier = (id) => {
-        setPanier((prev) => prev.filter((item) => item.id !== id));
+    // ── Retirer du panier ────────────────────────────
+    const retirerDuPanier = (variant_id) => {
+        setPanier(prev => prev.filter(i => i.variant_id !== variant_id));
     };
 
-    // Changer la quantité
-    const changerQuantite = (id, quantite) => {
-        if (quantite < 1) {
-            retirerDuPanier(id);
+    // ── Changer la quantité ──────────────────────────
+    const changerQuantite = (variant_id, quantity) => {
+        if (quantity < 1) {
+            retirerDuPanier(variant_id);
             return;
         }
-        setPanier((prev) =>
-            prev.map((item) =>
-                item.id === id ? { ...item, quantite } : item
+        setPanier(prev =>
+            prev.map(i =>
+                i.variant_id === variant_id
+                    ? { ...i, quantity: Math.min(quantity, i.stock || 99) }
+                    : i
             )
         );
     };
 
-    // Vider le panier
-    const viderPanier = () => setPanier([]);
+    // ── Vider le panier ──────────────────────────────
+    const viderPanier = () => {
+        setPanier([]);
+        localStorage.removeItem(CART_KEY);
+    };
 
-    // Total articles
-    const totalArticles = panier.reduce((acc, item) => acc + item.quantite, 0);
-
-    // Total prix
-    const totalPrix = panier.reduce(
-        (acc, item) => acc + item.prix * item.quantite, 0
-    );
+    // ── Totaux ───────────────────────────────────────
+    const totalArticles = panier.reduce((acc, i) => acc + i.quantity, 0);
+    const totalPrix     = panier.reduce((acc, i) => acc + parseFloat(i.price) * i.quantity, 0);
 
     return (
         <CartContext.Provider value={{
@@ -58,6 +81,7 @@ export const CartProvider = ({ children }) => {
             viderPanier,
             totalArticles,
             totalPrix,
+            loading: false,
         }}>
             {children}
         </CartContext.Provider>
@@ -66,9 +90,7 @@ export const CartProvider = ({ children }) => {
 
 export const useCart = () => {
     const context = useContext(CartContext);
-    if (!context) {
-        throw new Error('useCart doit être utilisé dans un CartProvider');
-    }
+    if (!context) throw new Error('useCart doit être utilisé dans un CartProvider');
     return context;
 };
 
