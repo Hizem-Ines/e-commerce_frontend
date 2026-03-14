@@ -18,6 +18,10 @@ import VerifyEmail from './Pages/Auth/VerifyEmail'
 import ForgotPassword from './Pages/Auth/Forgotpassword';
 import ResetPassword  from './Pages/Auth/Resetpassword';
 import LoginSuccess from './Pages/Auth/LoginSuccess';
+import Checkout from './Pages/Checkout';
+import OrderConfirmation from './Pages/OrderConfirmation';
+import CompleteAccount from './Pages/Auth/CompleteAccount';
+import OrderDetail from './Pages/OrderDetail';
 
 function App() {
     return (
@@ -31,6 +35,9 @@ function App() {
                             <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} /> 
                             <Route path="/reset-password/:token" element={<ResetPassword />} /> 
                             <Route path="/login/success" element={<LoginSuccess />} />
+                            <Route path="/checkout" element={<Checkout />} />
+                            <Route path="/commande-confirmee/:orderId" element={<OrderConfirmation />} />
+                            <Route path="/complete-account/:token" element={<CompleteAccount />} />
                             <Route element={<Layout />}>
                                 <Route path="/" element={<Home />} />
                                 <Route path="/produits" element={<Products />} />
@@ -40,6 +47,7 @@ function App() {
                                 <Route path="/producteurs" element={<Producers />} />
                                 <Route path="/producteurs/:nom" element={<ProducerDetail />} />
                                 <Route path="/profil" element={<Profile />} />
+                                <Route path="/commandes/:orderId" element={<OrderDetail />} />
                                 <Route path="*" element={<NotFound />} />
                             </Route>
                         </Routes>

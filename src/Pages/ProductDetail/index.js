@@ -46,16 +46,22 @@ const ProductDetail = () => {
             .catch(err => console.error(err));
     }, [id]);
 
-    const handleAjouter = async () => {
+    const handleAjouter = () => {
     if (!varianteActive?.id) return;
-    try {
-        await ajouterAuPanier(varianteActive.id, quantite);
-        setAjoute(true);
-        setTimeout(() => setAjoute(false), 2000);
-    } catch (err) {
-        alert(err.message);
-    }
+ 
+    ajouterAuPanier({
+        variant_id:   varianteActive.id,
+        product_name: produit.name,
+        price:        varianteActive.price,
+        image:        varianteActive.images?.[0]?.url || null,
+        attributes:   varianteActive.attributes || [],
+        stock:        varianteActive.stock,
+    }, quantite);
+ 
+    setAjoute(true);
+    setTimeout(() => setAjoute(false), 2000);
 };
+ 
 
     if (loading) {
         return (

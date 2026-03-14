@@ -1,122 +1,87 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { useAuth } from './authContext';
-import {
-    getCart,
-    addToCart as addToCartAPI,
-    updateCartItem as updateCartItemAPI,
-    removeFromCart as removeFromCartAPI,
-    clearCart as clearCartAPI,
-    mergeCart,
-    getSessionId,
-} from '../services/cartService';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const CartContext = createContext();
 
+const CART_KEY = 'goffa_cart';
+
+// ── Helpers localStorage ────────────────────────────
+const loadCart = () => {
+    try {
+        const data = localStorage.getItem(CART_KEY);
+        return data ? JSON.parse(data) : [];
+    } catch {
+        return [];
+    }
+};
+
+const saveCart = (items) => {
+    localStorage.setItem(CART_KEY, JSON.stringify(items));
+};
+
 export const CartProvider = ({ children }) => {
-    const { user } = useAuth();
-    const [panier, setPanier] = useState([]);
-    const [total, setTotal] = useState(0);
-    const [totalArticles, setTotalArticles] = useState(0);
-    const [loading, setLoading] = useState(false);
-    const mergedRef = useRef(false); // ✅ évite le double merge (StrictMode)
+    const [panier, setPanier] = useState(loadCart);
 
-    // ── Charger le panier depuis l'API ──────────────────
-    const fetchCart = useCallback(async () => {
-        setLoading(true);
-        try {
-            const res = await getCart();
-            setPanier(res.data.items || []);
-            setTotal(parseFloat(res.data.total) || 0);
-            setTotalArticles(res.data.totalItems || 0);
-        } catch (err) {
-            console.error('Erreur chargement panier:', err);
-            setPanier([]);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    // ── Charger au démarrage ────────────────────────────
+    // ── Sync localStorage à chaque changement ───────
     useEffect(() => {
-        getSessionId(); // ✅ génère session_id immédiatement
-        fetchCart();
-    }, [fetchCart]);
+        saveCart(panier);
+    }, [panier]);
 
-    // ── Fusionner le panier anonyme au login ────────────
-    useEffect(() => {
-        if (user && !mergedRef.current) {
-            mergedRef.current = true;
-            const sessionId = getSessionId(); // ✅ utilise la variable en mémoire
-            mergeCart(sessionId)
-                .then(() => fetchCart())
-                .catch(() => fetchCart());
-        }
-
-        // Reset si logout
-        if (!user) {
-            mergedRef.current = false;
-            fetchCart();
-        }
-    }, [user]);
-
-    // ── Ajouter au panier ───────────────────────────────
-    const ajouterAuPanier = async (variant_id, quantity = 1) => {
-        try {
-            await addToCartAPI({ variant_id, quantity });
-            await fetchCart();
-        } catch (err) {
-            const msg = err.response?.data?.message || "Erreur lors de l'ajout au panier";
-            throw new Error(msg);
-        }
+    // ── Ajouter au panier ────────────────────────────
+    // item doit contenir : { variant_id, product_name, price, image, attributes, stock }
+    const ajouterAuPanier = (item, quantity = 1) => {
+        setPanier(prev => {
+            const existe = prev.find(i => i.variant_id === item.variant_id);
+            if (existe) {
+                return prev.map(i =>
+                    i.variant_id === item.variant_id
+                        ? { ...i, quantity: Math.min(i.quantity + quantity, i.stock || 99) }
+                        : i
+                );
+            }
+            return [...prev, { ...item, quantity }];
+        });
     };
 
-    // ── Retirer du panier ───────────────────────────────
-    const retirerDuPanier = async (itemId) => {
-        try {
-            await removeFromCartAPI(itemId);
-            await fetchCart();
-        } catch (err) {
-            console.error('Erreur suppression:', err);
-        }
+    // ── Retirer du panier ────────────────────────────
+    const retirerDuPanier = (variant_id) => {
+        setPanier(prev => prev.filter(i => i.variant_id !== variant_id));
     };
 
-    // ── Changer la quantité ─────────────────────────────
-    const changerQuantite = async (itemId, quantity) => {
+    // ── Changer la quantité ──────────────────────────
+    const changerQuantite = (variant_id, quantity) => {
         if (quantity < 1) {
-            await retirerDuPanier(itemId);
+            retirerDuPanier(variant_id);
             return;
         }
-        try {
-            await updateCartItemAPI(itemId, { quantity });
-            await fetchCart();
-        } catch (err) {
-            console.error('Erreur mise à jour quantité:', err);
-        }
+        setPanier(prev =>
+            prev.map(i =>
+                i.variant_id === variant_id
+                    ? { ...i, quantity: Math.min(quantity, i.stock || 99) }
+                    : i
+            )
+        );
     };
 
-    // ── Vider le panier ─────────────────────────────────
-    const viderPanier = async () => {
-        try {
-            await clearCartAPI();
-            setPanier([]);
-            setTotal(0);
-            setTotalArticles(0);
-        } catch (err) {
-            console.error('Erreur vidage panier:', err);
-        }
+    // ── Vider le panier ──────────────────────────────
+    const viderPanier = () => {
+        setPanier([]);
+        localStorage.removeItem(CART_KEY);
     };
+
+    // ── Totaux ───────────────────────────────────────
+    const totalArticles = panier.reduce((acc, i) => acc + i.quantity, 0);
+    const totalPrix     = panier.reduce((acc, i) => acc + parseFloat(i.price) * i.quantity, 0);
 
     return (
         <CartContext.Provider value={{
             panier,
-            loading,
             ajouterAuPanier,
             retirerDuPanier,
             changerQuantite,
             viderPanier,
-            fetchCart,
             totalArticles,
-            totalPrix: total,
+            totalPrix,
+            loading: false,
         }}>
             {children}
         </CartContext.Provider>
