@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllSuppliers } from '../../services/suplierService';
 import { MdVerified } from 'react-icons/md';
-import { FaStar } from 'react-icons/fa';
+import { FaLeaf } from 'react-icons/fa';
 
 const Producers = () => {
     const [producteurs, setProducteurs] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading]         = useState(true);
 
     useEffect(() => {
         getAllSuppliers()
@@ -49,21 +49,22 @@ const Producers = () => {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {producteurs.map((producteur) => (
+                        {producteurs.map(producteur => (
                             <Link
                                 key={producteur.id}
-                                to={`/producteurs/${producteur.slug || producteur.id}`}
+                                to={`/producteurs/${producteur.slug}`}
                                 className="no-underline group"
                             >
                                 <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent group-hover:border-emerald-500 group-hover:-translate-y-1 group-hover:shadow-xl transition-all duration-300">
                                     <div className="px-5 pb-5 pt-5">
 
-                                        {/* AVATAR + NOTE */}
+                                        {/* LOGO + BADGE */}
                                         <div className="flex items-end justify-between mb-4">
                                             <div className="w-14 h-14 bg-emerald-50 rounded-xl shadow-md flex items-center justify-center border-2 border-emerald-100 overflow-hidden">
-                                                {producteur.images?.[0]?.url ? (
+                                                {/* ✅ Fixed: uses logo_url */}
+                                                {producteur.logo_url ? (
                                                     <img
-                                                        src={producteur.images[0].url}
+                                                        src={producteur.logo_url}
                                                         alt={producteur.name}
                                                         className="w-full h-full object-cover"
                                                     />
@@ -71,26 +72,37 @@ const Producers = () => {
                                                     <span className="text-2xl">🌿</span>
                                                 )}
                                             </div>
-                                            <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-full">
-                                                <FaStar size={12} className="text-yellow-400" />
-                                                <span className="text-xs font-bold text-yellow-700">
+                                            <div className="flex gap-2 flex-wrap justify-end">
+                                                {producteur.is_certified_bio && (
+                                                    <span className="flex items-center gap-1 bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-1 rounded-full">
+                                                        <FaLeaf size={10} /> Bio certifié
+                                                    </span>
+                                                )}
+                                                <span className="bg-yellow-50 text-yellow-700 text-xs font-bold px-2 py-1 rounded-full">
                                                     {producteur.product_count || 0} produits
                                                 </span>
                                             </div>
                                         </div>
 
-                                        {/* INFOS */}
+                                        {/* NOM */}
+                                        {/* ✅ Fixed: uses name (suppliers table uses name not name_fr) */}
                                         <h3 className="text-lg font-bold text-[#2c2c2c] mb-1 group-hover:text-emerald-600 transition-colors duration-200">
                                             {producteur.name}
                                         </h3>
-                                        {producteur.address && (
+
+                                        {/* RÉGION */}
+                                        {/* ✅ Fixed: uses region (DB column) */}
+                                        {(producteur.region || producteur.address) && (
                                             <p className="text-xs text-black/50 mb-3">
-                                                📍 {producteur.address}
+                                                📍 {producteur.region || producteur.address}
                                             </p>
                                         )}
-                                        {producteur.description && (
+
+                                        {/* DESCRIPTION */}
+                                        {/* ✅ Fixed: uses description_fr */}
+                                        {producteur.description_fr && (
                                             <p className="text-sm text-black/60 leading-relaxed mb-4 line-clamp-2">
-                                                {producteur.description}
+                                                {producteur.description_fr}
                                             </p>
                                         )}
 
@@ -103,7 +115,7 @@ const Producers = () => {
                                             </div>
                                         )}
 
-                                        {/* STATS */}
+                                        {/* FOOTER */}
                                         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                                             <span className="text-xs text-black/40">
                                                 {producteur.product_count || 0} produits
