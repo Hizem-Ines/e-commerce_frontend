@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FiUser, FiHeart, FiLogOut, FiSettings } from "react-icons/fi";
 import { BsFillBasket3Fill } from "react-icons/bs";
 import { useCart } from '../../../context/CartContext';
 import { useWishlist } from '../../../context/WishlistContext';
 import formatPrice from '../../../utils/formatPrice';
 import { useAuth } from '../../../context/authContext';
+import { getAllProducts } from '../../../services/productService';
 
 const Logo = () => (
     <Link to="/" className="shrink-0 no-underline flex items-center gap-2">
@@ -30,19 +31,69 @@ const Header = () => {
     const { totalArticles, totalPrix } = useCart();
     const { totalFavoris } = useWishlist();
     const { user, logout } = useAuth();
+    const navigate = useNavigate();
+
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
 
-    // Fermer le dropdown si on clique ailleurs
+    const [search, setSearch] = useState('');
+    const [suggestions, setSuggestions] = useState([]);
+    const [searchLoading, setSearchLoading] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
+    const searchRef = useRef(null);
+    const debounceRef = useRef(null);
+
     useEffect(() => {
         const handleClickOutside = (e) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target))
                 setDropdownOpen(false);
-            }
+            if (searchRef.current && !searchRef.current.contains(e.target))
+                setSearchOpen(false);
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    const handleSearchChange = (e) => {
+        const value = e.target.value;
+        setSearch(value);
+
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+
+        if (value.trim().length < 2) {
+            setSuggestions([]);
+            setSearchOpen(false);
+            return;
+        }
+
+        debounceRef.current = setTimeout(async () => {
+            setSearchLoading(true);
+            try {
+                const res = await getAllProducts({ search: value, page: 1 });
+                setSuggestions(res.data.products.slice(0, 6));
+                setSearchOpen(true);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setSearchLoading(false);
+            }
+        }, 350);
+    };
+
+    const handleSearchSubmit = (e) => {
+        if (e) e.preventDefault();
+        if (search.trim()) {
+            setSearchOpen(false);
+            navigate(`/produits?search=${encodeURIComponent(search.trim())}`);
+        }
+    };
+
+    const handleSuggestionClick = (produit) => {
+        setSearch('');
+        setSuggestions([]);
+        setSearchOpen(false);
+        navigate(`/produits/${produit.id}`);
+    };
 
     return (
         <div className="bg-emerald-600">
@@ -51,15 +102,92 @@ const Header = () => {
 
                     <Logo />
 
-                    <div className="flex-1 flex items-center bg-white/15 border border-white/30 rounded-full px-4 py-2 gap-2">
-                        <input
-                            type="text"
-                            placeholder="Rechercher un produit, producteur..."
-                            className="flex-1 bg-transparent outline-none text-white placeholder-white/60 text-sm"
-                        />
-                        <button className="bg-white/20 hover:bg-white/30 text-white rounded-full w-8 h-8 flex items-center justify-center transition">
-                            🔍
-                        </button>
+                    {/* BARRE DE RECHERCHE */}
+                    <div className="flex-1 relative" ref={searchRef}>
+                        <form onSubmit={handleSearchSubmit}>
+                            <div className="flex items-center bg-white/15 border border-white/30 rounded-full px-4 py-2 gap-2">
+                                <input
+                                    type="text"
+                                    value={search}
+                                    onChange={handleSearchChange}
+                                    onFocus={() => suggestions.length > 0 && setSearchOpen(true)}
+                                    placeholder="Rechercher un produit, producteur..."
+                                    className="flex-1 bg-transparent outline-none text-white placeholder-white/60 text-sm"
+                                />
+                                <button
+                                    type="submit"
+                                    className="bg-white/20 hover:bg-white/30 text-white rounded-full w-8 h-8 flex items-center justify-center transition shrink-0"
+                                >
+                                    {searchLoading ? (
+                                        <span className="animate-spin text-xs">🌿</span>
+                                    ) : '🔍'}
+                                </button>
+                            </div>
+                        </form>
+
+                        {/* DROPDOWN SUGGESTIONS */}
+                        {searchOpen && suggestions.length > 0 && (
+                            <div className="absolute top-12 left-0 right-0 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
+                                <div className="px-4 py-2 border-b border-gray-100">
+                                    <p className="text-xs font-bold text-black/40">
+                                        {suggestions.length} résultat{suggestions.length > 1 ? 's' : ''} pour "{search}"
+                                    </p>
+                                </div>
+                                {suggestions.map((produit) => (
+                                    <button
+                                        key={produit.id}
+                                        onClick={() => handleSuggestionClick(produit)}
+                                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-emerald-50 transition text-left border-b border-gray-50 last:border-0"
+                                    >
+                                        {/* IMAGE */}
+                                        <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0 overflow-hidden">
+                                            {produit.thumbnail?.[0]?.url ? (
+                                                <img
+                                                    src={produit.thumbnail[0].url}
+                                                    alt={produit.name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <span className="text-lg">🌿</span>
+                                            )}
+                                        </div>
+                                        {/* INFOS */}
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-bold text-[#2c2c2c] truncate">
+                                                {produit.name}
+                                            </p>
+                                            <p className="text-xs text-black/40">
+                                                {produit.category_name}
+                                                {produit.supplier_name ? ` · ${produit.supplier_name}` : ''}
+                                            </p>
+                                        </div>
+                                        {/* PRIX */}
+                                        <span className="text-sm font-extrabold text-emerald-600 shrink-0">
+                                            {produit.min_price
+                                                ? `${parseFloat(produit.min_price).toFixed(2)} DT`
+                                                : 'N/A'}
+                                        </span>
+                                    </button>
+                                ))}
+
+                                {/* VOIR TOUS */}
+                                <button
+                                    onClick={() => handleSearchSubmit()}
+                                    className="w-full px-4 py-3 text-sm font-bold text-emerald-600 hover:bg-emerald-50 transition text-center border-t border-gray-100"
+                                >
+                                    Voir tous les résultats pour "{search}" →
+                                </button>
+                            </div>
+                        )}
+
+                        {/* AUCUN RÉSULTAT */}
+                        {searchOpen && suggestions.length === 0 && search.length >= 2 && !searchLoading && (
+                            <div className="absolute top-12 left-0 right-0 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 p-6 text-center">
+                                <p className="text-2xl mb-2">🔍</p>
+                                <p className="text-sm font-bold text-[#2c2c2c]">Aucun produit trouvé</p>
+                                <p className="text-xs text-black/40">Essayez avec d'autres mots clés</p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
@@ -83,7 +211,7 @@ const Header = () => {
                                     onClick={() => setDropdownOpen(!dropdownOpen)}
                                     className="flex items-center gap-2 border border-white/30 rounded-full px-3 py-2 text-white hover:bg-white/10 transition"
                                 >
-                                    <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-black">
+                                    <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-black overflow-hidden">
                                         {user.avatar ? (
                                             <img src={user.avatar} alt={user.name} className="w-full h-full object-cover rounded-full" />
                                         ) : (
