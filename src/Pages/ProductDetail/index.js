@@ -1,4 +1,4 @@
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
@@ -6,12 +6,107 @@ import { getProductById, getAllProducts } from '../../services/productService';
 import formatPrice from '../../utils/formatPrice';
 import { FiHeart } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
+import { useAuth } from '../../context/authContext';
+import { createReview } from '../../services/reviewService';
 
+const FormAvis = ({ productId, onSuccess }) => {
+    const [rating, setRating] = useState(0);
+    const [hoverRating, setHoverRating] = useState(0);
+    const [comment, setComment] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (rating === 0) { setError('Veuillez choisir une note'); return; }
+        if (!comment.trim()) { setError('Veuillez écrire un commentaire'); return; }
+        setLoading(true);
+        setError('');
+        try {
+            await createReview(productId, { rating, comment });
+            setSuccess(true);
+            setRating(0);
+            setComment('');
+            onSuccess();
+        } catch (err) {
+            setError(err.response?.data?.message || 'Erreur lors de l\'envoi');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (success) return (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 text-center">
+            <p className="text-2xl mb-2">✅</p>
+            <p className="font-bold text-emerald-700">Merci pour votre avis !</p>
+        </div>
+    );
+
+    return (
+        <div className="bg-white border-2 border-emerald-100 rounded-xl p-6">
+            <h4 className="font-bold text-[#2c2c2c] mb-4">Laisser un avis</h4>
+            {error && (
+                <div className="bg-red-50 text-red-600 text-sm font-semibold px-4 py-2 rounded-xl mb-4">
+                    ❌ {error}
+                </div>
+            )}
+            <form onSubmit={handleSubmit} className="space-y-4">
+                {/* ÉTOILES */}
+                <div>
+                    <p className="text-xs font-bold text-gray-600 mb-2">Note *</p>
+                    <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                                key={star}
+                                type="button"
+                                onClick={() => setRating(star)}
+                                onMouseEnter={() => setHoverRating(star)}
+                                onMouseLeave={() => setHoverRating(0)}
+                                className="text-3xl transition-transform hover:scale-110"
+                            >
+                                <span className={(hoverRating || rating) >= star ? 'text-yellow-400' : 'text-gray-200'}>
+                                    ★
+                                </span>
+                            </button>
+                        ))}
+                        {rating > 0 && (
+                            <span className="ml-2 text-sm font-bold text-black/40 self-center">
+                                {['', 'Très mauvais', 'Mauvais', 'Moyen', 'Bien', 'Excellent'][rating]}
+                            </span>
+                        )}
+                    </div>
+                </div>
+
+                {/* COMMENTAIRE */}
+                <div>
+                    <p className="text-xs font-bold text-gray-600 mb-2">Commentaire *</p>
+                    <textarea
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        placeholder="Partagez votre expérience avec ce produit..."
+                        rows={3}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition resize-none"
+                        required
+                    />
+                </div>
+
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-xl transition-all duration-300 disabled:opacity-50 text-sm"
+                >
+                    {loading ? 'Envoi...' : 'Publier mon avis →'}
+                </button>
+            </form>
+        </div>
+    );
+};
 const ProductDetail = () => {
     const { id } = useParams();
-    const navigate = useNavigate();
     const { ajouterAuPanier } = useCart();
     const { toggleFavori, estFavori } = useWishlist();
+    const { user } = useAuth();
 
     const [quantite, setQuantite]             = useState(1);
     const [ajoute, setAjoute]                 = useState(false);
@@ -506,50 +601,67 @@ const ProductDetail = () => {
 
                         {/* ── Avis ──────────────────────────────────────── */}
                         {ongletActif === 'avis' && (
-                            <div className="space-y-4">
-                                {produit.reviews?.length > 0 ? (
-                                    produit.reviews.map(avis => (
-                                        <div key={avis.review_id} className="bg-[#f9f5f0] rounded-xl p-5">
-                                            <div className="flex items-center justify-between mb-3">
-                                                <div className="flex items-center gap-3">
-                                                    {avis.reviewer?.avatar ? (
-                                                        <img src={avis.reviewer.avatar} alt={avis.reviewer.name} className="w-10 h-10 rounded-full object-cover" />
-                                                    ) : (
-                                                        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-sm">
-                                                            {avis.reviewer?.name?.[0]}
-                                                        </div>
-                                                    )}
-                                                    <div>
-                                                        <p className="font-bold text-sm text-[#2c2c2c]">{avis.reviewer?.name}</p>
-                                                        {avis.is_verified && (
-                                                            <span className="text-xs text-emerald-600 font-semibold">✓ Achat vérifié</span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <div className="flex gap-0.5 mb-1 justify-end">
-                                                        {[...Array(5)].map((_, i) => (
-                                                            <span key={i} className={i < avis.rating ? 'text-yellow-400' : 'text-gray-200'}>★</span>
-                                                        ))}
-                                                    </div>
-                                                    <span className="text-xs text-black/40">
-                                                        {new Date(avis.created_at).toLocaleDateString('fr-FR')}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            {avis.title && <p className="font-bold text-sm text-[#2c2c2c] mb-1">{avis.title}</p>}
-                                            <p className="text-sm text-black/60 leading-relaxed">{avis.comment}</p>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="text-center py-8">
-                                        <p className="text-4xl mb-3">💬</p>
-                                        <p className="text-black/40 font-semibold">Aucun avis pour ce produit</p>
-                                        <p className="text-black/30 text-sm mt-1">Soyez le premier à donner votre avis !</p>
-                                    </div>
+    <div className="space-y-6">
+
+        {/* FORMULAIRE AJOUTER UN AVIS */}
+        {user ? (
+            <FormAvis productId={id} onSuccess={() => {
+                getProductById(id).then(res => setProduit(res.data.product));
+            }} />
+        ) : (
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
+                <p className="text-emerald-700 font-semibold text-sm mb-2">
+                    Connectez-vous pour laisser un avis
+                </p>
+                <Link to="/connexion" className="bg-emerald-600 text-white font-bold px-5 py-2 rounded-xl no-underline hover:bg-emerald-500 transition text-sm inline-block">
+                    Se connecter
+                </Link>
+            </div>
+        )}
+
+        {/* LISTE DES AVIS */}
+        {produit.reviews?.length > 0 ? (
+            produit.reviews.map((avis, i) => (
+                <div key={avis.review_id || i} className="bg-[#f9f5f0] rounded-xl p-5">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                            {avis.reviewer?.avatar ? (
+                                <img src={avis.reviewer.avatar} alt={avis.reviewer.name} className="w-10 h-10 rounded-full object-cover" />
+                            ) : (
+                                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-sm">
+                                    {avis.reviewer?.name?.[0]}
+                                </div>
+                            )}
+                            <div>
+                                <p className="font-bold text-sm text-[#2c2c2c]">{avis.reviewer?.name}</p>
+                                {avis.is_verified && (
+                                    <span className="text-xs text-emerald-600 font-semibold">✓ Achat vérifié</span>
                                 )}
                             </div>
-                        )}
+                        </div>
+                        <div className="text-right">
+                            <div className="flex gap-0.5 mb-1 justify-end">
+                                {[...Array(5)].map((_, j) => (
+                                    <span key={j} className={j < avis.rating ? 'text-yellow-400' : 'text-gray-200'}>★</span>
+                                ))}
+                            </div>
+                            <span className="text-xs text-black/40">
+                                {new Date(avis.created_at).toLocaleDateString('fr-FR')}
+                            </span>
+                        </div>
+                    </div>
+                    <p className="text-sm text-black/60 leading-relaxed">{avis.comment}</p>
+                </div>
+            ))
+        ) : (
+            <div className="text-center py-10">
+                <p className="text-4xl mb-3">💬</p>
+                <p className="font-bold text-[#2c2c2c] mb-1">Aucun avis pour le moment</p>
+                <p className="text-sm text-black/40">Soyez le premier à donner votre avis !</p>
+            </div>
+        )}
+    </div>
+)}
 
                     </div>
                 </div>
