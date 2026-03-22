@@ -7,9 +7,11 @@ import formatPrice from '../../utils/formatPrice';
 import { BsStars } from "react-icons/bs";
 import { FiHeart } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
+import { useLocation } from 'react-router-dom';
 
 const Products = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { toggleFavori, estFavori } = useWishlist();
 
     const [produits, setProduits]       = useState([]);
@@ -19,33 +21,44 @@ const Products = () => {
     const [page, setPage]               = useState(1);
 
     // Filtres
-    const [tri, setTri]               = useState('defaut');
-    const [prixMin, setPrixMin]       = useState('');
-    const [prixMax, setPrixMax]       = useState('');
-    const [noteMin, setNoteMin]       = useState('');
+    const [tri, setTri]                 = useState('defaut');
+    const [prixMin, setPrixMin]         = useState('');
+    const [prixMax, setPrixMax]         = useState('');
+    const [noteMin, setNoteMin]         = useState('');
     const [categorieId, setCategorieId] = useState('');
 
-    useEffect(() => {
-        const fetchProduits = async () => {
-            setLoading(true);
-            try {
-                const res = await getAllProducts({
-                    category_id: categorieId || undefined,
-                    min_price:   prixMin     || undefined,
-                    max_price:   prixMax     || undefined,
-                    min_rating:  noteMin     || undefined,   // ✅ fixed: was "ratings"
-                    page,
-                });
-                setProduits(res.data.products);
-                setTotalPages(res.data.totalPages);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchProduits();
-    }, [categorieId, prixMin, prixMax, noteMin, page]);
+   useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const categoryFromUrl = params.get('category_id');
+    
+    const catId = categoryFromUrl || categorieId;
+    
+    if (categoryFromUrl && categoryFromUrl !== categorieId) {
+        setCategorieId(categoryFromUrl);
+        return;
+    }
+
+    const fetchProduits = async () => {
+        setLoading(true);
+        try {
+            const res = await getAllProducts({
+                category_id: catId     || undefined,
+                min_price:   prixMin   || undefined,
+                max_price:   prixMax   || undefined,
+                min_rating:  noteMin   || undefined,
+                page,
+            });
+            setProduits(res.data.products);
+            setTotalPages(res.data.totalPages);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+    fetchProduits();
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, [location.search, categorieId, prixMin, prixMax, noteMin, page]);
 
     useEffect(() => {
         getAllCategories()
@@ -53,7 +66,7 @@ const Products = () => {
             .catch(err => console.error(err));
     }, []);
 
-    // ✅ Fixed: uses min_price and rating_avg (DB column names)
+    
     const produitsTries = [...produits].sort((a, b) => {
         if (tri === 'prix-asc')  return (a.min_price || 0) - (b.min_price || 0);
         if (tri === 'prix-desc') return (b.min_price || 0) - (a.min_price || 0);

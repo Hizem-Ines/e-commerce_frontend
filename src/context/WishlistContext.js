@@ -1,24 +1,51 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import {
+    getWishlist,
+    addToWishlist,
+    removeFromWishlist,
+    clearWishlist,
+} from '../services/wishlistService';
+import { useAuth } from './authContext';
 
 const WishlistContext = createContext();
 
 export const WishlistProvider = ({ children }) => {
+    const { user } = useAuth();
     const [favoris, setFavoris] = useState([]);
 
-    const ajouterFavori = (produit) => {
-        setFavoris((prev) => {
-            const existe = prev.find((p) => p.id === produit.id);
-            if (existe) return prev;
-            return [...prev, produit];
-        });
+    // Charger la wishlist depuis le backend si connecté
+    useEffect(() => {
+        if (user) {
+            getWishlist()
+                .then(res => setFavoris(res.data.items))
+                .catch(() => setFavoris([]));
+        } else {
+            setFavoris([]);
+        }
+    }, [user]);
+
+    const ajouterFavori = async (produit) => {
+        if (!user) return;
+        try {
+            await addToWishlist(produit.id);
+            setFavoris(prev => [...prev, { ...produit, product_id: produit.id }]);
+        } catch (err) {
+            console.error(err);
+        }
     };
 
-    const retirerFavori = (id) => {
-        setFavoris((prev) => prev.filter((p) => p.id !== id));
+    const retirerFavori = async (id) => {
+        if (!user) return;
+        try {
+            await removeFromWishlist(id);
+            setFavoris(prev => prev.filter(p => (p.product_id || p.id) !== id));
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     const toggleFavori = (produit) => {
-        const existe = favoris.find((p) => p.id === produit.id);
+        const existe = favoris.find(p => (p.product_id || p.id) === produit.id);
         if (existe) {
             retirerFavori(produit.id);
         } else {
@@ -26,7 +53,7 @@ export const WishlistProvider = ({ children }) => {
         }
     };
 
-    const estFavori = (id) => favoris.some((p) => p.id === id);
+    const estFavori = (id) => favoris.some(p => (p.product_id || p.id) === id);
 
     const totalFavoris = favoris.length;
 
@@ -45,9 +72,7 @@ export const WishlistProvider = ({ children }) => {
 
 export const useWishlist = () => {
     const context = useContext(WishlistContext);
-    if (!context) {
-        throw new Error('useWishlist doit être utilisé dans un WishlistProvider');
-    }
+    if (!context) throw new Error('useWishlist doit être utilisé dans un WishlistProvider');
     return context;
 };
 
