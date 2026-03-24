@@ -22,6 +22,8 @@ import Checkout from './Pages/Checkout';
 import OrderConfirmation from './Pages/OrderConfirmation';
 import CompleteAccount from './Pages/Auth/CompleteAccount';
 import OrderDetail from './Pages/OrderDetail';
+import Offres from './Pages/Offres';
+import Admin from './Pages/Admin';
 
 function App() {
     return (
@@ -30,6 +32,7 @@ function App() {
                 <CartProvider>
                     <WishlistProvider>
                         <Routes>
+                            <Route path="/admin" element={<Admin />} />
                             <Route path="/connexion" element={<Auth />} />
                             <Route path="/verify-email/:token" element={<VerifyEmail />} />
                             <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} /> 
@@ -48,6 +51,7 @@ function App() {
                                 <Route path="/producteurs/:nom" element={<ProducerDetail />} />
                                 <Route path="/profil" element={<Profile />} />
                                 <Route path="/commandes/:orderId" element={<OrderDetail />} />
+                                <Route path="/offres" element={<Offres />} />
                                 <Route path="*" element={<NotFound />} />
                             </Route>
                         </Routes>
