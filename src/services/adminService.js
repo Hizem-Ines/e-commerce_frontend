@@ -10,3 +10,15 @@ export const getAllSuppliers  = ()          => api.get('/suppliers');
 export const deleteSupplier   = (id)        => api.delete(`/suppliers/${id}`);
 export const getAllCategories = ()          => api.get('/categories');
 export const getAllPromotions = ()          => api.get('/promotions');
+// Create a new product  (multipart/form-data)
+export const createProduct = (formData) =>
+    API.post("/products", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+    });
+ 
+// Update an existing product  (multipart/form-data)
+export const updateProduct = (productId, formData) =>
+    API.put(`/products/${productId}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+    });
+ 
