@@ -26,6 +26,7 @@ import Offres from './Pages/Offres';
 import Admin from './Pages/Admin';
 import Recipes    from "./Pages/Recipes";
 import RecipesDetail from "./Pages/RecipesDetail";
+import Unsubscribe from "./Pages/Unsubscribe";
 
 function App() {
     return (
@@ -56,6 +57,7 @@ function App() {
                                 <Route path="/offres" element={<Offres />} />
                                 <Route path="/recettes"       element={<Recipes />} />
                                 <Route path="/recettes/:slug" element={<RecipesDetail />} />
+                                <Route path="/unsubscribe" element={<Unsubscribe />} />
                                 <Route path="*" element={<NotFound />} />
                             </Route>
                         </Routes>

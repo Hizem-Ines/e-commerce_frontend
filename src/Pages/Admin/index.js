@@ -11,6 +11,16 @@ import AdminProducteurs from './sections/AdminProducteurs';
 import AdminCategories from './sections/AdminCategories';
 import AdminPromotions from './sections/AdminPromotions';
 import AdminRecipes from "./sections/AdminRecipes";
+import { FiGrid, FiPackage, FiShoppingBag, FiUsers, FiTag, FiList, FiPercent, FiMenu, FiX, FiMail } from 'react-icons/fi';
+
+import AdminStats        from './sections/AdminStats';
+import AdminProduits     from './sections/AdminProduits';
+import AdminCommandes    from './sections/AdminCommandes';
+import AdminUtilisateurs from './sections/AdminUtilisateurs';
+import AdminProducteurs  from './sections/AdminProducteurs';
+import AdminCategories   from './sections/AdminCategories';
+import AdminPromotions   from './sections/AdminPromotions';
+import AdminEmailCampaigns from './sections/AdminEmailCampaigns';
 
 const SECTIONS = [
     { id: 'stats',         label: 'Tableau de bord', icone: <FiGrid size={18} /> },
@@ -21,6 +31,8 @@ const SECTIONS = [
     { id: "recipes",       label: "Recettes",         icone: <GiCookingGlove size={18} />},
     { id: 'categories',    label: 'Catégories',       icone: <FiTag size={18} /> },
     { id: 'promotions',    label: 'Promotions',       icone: <FiPercent size={18} /> }
+    { id: 'promotions',    label: 'Promotions',       icone: <FiPercent size={18} /> },
+    { id: 'campaigns',     label: 'Campagnes email',  icone: <FiMail size={18} /> },
 ];
 
 const Admin = () => {
@@ -41,6 +53,7 @@ const Admin = () => {
             case 'categories':   return <AdminCategories />;
             case 'promotions':   return <AdminPromotions />;
             case 'recipes':      return <AdminRecipes />;
+            case 'campaigns':    return <AdminEmailCampaigns />;
             default:             return <AdminStats />;
         }
     };

@@ -3,6 +3,8 @@ import { getAllSuppliers, deleteSupplier } from '../../../services/adminService'
 import { FiTrash2, FiPlus, FiSearch, FiEdit } from 'react-icons/fi';
 import { MdVerified } from 'react-icons/md';
 
+const EMPTY_FORM = { name: '', name_ar: '', description_fr: '', description_ar: '', region: '', address: '', contact: '', email: '', website: '', is_certified_bio: false };
+
 const AdminProducteurs = () => {
     const [producteurs, setProducteurs] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -11,7 +13,8 @@ const AdminProducteurs = () => {
     const [successMsg, setSuccessMsg] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
     const [showForm, setShowForm] = useState(false);
-    const [formData, setFormData] = useState({ name: '', description: '', address: '', contact: '', website: '' });
+    const [editTarget, setEditTarget] = useState(null); // null = création, objet = édition
+    const [formData, setFormData] = useState(EMPTY_FORM);
     const [formLoading, setFormLoading] = useState(false);
 
     const fetchProducteurs = async () => {
@@ -33,6 +36,29 @@ const AdminProducteurs = () => {
         (p.address || '').toLowerCase().includes(search.toLowerCase())
     );
 
+    const openCreate = () => {
+        setEditTarget(null);
+        setFormData(EMPTY_FORM);
+        setShowForm(true);
+    };
+
+    const openEdit = (p) => {
+        setEditTarget(p);
+        setFormData({
+            name: p.name || '',
+            name_ar: p.name_ar || '',
+            description_fr: p.description_fr || '',
+            description_ar: p.description_ar || '',
+            region: p.region || '',
+            address: p.address || '',
+            contact: p.contact || '',
+            email: p.email || '',
+            website: p.website || '',
+            is_certified_bio: p.is_certified_bio || false,
+        });
+        setShowForm(true);
+    };
+
     const handleDelete = async (id) => {
         try {
             await deleteSupplier(id);
@@ -47,42 +73,58 @@ const AdminProducteurs = () => {
         }
     };
 
-    const handleCreateSupplier = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setFormLoading(true);
         try {
             const { default: api } = await import('../../../services/api');
-            await api.post('/suppliers', formData);
-            setSuccessMsg('Producteur créé avec succès.');
+            if (editTarget) {
+                // MODIFICATION
+                await api.put(`/suppliers/${editTarget.id}`, formData);
+                setSuccessMsg('Producteur modifié avec succès.');
+            } else {
+                // CRÉATION
+                await api.post('/suppliers', formData);
+                setSuccessMsg('Producteur créé avec succès.');
+            }
             setShowForm(false);
-            setFormData({ name: '', description: '', address: '', contact: '', website: '' });
+            setFormData(EMPTY_FORM);
+            setEditTarget(null);
             fetchProducteurs();
             setTimeout(() => setSuccessMsg(''), 3000);
         } catch (err) {
-            setErrorMsg(err.response?.data?.message || 'Erreur lors de la création.');
+            setErrorMsg(err.response?.data?.message || 'Erreur lors de l\'opération.');
             setTimeout(() => setErrorMsg(''), 3000);
         } finally {
             setFormLoading(false);
         }
     };
 
+    const fields = [
+        { label: 'Nom (FR) *', key: 'name', placeholder: 'Nom du producteur', required: true },
+        { label: 'Nom (AR)', key: 'name_ar', placeholder: 'اسم المنتج' },
+        { label: 'Région', key: 'region', placeholder: 'Ex: Sfax, Tunis...' },
+        { label: 'Adresse', key: 'address', placeholder: 'Ville, Tunisie' },
+        { label: 'Contact', key: 'contact', placeholder: '+216 XX XXX XXX' },
+        { label: 'Email', key: 'email', placeholder: 'contact@exemple.tn' },
+        { label: 'Site web', key: 'website', placeholder: 'https://...' },
+    ];
+
     return (
         <div>
             <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Producteurs</h2>
                 <button
-                    onClick={() => setShowForm(true)}
+                    onClick={openCreate}
                     className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
                 >
                     <FiPlus size={16} /> Nouveau producteur
                 </button>
             </div>
 
-            {/* ALERTES */}
             {successMsg && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">✅ {successMsg}</div>}
             {errorMsg && <div className="bg-red-50 border border-red-200 text-red-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">❌ {errorMsg}</div>}
 
-            {/* RECHERCHE */}
             <div className="relative mb-6">
                 <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                 <input
@@ -94,7 +136,6 @@ const AdminProducteurs = () => {
                 />
             </div>
 
-            {/* GRILLE */}
             {loading ? (
                 <div className="flex items-center justify-center py-20">
                     <div className="text-4xl animate-spin">🌿</div>
@@ -108,8 +149,8 @@ const AdminProducteurs = () => {
                             <div className="flex items-start justify-between mb-3">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center overflow-hidden shrink-0">
-                                        {p.images?.[0]?.url
-                                            ? <img src={p.images[0].url} alt={p.name} className="w-full h-full object-cover" />
+                                        {p.logo_url
+                                            ? <img src={p.logo_url} alt={p.name} className="w-full h-full object-cover" />
                                             : <span className="text-xl">🌿</span>
                                         }
                                     </div>
@@ -121,7 +162,11 @@ const AdminProducteurs = () => {
                                     </div>
                                 </div>
                                 <div className="flex gap-1">
-                                    <button className="p-1.5 hover:bg-blue-50 text-blue-500 rounded-xl transition">
+                                    {/* ✅ onClick ajouté ici */}
+                                    <button
+                                        onClick={() => openEdit(p)}
+                                        className="p-1.5 hover:bg-blue-50 text-blue-500 rounded-xl transition"
+                                    >
                                         <FiEdit size={14} />
                                     </button>
                                     <button
@@ -134,8 +179,8 @@ const AdminProducteurs = () => {
                             </div>
                             {p.address && <p className="text-xs text-black/50 mb-2">📍 {p.address}</p>}
                             {p.contact && <p className="text-xs text-black/50 mb-2">📞 {p.contact}</p>}
-                            {p.description && (
-                                <p className="text-xs text-black/60 line-clamp-2 mb-3">{p.description}</p>
+                            {p.description_fr && (
+                                <p className="text-xs text-black/60 line-clamp-2 mb-3">{p.description_fr}</p>
                             )}
                             <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                                 <span className="text-xs text-black/40">{p.product_count || 0} produits</span>
@@ -146,21 +191,18 @@ const AdminProducteurs = () => {
                 </div>
             )}
 
-            {/* MODAL CRÉATION */}
+            {/* MODAL CRÉATION / MODIFICATION */}
             {showForm && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl p-8 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-xl font-bold text-[#2c2c2c]">Nouveau producteur</h3>
-                            <button onClick={() => setShowForm(false)} className="text-black/40 hover:text-black text-2xl font-bold">×</button>
+                            <h3 className="text-xl font-bold text-[#2c2c2c]">
+                                {editTarget ? `Modifier : ${editTarget.name}` : 'Nouveau producteur'}
+                            </h3>
+                            <button onClick={() => { setShowForm(false); setEditTarget(null); }} className="text-black/40 hover:text-black text-2xl font-bold">×</button>
                         </div>
-                        <form onSubmit={handleCreateSupplier} className="space-y-4">
-                            {[
-                                { label: 'Nom *', key: 'name', placeholder: 'Nom du producteur', required: true },
-                                { label: 'Adresse', key: 'address', placeholder: 'Ville, Tunisie' },
-                                { label: 'Contact', key: 'contact', placeholder: '+216 XX XXX XXX' },
-                                { label: 'Site web', key: 'website', placeholder: 'https://...' },
-                            ].map(field => (
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            {fields.map(field => (
                                 <div key={field.key}>
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">{field.label}</label>
                                     <input
@@ -174,19 +216,40 @@ const AdminProducteurs = () => {
                                 </div>
                             ))}
                             <div>
-                                <label className="block text-xs font-bold text-gray-600 mb-1.5">Description</label>
+                                <label className="block text-xs font-bold text-gray-600 mb-1.5">Description (FR)</label>
                                 <textarea
-                                    value={formData.description}
-                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                    value={formData.description_fr}
+                                    onChange={(e) => setFormData({ ...formData, description_fr: e.target.value })}
                                     placeholder="Description du producteur..."
                                     rows={3}
                                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition resize-none"
                                 />
                             </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-600 mb-1.5">Description (AR)</label>
+                                <textarea
+                                    value={formData.description_ar}
+                                    onChange={(e) => setFormData({ ...formData, description_ar: e.target.value })}
+                                    placeholder="وصف المنتج..."
+                                    rows={3}
+                                    dir="rtl"
+                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition resize-none"
+                                />
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    id="is_certified_bio"
+                                    checked={formData.is_certified_bio}
+                                    onChange={(e) => setFormData({ ...formData, is_certified_bio: e.target.checked })}
+                                    className="w-4 h-4 accent-emerald-600"
+                                />
+                                <label htmlFor="is_certified_bio" className="text-xs font-bold text-gray-600">Certifié Bio</label>
+                            </div>
                             <div className="flex gap-3 pt-2">
                                 <button
                                     type="button"
-                                    onClick={() => setShowForm(false)}
+                                    onClick={() => { setShowForm(false); setEditTarget(null); }}
                                     className="flex-1 border-2 border-gray-200 text-black/60 font-bold py-3 rounded-xl hover:bg-gray-50 transition"
                                 >
                                     Annuler
@@ -196,7 +259,7 @@ const AdminProducteurs = () => {
                                     disabled={formLoading}
                                     className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition disabled:opacity-50"
                                 >
-                                    {formLoading ? 'Création...' : 'Créer'}
+                                    {formLoading ? '...' : editTarget ? 'Enregistrer' : 'Créer'}
                                 </button>
                             </div>
                         </form>
