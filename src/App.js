@@ -24,6 +24,8 @@ import CompleteAccount from './Pages/Auth/CompleteAccount';
 import OrderDetail from './Pages/OrderDetail';
 import Offres from './Pages/Offres';
 import Admin from './Pages/Admin';
+import Recipes    from "./Pages/Recipes";
+import RecipesDetail from "./Pages/RecipesDetail";
 import Unsubscribe from "./Pages/Unsubscribe";
 
 function App() {
@@ -53,6 +55,8 @@ function App() {
                                 <Route path="/profil" element={<Profile />} />
                                 <Route path="/commandes/:orderId" element={<OrderDetail />} />
                                 <Route path="/offres" element={<Offres />} />
+                                <Route path="/recettes"       element={<Recipes />} />
+                                <Route path="/recettes/:slug" element={<RecipesDetail />} />
                                 <Route path="/unsubscribe" element={<Unsubscribe />} />
                                 <Route path="*" element={<NotFound />} />
                             </Route>
