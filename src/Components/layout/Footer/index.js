@@ -2,15 +2,26 @@ import { Link } from 'react-router-dom';
 import { FaFacebook, FaInstagram } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { useState } from 'react';
+import { subscribeNewsletter } from '../../../services/emailcampaignService';
 
 const Footer = () => {
     const [email, setEmail] = useState('');
+    const [status, setStatus] = useState(null); // 'success' | 'error' | 'loading'
+    const [msg, setMsg] = useState('');
 
-    const handleNewsletter = (e) => {
+    const handleNewsletter = async (e) => {
         e.preventDefault();
-        if (email) {
-            alert(`Merci ! ${email} a été inscrit à la newsletter.`);
+        if (!email) return;
+
+        setStatus('loading');
+        try {
+            const res = await subscribeNewsletter(email);
+            setStatus('success');
+            setMsg(res.data.message);
             setEmail('');
+        } catch (err) {
+            setStatus('error');
+            setMsg(err.response?.data?.message || "Une erreur s'est produite.");
         }
     };
 
@@ -111,17 +122,36 @@ const Footer = () => {
                             <input
                                 type="email"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={(e) => {
+                                    setEmail(e.target.value);
+                                    if (status) { setStatus(null); setMsg(''); }
+                                }}
                                 placeholder="Votre email"
-                                className="flex-1 bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-l-xl outline-none text-sm focus:bg-white/15 transition-colors duration-200"
+                                disabled={status === 'loading'}
+                                className="flex-1 bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-l-xl outline-none text-sm focus:bg-white/15 transition-colors duration-200 disabled:opacity-50"
                             />
                             <button
                                 type="submit"
-                                className="bg-[#059669] hover:bg-[#047857] text-white font-bold px-5 py-3 rounded-r-xl transition-colors duration-300"
+                                disabled={status === 'loading'}
+                                className="bg-[#059669] hover:bg-[#047857] text-white font-bold px-5 py-3 rounded-r-xl transition-colors duration-300 disabled:opacity-50"
                             >
-                                OK
+                                {status === 'loading' ? '...' : "S'abonner"}
                             </button>
                         </form>
+
+                        {/* Feedback message */}
+                        {msg && (
+                            <p className={`text-xs mt-2 ${status === 'success' ? 'text-[#a8d5a2]' : 'text-red-400'}`}>
+                                {msg}
+                            </p>
+                        )}
+
+                        <Link
+                            to="/unsubscribe"
+                            className="text-white/30 hover:text-white/60 text-xs mt-3 inline-block transition-colors duration-200"
+                        >
+                            Se désabonner
+                        </Link>
                     </div>
 
                 </div>
