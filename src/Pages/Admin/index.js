@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../../context/authContext';
 import { Navigate } from 'react-router-dom';
 import { FiGrid, FiPackage, FiShoppingBag, FiUsers, FiTag, FiList, FiPercent, FiMenu, FiX } from 'react-icons/fi';
-
+import { GiCookingGlove } from "react-icons/gi";
 import AdminStats      from './sections/AdminStats';
 import AdminProduits   from './sections/AdminProduits';
 import AdminCommandes  from './sections/AdminCommandes';
@@ -10,6 +10,7 @@ import AdminUtilisateurs from './sections/AdminUtilisateurs';
 import AdminProducteurs from './sections/AdminProducteurs';
 import AdminCategories from './sections/AdminCategories';
 import AdminPromotions from './sections/AdminPromotions';
+import AdminRecipes from "./sections/AdminRecipes";
 
 const SECTIONS = [
     { id: 'stats',         label: 'Tableau de bord', icone: <FiGrid size={18} /> },
@@ -17,8 +18,9 @@ const SECTIONS = [
     { id: 'commandes',     label: 'Commandes',        icone: <FiShoppingBag size={18} /> },
     { id: 'utilisateurs',  label: 'Utilisateurs',     icone: <FiUsers size={18} /> },
     { id: 'producteurs',   label: 'Producteurs',      icone: <FiList size={18} /> },
+    { id: "recipes",       label: "Recettes",         icone: <GiCookingGlove size={18} />},
     { id: 'categories',    label: 'Catégories',       icone: <FiTag size={18} /> },
-    { id: 'promotions',    label: 'Promotions',       icone: <FiPercent size={18} /> },
+    { id: 'promotions',    label: 'Promotions',       icone: <FiPercent size={18} /> }
 ];
 
 const Admin = () => {
@@ -38,6 +40,7 @@ const Admin = () => {
             case 'producteurs':  return <AdminProducteurs />;
             case 'categories':   return <AdminCategories />;
             case 'promotions':   return <AdminPromotions />;
+            case 'recipes':      return <AdminRecipes />;
             default:             return <AdminStats />;
         }
     };
