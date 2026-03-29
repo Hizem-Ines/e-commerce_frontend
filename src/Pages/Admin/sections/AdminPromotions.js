@@ -9,7 +9,7 @@ const EMPTY_FORM = {
   code: "",
   description_fr: "",
   description_ar: "",
-  discount_type: "percentage",
+  discount_type: "percent",
   discount_value: "",
   min_order_amount: "",
   starts_at: "",
@@ -113,7 +113,7 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
     if (!form.expires_at)        return setError("La date d'expiration est requise.");
     if (new Date(form.expires_at) <= new Date(form.starts_at))
       return setError("La date d'expiration doit être après la date de début.");
-    if (form.discount_type === "percentage" &&
+    if (form.discount_type === "percent" &&
         (Number(form.discount_value) <= 0 || Number(form.discount_value) > 100))
       return setError("Le pourcentage doit être entre 1 et 100.");
 
@@ -211,13 +211,13 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
                 onChange={handle}
                 className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#c8a96e]/40 focus:border-[#c8a96e] transition-all bg-white"
               >
-                <option value="percentage">Pourcentage (%)</option>
+                <option value="percent">Pourcentage (%)</option>
                 <option value="fixed">Montant fixe (TND)</option>
               </select>
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">
-                Valeur * {form.discount_type === "percentage" ? "(1–100%)" : "(TND)"}
+                Valeur * {form.discount_type === "percent" ? "(1–100%)" : "(TND)"}
               </label>
               <input
                 type="number"
@@ -225,9 +225,9 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
                 value={form.discount_value}
                 onChange={handle}
                 min="0"
-                max={form.discount_type === "percentage" ? 100 : undefined}
-                step={form.discount_type === "percentage" ? 1 : 0.5}
-                placeholder={form.discount_type === "percentage" ? "20" : "15.000"}
+                max={form.discount_type === "percent" ? 100 : undefined}
+                step={form.discount_type === "percent" ? 1 : 0.5}
+                placeholder={form.discount_type === "percent" ? "20" : "15.000"}
                 className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#c8a96e]/40 focus:border-[#c8a96e] transition-all"
               />
             </div>
@@ -595,8 +595,8 @@ const AdminPromotions = () => {
 
                     {/* Réduction */}
                     <td className="px-4 py-3">
-                      <span className={`font-bold text-sm ${promo.discount_type === "percentage" ? "text-[#c8a96e]" : "text-green-600"}`}>
-                        {promo.discount_type === "percentage"
+                      <span className={`font-bold text-sm ${promo.discount_type === "percent" ? "text-[#c8a96e]" : "text-green-600"}`}>
+                        {promo.discount_type === "percent"
                           ? `${promo.discount_value}%`
                           : `${Number(promo.discount_value).toFixed(3)} TND`}
                       </span>
