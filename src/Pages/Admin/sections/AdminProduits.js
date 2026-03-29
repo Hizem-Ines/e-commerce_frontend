@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { getAllProducts, deleteProduct, createProduct, updateProduct, getAllCategories, getAllSuppliers } from '../../../services/adminService';
 import { FiEdit, FiTrash2, FiPlus, FiSearch, FiX, FiUpload, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import formatPrice from '../../../utils/formatPrice';
@@ -305,14 +305,44 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
     const [showAr, setShowAr]   = useState(false);
     const fileRef = useRef();
 
-    // Fetch full product with variants when editing (list view may not include variants)
+    const [formLoading, setFormLoading] = useState(isEdit);
+
+    // Fetch full product on mount — the paginated list omits description, usage, ingredients, etc.
     useEffect(() => {
-        if (isEdit && product.id) {
-            api.get(`/products/${product.id}`).then(res => {
-                setEditVariants(res.data.product?.variants || []);
-            }).catch(() => {});
-        }
-    }, []);
+        if (!isEdit || !product.id) return;
+        setFormLoading(true);
+        api.get(`/products/${product.id}`)
+            .then(res => {
+                const p = res.data.product;
+                if (!p) return;
+                setForm({
+                    name_fr:        p.name_fr        || '',
+                    name_ar:        p.name_ar        || '',
+                    description_fr: p.description_fr || '',
+                    description_ar: p.description_ar || '',
+                    ethical_info_fr: p.ethical_info_fr || '',
+                    ethical_info_ar: p.ethical_info_ar || '',
+                    origin:         p.origin         || '',
+                    usage_fr:       p.usage_fr       || '',
+                    usage_ar:       p.usage_ar       || '',
+                    ingredients_fr: p.ingredients_fr || '',
+                    ingredients_ar: p.ingredients_ar || '',
+                    precautions_fr: p.precautions_fr || '',
+                    precautions_ar: p.precautions_ar || '',
+                    certifications: Array.isArray(p.certifications)
+                        ? p.certifications.join(', ')
+                        : (p.certifications || ''),
+                    supplier_id: p.supplier_id || '',
+                    category_id: p.category_id || '',
+                    slug:        p.slug        || '',
+                    is_active:   p.is_active   ?? true,
+                    is_featured: p.is_featured ?? false,
+                });
+                setEditVariants(p.variants || []);
+            })
+            .catch(() => {})
+            .finally(() => setFormLoading(false));
+    }, [isEdit, product?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -453,8 +483,16 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                 {/* Body */}
                 <div className="overflow-y-auto flex-1 px-7 py-6">
 
+                    {/* Loading skeleton while fetching full product data */}
+                    {formLoading ? (
+                        <div className="flex flex-col items-center justify-center py-20 gap-3">
+                            <div className="text-3xl animate-spin">🌿</div>
+                            <p className="text-sm text-black/40 font-medium">Chargement des données...</p>
+                        </div>
+                    ) : null}
+
                     {/* ── GÉNÉRAL ──────────────────────────────────── */}
-                    {tab === 'general' && (
+                    {!formLoading && tab === 'general' && (
                         <div className="space-y-5">
                             <div className="grid grid-cols-2 gap-4">
                                 <Field label="Nom (FR)" required>
@@ -521,7 +559,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                     )}
 
                     {/* ── DÉTAILS ───────────────────────────────────── */}
-                    {tab === 'details' && (
+                    {!formLoading && tab === 'details' && (
                         <div className="space-y-5">
                             <Field label="Mode d'emploi (FR)">
                                 <textarea className={textareaCls} rows={3} value={form.usage_fr} onChange={e => set('usage_fr', e.target.value)} placeholder="Instructions d'utilisation..." />
@@ -542,7 +580,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                     )}
 
                     {/* ── VARIANTES ────────────────────────────────── */}
-                    {tab === 'variants' && (
+                    {!formLoading && tab === 'variants' && (
                         <div className="space-y-4">
                             {/* ─ EDIT MODE: manage existing variants ─ */}
                             {isEdit ? (
@@ -647,7 +685,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                     )}
 
                     {/* ── IMAGES ───────────────────────────────────── */}
-                    {tab === 'images' && (
+                    {!formLoading && tab === 'images' && (
                         <div className="space-y-5">
                             <button
                                 onClick={() => fileRef.current?.click()}
@@ -695,7 +733,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                     )}
 
                     {/* ── PARAMÈTRES ───────────────────────────────── */}
-                    {tab === 'settings' && (
+                    {!formLoading && tab === 'settings' && (
                         <div className="space-y-4">
                             <div className="flex items-center justify-between bg-[#f9f5f0] rounded-xl px-5 py-4">
                                 <div>
@@ -766,7 +804,7 @@ const AdminProduits = () => {
         getAllSuppliers?.()?.then(r => setSuppliers(r.data.suppliers || [])).catch(() => {});
     }, []);
 
-    const fetchProduits = async () => {
+    const fetchProduits = useCallback(async () => {
         setLoading(true);
         try {
             const res = await getAllProducts({ search: search || undefined, page });
@@ -777,9 +815,9 @@ const AdminProduits = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [page, search]); // re-created only when page or search changes
 
-    useEffect(() => { fetchProduits(); }, [page]);
+    useEffect(() => { fetchProduits(); }, [fetchProduits]);
 
     const handleSearch = (e) => { e.preventDefault(); setPage(1); fetchProduits(); };
 
