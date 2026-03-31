@@ -1,132 +1,139 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { fetchAllRecipes, fetchFeaturedRecipes } from "../../services/recipesService";
+import { FiClock, FiUsers, FiEye } from "react-icons/fi";
+import { GiPlantSeed } from "react-icons/gi";
 
 const DIFFICULTIES = ["facile", "moyen", "difficile"];
-const CATEGORIES = ["entrée", "plat", "dessert", "boisson", "snack"];
 
-const clockIcon = (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-  </svg>
-);
-const leafIcon = (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/>
-    <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
-  </svg>
-);
-const searchIcon = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-  </svg>
-);
-const usersIcon = (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-  </svg>
-);
-const eyeIcon = (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-  </svg>
-);
+// valeur = exactement ce qui est stocké en base
+// label  = ce qu'on affiche dans l'UI
+const CATEGORIES = [
+  { value: "entree",         label: "Entrée" },
+  { value: "plat-principal", label: "Plat principal" },
+  { value: "soupe",          label: "Soupe" },
+  { value: "dessert",        label: "Dessert" },
+  { value: "boisson",        label: "Boisson" },
+];
 
-const difficultyColor = {
-  facile: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
-  moyen:  { bg: "bg-amber-50",   text: "text-amber-700",   dot: "bg-amber-500"  },
-  difficile: { bg: "bg-rose-50", text: "text-rose-700",    dot: "bg-rose-500"   },
+const difficultyConfig = {
+  facile:    { bg: "bg-emerald-100", text: "text-emerald-700", dot: "bg-emerald-500", label: "Facile" },
+  moyen:     { bg: "bg-amber-100",   text: "text-amber-700",   dot: "bg-amber-500",   label: "Moyen" },
+  difficile: { bg: "bg-rose-100",    text: "text-rose-700",    dot: "bg-rose-500",    label: "Difficile" },
 };
 
 function RecipeCard({ recipe }) {
-  const diff = difficultyColor[recipe.difficulty] || difficultyColor.facile;
+  const diff = difficultyConfig[recipe.difficulty] || difficultyConfig.facile;
   const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
 
   return (
-    <Link
-      to={`/recettes/${recipe.slug}`}
-      className="group block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100"
-    >
-      {/* Image */}
-      <div className="relative overflow-hidden h-52 bg-[#f5f0e8]">
-        {recipe.cover_image ? (
-          <img
-            src={recipe.cover_image}
-            alt={recipe.title_fr}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-5xl opacity-30">🍽️</span>
-          </div>
-        )}
-        {recipe.is_featured && (
-          <div className="absolute top-3 left-3 bg-[#c8a96e] text-white text-xs font-semibold px-2.5 py-1 rounded-full">
-            ✦ Mis en avant
-          </div>
-        )}
-        <div className={`absolute top-3 right-3 ${diff.bg} ${diff.text} text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${diff.dot}`} />
-          {recipe.difficulty}
-        </div>
-        {recipe.category && (
-          <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full capitalize">
-            {recipe.category}
-          </div>
-        )}
-      </div>
+    <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent hover:border-emerald-500 hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
+      {/* IMAGE */}
+      <Link to={`/recettes/${recipe.slug}`} className="no-underline">
+        <div className="relative h-44 bg-[#ecfdf5] flex items-center justify-center cursor-pointer overflow-hidden">
+          {recipe.cover_image ? (
+            <img
+              src={recipe.cover_image}
+              alt={recipe.title_fr}
+              className="h-full w-full object-cover hover:scale-105 transition-transform duration-500"
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center gap-2">
+              <span className="text-5xl">🍲</span>
+              <span className="text-xs text-black/30 font-semibold">Pas d'image</span>
+            </div>
+          )}
 
-      {/* Content */}
+          {/* Badges */}
+          {recipe.is_featured && (
+            <span className="absolute top-3 left-3 bg-amber-400 text-white text-xs font-bold px-2 py-1 rounded-full">
+              ✨ Mis en avant
+            </span>
+          )}
+          <span className={`absolute top-3 right-3 ${diff.bg} ${diff.text} text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${diff.dot}`} />
+            {diff.label}
+          </span>
+          {recipe.category && (
+            <span className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full">
+              {CATEGORIES.find(c => c.value === recipe.category)?.label || recipe.category}
+            </span>
+          )}
+        </div>
+      </Link>
+
+      {/* INFOS */}
       <div className="p-4">
-        <h3 className="font-semibold text-[#2c2c2c] text-base leading-snug mb-1 group-hover:text-[#c8a96e] transition-colors line-clamp-2">
-          {recipe.title_fr}
-        </h3>
-        {recipe.title_ar && (
-          <p className="text-xs text-gray-400 text-right mb-2" dir="rtl">{recipe.title_ar}</p>
-        )}
+        <div className="mb-2">
+          <Link to={`/recettes/${recipe.slug}`} className="no-underline">
+            <h3 className="text-sm font-bold text-[#2c2c2c] hover:text-emerald-600 transition-colors duration-200 line-clamp-2">
+              {recipe.title_fr}
+            </h3>
+          </Link>
+          {recipe.title_ar && (
+            <p className="text-xs text-gray-400 text-right mt-0.5" dir="rtl">{recipe.title_ar}</p>
+          )}
+        </div>
+
         {recipe.description_fr && (
-          <p className="text-gray-500 text-sm leading-relaxed line-clamp-2 mb-3">{recipe.description_fr}</p>
+          <p className="text-xs text-black/50 line-clamp-2 mb-3">{recipe.description_fr}</p>
         )}
 
         {/* Meta */}
-        <div className="flex items-center gap-3 text-gray-400 text-xs pt-3 border-t border-gray-50">
+        <div className="flex items-center gap-3 text-xs text-black/40 pt-3 border-t border-gray-100 flex-wrap">
           {totalTime > 0 && (
             <span className="flex items-center gap-1">
-              {clockIcon} {totalTime} min
+              <FiClock size={12} /> {totalTime} min
             </span>
           )}
           {recipe.servings && (
             <span className="flex items-center gap-1">
-              {usersIcon} {recipe.servings} pers.
+              <FiUsers size={12} /> {recipe.servings} pers.
             </span>
           )}
           {recipe.ingredients_count > 0 && (
             <span className="flex items-center gap-1">
-              {leafIcon} {recipe.ingredients_count} ingr.
+              <GiPlantSeed size={12} /> {recipe.ingredients_count} ingr.
             </span>
           )}
           {recipe.views_count > 0 && (
             <span className="flex items-center gap-1 ml-auto">
-              {eyeIcon} {recipe.views_count}
+              <FiEye size={12} /> {recipe.views_count}
             </span>
           )}
         </div>
+
+        {/* CTA */}
+        <div className="flex items-center justify-between pt-3">
+          <span className="text-lg font-extrabold text-emerald-600">
+            {recipe.difficulty ? (
+              <span className={`text-xs font-bold px-2 py-1 rounded-full ${difficultyConfig[recipe.difficulty]?.bg} ${difficultyConfig[recipe.difficulty]?.text}`}>
+                {difficultyConfig[recipe.difficulty]?.label}
+              </span>
+            ) : null}
+          </span>
+          <Link
+            to={`/recettes/${recipe.slug}`}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300 no-underline"
+          >
+            Voir la recette
+          </Link>
+        </div>
       </div>
-    </Link>
+    </div>
   );
 }
 
 export default function RecipesPage() {
-  const [recipes, setRecipes]       = useState([]);
-  const [featured, setFeatured]     = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [totalPages, setTotalPages] = useState(1);
-  const [page, setPage]             = useState(1);
-  const [search, setSearch]         = useState("");
+  const [recipes, setRecipes]         = useState([]);
+  const [featured, setFeatured]       = useState([]);
+  const [loading, setLoading]         = useState(true);
+  const [totalPages, setTotalPages]   = useState(1);
+  const [page, setPage]               = useState(1);
+  const [search, setSearch]           = useState("");
   const [searchInput, setSearchInput] = useState("");
-  const [category, setCategory]     = useState("");
-  const [difficulty, setDifficulty] = useState("");
+  const [category, setCategory]       = useState("");
+  const [difficulty, setDifficulty]   = useState("");
 
   // Fetch featured (once)
   useEffect(() => {
@@ -136,7 +143,7 @@ export default function RecipesPage() {
   }, []);
 
   // Fetch recipes
-  const fetchRecipes = useCallback(async () => {
+  const loadRecipes = useCallback(async () => {
     setLoading(true);
     try {
       const { data } = await fetchAllRecipes({ page, search, category, difficulty });
@@ -149,7 +156,7 @@ export default function RecipesPage() {
     }
   }, [page, search, category, difficulty]);
 
-  useEffect(() => { fetchRecipes(); }, [fetchRecipes]);
+  useEffect(() => { loadRecipes(); }, [loadRecipes]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -162,183 +169,235 @@ export default function RecipesPage() {
     if (type === "difficulty") { setDifficulty(prev => prev === value ? "" : value); setPage(1); }
   };
 
+  const resetFiltres = () => {
+    setSearch("");
+    setSearchInput("");
+    setCategory("");
+    setDifficulty("");
+    setPage(1);
+  };
+
   const heroRecipe = featured[0];
+  const hasActiveFilters = search || category || difficulty;
 
   return (
-    <div className="min-h-screen bg-[#faf8f5]">
+    <div className="bg-[#fdf6ec] min-h-screen py-12">
+      <div className="container mx-auto px-4">
 
-      {/* ── Hero ── */}
-      <section className="relative bg-[#2c2c2c] text-white overflow-hidden">
-        <div className="absolute inset-0 opacity-10"
-          style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c8a96e' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")" }}
-        />
-        <div className="relative max-w-6xl mx-auto px-4 py-16 lg:py-20">
-          {heroRecipe ? (
-            <div className="grid lg:grid-cols-2 gap-8 items-center">
-              <div>
-                <div className="inline-flex items-center gap-2 bg-[#c8a96e]/20 text-[#c8a96e] text-sm font-medium px-3 py-1.5 rounded-full mb-4">
-                  ✦ Recette mise en avant
+        {/* ── TITRE + HERO ── */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-4xl font-bold font-serif text-[#2c2c2c] mb-1">
+              Nos Recettes
+            </h1>
+            <p className="text-black/50">
+              {recipes.length} recette{recipes.length > 1 ? "s" : ""} trouvée{recipes.length > 1 ? "s" : ""}
+              {search && <span> pour "<strong>{search}</strong>"</span>}
+            </p>
+          </div>
+          
+        </div>
+
+        {/* ── Hero featured recipe banner ── */}
+        {heroRecipe && (
+          <div className="bg-[#2c2c2c] rounded-2xl overflow-hidden mb-8 shadow-lg">
+            <div className="flex flex-col md:flex-row items-center gap-0">
+              {heroRecipe.cover_image && (
+                <div className="w-full md:w-56 h-40 md:h-full shrink-0 overflow-hidden">
+                  <img
+                    src={heroRecipe.cover_image}
+                    alt={heroRecipe.title_fr}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <h1 className="text-4xl lg:text-5xl font-bold leading-tight mb-3">
-                  {heroRecipe.title_fr}
-                </h1>
+              )}
+              <div className="p-6 flex-1">
+                <span className="inline-flex items-center gap-1.5 bg-amber-400/20 text-amber-400 text-xs font-bold px-3 py-1 rounded-full mb-3">
+                  ✨ Recette mise en avant
+                </span>
+                <h2 className="text-xl font-bold text-white mb-2">{heroRecipe.title_fr}</h2>
                 {heroRecipe.description_fr && (
-                  <p className="text-white/70 text-lg leading-relaxed mb-6 line-clamp-3">
-                    {heroRecipe.description_fr}
-                  </p>
+                  <p className="text-white/60 text-sm line-clamp-2 mb-4">{heroRecipe.description_fr}</p>
                 )}
-                <div className="flex items-center gap-4 text-sm text-white/60 mb-6">
+                <div className="flex items-center gap-4 text-white/50 text-xs mb-4 flex-wrap">
                   {((heroRecipe.prep_time || 0) + (heroRecipe.cook_time || 0)) > 0 && (
-                    <span className="flex items-center gap-1.5">{clockIcon} {(heroRecipe.prep_time || 0) + (heroRecipe.cook_time || 0)} min</span>
+                    <span className="flex items-center gap-1">
+                      <FiClock size={12} />
+                      {(heroRecipe.prep_time || 0) + (heroRecipe.cook_time || 0)} min
+                    </span>
                   )}
                   {heroRecipe.servings && (
-                    <span className="flex items-center gap-1.5">{usersIcon} {heroRecipe.servings} personnes</span>
+                    <span className="flex items-center gap-1">
+                      <FiUsers size={12} />
+                      {heroRecipe.servings} personnes
+                    </span>
                   )}
-                  <span className="capitalize flex items-center gap-1.5">
-                    <span className={`w-2 h-2 rounded-full ${difficultyColor[heroRecipe.difficulty]?.dot || "bg-gray-400"}`} />
-                    {heroRecipe.difficulty}
-                  </span>
+                  {heroRecipe.difficulty && (
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${difficultyConfig[heroRecipe.difficulty]?.bg} ${difficultyConfig[heroRecipe.difficulty]?.text}`}>
+                      {difficultyConfig[heroRecipe.difficulty]?.label}
+                    </span>
+                  )}
                 </div>
-                <Link to={`/recettes/${heroRecipe.slug}`}
-                  className="inline-flex items-center gap-2 bg-[#c8a96e] hover:bg-[#b8955a] text-white font-semibold px-6 py-3 rounded-xl transition-colors">
+                <Link
+                  to={`/recettes/${heroRecipe.slug}`}
+                  className="inline-block bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold px-5 py-2 rounded-xl transition-colors duration-300 no-underline"
+                >
                   Voir la recette →
                 </Link>
               </div>
-              {heroRecipe.cover_image && (
-                <div className="hidden lg:block rounded-2xl overflow-hidden h-72 shadow-2xl">
-                  <img src={heroRecipe.cover_image} alt={heroRecipe.title_fr} className="w-full h-full object-cover" />
-                </div>
-              )}
             </div>
-          ) : (
-            <div className="text-center py-4">
-              <div className="text-5xl mb-4">🍲</div>
-              <h1 className="text-4xl lg:text-5xl font-bold mb-3">Nos Recettes</h1>
-              <p className="text-white/60 text-lg max-w-xl mx-auto">
-                Découvrez nos recettes artisanales tunisiennes, préparées avec des produits locaux de qualité.
-              </p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ── Filters ── */}
-      <section className="sticky top-0 z-20 bg-white border-b border-gray-100 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-3">
-          <div className="flex flex-col sm:flex-row gap-3 items-center">
-            {/* Search */}
-            <form onSubmit={handleSearch} className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 flex-1 max-w-sm">
-              <span className="text-gray-400">{searchIcon}</span>
-              <input
-                type="text"
-                placeholder="Rechercher une recette..."
-                value={searchInput}
-                onChange={e => setSearchInput(e.target.value)}
-                className="bg-transparent text-sm text-[#2c2c2c] placeholder-gray-400 outline-none w-full"
-              />
-            </form>
-
-            {/* Category filters */}
-            <div className="flex gap-1.5 flex-wrap">
-              {CATEGORIES.map(c => (
-                <button key={c} onClick={() => handleFilter("category", c)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-all ${
-                    category === c
-                      ? "bg-[#2c2c2c] text-white"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  }`}>
-                  {c}
-                </button>
-              ))}
-            </div>
-
-            {/* Difficulty filters */}
-            <div className="flex gap-1.5">
-              {DIFFICULTIES.map(d => {
-                const dc = difficultyColor[d];
-                return (
-                  <button key={d} onClick={() => handleFilter("difficulty", d)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-all ${
-                      difficulty === d
-                        ? `${dc.bg} ${dc.text} ring-1 ring-current`
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    }`}>
-                    {d}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Clear */}
-            {(search || category || difficulty) && (
-              <button onClick={() => { setSearch(""); setSearchInput(""); setCategory(""); setDifficulty(""); setPage(1); }}
-                className="text-xs text-[#c8a96e] hover:text-[#b8955a] font-medium whitespace-nowrap">
-                ✕ Effacer
-              </button>
-            )}
           </div>
-        </div>
-      </section>
-
-      {/* ── Grid ── */}
-      <section className="max-w-6xl mx-auto px-4 py-10">
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl overflow-hidden animate-pulse border border-gray-100">
-                <div className="h-52 bg-gray-100" />
-                <div className="p-4 space-y-2">
-                  <div className="h-4 bg-gray-100 rounded w-3/4" />
-                  <div className="h-3 bg-gray-100 rounded w-full" />
-                  <div className="h-3 bg-gray-100 rounded w-2/3" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : recipes.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="text-5xl mb-4">🔍</div>
-            <h3 className="text-lg font-semibold text-[#2c2c2c] mb-2">Aucune recette trouvée</h3>
-            <p className="text-gray-500 text-sm">Essayez d'autres filtres ou termes de recherche.</p>
-          </div>
-        ) : (
-          <>
-            <div className="flex items-center justify-between mb-6">
-              <p className="text-sm text-gray-500">
-                {recipes.length} recette{recipes.length > 1 ? "s" : ""}
-                {search && <span> pour "<strong>{search}</strong>"</span>}
-              </p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {recipes.map(recipe => <RecipeCard key={recipe.id} recipe={recipe} />)}
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex justify-center gap-2 mt-10">
-                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-                  className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                  ← Précédent
-                </button>
-                {[...Array(totalPages)].map((_, i) => (
-                  <button key={i} onClick={() => setPage(i + 1)}
-                    className={`w-9 h-9 rounded-xl text-sm font-medium transition-colors ${
-                      page === i + 1
-                        ? "bg-[#2c2c2c] text-white"
-                        : "border border-gray-200 text-gray-600 hover:bg-gray-50"
-                    }`}>
-                    {i + 1}
-                  </button>
-                ))}
-                <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                  className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                  Suivant →
-                </button>
-              </div>
-            )}
-          </>
         )}
-      </section>
+
+        <div className="flex gap-6">
+
+          {/* ── SIDEBAR FILTRES ── */}
+          <div className="w-64 shrink-0">
+            <div className="bg-white rounded-2xl p-5 shadow-[0_4px_15px_rgba(0,0,0,0.07)] sticky top-4">
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="font-bold text-[#2c2c2c] text-base">Filtres</h3>
+                {hasActiveFilters && (
+                  <button onClick={resetFiltres} className="text-xs text-emerald-600 hover:underline font-semibold">
+                    Réinitialiser
+                  </button>
+                )}
+              </div>
+
+              {/* RECHERCHE */}
+              <div className="mb-6">
+                <h4 className="text-xs font-bold text-black/40 uppercase tracking-wider mb-3">Recherche</h4>
+                <form onSubmit={handleSearch} className="flex items-center gap-2 bg-[#f9f5f0] rounded-xl px-3 py-2.5">
+                  <input
+                    type="text"
+                    placeholder="Rechercher..."
+                    value={searchInput}
+                    onChange={e => setSearchInput(e.target.value)}
+                    className="bg-transparent text-sm text-[#2c2c2c] placeholder-black/30 outline-none w-full"
+                  />
+                  <button type="submit" className="text-emerald-600 shrink-0">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                  </button>
+                </form>
+              </div>
+
+              {/* CATÉGORIES */}
+              <div className="mb-6">
+                <h4 className="text-xs font-bold text-black/40 uppercase tracking-wider mb-3">Catégorie</h4>
+                <div className="flex flex-col gap-1">
+                  <button
+                    onClick={() => { setCategory(""); setPage(1); }}
+                    className={`text-left px-3 py-2 rounded-xl text-sm font-semibold transition-colors duration-200 ${
+                      category === ""
+                        ? "bg-emerald-600 text-white"
+                        : "bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-emerald-600"
+                    }`}
+                  >
+                    Toutes les catégories
+                  </button>
+                  {CATEGORIES.map(c => (
+                    <button
+                      key={c.value}
+                      onClick={() => handleFilter("category", c.value)}
+                      className={`text-left px-3 py-2 rounded-xl text-sm font-semibold transition-colors duration-200 ${
+                        category === c.value
+                          ? "bg-emerald-600 text-white"
+                          : "bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-emerald-600"
+                      }`}
+                    >
+                      {c.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* DIFFICULTÉ */}
+              <div>
+                <h4 className="text-xs font-bold text-black/40 uppercase tracking-wider mb-3">Difficulté</h4>
+                <div className="flex flex-col gap-1">
+                  <button
+                    onClick={() => { setDifficulty(""); setPage(1); }}
+                    className={`text-left px-3 py-2 rounded-xl text-sm font-semibold transition-colors duration-200 ${
+                      difficulty === ""
+                        ? "bg-emerald-600 text-white"
+                        : "bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-emerald-600"
+                    }`}
+                  >
+                    Toutes les difficultés
+                  </button>
+                  {DIFFICULTIES.map(d => {
+                    const dc = difficultyConfig[d];
+                    return (
+                      <button
+                        key={d}
+                        onClick={() => handleFilter("difficulty", d)}
+                        className={`text-left px-3 py-2 rounded-xl text-sm font-semibold capitalize transition-colors duration-200 flex items-center gap-2 ${
+                          difficulty === d
+                            ? `${dc.bg} ${dc.text} ring-1 ring-current`
+                            : "bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-emerald-600"
+                        }`}
+                      >
+                        <span className={`w-2 h-2 rounded-full ${dc.dot}`} />
+                        {dc.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── GRILLE RECETTES ── */}
+          <div className="flex-1">
+            {loading ? (
+              <div className="text-center py-20">
+                <div className="text-6xl mb-4 animate-spin">🌿</div>
+                <p className="text-black/50 font-semibold">Chargement...</p>
+              </div>
+            ) : recipes.length === 0 ? (
+              <div className="text-center py-20">
+                <div className="text-6xl mb-4">🔍</div>
+                <h3 className="text-xl font-bold text-[#2c2c2c] mb-2">Aucune recette trouvée</h3>
+                <p className="text-black/50 mb-6">Essayez avec d'autres filtres</p>
+                <button
+                  onClick={resetFiltres}
+                  className="bg-emerald-600 text-white font-bold px-6 py-3 rounded-full hover:bg-emerald-500 transition-colors duration-300"
+                >
+                  Réinitialiser les filtres
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {recipes.map(recipe => (
+                    <RecipeCard key={recipe.id} recipe={recipe} />
+                  ))}
+                </div>
+
+                {/* PAGINATION */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center gap-2 mt-10">
+                    {[...Array(totalPages)].map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setPage(i + 1)}
+                        className={`w-10 h-10 rounded-full font-bold text-sm transition-all duration-200 ${
+                          page === i + 1
+                            ? "bg-emerald-600 text-white"
+                            : "bg-white text-black/50 hover:bg-emerald-100"
+                        }`}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
