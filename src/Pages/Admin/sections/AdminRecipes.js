@@ -6,6 +6,7 @@ import {
   deleteRecipe,
 } from "../../../services/recipesService";
 import { FiEdit, FiTrash2, FiPlus, FiSearch, FiX, FiUpload, FiEye } from "react-icons/fi";
+import api from "../../../services/api";
 
 // ─── Constants ────────────────────────────────────────────
 const DIFFICULTIES = ["facile", "moyen", "difficile"];
@@ -80,38 +81,91 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
   const [saving, setSaving]           = useState(false);
   const [error, setError]             = useState("");
   const [tab, setTab]                 = useState("general");
+  const [formLoading, setFormLoading] = useState(false);
   const fileRef                       = useRef();
 
   useEffect(() => {
     if (!open) return;
     setTab("general");
     setError("");
+
     if (editRecipe) {
-      setForm({
-        title_fr:       editRecipe.title_fr       || "",
-        title_ar:       editRecipe.title_ar       || "",
-        description_fr: editRecipe.description_fr || "",
-        description_ar: editRecipe.description_ar || "",
-        prep_time:      editRecipe.prep_time      || "",
-        cook_time:      editRecipe.cook_time      || "",
-        servings:       editRecipe.servings       || 4,
-        difficulty:     editRecipe.difficulty     || "facile",
-        category:       editRecipe.category       || "",
-        is_published:   editRecipe.is_published   || false,
-        is_featured:    editRecipe.is_featured    || false,
-      });
-      setPreview(editRecipe.cover_image || null);
+      // Reset first, then fetch full recipe data (list omits ingredients/steps)
+      setForm(emptyForm);
       setIngredients([{ ...emptyIngredient }]);
       setSteps([{ ...emptyStep }]);
+      setPreview(null);
       setImageFile(null);
+      setFormLoading(true);
+
+      api.get(`/recipes/admin/${editRecipe.id}`)
+        .then(res => {
+          const r = res.data.recipe || res.data;
+          if (!r) return;
+          setForm({
+            title_fr:       r.title_fr       || "",
+            title_ar:       r.title_ar       || "",
+            description_fr: r.description_fr || "",
+            description_ar: r.description_ar || "",
+            prep_time:      r.prep_time      || "",
+            cook_time:      r.cook_time      || "",
+            servings:       r.servings       || 4,
+            difficulty:     r.difficulty     || "facile",
+            category:       r.category       || "",
+            is_published:   r.is_published   || false,
+            is_featured:    r.is_featured    || false,
+          });
+          setPreview(r.cover_image || null);
+          // Hydrate ingredients
+          if (r.ingredients?.length) {
+            setIngredients(r.ingredients.map(i => ({
+              name_fr:  i.name_fr  || "",
+              name_ar:  i.name_ar  || "",
+              quantity: i.quantity || "",
+              is_bio:   i.is_bio   || false,
+            })));
+          } else {
+            setIngredients([{ ...emptyIngredient }]);
+          }
+          // Hydrate steps (sorted by step_number if present)
+          if (r.steps?.length) {
+            const sorted = [...r.steps].sort((a, b) => (a.step_number || 0) - (b.step_number || 0));
+            setSteps(sorted.map(s => ({
+              instruction_fr: s.instruction_fr || "",
+              instruction_ar: s.instruction_ar || "",
+              duration:       s.duration       || "",
+            })));
+          } else {
+            setSteps([{ ...emptyStep }]);
+          }
+        })
+        .catch(() => {
+          // Fallback to partial list data
+          setForm({
+            title_fr:       editRecipe.title_fr       || "",
+            title_ar:       editRecipe.title_ar       || "",
+            description_fr: editRecipe.description_fr || "",
+            description_ar: editRecipe.description_ar || "",
+            prep_time:      editRecipe.prep_time      || "",
+            cook_time:      editRecipe.cook_time      || "",
+            servings:       editRecipe.servings       || 4,
+            difficulty:     editRecipe.difficulty     || "facile",
+            category:       editRecipe.category       || "",
+            is_published:   editRecipe.is_published   || false,
+            is_featured:    editRecipe.is_featured    || false,
+          });
+          setPreview(editRecipe.cover_image || null);
+        })
+        .finally(() => setFormLoading(false));
     } else {
       setForm(emptyForm);
       setIngredients([{ ...emptyIngredient }]);
       setSteps([{ ...emptyStep }]);
       setPreview(null);
       setImageFile(null);
+      setFormLoading(false);
     }
-  }, [editRecipe, open]);
+  }, [editRecipe, open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleImage = (e) => {
     const file = e.target.files[0];
@@ -223,8 +277,16 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
         {/* Body */}
         <div className="overflow-y-auto flex-1 px-7 py-6">
 
+          {/* Loading skeleton while fetching full recipe */}
+          {formLoading && (
+            <div className="flex flex-col items-center justify-center py-20 gap-3">
+              <div className="text-3xl animate-spin">🌿</div>
+              <p className="text-sm text-black/40 font-medium">Chargement des données...</p>
+            </div>
+          )}
+
           {/* ── GÉNÉRAL ── */}
-          {tab === "general" && (
+          {!formLoading && tab === "general" && (
             <div className="space-y-5">
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Titre (FR)" required>
@@ -281,7 +343,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
           )}
 
           {/* ── INGRÉDIENTS ── */}
-          {tab === "ingredients" && (
+          {!formLoading && tab === "ingredients" && (
             <div className="space-y-4">
               <div className="space-y-2.5">
                 {ingredients.map((ing, i) => (
@@ -331,7 +393,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
           )}
 
           {/* ── ÉTAPES ── */}
-          {tab === "etapes" && (
+          {!formLoading && tab === "etapes" && (
             <div className="space-y-4">
               <div className="space-y-3">
                 {steps.map((step, i) => (
@@ -374,7 +436,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
           )}
 
           {/* ── IMAGE ── */}
-          {tab === "image" && (
+          {!formLoading && tab === "image" && (
             <div className="space-y-5">
               <input type="file" accept="image/*" ref={fileRef} onChange={handleImage} className="hidden" />
               {preview ? (
@@ -398,7 +460,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
           )}
 
           {/* ── PARAMÈTRES ── */}
-          {tab === "parametres" && (
+          {!formLoading && tab === "parametres" && (
             <div className="space-y-4">
               <div className="flex items-center justify-between bg-[#f9f5f0] rounded-xl px-5 py-4">
                 <div>
