@@ -4,6 +4,10 @@ import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/authContext';
 import { createOrder, createGuestOrder } from '../../services/orderService';
 import { FiUser, FiMail, FiPhone, FiMapPin, FiCreditCard, FiTruck, FiChevronRight } from 'react-icons/fi';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
 const VILLES = [
     'Tunis', 'Sfax', 'Sousse', 'Bizerte', 'Gabès',
@@ -29,6 +33,9 @@ const Checkout = () => {
         notes:            '',
         promo_code:       '',
     });
+
+    const [clientSecret, setClientSecret] = useState(null);
+    const [pendingOrder, setPendingOrder] = useState(null);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -60,9 +67,10 @@ const Checkout = () => {
         const orderData = {
             items,
             payment_method:   paymentMethod,
+            shipping_full_name: user ? user.name : formData.name, 
             shipping_address: formData.shipping_address,
             shipping_city:    formData.shipping_city,
-            shipping_country: 'Tunisie',
+            shipping_country: 'TN',
             notes:            formData.notes      || undefined,
             promo_code:       formData.promo_code || undefined,
         };
@@ -80,10 +88,18 @@ const Checkout = () => {
                 });
             }
 
-            const order = res.data.order;
+            const { order, payment } = res.data;
+
+            if (payment.method === 'stripe') {
+                setPendingOrder(order);
+                setClientSecret(payment.client_secret);
+                setLoading(false);
+            return;
+            }
+
             viderPanier();
             navigate(`/commande-confirmee/${order.id}`, {
-                state: { order, payment: res.data.payment }
+                state: { order, payment }
             });
 
         } catch (err) {
@@ -92,7 +108,25 @@ const Checkout = () => {
             setLoading(false);
         }
     };
-
+    if (clientSecret) {
+        return (
+            <Elements stripe={stripePromise} options={{ clientSecret }}>
+                <StripePaymentStep
+                    order={pendingOrder}
+                    onSuccess={() => {
+                        viderPanier();
+                        navigate(`/commande-confirmee/${pendingOrder.id}`, {
+                            state: { order: pendingOrder, payment: { method: 'stripe' } }
+                        });
+                    }}
+                    onError={(msg) => {
+                        setClientSecret(null);
+                        setError(msg);
+                    }}
+                />
+            </Elements>
+        );
+    }
     return (
         <div className="bg-[#fdf6ec] min-h-screen py-12">
             <div className="container mx-auto px-4 max-w-5xl">
@@ -371,6 +405,49 @@ const Checkout = () => {
                         </div>
                     </div>
                 </form>
+            </div>
+        </div>
+    );
+};
+
+const StripePaymentStep = ({ order, onSuccess, onError }) => {
+    const stripe   = useStripe();
+    const elements = useElements();
+    const [paying, setPaying] = useState(false);
+
+    const handlePay = async () => {
+        if (!stripe || !elements) return;
+        setPaying(true);
+        const { error } = await stripe.confirmPayment({
+            elements,
+            confirmParams: { return_url: window.location.origin },
+            redirect: 'if_required',
+        });
+        if (error) {
+            onError(error.message);
+        } else {
+            onSuccess();
+        }
+        setPaying(false);
+    };
+
+    return (
+        <div className="min-h-screen bg-[#fdf6ec] flex items-center justify-center p-6">
+            <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full">
+                <h2 className="text-2xl font-bold font-serif text-[#2c2c2c] mb-2">
+                    Paiement sécurisé
+                </h2>
+                <p className="text-sm text-black/50 mb-6">
+                    Commande #{order.id?.slice(0, 8).toUpperCase()} — {parseFloat(order.total_price).toFixed(2)} DT
+                </p>
+                <div className="border-2 border-gray-200 rounded-xl p-4 mb-6 focus-within:border-[#166534] transition-colors">
+                    <CardElement options={{ style: { base: { fontSize: '15px', color: '#2c2c2c' } } }} />
+                </div>
+                <button onClick={handlePay} disabled={paying || !stripe}
+                    className="w-full text-white font-bold py-4 rounded-xl disabled:opacity-50 transition-all hover:scale-105"
+                    style={{ background: 'linear-gradient(135deg, #166534, #15803d)' }}>
+                    {paying ? '⏳ Traitement...' : `💳 Payer ${parseFloat(order.total_price).toFixed(2)} DT`}
+                </button>
             </div>
         </div>
     );

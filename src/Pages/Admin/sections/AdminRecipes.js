@@ -20,7 +20,7 @@ const emptyForm = {
 const emptyIngredient = { name_fr: "", name_ar: "", quantity: "", is_bio: false };
 const emptyStep       = { instruction_fr: "", instruction_ar: "", duration: "" };
 
-// ─── Field component (matches AdminProduits) ──────────────
+// ─── Field component ──────────────────────────────────────
 const Field = ({ label, required, children }) => (
   <div>
     <label className="block text-xs font-bold text-black/50 uppercase tracking-wider mb-1.5">
@@ -90,7 +90,6 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
     setError("");
 
     if (editRecipe) {
-      // Reset first, then fetch full recipe data (list omits ingredients/steps)
       setForm(emptyForm);
       setIngredients([{ ...emptyIngredient }]);
       setSteps([{ ...emptyStep }]);
@@ -116,7 +115,6 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
             is_featured:    r.is_featured    || false,
           });
           setPreview(r.cover_image || null);
-          // Hydrate ingredients
           if (r.ingredients?.length) {
             setIngredients(r.ingredients.map(i => ({
               name_fr:  i.name_fr  || "",
@@ -127,7 +125,6 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
           } else {
             setIngredients([{ ...emptyIngredient }]);
           }
-          // Hydrate steps (sorted by step_number if present)
           if (r.steps?.length) {
             const sorted = [...r.steps].sort((a, b) => (a.step_number || 0) - (b.step_number || 0));
             setSteps(sorted.map(s => ({
@@ -140,7 +137,6 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
           }
         })
         .catch(() => {
-          // Fallback to partial list data
           setForm({
             title_fr:       editRecipe.title_fr       || "",
             title_ar:       editRecipe.title_ar       || "",
@@ -176,21 +172,20 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  // Ingredients helpers
   const updateIngredient = (i, field, value) =>
     setIngredients(prev => prev.map((ing, idx) => idx === i ? { ...ing, [field]: value } : ing));
   const addIngredient    = () => setIngredients(prev => [...prev, { ...emptyIngredient }]);
   const removeIngredient = (i) => setIngredients(prev => prev.filter((_, idx) => idx !== i));
 
-  // Steps helpers
-  const updateStep    = (i, field, value) => setSteps(prev => prev.map((s, idx) => idx === i ? { ...s, [field]: value } : s));
-  const addStep       = () => setSteps(prev => [...prev, { ...emptyStep }]);
-  const removeStep    = (i) => setSteps(prev => prev.filter((_, idx) => idx !== i));
+  const updateStep = (i, field, value) =>
+    setSteps(prev => prev.map((s, idx) => idx === i ? { ...s, [field]: value } : s));
+  const addStep    = () => setSteps(prev => [...prev, { ...emptyStep }]);
+  const removeStep = (i) => setSteps(prev => prev.filter((_, idx) => idx !== i));
 
   const handleSubmit = async () => {
     setError("");
-    if (!form.title_fr.trim())       { setError("Le titre en français est requis."); setTab("general");      return; }
-    if (!form.description_fr.trim()) { setError("La description est requise.");      setTab("general");      return; }
+    if (!form.title_fr.trim())       { setError("Le titre en français est requis."); setTab("general");  return; }
+    if (!form.description_fr.trim()) { setError("La description est requise.");      setTab("general");  return; }
     if (steps.filter(s => s.instruction_fr.trim()).length === 0)
       { setError("Au moins une étape est requise."); setTab("etapes"); return; }
 
@@ -219,11 +214,11 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
   if (!open) return null;
 
   const tabs = [
-    { id: "general",      label: "📝 Général" },
-    { id: "ingredients",  label: "🥬 Ingrédients", count: ingredients.filter(i => i.name_fr.trim()).length || ingredients.length },
-    { id: "etapes",       label: "📋 Étapes",       count: steps.length },
-    { id: "image",        label: "🖼️ Image" },
-    { id: "parametres",   label: "⚙️ Paramètres" },
+    { id: "general",     label: "📝 Général" },
+    { id: "ingredients", label: "🥬 Ingrédients", count: ingredients.filter(i => i.name_fr.trim()).length || ingredients.length },
+    { id: "etapes",      label: "📋 Étapes",       count: steps.length },
+    { id: "image",       label: "🖼️ Image" },
+    { id: "parametres",  label: "⚙️ Paramètres" },
   ];
 
   return (
@@ -277,7 +272,6 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
         {/* Body */}
         <div className="overflow-y-auto flex-1 px-7 py-6">
 
-          {/* Loading skeleton while fetching full recipe */}
           {formLoading && (
             <div className="flex flex-col items-center justify-center py-20 gap-3">
               <div className="text-3xl animate-spin">🌿</div>
@@ -298,19 +292,16 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
                     onChange={e => set("title_ar", e.target.value)} placeholder="بريك بالبيض" />
                 </Field>
               </div>
-
               <Field label="Description (FR)" required>
                 <textarea className={textareaCls} rows={3} value={form.description_fr}
                   onChange={e => set("description_fr", e.target.value)}
                   placeholder="Décrivez la recette en français..." />
               </Field>
-
               <Field label="Description (AR)">
                 <textarea className={textareaCls} rows={3} dir="rtl" value={form.description_ar}
                   onChange={e => set("description_ar", e.target.value)}
                   placeholder="وصف الوصفة بالعربية..." />
               </Field>
-
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <Field label="Prép. (min)">
                   <input type="number" min="0" className={inputCls} value={form.prep_time}
@@ -331,7 +322,6 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
                   </select>
                 </Field>
               </div>
-
               <Field label="Catégorie">
                 <select className={selectCls} value={form.category}
                   onChange={e => set("category", e.target.value)}>
@@ -518,7 +508,8 @@ export default function AdminRecettes() {
   const showSuccess = (msg) => { setSuccessMsg(msg); setTimeout(() => setSuccessMsg(""), 3000); };
   const showError   = (msg) => { setErrorMsg(msg);   setTimeout(() => setErrorMsg(""), 3000); };
 
-  const fetchRecipes = async () => {
+  // ── standalone loader (used by useEffect AND onSaved) ──
+  const loadRecipes = async () => {
     setLoading(true);
     try {
       const { data } = await fetchAllRecipesAdmin();
@@ -530,14 +521,19 @@ export default function AdminRecettes() {
     }
   };
 
-  useEffect(() => { fetchRecipes(); }, []);
+  // ── fetch once on mount ────────────────────────────────
+  useEffect(() => {
+    loadRecipes();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTogglePublished = async (recipe) => {
     try {
       const fd = new FormData();
       fd.append("is_published", !recipe.is_published);
       await updateRecipe(recipe.id, fd);
-      setRecipes(prev => prev.map(r => r.id === recipe.id ? { ...r, is_published: !r.is_published } : r));
+      setRecipes(prev => prev.map(r =>
+        r.id === recipe.id ? { ...r, is_published: !r.is_published } : r
+      ));
       showSuccess(`Recette ${!recipe.is_published ? "publiée" : "dépubliée"} avec succès.`);
     } catch {
       showError("Erreur lors de la mise à jour.");
@@ -558,8 +554,9 @@ export default function AdminRecettes() {
 
   const openEdit = (recipe) => { setEditRecipe(recipe); setShowForm(true); };
   const openNew  = () => { setEditRecipe(null); setShowForm(true); };
-  const onSaved  = () => {
-    fetchRecipes();
+
+  const onSaved = () => {
+    loadRecipes(); // ← uses standalone loader, not the one inside useEffect
     showSuccess(editRecipe ? "Recette mise à jour avec succès." : "Recette créée avec succès.");
   };
 
@@ -579,7 +576,7 @@ export default function AdminRecettes() {
         </button>
       </div>
 
-      {/* Feedback messages */}
+      {/* Feedback */}
       {successMsg && (
         <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">
           ✅ {successMsg}
@@ -638,8 +635,6 @@ export default function AdminRecettes() {
             <tbody>
               {filtered.map(recipe => (
                 <tr key={recipe.id} className="border-b border-gray-50 hover:bg-[#fdf6ec] transition">
-
-                  {/* Recipe */}
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center overflow-hidden shrink-0">
@@ -658,8 +653,6 @@ export default function AdminRecettes() {
                       </div>
                     </div>
                   </td>
-
-                  {/* Category */}
                   <td className="px-5 py-4 hidden sm:table-cell">
                     {recipe.category ? (
                       <span className="capitalize text-xs font-bold px-2 py-1 rounded-full bg-gray-100 text-gray-600">
@@ -667,20 +660,14 @@ export default function AdminRecettes() {
                       </span>
                     ) : <span className="text-black/30">—</span>}
                   </td>
-
-                  {/* Difficulty */}
                   <td className="px-5 py-4 hidden md:table-cell">
                     <span className="capitalize text-sm text-black/60">{recipe.difficulty}</span>
                   </td>
-
-                  {/* Status */}
                   <td className="px-5 py-4 text-center">
                     <button onClick={() => handleTogglePublished(recipe)} title="Changer le statut">
                       <StatusBadge published={recipe.is_published} />
                     </button>
                   </td>
-
-                  {/* Stats */}
                   <td className="px-5 py-4 text-center hidden lg:table-cell">
                     <div className="flex items-center justify-center gap-3 text-xs text-black/40 font-medium">
                       <span>👁️ {recipe.views_count || 0}</span>
@@ -688,8 +675,6 @@ export default function AdminRecettes() {
                       <span>📋 {recipe.steps_count || 0}</span>
                     </div>
                   </td>
-
-                  {/* Actions */}
                   <td className="px-5 py-4">
                     <div className="flex items-center justify-center gap-2">
                       <a href={`/recettes/${recipe.slug}`} target="_blank" rel="noreferrer"

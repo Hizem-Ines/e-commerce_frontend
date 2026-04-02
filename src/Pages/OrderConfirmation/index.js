@@ -2,7 +2,6 @@ import { useLocation, useParams, Link } from 'react-router-dom';
 import { FiPackage, FiMapPin, FiCreditCard, FiHome } from 'react-icons/fi';
 
 const OrderConfirmation = () => {
-    const { orderId } = useParams();
     const { state } = useLocation();
     const order = state?.order;
 

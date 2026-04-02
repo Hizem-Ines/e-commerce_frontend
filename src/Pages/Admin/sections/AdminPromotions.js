@@ -4,7 +4,6 @@ import {
   FiPlus, FiSearch, FiEdit, FiTrash2,
   FiTag, FiCheckCircle, FiClock, FiBarChart2
 } from "react-icons/fi";
-import { MdVerified } from "react-icons/md";
 
 // ─── CONFIG ───────────────────────────────────────────────
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
