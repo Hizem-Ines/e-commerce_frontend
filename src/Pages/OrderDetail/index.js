@@ -202,7 +202,9 @@ const OrderDetail = () => {
                                                 : <span className="text-2xl">🌿</span>}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="font-bold text-sm text-[#2c2c2c] mb-0.5">{item.product_name}</p>
+                                            <p className="font-bold text-sm text-[#2c2c2c] mb-0.5">
+                                                {item.product_name_fr || item.product_name}
+                                            </p>
                                             {details.length > 0 && (
                                                 <p className="text-xs text-black/40">
                                                     {details.map(d => `${d.attribute_type}: ${d.attribute_value}`).join(' · ')}

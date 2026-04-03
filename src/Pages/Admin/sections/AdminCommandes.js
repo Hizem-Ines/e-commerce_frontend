@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAllOrders, updateOrderStatus } from '../../../services/adminService';
-import { FiEye, FiSearch } from 'react-icons/fi';
+import { FiEye } from 'react-icons/fi';
 import formatPrice from '../../../utils/formatPrice';
 
 const STATUS_LABELS = {
@@ -23,6 +23,8 @@ const AdminCommandes = () => {
     const [successMsg, setSuccessMsg] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
 
+
+useEffect(() => {
     const fetchCommandes = async () => {
         setLoading(true);
         try {
@@ -35,8 +37,8 @@ const AdminCommandes = () => {
             setLoading(false);
         }
     };
-
-    useEffect(() => { fetchCommandes(); }, [page, filterStatus]);
+    fetchCommandes();
+}, [page, filterStatus]);
 
     const handleStatusChange = async (orderId, newStatus) => {
         try {

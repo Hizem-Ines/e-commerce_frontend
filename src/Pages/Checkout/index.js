@@ -3,7 +3,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/authContext';
 import { createOrder, createGuestOrder } from '../../services/orderService';
-import { FiUser, FiMail, FiPhone, FiMapPin, FiCreditCard, FiTruck, FiChevronRight } from 'react-icons/fi';
+import { FiUser, FiMail, FiPhone, FiMapPin, FiCreditCard, FiTruck, FiChevronRight, FiLock } from 'react-icons/fi';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
 const VILLES = [
     'Tunis', 'Sfax', 'Sousse', 'Bizerte', 'Gabès',
@@ -11,10 +15,43 @@ const VILLES = [
     'Tozeur', 'Kasserine', 'Gafsa', 'Médenine', 'Beja'
 ];
 
-const Checkout = () => {
+const CARD_ELEMENT_OPTIONS = {
+    style: {
+        base: {
+            fontSize: '15px',
+            color: '#2c2c2c',
+            fontFamily: 'system-ui, sans-serif',
+            '::placeholder': { color: '#9ca3af' },
+        },
+        invalid: { color: '#dc2626' },
+    },
+};
+
+// ── Logos SVG Visa & Mastercard ──────────────────────────────────────────────
+const VisaLogo = () => (
+    <svg height="22" viewBox="0 0 780 500" xmlns="http://www.w3.org/2000/svg">
+        <rect width="780" height="500" rx="40" fill="#1A1F71" />
+        <path d="M293.2 348.7l33.4-195.8h53.4l-33.4 195.8h-53.4zm246.7-191.3c-10.6-3.9-27.2-8.1-47.9-8.1-52.8 0-90 26.5-90.3 64.4-.3 28 26.7 43.6 47.1 52.9 20.9 9.5 27.9 15.6 27.8 24.1-.1 13-16.7 18.9-32.1 18.9-21.5 0-32.9-2.9-50.6-10.1l-6.9-3.1-7.5 43.7c12.5 5.4 35.5 10.1 59.4 10.4 56 0 92.4-26.1 92.8-66.6.2-22.2-14.1-39.1-45-53-18.8-9-30.3-15-30.2-24.2 0-8.1 9.7-16.8 30.8-16.8 17.6-.3 30.3 3.5 40.2 7.4l4.8 2.3 7.6-44.2zm137 1.3h-41.3c-12.8 0-22.3 3.5-27.9 16.3l-79.2 178.8h56l11.2-29.2 68.3.1c1.6 6.8 6.5 29.1 6.5 29.1h49.5l-43.1-195.1zm-77.9 128.3l21.3-54.7 3.5-9.5c2.1 5.2 5.8 14.7 10 29.8l6.9 34.4h-41.7zm-330.1-128.3l-52.4 133.5-5.6-27c-9.8-31.2-40.2-65.1-74.3-82l47.9 171.2 56.5-.1 84.1-195.6h-56.2z" fill="#fff" />
+        <path d="M146 152.8H60.3l-.8 4.5c66.8 16.2 111 55.3 129.4 102.3l-18.7-89.7c-3.2-12.3-12.5-15.9-24.2-17.1z" fill="#F2AE14" />
+    </svg>
+);
+
+const MastercardLogo = () => (
+    <svg height="22" viewBox="0 0 152.4 108" xmlns="http://www.w3.org/2000/svg">
+        <rect width="152.4" height="108" rx="8" fill="#252525" />
+        <circle cx="60.2" cy="54" r="30" fill="#EB001B" />
+        <circle cx="92.2" cy="54" r="30" fill="#F79E1B" />
+        <path d="M76.2 32.3c7 5.3 11.5 13.6 11.5 22.7s-4.5 17.4-11.5 22.7c-7-5.3-11.5-13.6-11.5-22.7s4.5-17.4 11.5-22.7z" fill="#FF5F00" />
+    </svg>
+);
+
+// ── Composant interne qui utilise useStripe / useElements ────────────────────
+const CheckoutForm = () => {
     const { panier, totalPrix, viderPanier } = useCart();
     const { user } = useAuth();
     const navigate = useNavigate();
+    const stripe = useStripe();
+    const elements = useElements();
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -59,12 +96,13 @@ const Checkout = () => {
 
         const orderData = {
             items,
-            payment_method:   paymentMethod,
-            shipping_address: formData.shipping_address,
-            shipping_city:    formData.shipping_city,
-            shipping_country: 'Tunisie',
-            notes:            formData.notes      || undefined,
-            promo_code:       formData.promo_code || undefined,
+            payment_method:     paymentMethod,
+            shipping_full_name: user ? user.name : formData.name,
+            shipping_address:   formData.shipping_address,
+            shipping_city:      formData.shipping_city,
+            shipping_country:   'TN',
+            notes:              formData.notes      || undefined,
+            promo_code:         formData.promo_code || undefined,
         };
 
         try {
@@ -80,10 +118,40 @@ const Checkout = () => {
                 });
             }
 
-            const order = res.data.order;
+            const { order, payment } = res.data;
+
+            // ── Paiement Stripe ──────────────────────────────
+            if (payment.method === 'stripe') {
+                if (!stripe || !elements) {
+                    setError('Stripe n\'est pas encore chargé. Veuillez réessayer.');
+                    setLoading(false);
+                    return;
+                }
+
+                const { error: stripeError } = await stripe.confirmPayment({
+                    elements,
+                    clientSecret: payment.client_secret,
+                    confirmParams: { return_url: window.location.origin },
+                    redirect: 'if_required',
+                });
+
+                if (stripeError) {
+                    setError(stripeError.message);
+                    setLoading(false);
+                    return;
+                }
+
+                viderPanier();
+                navigate(`/commande-confirmee/${order.id}`, {
+                    state: { order, payment: { method: 'stripe' } }
+                });
+                return;
+            }
+
+            // ── Paiement COD ─────────────────────────────────
             viderPanier();
             navigate(`/commande-confirmee/${order.id}`, {
-                state: { order, payment: res.data.payment }
+                state: { order, payment }
             });
 
         } catch (err) {
@@ -131,9 +199,7 @@ const Checkout = () => {
                                         </Link>
                                         {' '}— Sinon, un compte sera créé avec ces informations.
                                     </p>
-
                                     <div className="space-y-4">
-                                        {/* NOM */}
                                         <div>
                                             <label className="block text-xs font-bold text-gray-600 mb-1.5">Nom complet *</label>
                                             <div className="relative">
@@ -147,9 +213,7 @@ const Checkout = () => {
                                                     onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
                                             </div>
                                         </div>
-
                                         <div className="grid grid-cols-2 gap-4">
-                                            {/* EMAIL */}
                                             <div>
                                                 <label className="block text-xs font-bold text-gray-600 mb-1.5">Email *</label>
                                                 <div className="relative">
@@ -162,12 +226,8 @@ const Checkout = () => {
                                                         onFocus={e => e.target.style.borderColor = '#166534'}
                                                         onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
                                                 </div>
-                                                <p className="text-xs text-black/30 mt-1">
-                                                    ✉️ Un email de confirmation vous sera envoyé
-                                                </p>
+                                                <p className="text-xs text-black/30 mt-1">✉️ Email de confirmation</p>
                                             </div>
-
-                                            {/* TÉLÉPHONE */}
                                             <div>
                                                 <label className="block text-xs font-bold text-gray-600 mb-1.5">Téléphone *</label>
                                                 <div className="relative">
@@ -257,11 +317,11 @@ const Checkout = () => {
                                             )}
                                         </div>
                                         <FiTruck size={20} style={{ color: '#166534' }} />
-                                        <div>
+                                        <div className="flex-1">
                                             <p className="font-bold text-sm text-[#2c2c2c]">Paiement à la livraison</p>
                                             <p className="text-xs text-black/40">Payez en espèces à la réception</p>
                                         </div>
-                                        <span className="ml-auto text-xs font-bold px-3 py-1 rounded-full"
+                                        <span className="text-xs font-bold px-3 py-1 rounded-full"
                                             style={{ background: '#dcfce7', color: '#166534' }}>Gratuit</span>
                                     </label>
 
@@ -282,15 +342,35 @@ const Checkout = () => {
                                             )}
                                         </div>
                                         <FiCreditCard size={20} style={{ color: '#6366f1' }} />
-                                        <div>
+                                        <div className="flex-1">
                                             <p className="font-bold text-sm text-[#2c2c2c]">Carte bancaire</p>
-                                            <p className="text-xs text-black/40">Visa, Mastercard — paiement sécurisé via Stripe</p>
+                                            <p className="text-xs text-black/40">Visa, Mastercard — paiement sécurisé</p>
                                         </div>
-                                        <div className="ml-auto flex gap-1">
-                                            <span className="text-xs font-bold px-2 py-1 rounded bg-blue-100 text-blue-700">VISA</span>
-                                            <span className="text-xs font-bold px-2 py-1 rounded bg-red-100 text-red-700">MC</span>
+                                        <div className="flex gap-2 items-center">
+                                            <VisaLogo />
+                                            <MastercardLogo />
                                         </div>
                                     </label>
+
+                                    {/* CARD ELEMENT — affiché directement sous le choix Stripe */}
+                                    {paymentMethod === 'stripe' && (
+                                        <div className="rounded-xl p-4 transition-all duration-200"
+                                            style={{ background: '#f8fafc', border: '2px solid #e5e7eb' }}>
+                                            <p className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wide">
+                                                Informations de carte
+                                            </p>
+                                            <div className="rounded-lg p-3 bg-white transition-all"
+                                                style={{ border: '1.5px solid #e5e7eb' }}>
+                                                <CardElement options={CARD_ELEMENT_OPTIONS} />
+                                            </div>
+                                            <div className="flex items-center gap-2 mt-3">
+                                                <FiLock size={11} style={{ color: '#6b7280' }} />
+                                                <p className="text-xs text-black/40">
+                                                    Vos données sont chiffrées et sécurisées par Stripe. GOFFA ne stocke jamais vos informations bancaires.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -355,25 +435,37 @@ const Checkout = () => {
                                     </div>
                                 </div>
 
-                                <button type="submit" disabled={loading}
+                                <button type="submit" disabled={loading || (paymentMethod === 'stripe' && !stripe)}
                                     className="w-full text-white font-bold py-4 rounded-xl transition-all duration-300 text-base disabled:opacity-50 hover:scale-105"
                                     style={{
                                         background: 'linear-gradient(135deg, #166534, #15803d)',
                                         boxShadow: '0 4px 20px rgba(22,101,52,0.4)'
                                     }}>
-                                    {loading ? '⏳ Traitement...'
-                                        : paymentMethod === 'stripe' ? '💳 Payer maintenant →'
-                                        : '✅ Confirmer la commande →'}
+                                    {loading
+                                        ? '⏳ Traitement...'
+                                        : paymentMethod === 'stripe'
+                                            ? '💳 Payer maintenant →'
+                                            : '✅ Confirmer la commande →'}
                                 </button>
 
-                                <p className="text-xs text-center text-black/30 mt-3">🔒 Paiement 100% sécurisé</p>
+                                <p className="text-xs text-center text-black/30 mt-3 flex items-center justify-center gap-1">
+                                    <FiLock size={11} /> Paiement 100% sécurisé
+                                </p>
                             </div>
                         </div>
+
                     </div>
                 </form>
             </div>
         </div>
     );
 };
+
+// ── Wrapper qui fournit le contexte Stripe dès le départ ─────────────────────
+const Checkout = () => (
+    <Elements stripe={stripePromise}>
+        <CheckoutForm />
+    </Elements>
+);
 
 export default Checkout;

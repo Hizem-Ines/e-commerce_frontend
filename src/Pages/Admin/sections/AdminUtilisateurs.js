@@ -10,19 +10,22 @@ const AdminUtilisateurs = () => {
     const [successMsg, setSuccessMsg] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
 
-    const fetchUsers = async () => {
-        setLoading(true);
-        try {
-            const res = await api.get('/auth/users', { params: { search: search || undefined } });
-            setUsers(res.data.users);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
+   
+const fetchUsers = async () => {
+    setLoading(true);
+    try {
+        const res = await api.get('/auth/users', { params: { search: search || undefined } });
+        setUsers(res.data.users);
+    } catch (err) {
+        console.error(err);
+    } finally {
+        setLoading(false);
+    }
+};
 
-    useEffect(() => { fetchUsers(); }, []);
+useEffect(() => {
+    fetchUsers();
+}, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleSearch = (e) => {
         e.preventDefault();

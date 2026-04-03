@@ -110,7 +110,14 @@ const Offres = () => {
                         )}
                     </div>
                     <button
-                        onClick={() => ajouterAuPanier(produit)}
+                        onClick={() => ajouterAuPanier({
+                            variant_id:   produit.variant_id,  
+                            product_name: produit.name_fr,
+                            price:        produit.price,
+                            image:        produit.images?.[0]?.url || null,
+                            attributes:   [],
+                            stock:        99,
+                        })}
                         className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300"
                     >
                         Ajouter
