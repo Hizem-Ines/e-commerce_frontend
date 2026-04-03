@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../../../services/api';
-import { FiSearch, FiTrash2 } from 'react-icons/fi';
+import { FiSearch, FiTrash2, FiEdit2, FiX, FiCheck } from 'react-icons/fi';
 
 const AdminUtilisateurs = () => {
     const [users, setUsers] = useState([]);
@@ -10,22 +10,26 @@ const AdminUtilisateurs = () => {
     const [successMsg, setSuccessMsg] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
 
-   
-const fetchUsers = async () => {
-    setLoading(true);
-    try {
-        const res = await api.get('/auth/users', { params: { search: search || undefined } });
-        setUsers(res.data.users);
-    } catch (err) {
-        console.error(err);
-    } finally {
-        setLoading(false);
-    }
-};
+    // ── Edit modal state ─────────────────────────────────
+    const [editUser, setEditUser] = useState(null); // user object being edited
+    const [editForm, setEditForm] = useState({});
+    const [editLoading, setEditLoading] = useState(false);
 
-useEffect(() => {
-    fetchUsers();
-}, []); // eslint-disable-line react-hooks/exhaustive-deps
+    const fetchUsers = async () => {
+        setLoading(true);
+        try {
+            const res = await api.get('/auth/users', { params: { search: search || undefined } });
+            setUsers(res.data.users);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchUsers();
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -55,6 +59,52 @@ useEffect(() => {
         } catch (err) {
             setErrorMsg(err.response?.data?.message || 'Erreur lors de la mise à jour.');
             setTimeout(() => setErrorMsg(''), 3000);
+        }
+    };
+
+    // ── Open edit modal ──────────────────────────────────
+    const openEdit = (user) => {
+        setEditUser(user);
+        setEditForm({
+            name:        user.name        || '',
+            email:       user.email       || '',
+            phone:       user.phone       || '',
+            address:     user.address     || '',
+            city:        user.city        || '',
+            role:        user.role        || 'user',
+            is_verified: user.is_verified ?? true,
+            is_active:   user.is_active   ?? true,
+            newPassword: '',
+        });
+    };
+
+    const closeEdit = () => {
+        setEditUser(null);
+        setEditForm({});
+    };
+
+    const handleEditChange = (field, value) => {
+        setEditForm(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleEditSubmit = async () => {
+        setEditLoading(true);
+        try {
+            const payload = { ...editForm };
+            // Don't send empty password
+            if (!payload.newPassword) delete payload.newPassword;
+
+            const res = await api.put(`/auth/users/${editUser.id}`, payload);
+            const updated = res.data.user;
+            setUsers(prev => prev.map(u => u.id === updated.id ? { ...u, ...updated } : u));
+            setSuccessMsg('Utilisateur mis à jour avec succès.');
+            setTimeout(() => setSuccessMsg(''), 3000);
+            closeEdit();
+        } catch (err) {
+            setErrorMsg(err.response?.data?.message || 'Erreur lors de la mise à jour.');
+            setTimeout(() => setErrorMsg(''), 3000);
+        } finally {
+            setEditLoading(false);
         }
     };
 
@@ -152,12 +202,22 @@ useEffect(() => {
                                         {new Date(user.created_at).toLocaleDateString('fr-FR')}
                                     </td>
                                     <td className="px-5 py-4 text-center">
-                                        <button
-                                            onClick={() => setDeleteConfirm(user.id)}
-                                            className="p-2 hover:bg-red-50 text-red-500 rounded-xl transition"
-                                        >
-                                            <FiTrash2 size={15} />
-                                        </button>
+                                        <div className="flex items-center justify-center gap-1">
+                                            <button
+                                                onClick={() => openEdit(user)}
+                                                className="p-2 hover:bg-emerald-50 text-emerald-600 rounded-xl transition"
+                                                title="Modifier"
+                                            >
+                                                <FiEdit2 size={15} />
+                                            </button>
+                                            <button
+                                                onClick={() => setDeleteConfirm(user.id)}
+                                                className="p-2 hover:bg-red-50 text-red-500 rounded-xl transition"
+                                                title="Supprimer"
+                                            >
+                                                <FiTrash2 size={15} />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -166,7 +226,7 @@ useEffect(() => {
                 )}
             </div>
 
-            {/* MODAL SUPPRESSION */}
+            {/* ── MODAL SUPPRESSION ─────────────────────────── */}
             {deleteConfirm && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-2xl text-center">
@@ -185,6 +245,162 @@ useEffect(() => {
                                 className="flex-1 bg-red-500 hover:bg-red-400 text-white font-bold py-3 rounded-xl transition"
                             >
                                 Supprimer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── MODAL ÉDITION ─────────────────────────────── */}
+            {editUser && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-[#f9f5f0]">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-black overflow-hidden shrink-0">
+                                    {editUser.avatar
+                                        ? <img src={editUser.avatar} alt={editUser.name} className="w-full h-full object-cover" />
+                                        : editUser.name?.[0]?.toUpperCase()
+                                    }
+                                </div>
+                                <div>
+                                    <p className="font-bold text-[#2c2c2c] text-sm">{editUser.name}</p>
+                                    <p className="text-xs text-black/40">{editUser.email}</p>
+                                </div>
+                            </div>
+                            <button onClick={closeEdit} className="p-2 hover:bg-gray-100 rounded-xl transition text-black/40">
+                                <FiX size={18} />
+                            </button>
+                        </div>
+
+                        {/* Body */}
+                        <div className="px-6 py-5 space-y-4 max-h-[65vh] overflow-y-auto">
+                            {/* Row : Nom + Email */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-xs font-bold text-black/50 mb-1">Nom</label>
+                                    <input
+                                        type="text"
+                                        value={editForm.name}
+                                        onChange={e => handleEditChange('name', e.target.value)}
+                                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none transition"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-black/50 mb-1">Email</label>
+                                    <input
+                                        type="email"
+                                        value={editForm.email}
+                                        onChange={e => handleEditChange('email', e.target.value)}
+                                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none transition"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Row : Téléphone + Ville */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-xs font-bold text-black/50 mb-1">Téléphone</label>
+                                    <input
+                                        type="text"
+                                        value={editForm.phone}
+                                        onChange={e => handleEditChange('phone', e.target.value)}
+                                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none transition"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-black/50 mb-1">Ville</label>
+                                    <input
+                                        type="text"
+                                        value={editForm.city}
+                                        onChange={e => handleEditChange('city', e.target.value)}
+                                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none transition"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Adresse */}
+                            <div>
+                                <label className="block text-xs font-bold text-black/50 mb-1">Adresse</label>
+                                <input
+                                    type="text"
+                                    value={editForm.address}
+                                    onChange={e => handleEditChange('address', e.target.value)}
+                                    className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none transition"
+                                />
+                            </div>
+
+                            {/* Row : Rôle + Statuts */}
+                            <div className="grid grid-cols-3 gap-3">
+                                <div>
+                                    <label className="block text-xs font-bold text-black/50 mb-1">Rôle</label>
+                                    <select
+                                        value={editForm.role}
+                                        onChange={e => handleEditChange('role', e.target.value)}
+                                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none transition bg-white"
+                                    >
+                                        <option value="user">Client</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-black/50 mb-1">Email vérifié</label>
+                                    <select
+                                        value={editForm.is_verified ? 'true' : 'false'}
+                                        onChange={e => handleEditChange('is_verified', e.target.value === 'true')}
+                                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none transition bg-white"
+                                    >
+                                        <option value="true">✅ Oui</option>
+                                        <option value="false">⏳ Non</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-black/50 mb-1">Compte actif</label>
+                                    <select
+                                        value={editForm.is_active ? 'true' : 'false'}
+                                        onChange={e => handleEditChange('is_active', e.target.value === 'true')}
+                                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none transition bg-white"
+                                    >
+                                        <option value="true">🟢 Actif</option>
+                                        <option value="false">🔴 Suspendu</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Nouveau mot de passe */}
+                            <div>
+                                <label className="block text-xs font-bold text-black/50 mb-1">
+                                    Nouveau mot de passe <span className="font-normal text-black/30">(laisser vide pour ne pas modifier)</span>
+                                </label>
+                                <input
+                                    type="password"
+                                    value={editForm.newPassword}
+                                    onChange={e => handleEditChange('newPassword', e.target.value)}
+                                    placeholder="••••••••"
+                                    className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none transition"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="flex gap-3 px-6 py-4 border-t border-gray-100 bg-[#fafafa]">
+                            <button
+                                onClick={closeEdit}
+                                className="flex-1 border-2 border-gray-200 text-black/60 font-bold py-3 rounded-xl hover:bg-gray-50 transition text-sm"
+                            >
+                                Annuler
+                            </button>
+                            <button
+                                onClick={handleEditSubmit}
+                                disabled={editLoading}
+                                className="flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition text-sm flex items-center justify-center gap-2"
+                            >
+                                {editLoading ? (
+                                    <span className="animate-spin">🌿</span>
+                                ) : (
+                                    <><FiCheck size={15} /> Enregistrer</>
+                                )}
                             </button>
                         </div>
                     </div>
