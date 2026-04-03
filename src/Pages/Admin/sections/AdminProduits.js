@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { getAllProducts, deleteProduct, createProduct, updateProduct, getAllCategories, getAllSuppliers } from '../../../services/adminService';
 import { FiEdit, FiTrash2, FiPlus, FiSearch, FiX, FiUpload, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import formatPrice from '../../../utils/formatPrice';
-import api from '../../../services/api'; // ← used for variant sub-routes
+import api from '../../../services/api';
 
 // ─── Blank form state ────────────────────────────────────────────────────────
 const BLANK_FORM = {
@@ -86,7 +86,6 @@ const VariantEditRow = ({ variant, productId, onUpdated, onDeleted }) => {
         }
     };
 
-    // Build a readable label from attributes
     const attrLabel = variant.attributes?.length
         ? variant.attributes.map(a => `${a.type_fr}: ${a.value_fr}`).join(' · ')
         : 'Variante sans attribut';
@@ -288,30 +287,28 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
         is_featured: product.is_featured ?? false,
     } : { ...BLANK_FORM });
 
-    // For create mode
     const [variants, setVariants] = useState(
         [{ ...BLANK_VARIANT, attributes: [{ type_fr: '', value_fr: '', type_ar: '', value_ar: '' }] }]
     );
 
-    // For edit mode — live list of existing variants
     const [editVariants, setEditVariants] = useState(product?.variants || []);
     const [showAddVariant, setShowAddVariant] = useState(false);
 
-    const [images, setImages]   = useState([]);
+    const [images, setImages]     = useState([]);
     const [previews, setPreviews] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError]     = useState('');
-    const [tab, setTab]         = useState('general');
-    const [showAr, setShowAr]   = useState(false);
+    const [loading, setLoading]   = useState(false);
+    const [error, setError]       = useState('');
+    const [tab, setTab]           = useState('general');
+    const [showAr, setShowAr]     = useState(false);
     const fileRef = useRef();
 
     const [formLoading, setFormLoading] = useState(isEdit);
 
-    // Fetch full product on mount — the paginated list omits description, usage, ingredients, etc.
+    // FIX 3c: fetch full product data with ?admin=true so inactive products load correctly
     useEffect(() => {
         if (!isEdit || !product.id) return;
         setFormLoading(true);
-        api.get(`/products/${product.id}`)
+        api.get(`/products/${product.id}?admin=true`)
             .then(res => {
                 const p = res.data.product;
                 if (!p) return;
@@ -346,14 +343,12 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
 
     const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-    // Image picker
     const handleImages = (e) => {
         const files = Array.from(e.target.files);
         setImages(files);
         setPreviews(files.map(f => URL.createObjectURL(f)));
     };
 
-    // Variant helpers (create mode)
     const setVariant = (vi, k, v) => setVariants(vs => vs.map((vt, i) => i === vi ? { ...vt, [k]: v } : vt));
     const setAttr    = (vi, ai, k, v) => setVariants(vs => vs.map((vt, i) => i !== vi ? vt : {
         ...vt, attributes: vt.attributes.map((a, j) => j === ai ? { ...a, [k]: v } : a),
@@ -483,7 +478,6 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                 {/* Body */}
                 <div className="overflow-y-auto flex-1 px-7 py-6">
 
-                    {/* Loading skeleton while fetching full product data */}
                     {formLoading ? (
                         <div className="flex flex-col items-center justify-center py-20 gap-3">
                             <div className="text-3xl animate-spin">🌿</div>
@@ -533,7 +527,6 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                 <textarea className={textareaCls} rows={2} value={form.ethical_info_fr} onChange={e => set('ethical_info_fr', e.target.value)} placeholder="Engagements éthiques, labels..." />
                             </Field>
 
-                            {/* Arabic toggle */}
                             <button
                                 onClick={() => setShowAr(a => !a)}
                                 className="flex items-center gap-2 text-xs font-bold text-black/40 hover:text-emerald-600 transition"
@@ -582,7 +575,6 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                     {/* ── VARIANTES ────────────────────────────────── */}
                     {!formLoading && tab === 'variants' && (
                         <div className="space-y-4">
-                            {/* ─ EDIT MODE: manage existing variants ─ */}
                             {isEdit ? (
                                 <>
                                     {editVariants.length === 0 ? (
@@ -615,7 +607,6 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                     )}
                                 </>
                             ) : (
-                                /* ─ CREATE MODE ─ */
                                 <>
                                     {variants.map((v, vi) => (
                                         <div key={vi} className="bg-[#f9f5f0] rounded-2xl p-5 space-y-4">
@@ -789,6 +780,8 @@ const AdminProduits = () => {
     const [produits, setProduits]           = useState([]);
     const [loading, setLoading]             = useState(true);
     const [search, setSearch]               = useState('');
+    // FIX 1a: separate committed search from live input value
+    const [committedSearch, setCommittedSearch] = useState('');
     const [page, setPage]                   = useState(1);
     const [totalPages, setTotalPages]       = useState(1);
     const [deleteConfirm, setDeleteConfirm] = useState(null);
@@ -804,10 +797,11 @@ const AdminProduits = () => {
         getAllSuppliers?.()?.then(r => setSuppliers(r.data.suppliers || [])).catch(() => {});
     }, []);
 
+    // FIX 1b: depend on committedSearch, not search — so typing doesn't trigger a fetch
     const fetchProduits = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await getAllProducts({ search: search || undefined, page });
+            const res = await getAllProducts({ search: committedSearch || undefined, page });
             setProduits(res.data.products);
             setTotalPages(res.data.totalPages);
         } catch (err) {
@@ -815,11 +809,18 @@ const AdminProduits = () => {
         } finally {
             setLoading(false);
         }
-    }, [page, search]); // re-created only when page or search changes
+    }, [page, committedSearch]);
 
     useEffect(() => { fetchProduits(); }, [fetchProduits]);
 
-    const handleSearch = (e) => { e.preventDefault(); setPage(1); fetchProduits(); };
+    // FIX 1c: commit the search value on submit instead of calling fetchProduits() directly.
+    // Setting committedSearch will update the useCallback dep, which recreates fetchProduits,
+    // which triggers the useEffect — one clean fetch, correct page, no race condition.
+    const handleSearch = (e) => {
+        e.preventDefault();
+        setPage(1);
+        setCommittedSearch(search);
+    };
 
     const handleDelete = async (id) => {
         try {
