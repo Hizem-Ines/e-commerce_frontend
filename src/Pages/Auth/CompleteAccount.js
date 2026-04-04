@@ -1,161 +1,215 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import { useAuth } from '../../context/authContext';
 import api from '../../services/api';
+import { FiLock, FiEye, FiEyeOff, FiCheck } from 'react-icons/fi';
 
 const CompleteAccount = () => {
-    const { token } = useParams();
-    const navigate = useNavigate();
-    const { loginSuccess } = useAuth();
+    const { token }    = useParams();
+    const navigate     = useNavigate();
+    const { setUser }  = useAuth(); // pour connecter l'utilisateur après
 
-    const [showPassword, setShowPassword] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
-    const [error, setError] = useState('');
-    const [formData, setFormData] = useState({
-        password: '',
-        confirmPassword: '',
-    });
+    const [password,        setPassword]        = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPassword,    setShowPassword]    = useState(false);
+    const [loading,         setLoading]         = useState(false);
+    const [error,           setError]           = useState('');
+    const [success,         setSuccess]         = useState(false);
+
+    // ── Validation mot de passe en temps réel ─────────────
+    const rules = [
+        { label: 'Au moins 6 caractères',         ok: password.length >= 6 },
+        { label: 'Les deux mots de passe identiques', ok: password === confirmPassword && confirmPassword.length > 0 },
+    ];
+    const isValid = rules.every(r => r.ok);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (formData.password !== formData.confirmPassword) {
-            setError('Les mots de passe ne correspondent pas !');
-            return;
-        }
+        if (!isValid) return;
+
         setLoading(true);
         setError('');
+
         try {
-            await api.post(`/auth/complete-account/${token}`, {
-                password:        formData.password,
-                confirmPassword: formData.confirmPassword,
+            const res = await api.post(`/auth/complete-account/${token}`, {
+                password,
+                confirmPassword,
             });
-            await loginSuccess(); // ✅ connecte automatiquement
+
+            // Le backend appelle sendToken → le cookie JWT est posé automatiquement
+            // On met à jour le contexte auth si possible
+            if (res.data?.user && setUser) {
+                setUser(res.data.user);
+            }
+
             setSuccess(true);
-            setTimeout(() => navigate('/'), 3000);
+
+            // Redirection vers home après 2 secondes
+            setTimeout(() => navigate('/Home'), 2000);
+
         } catch (err) {
-            setError(err.response?.data?.message || 'Lien invalide ou expiré');
+            setError(err.response?.data?.message || 'Lien invalide ou expiré. Veuillez repasser une commande.');
         } finally {
             setLoading(false);
         }
     };
 
-    return (
-        <div className="min-h-screen flex items-center justify-center p-6"
-            style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #fef2f2 50%, #f0fdf4 100%)' }}>
-            <div className="bg-white rounded-3xl p-12 max-w-md w-full text-center"
-                style={{ boxShadow: '0 25px 60px rgba(0,0,0,0.12)' }}>
+    const inputStyle = (focused) => ({
+        border: `2px solid ${focused ? '#166534' : '#e5e7eb'}`,
+    });
 
-                {/* LOGO */}
+    // ── Succès ────────────────────────────────────────────
+    if (success) {
+        return (
+            <div className="min-h-screen bg-[#fdf6ec] flex items-center justify-center p-6">
+                <div className="bg-white rounded-3xl shadow-2xl p-10 max-w-md w-full text-center">
+                    <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
+                        style={{ background: '#dcfce7' }}>
+                        <span className="text-4xl">🎉</span>
+                    </div>
+                    <h2 className="text-2xl font-bold font-serif text-[#2c2c2c] mb-2">
+                        Compte activé !
+                    </h2>
+                    <p className="text-black/50 text-sm mb-2">
+                        Votre mot de passe a été défini. Vous êtes maintenant connecté.
+                    </p>
+                    <p className="text-xs text-black/30">Redirection vers vos page d'accueil...</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-[#fdf6ec] flex items-center justify-center p-6">
+            <div className="bg-white rounded-3xl shadow-2xl p-10 max-w-md w-full">
+
+                {/* Logo */}
                 <Link to="/" className="flex items-center justify-center gap-3 mb-8 no-underline">
                     <div className="relative p-3 rounded-2xl shadow-lg"
                         style={{ background: 'linear-gradient(135deg, #166534, #15803d)' }}>
                         <span className="text-2xl">🧺</span>
                         <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white"
-                            style={{ background: '#e63946' }}></span>
+                            style={{ background: '#e63946' }} />
                     </div>
                     <div>
                         <h1 className="text-2xl font-black tracking-widest font-serif" style={{ color: '#166534' }}>
                             GOF<span style={{ color: '#e63946' }}>FA</span>
                         </h1>
-                        <p className="text-xs font-semibold tracking-wider" style={{ color: '#4ade80' }}>artisanat tunisien</p>
+                        <p className="text-xs font-semibold tracking-wider" style={{ color: '#4ade80' }}>
+                            artisanat tunisien
+                        </p>
                     </div>
                 </Link>
 
-                {!success ? (
-                    <>
-                        <div className="text-5xl mb-4">🔐</div>
-                        <h2 className="text-2xl font-black font-serif text-gray-900 mb-2">
-                            Créez votre mot de passe
-                        </h2>
-                        <p className="text-gray-500 text-sm mb-8">
-                            Votre compte a été créé lors de votre commande. Définissez un mot de passe pour accéder à votre espace.
-                        </p>
+                {/* Titre */}
+                <div className="text-center mb-8">
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                        style={{ background: '#dcfce7' }}>
+                        <FiLock size={24} style={{ color: '#166534' }} />
+                    </div>
+                    <h2 className="text-2xl font-bold font-serif text-[#2c2c2c] mb-2">
+                        Créez votre mot de passe
+                    </h2>
+                    <p className="text-sm text-black/50">
+                        Dernière étape pour accéder à votre compte et suivre vos commandes.
+                    </p>
+                </div>
 
-                        {error && (
-                            <div className="mb-4 px-4 py-3 rounded-xl text-sm font-semibold text-left"
-                                style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626' }}>
-                                ❌ {error}
-                            </div>
-                        )}
-
-                        <form onSubmit={handleSubmit} className="space-y-4 text-left">
-                            <div>
-                                <label className="block text-xs font-bold text-gray-600 mb-1.5">
-                                    Nouveau mot de passe
-                                </label>
-                                <div className="relative">
-                                    <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#e63946' }} />
-                                    <input
-                                        type={showPassword ? 'text' : 'password'}
-                                        value={formData.password}
-                                        onChange={e => setFormData({ ...formData, password: e.target.value })}
-                                        placeholder="••••••••"
-                                        className="w-full pl-10 pr-10 py-3 rounded-xl text-sm transition focus:outline-none"
-                                        style={{ border: '2px solid #e5e7eb' }}
-                                        onFocus={e => e.target.style.borderColor = '#166534'}
-                                        onBlur={e => e.target.style.borderColor = '#e5e7eb'}
-                                        required minLength={6}
-                                    />
-                                    <button type="button" onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                        {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-xs font-bold text-gray-600 mb-1.5">
-                                    Confirmer le mot de passe
-                                </label>
-                                <div className="relative">
-                                    <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#e63946' }} />
-                                    <input
-                                        type={showPassword ? 'text' : 'password'}
-                                        value={formData.confirmPassword}
-                                        onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                        placeholder="••••••••"
-                                        className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
-                                        style={{ border: '2px solid #e5e7eb' }}
-                                        onFocus={e => e.target.style.borderColor = '#166534'}
-                                        onBlur={e => e.target.style.borderColor = '#e5e7eb'}
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full text-white py-4 rounded-xl font-bold text-base transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
-                                style={{
-                                    background: 'linear-gradient(135deg, #166534, #15803d)',
-                                    boxShadow: '0 4px 20px rgba(22, 101, 52, 0.4)'
-                                }}>
-                                {loading ? 'Création en cours...' : 'Créer mon mot de passe →'}
-                            </button>
-                        </form>
-                    </>
-                ) : (
-                    <>
-                        <div className="text-5xl mb-4">✅</div>
-                        <h2 className="text-2xl font-black font-serif text-gray-900 mb-2">
-                            Compte activé !
-                        </h2>
-                        <p className="text-gray-500 text-sm mb-6">
-                            Votre mot de passe a été créé. Vous êtes maintenant connecté(e) !
-                        </p>
-                        <div className="w-full bg-gray-100 rounded-full h-2 mb-6">
-                            <div className="h-2 rounded-full animate-pulse" style={{ width: '100%', background: '#166534' }}></div>
-                        </div>
-                        <Link to="/"
-                            className="inline-block text-white font-bold px-8 py-3 rounded-xl no-underline transition hover:scale-105"
-                            style={{ background: 'linear-gradient(135deg, #166534, #15803d)' }}>
-                            Aller à l'accueil →
-                        </Link>
-                    </>
+                {/* Erreur */}
+                {error && (
+                    <div className="mb-5 px-4 py-3 rounded-xl text-sm font-semibold"
+                        style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626' }}>
+                        ❌ {error}
+                    </div>
                 )}
+
+                <form onSubmit={handleSubmit} className="space-y-5">
+
+                    {/* Mot de passe */}
+                    <div>
+                        <label className="block text-xs font-bold text-gray-600 mb-1.5">
+                            Nouveau mot de passe *
+                        </label>
+                        <div className="relative">
+                            <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <input
+                                type={showPassword ? 'text' : 'password'}
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
+                                required
+                                placeholder="Minimum 6 caractères"
+                                className="w-full pl-10 pr-12 py-3 rounded-xl text-sm focus:outline-none transition"
+                                style={inputStyle(false)}
+                                onFocus={e  => (e.target.style.borderColor = '#166534')}
+                                onBlur={e   => (e.target.style.borderColor = '#e5e7eb')}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(v => !v)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                                {showPassword ? <FiEyeOff size={17} /> : <FiEye size={17} />}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Confirmer */}
+                    <div>
+                        <label className="block text-xs font-bold text-gray-600 mb-1.5">
+                            Confirmer le mot de passe *
+                        </label>
+                        <div className="relative">
+                            <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <input
+                                type={showPassword ? 'text' : 'password'}
+                                value={confirmPassword}
+                                onChange={e => setConfirmPassword(e.target.value)}
+                                required
+                                placeholder="Répétez votre mot de passe"
+                                className="w-full pl-10 pr-4 py-3 rounded-xl text-sm focus:outline-none transition"
+                                style={inputStyle(false)}
+                                onFocus={e  => (e.target.style.borderColor = '#166534')}
+                                onBlur={e   => (e.target.style.borderColor = '#e5e7eb')}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Règles de validation */}
+                    {password.length > 0 && (
+                        <div className="rounded-xl p-3 space-y-1.5"
+                            style={{ background: '#f9fafb', border: '1px solid #f3f4f6' }}>
+                            {rules.map((rule, i) => (
+                                <div key={i} className="flex items-center gap-2 text-xs transition-all">
+                                    <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 transition-all"
+                                        style={{
+                                            background: rule.ok ? '#dcfce7' : '#f3f4f6',
+                                            border: `1.5px solid ${rule.ok ? '#86efac' : '#e5e7eb'}`,
+                                        }}>
+                                        {rule.ok && <FiCheck size={9} style={{ color: '#166534' }} />}
+                                    </div>
+                                    <span style={{ color: rule.ok ? '#166534' : '#9ca3af' }}>
+                                        {rule.label}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Bouton */}
+                    <button
+                        type="submit"
+                        disabled={loading || !isValid}
+                        className="w-full text-white font-bold py-4 rounded-xl transition-all duration-300 text-base disabled:opacity-50 hover:scale-[1.02] mt-2"
+                        style={{
+                            background: 'linear-gradient(135deg, #166534, #15803d)',
+                            boxShadow:  '0 4px 20px rgba(22,101,52,0.4)',
+                        }}>
+                        {loading ? '⏳ Activation...' : '🔐 Activer mon compte →'}
+                    </button>
+                </form>
+
+                <p className="text-xs text-center text-black/30 mt-6">
+                    Ce lien est valable 7 jours après votre commande.
+                </p>
             </div>
         </div>
     );
