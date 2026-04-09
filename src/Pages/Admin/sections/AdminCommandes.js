@@ -127,7 +127,7 @@ const AdminCommandes = () => {
                 <button
                     onClick={() => { setFilterStatus(''); setPage(1); }}
                     className={`px-4 py-2 rounded-xl text-sm font-bold transition ${
-                        filterStatus === '' ? 'bg-emerald-600 text-white' : 'bg-white text-black/50 hover:bg-emerald-50'
+                        filterStatus === '' ? 'bg-[#2d5a27] text-white' : 'bg-white text-black/50 hover:bg-emerald-50'
                     }`}
                 >
                     Toutes
@@ -137,7 +137,7 @@ const AdminCommandes = () => {
                         key={s}
                         onClick={() => { setFilterStatus(s); setPage(1); }}
                         className={`px-4 py-2 rounded-xl text-sm font-bold transition ${
-                            filterStatus === s ? 'bg-emerald-600 text-white' : 'bg-white text-black/50 hover:bg-emerald-50'
+                            filterStatus === s ? 'bg-[#2d5a27] text-white' : 'bg-white text-black/50 hover:bg-emerald-50'
                         }`}
                     >
                         {STATUS_LABELS[s]?.label}
@@ -187,7 +187,7 @@ const AdminCommandes = () => {
                                     <td className="px-5 py-4 text-black/50 text-xs">
                                         {new Date(commande.created_at).toLocaleDateString('fr-FR')}
                                     </td>
-                                    <td className="px-5 py-4 text-right font-bold text-emerald-600">
+                                    <td className="px-5 py-4 text-right font-bold text-[#2d5a27]">
                                         {formatPrice(parseFloat(commande.total_price))}
                                     </td>
                                     <td className="px-5 py-4 text-center">
@@ -226,7 +226,7 @@ const AdminCommandes = () => {
                             onClick={() => setPage(i + 1)}
                             className={`w-10 h-10 rounded-full font-bold text-sm transition ${
                                 page === i + 1
-                                    ? 'bg-emerald-600 text-white'
+                                    ? 'bg-[#2d5a27] text-white'
                                     : 'bg-white text-black/50 hover:bg-emerald-100'
                             }`}
                         >
@@ -336,7 +336,7 @@ const AdminCommandes = () => {
                                 </div>
                                 <div>
                                     <p className="text-xs text-black/40 uppercase font-semibold mb-1">Total</p>
-                                    <p className="font-bold text-emerald-600 text-lg">
+                                    <p className="font-bold text-[#2d5a27] text-lg">
                                         {formatPrice(parseFloat(selectedOrder.total_price))}
                                     </p>
                                 </div>
@@ -396,7 +396,7 @@ const AdminCommandes = () => {
                                                         )}
                                                     </div>
                                                     <div className="text-right flex-shrink-0">
-                                                        <p className="font-bold text-emerald-600 text-sm">
+                                                        <p className="font-bold text-[#2d5a27] text-sm">
                                                             {formatPrice(parseFloat(item.price_at_order))}
                                                         </p>
                                                         <p className="text-xs text-black/40">× {item.quantity}</p>

@@ -30,7 +30,7 @@ const Producers = () => {
 
                 {/* TITRE */}
                 <div className="text-center mb-12">
-                    <span className="bg-emerald-600 text-white text-xs font-bold px-4 py-1.5 rounded-full inline-block mb-3">
+                    <span className="bg-[#2d5a27] text-white text-xs font-bold px-4 py-1.5 rounded-full inline-block mb-3">
                         🌱 NOS PRODUCTEURS
                     </span>
                     <h1 className="text-4xl font-bold font-serif text-[#2c2c2c] mb-2">
@@ -86,7 +86,7 @@ const Producers = () => {
 
                                         {/* NOM */}
                                         {/* ✅ Fixed: uses name (suppliers table uses name not name_fr) */}
-                                        <h3 className="text-lg font-bold text-[#2c2c2c] mb-1 group-hover:text-emerald-600 transition-colors duration-200">
+                                        <h3 className="text-lg font-bold text-[#2c2c2c] mb-1 group-hover:text-[#2d5a27] transition-colors duration-200">
                                             {producteur.name}
                                         </h3>
 
@@ -120,7 +120,7 @@ const Producers = () => {
                                             <span className="text-xs text-black/40">
                                                 {producteur.product_count || 0} produits
                                             </span>
-                                            <span className="bg-emerald-600 group-hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300">
+                                            <span className="bg-[#2d5a27] group-hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300">
                                                 Voir le profil →
                                             </span>
                                         </div>

@@ -147,7 +147,7 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
               <label className="flex items-center gap-3 cursor-pointer">
                 <div className="relative">
                   <input type="checkbox" name="is_active" checked={form.is_active} onChange={handle} className="sr-only peer" />
-                  <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-emerald-600 transition-colors" />
+                  <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-[#2d5a27] transition-colors" />
                   <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5" />
                 </div>
                 <span className="text-sm font-bold text-gray-600">Active</span>
@@ -226,7 +226,7 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
             Annuler
           </button>
           <button onClick={submit} disabled={loading}
-            className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition disabled:opacity-50">
+            className="flex-1 bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition disabled:opacity-50">
             {loading ? "..." : mode === "edit" ? "Enregistrer" : "Créer la promotion"}
           </button>
         </div>
@@ -330,7 +330,7 @@ const AdminPromotions = () => {
         <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Promotions</h2>
         <button
           onClick={() => setModal({ type: "create" })}
-          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
+          className="flex items-center gap-2 bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
         >
           <FiPlus size={16} /> Nouvelle promotion
         </button>
@@ -340,7 +340,7 @@ const AdminPromotions = () => {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         {[
           { label: "Total",        value: stats.total,     icon: <FiTag size={18} />,      bg: "bg-blue-50 text-blue-600"    },
-          { label: "Actives",      value: stats.active,    icon: <FiCheckCircle size={18}/>,bg: "bg-emerald-50 text-emerald-600"},
+          { label: "Actives",      value: stats.active,    icon: <FiCheckCircle size={18}/>,bg: "bg-emerald-50 text-[#2d5a27]"},
           { label: "Expirées",     value: stats.expired,   icon: <FiClock size={18} />,    bg: "bg-red-50 text-red-500"      },
           { label: "Utilisations", value: stats.totalUses, icon: <FiBarChart2 size={18} />,bg: "bg-amber-50 text-amber-600"  },
         ].map((s) => (
@@ -380,7 +380,7 @@ const AdminPromotions = () => {
             onClick={() => setFilterStatus(f.value)}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
               filterStatus === f.value
-                ? "bg-emerald-600 text-white"
+                ? "bg-[#2d5a27] text-white"
                 : "bg-white text-black/50 border-2 border-gray-200 hover:border-emerald-400"
             }`}
           >
@@ -429,7 +429,7 @@ const AdminPromotions = () => {
 
                   {/* Réduction */}
                   <td className="px-5 py-4">
-                    <span className="font-bold text-emerald-600 text-sm">
+                    <span className="font-bold text-[#2d5a27] text-sm">
                       {promo.discount_type === "percent"
                         ? `${promo.discount_value}%`
                         : `${Number(promo.discount_value).toFixed(3)} TND`}

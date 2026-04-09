@@ -116,7 +116,7 @@ const AdminProducteurs = () => {
                 <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Producteurs</h2>
                 <button
                     onClick={openCreate}
-                    className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
+                    className="flex items-center gap-2 bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
                 >
                     <FiPlus size={16} /> Nouveau producteur
                 </button>
@@ -156,7 +156,7 @@ const AdminProducteurs = () => {
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-[#2c2c2c] text-sm">{p.name}</h3>
-                                        <div className="flex items-center gap-1 text-xs text-emerald-600">
+                                        <div className="flex items-center gap-1 text-xs text-[#2d5a27]">
                                             <MdVerified size={12} /> Vérifié
                                         </div>
                                     </div>
@@ -184,7 +184,7 @@ const AdminProducteurs = () => {
                             )}
                             <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                                 <span className="text-xs text-black/40">{p.product_count || 0} produits</span>
-                                <span className="text-xs font-bold text-emerald-600">{p.slug}</span>
+                                <span className="text-xs font-bold text-[#2d5a27]">{p.slug}</span>
                             </div>
                         </div>
                     ))}
@@ -242,7 +242,7 @@ const AdminProducteurs = () => {
                                     id="is_certified_bio"
                                     checked={formData.is_certified_bio}
                                     onChange={(e) => setFormData({ ...formData, is_certified_bio: e.target.checked })}
-                                    className="w-4 h-4 accent-emerald-600"
+                                    className="w-4 h-4 accent-[#2d5a27]"
                                 />
                                 <label htmlFor="is_certified_bio" className="text-xs font-bold text-gray-600">Certifié Bio</label>
                             </div>
@@ -257,7 +257,7 @@ const AdminProducteurs = () => {
                                 <button
                                     type="submit"
                                     disabled={formLoading}
-                                    className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition disabled:opacity-50"
+                                    className="flex-1 bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition disabled:opacity-50"
                                 >
                                     {formLoading ? '...' : editTarget ? 'Enregistrer' : 'Créer'}
                                 </button>

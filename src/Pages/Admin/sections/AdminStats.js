@@ -29,7 +29,7 @@ const RevenueTooltip = ({ active, payload, label }) => {
     return (
         <div className="bg-white border border-gray-100 rounded-xl shadow-lg p-3">
             <p className="text-xs font-bold text-black/40 mb-1">{label}</p>
-            <p className="text-sm font-black text-emerald-600">{formatPrice(payload[0].value)}</p>
+            <p className="text-sm font-black text-[#2d5a27]">{formatPrice(payload[0].value)}</p>
             {payload[1] && (
                 <p className="text-xs text-purple-500 font-semibold">{payload[1].value} commandes</p>
             )}
@@ -72,7 +72,7 @@ const AdminStats = () => {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
                 {[
                     { label: 'Utilisateurs',        value: data?.stats.totalUsers,    icon: <FiUsers size={22} />,       color: 'bg-blue-50 text-blue-600' },
-                    { label: 'Produits',             value: data?.stats.totalProducts, icon: <FiPackage size={22} />,     color: 'bg-emerald-50 text-emerald-600' },
+                    { label: 'Produits',             value: data?.stats.totalProducts, icon: <FiPackage size={22} />,     color: 'bg-emerald-50 text-[#2d5a27]' },
                     { label: 'Commandes',            value: data?.stats.totalOrders,   icon: <FiShoppingBag size={22} />, color: 'bg-purple-50 text-purple-600' },
                     { label: "Chiffre d'affaires",   value: formatPrice(data?.stats.totalRevenue || 0), icon: <FiDollarSign size={22} />, color: 'bg-orange-50 text-orange-600' },
                 ].map((stat, i) => (
@@ -89,7 +89,7 @@ const AdminStats = () => {
             {/* ── COURBE REVENUS + COMMANDES ── */}
             <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-6 mb-6">
                 <div className="flex items-center gap-2 mb-6">
-                    <FiTrendingUp className="text-emerald-600" size={18} />
+                    <FiTrendingUp className="text-[#2d5a27]" size={18} />
                     <h3 className="text-lg font-bold text-[#2c2c2c]">Revenus & commandes — 6 derniers mois</h3>
                 </div>
 
@@ -251,7 +251,7 @@ const AdminStats = () => {
                                 <p className="text-xs text-black/40">{order.customer_name} · {order.item_count} article{order.item_count > 1 ? 's' : ''}</p>
                             </div>
                             <div className="text-right">
-                                <p className="text-sm font-bold text-emerald-600">{formatPrice(parseFloat(order.total_price))}</p>
+                                <p className="text-sm font-bold text-[#2d5a27]">{formatPrice(parseFloat(order.total_price))}</p>
                                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${STATUS_LABELS[order.status]?.color || 'bg-gray-100 text-gray-600'}`}>
                                     {STATUS_LABELS[order.status]?.label || order.status}
                                 </span>

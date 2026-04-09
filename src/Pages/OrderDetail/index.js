@@ -232,14 +232,14 @@ const OrderDetail = () => {
                                 <span>{(parseFloat(order.total_price) + parseFloat(order.discount_amount || 0)).toFixed(2)} DT</span>
                             </div>
                             {parseFloat(order.discount_amount) > 0 && (
-                                <div className="flex justify-between text-emerald-600 font-semibold">
+                                <div className="flex justify-between text-[#2d5a27] font-semibold">
                                     <span>Réduction {order.promo_code && `(${order.promo_code})`}</span>
                                     <span>- {parseFloat(order.discount_amount).toFixed(2)} DT</span>
                                 </div>
                             )}
                             <div className="flex justify-between text-black/60">
                                 <span>Livraison</span>
-                                <span className="font-semibold text-emerald-600">Gratuite</span>
+                                <span className="font-semibold text-[#2d5a27]">Gratuite</span>
                             </div>
                             <div className="flex justify-between font-black text-lg text-[#2c2c2c] pt-3 border-t border-gray-100">
                                 <span>Total</span>

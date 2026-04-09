@@ -45,11 +45,11 @@ const VerifyEmail = () => {
 
                 {/* LOGO */}
                 <Link to="/" className="flex items-center justify-center gap-3 mb-8 no-underline">
-                    <div className="bg-gradient-to-br from-emerald-600 to-teal-600 p-3 rounded-2xl shadow-lg">
+                    <div className="bg-gradient-to-br from-[#2d5a27] to-teal-600 p-3 rounded-2xl shadow-lg">
                         <span className="text-2xl">🧺</span>
                     </div>
                     <div>
-                        <h1 className="text-2xl font-black text-emerald-600 tracking-widest font-serif">GOFFA</h1>
+                        <h1 className="text-2xl font-black text-[#2d5a27] tracking-widest font-serif">GOFFA</h1>
                         <p className="text-xs text-emerald-500 font-semibold tracking-wider">artisanat tunisien</p>
                     </div>
                 </Link>
@@ -78,11 +78,11 @@ const VerifyEmail = () => {
                             Votre compte est activé. Vous êtes maintenant connecté(e) !
                         </p>
                         <div className="w-full bg-gray-100 rounded-full h-2 mb-6">
-                            <div className="bg-emerald-600 h-2 rounded-full animate-pulse" style={{ width: '100%' }}></div>
+                            <div className="bg-[#2d5a27] h-2 rounded-full animate-pulse" style={{ width: '100%' }}></div>
                         </div>
                         <Link
                             to="/"
-                            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-xl no-underline transition-all duration-300 inline-block"
+                            className="bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-xl no-underline transition-all duration-300 inline-block"
                         >
                             Aller à l'accueil →
                         </Link>
@@ -102,13 +102,13 @@ const VerifyEmail = () => {
                         <div className="flex flex-col gap-3">
                             <Link
                                 to="/connexion"
-                                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-xl no-underline transition-all duration-300 inline-block"
+                                className="bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-xl no-underline transition-all duration-300 inline-block"
                             >
                                 Se connecter
                             </Link>
                             <Link
                                 to="/"
-                                className="text-emerald-600 hover:underline font-semibold text-sm no-underline"
+                                className="text-[#2d5a27] hover:underline font-semibold text-sm no-underline"
                             >
                                 Retour à l'accueil
                             </Link>

@@ -66,7 +66,7 @@ function RecipeCard({ recipe }) {
       <div className="p-4">
         <div className="mb-2">
           <Link to={`/recettes/${recipe.slug}`} className="no-underline">
-            <h3 className="text-sm font-bold text-[#2c2c2c] hover:text-emerald-600 transition-colors duration-200 line-clamp-2">
+            <h3 className="text-sm font-bold text-[#2c2c2c] hover:text-[#2d5a27] transition-colors duration-200 line-clamp-2">
               {recipe.title_fr}
             </h3>
           </Link>
@@ -105,7 +105,7 @@ function RecipeCard({ recipe }) {
 
         {/* CTA */}
         <div className="flex items-center justify-between pt-3">
-          <span className="text-lg font-extrabold text-emerald-600">
+          <span className="text-lg font-extrabold text-[#2d5a27]">
             {recipe.difficulty ? (
               <span className={`text-xs font-bold px-2 py-1 rounded-full ${difficultyConfig[recipe.difficulty]?.bg} ${difficultyConfig[recipe.difficulty]?.text}`}>
                 {difficultyConfig[recipe.difficulty]?.label}
@@ -114,7 +114,7 @@ function RecipeCard({ recipe }) {
           </span>
           <Link
             to={`/recettes/${recipe.slug}`}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300 no-underline"
+            className="bg-[#2d5a27] hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300 no-underline"
           >
             Voir la recette
           </Link>
@@ -240,7 +240,7 @@ export default function RecipesPage() {
                 </div>
                 <Link
                   to={`/recettes/${heroRecipe.slug}`}
-                  className="inline-block bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold px-5 py-2 rounded-xl transition-colors duration-300 no-underline"
+                  className="inline-block bg-[#2d5a27] hover:bg-emerald-500 text-white text-sm font-bold px-5 py-2 rounded-xl transition-colors duration-300 no-underline"
                 >
                   Voir la recette →
                 </Link>
@@ -257,7 +257,7 @@ export default function RecipesPage() {
               <div className="flex items-center justify-between mb-5">
                 <h3 className="font-bold text-[#2c2c2c] text-base">Filtres</h3>
                 {hasActiveFilters && (
-                  <button onClick={resetFiltres} className="text-xs text-emerald-600 hover:underline font-semibold">
+                  <button onClick={resetFiltres} className="text-xs text-[#2d5a27] hover:underline font-semibold">
                     Réinitialiser
                   </button>
                 )}
@@ -274,7 +274,7 @@ export default function RecipesPage() {
                     onChange={e => setSearchInput(e.target.value)}
                     className="bg-transparent text-sm text-[#2c2c2c] placeholder-black/30 outline-none w-full"
                   />
-                  <button type="submit" className="text-emerald-600 shrink-0">
+                  <button type="submit" className="text-[#2d5a27] shrink-0">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                       <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                     </svg>
@@ -290,8 +290,8 @@ export default function RecipesPage() {
                     onClick={() => { setCategory(""); setPage(1); }}
                     className={`text-left px-3 py-2 rounded-xl text-sm font-semibold transition-colors duration-200 ${
                       category === ""
-                        ? "bg-emerald-600 text-white"
-                        : "bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-emerald-600"
+                        ? "bg-[#2d5a27] text-white"
+                        : "bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-[#2d5a27]"
                     }`}
                   >
                     Toutes les catégories
@@ -302,8 +302,8 @@ export default function RecipesPage() {
                       onClick={() => handleFilter("category", c.value)}
                       className={`text-left px-3 py-2 rounded-xl text-sm font-semibold transition-colors duration-200 ${
                         category === c.value
-                          ? "bg-emerald-600 text-white"
-                          : "bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-emerald-600"
+                          ? "bg-[#2d5a27] text-white"
+                          : "bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-[#2d5a27]"
                       }`}
                     >
                       {c.label}
@@ -320,8 +320,8 @@ export default function RecipesPage() {
                     onClick={() => { setDifficulty(""); setPage(1); }}
                     className={`text-left px-3 py-2 rounded-xl text-sm font-semibold transition-colors duration-200 ${
                       difficulty === ""
-                        ? "bg-emerald-600 text-white"
-                        : "bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-emerald-600"
+                        ? "bg-[#2d5a27] text-white"
+                        : "bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-[#2d5a27]"
                     }`}
                   >
                     Toutes les difficultés
@@ -335,7 +335,7 @@ export default function RecipesPage() {
                         className={`text-left px-3 py-2 rounded-xl text-sm font-semibold capitalize transition-colors duration-200 flex items-center gap-2 ${
                           difficulty === d
                             ? `${dc.bg} ${dc.text} ring-1 ring-current`
-                            : "bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-emerald-600"
+                            : "bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-[#2d5a27]"
                         }`}
                       >
                         <span className={`w-2 h-2 rounded-full ${dc.dot}`} />
@@ -362,7 +362,7 @@ export default function RecipesPage() {
                 <p className="text-black/50 mb-6">Essayez avec d'autres filtres</p>
                 <button
                   onClick={resetFiltres}
-                  className="bg-emerald-600 text-white font-bold px-6 py-3 rounded-full hover:bg-emerald-500 transition-colors duration-300"
+                  className="bg-[#2d5a27] text-white font-bold px-6 py-3 rounded-full hover:bg-emerald-500 transition-colors duration-300"
                 >
                   Réinitialiser les filtres
                 </button>
@@ -384,7 +384,7 @@ export default function RecipesPage() {
                         onClick={() => setPage(i + 1)}
                         className={`w-10 h-10 rounded-full font-bold text-sm transition-all duration-200 ${
                           page === i + 1
-                            ? "bg-emerald-600 text-white"
+                            ? "bg-[#2d5a27] text-white"
                             : "bg-white text-black/50 hover:bg-emerald-100"
                         }`}
                       >

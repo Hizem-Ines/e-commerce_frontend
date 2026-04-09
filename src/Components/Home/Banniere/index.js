@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 const Banniere = () => (
     <section className="py-16 bg-gradient-to-b from-green-100 to-white">
         <div className="container mx-auto px-4">
-            <div className="bg-gradient-to-r from-green-900 via-emerald-800 to-teal-900 rounded-3xl p-12 flex items-center justify-between text-white shadow-2xl overflow-hidden relative">
+            <div className="bg-gradient-to-r from-[#2d5a27] via-[#3a7a32] to-[#2d5a27] rounded-3xl p-12 flex items-center justify-between text-white shadow-2xl overflow-hidden relative">
 
                 {/* MOTIF DE FOND */}
                 <div className="absolute inset-0 opacity-20">
@@ -26,7 +26,7 @@ const Banniere = () => (
                     </p>
                     <Link
                         to="/producteurs"
-                        className="inline-block bg-white text-green-600 px-8 py-4 rounded-full font-bold hover:bg-green-50 transition shadow-xl no-underline"
+                        className="inline-block bg-white text-[#2d5a27] px-8 py-4 rounded-full font-bold hover:bg-green-50 transition shadow-xl no-underline"
                     >
                          Découvrir nos producteurs
                     </Link>

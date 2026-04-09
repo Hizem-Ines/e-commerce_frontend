@@ -97,7 +97,7 @@ const VariantEditRow = ({ variant, productId, onUpdated, onDeleted }) => {
                     <p className="font-bold text-sm text-[#2c2c2c]">{attrLabel}</p>
                     {!editing && (
                         <p className="text-xs text-black/40 mt-0.5">
-                            Prix: <span className="font-bold text-emerald-600">{formatPrice(parseFloat(variant.price))}</span>
+                            Prix: <span className="font-bold text-[#2d5a27]">{formatPrice(parseFloat(variant.price))}</span>
                             {' · '}Stock: <span className="font-bold">{variant.stock}</span>
                             {variant.sku && ` · SKU: ${variant.sku}`}
                             <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${vals.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-500'}`}>
@@ -118,7 +118,7 @@ const VariantEditRow = ({ variant, productId, onUpdated, onDeleted }) => {
                         </>
                     ) : (
                         <>
-                            <button onClick={save} disabled={saving} className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition disabled:opacity-50">
+                            <button onClick={save} disabled={saving} className="px-3 py-1.5 bg-[#2d5a27] hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition disabled:opacity-50">
                                 {saving ? '⏳' : '💾 Sauver'}
                             </button>
                             <button onClick={() => { setEditing(false); setErr(''); }} className="px-3 py-1.5 border border-gray-200 text-black/50 rounded-xl text-xs font-bold hover:bg-gray-50 transition">
@@ -247,12 +247,12 @@ const AddVariantForm = ({ productId, onAdded, onCancel }) => {
                         </div>
                     ))}
                 </div>
-                <button onClick={addAttr} className="mt-2 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition">+ Ajouter attribut</button>
+                <button onClick={addAttr} className="mt-2 text-xs font-bold text-[#2d5a27] hover:text-emerald-700 transition">+ Ajouter attribut</button>
             </div>
 
             <div className="flex gap-3 pt-2">
                 <button onClick={onCancel} className="flex-1 border border-gray-200 text-black/50 font-bold py-2 rounded-xl text-xs hover:bg-gray-50 transition">Annuler</button>
-                <button onClick={save} disabled={saving} className="flex-[2] bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold py-2 rounded-xl text-xs transition">
+                <button onClick={save} disabled={saving} className="flex-[2] bg-[#2d5a27] hover:bg-emerald-500 disabled:opacity-50 text-white font-bold py-2 rounded-xl text-xs transition">
                     {saving ? '⏳ Ajout...' : '✅ Ajouter la variante'}
                 </button>
             </div>
@@ -461,7 +461,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                             onClick={() => setTab(t.id)}
                             className={`whitespace-nowrap px-4 py-3.5 text-xs font-bold transition-all border-b-2 -mb-px ${
                                 tab === t.id
-                                    ? 'border-emerald-600 text-emerald-600'
+                                    ? 'border-[#2d5a27] text-[#2d5a27]'
                                     : 'border-transparent text-black/40 hover:text-black/70'
                             }`}
                         >
@@ -529,7 +529,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
 
                             <button
                                 onClick={() => setShowAr(a => !a)}
-                                className="flex items-center gap-2 text-xs font-bold text-black/40 hover:text-emerald-600 transition"
+                                className="flex items-center gap-2 text-xs font-bold text-black/40 hover:text-[#2d5a27] transition"
                             >
                                 {showAr ? <FiChevronUp size={14}/> : <FiChevronDown size={14}/>}
                                 Champs arabes (عربي)
@@ -600,7 +600,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                     ) : (
                                         <button
                                             onClick={() => setShowAddVariant(true)}
-                                            className="w-full border-2 border-dashed border-emerald-300 hover:border-emerald-500 text-emerald-600 font-bold py-3 rounded-xl text-sm transition hover:bg-emerald-50"
+                                            className="w-full border-2 border-dashed border-emerald-300 hover:border-emerald-500 text-[#2d5a27] font-bold py-3 rounded-xl text-sm transition hover:bg-emerald-50"
                                         >
                                             + Ajouter une variante
                                         </button>
@@ -658,7 +658,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                                         </div>
                                                     ))}
                                                 </div>
-                                                <button onClick={() => addAttr(vi)} className="mt-2 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition">
+                                                <button onClick={() => addAttr(vi)} className="mt-2 text-xs font-bold text-[#2d5a27] hover:text-emerald-700 transition">
                                                     + Ajouter attribut
                                                 </button>
                                             </div>
@@ -666,7 +666,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                     ))}
                                     <button
                                         onClick={addVariant}
-                                        className="w-full border-2 border-dashed border-emerald-300 hover:border-emerald-500 text-emerald-600 font-bold py-3 rounded-xl text-sm transition hover:bg-emerald-50"
+                                        className="w-full border-2 border-dashed border-emerald-300 hover:border-emerald-500 text-[#2d5a27] font-bold py-3 rounded-xl text-sm transition hover:bg-emerald-50"
                                     >
                                         + Ajouter une variante
                                     </button>
@@ -680,7 +680,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                         <div className="space-y-5">
                             <button
                                 onClick={() => fileRef.current?.click()}
-                                className="w-full border-2 border-dashed border-emerald-300 hover:border-emerald-500 rounded-2xl py-10 flex flex-col items-center gap-3 text-emerald-600 hover:bg-emerald-50 transition"
+                                className="w-full border-2 border-dashed border-emerald-300 hover:border-emerald-500 rounded-2xl py-10 flex flex-col items-center gap-3 text-[#2d5a27] hover:bg-emerald-50 transition"
                             >
                                 <FiUpload size={28} />
                                 <p className="font-bold text-sm">Cliquer pour uploader des images</p>
@@ -762,7 +762,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                     <button
                         onClick={handleSubmit}
                         disabled={loading}
-                        className="flex-2 flex-[2] bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition text-sm"
+                        className="flex-2 flex-[2] bg-[#2d5a27] hover:bg-emerald-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition text-sm"
                     >
                         {loading
                             ? '⏳ Enregistrement...'
@@ -854,7 +854,7 @@ const AdminProduits = () => {
                 <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Produits</h2>
                 <button
                     onClick={openCreate}
-                    className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
+                    className="flex items-center gap-2 bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
                 >
                     <FiPlus size={16} /> Nouveau produit
                 </button>
@@ -873,7 +873,7 @@ const AdminProduits = () => {
                         className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
                     />
                 </div>
-                <button type="submit" className="bg-emerald-600 text-white font-bold px-5 py-3 rounded-xl hover:bg-emerald-500 transition text-sm">
+                <button type="submit" className="bg-[#2d5a27] text-white font-bold px-5 py-3 rounded-xl hover:bg-emerald-500 transition text-sm">
                     Rechercher
                 </button>
             </form>
@@ -919,7 +919,7 @@ const AdminProduits = () => {
                                     </td>
                                     <td className="px-5 py-4 text-black/60">{produit.category_name || '—'}</td>
                                     <td className="px-5 py-4 text-black/60">{produit.supplier_name || '—'}</td>
-                                    <td className="px-5 py-4 text-right font-bold text-emerald-600">
+                                    <td className="px-5 py-4 text-right font-bold text-[#2d5a27]">
                                         {produit.min_price ? formatPrice(parseFloat(produit.min_price)) : '—'}
                                     </td>
                                     <td className="px-5 py-4 text-center">
@@ -971,7 +971,7 @@ const AdminProduits = () => {
                             key={i}
                             onClick={() => setPage(i + 1)}
                             className={`w-10 h-10 rounded-full font-bold text-sm transition ${
-                                page === i + 1 ? 'bg-emerald-600 text-white' : 'bg-white text-black/50 hover:bg-emerald-100'
+                                page === i + 1 ? 'bg-[#2d5a27] text-white' : 'bg-white text-black/50 hover:bg-emerald-100'
                             }`}
                         >
                             {i + 1}

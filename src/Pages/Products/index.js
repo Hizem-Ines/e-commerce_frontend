@@ -97,7 +97,7 @@ const Products = () => {
                             {produits.length} produit{produits.length > 1 ? 's' : ''} trouvé{produits.length > 1 ? 's' : ''}
                         </p>
                     </div>
-                    <button className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-6 py-3 rounded-full shadow-lg transition-all duration-300 group">
+                    <button className="flex items-center gap-2 bg-gradient-to-r from-[#2d5a27] to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-6 py-3 rounded-full shadow-lg transition-all duration-300 group">
                         <BsStars size={18} className="group-hover:animate-spin" />
                         Recherche IA
                     </button>
@@ -110,7 +110,7 @@ const Products = () => {
                         <div className="bg-white rounded-2xl p-5 shadow-[0_4px_15px_rgba(0,0,0,0.07)] sticky top-4">
                             <div className="flex items-center justify-between mb-5">
                                 <h3 className="font-bold text-[#2c2c2c] text-base">Filtres</h3>
-                                <button onClick={resetFiltres} className="text-xs text-emerald-600 hover:underline font-semibold">
+                                <button onClick={resetFiltres} className="text-xs text-[#2d5a27] hover:underline font-semibold">
                                     Réinitialiser
                                 </button>
                             </div>
@@ -162,8 +162,8 @@ const Products = () => {
                                             onClick={() => setNoteMin(note === 0 ? '' : note)}
                                             className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold transition-colors duration-200 ${
                                                 (note === 0 && noteMin === '') || noteMin === note
-                                                    ? 'bg-emerald-600 text-white'
-                                                    : 'bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-emerald-600'
+                                                    ? 'bg-[#2d5a27] text-white'
+                                                    : 'bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-[#2d5a27]'
                                             }`}
                                         >
                                             {note === 0 ? 'Toutes les notes' : `${'⭐'.repeat(Math.floor(note))} ${note}+`}
@@ -182,8 +182,8 @@ const Products = () => {
                                         onClick={() => { setCategorieId(''); setPage(1); }}
                                         className={`text-left px-3 py-2 rounded-xl text-sm font-semibold transition-colors duration-200 ${
                                             categorieId === ''
-                                                ? 'bg-emerald-600 text-white'
-                                                : 'bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-emerald-600'
+                                                ? 'bg-[#2d5a27] text-white'
+                                                : 'bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-[#2d5a27]'
                                         }`}
                                     >
                                         Toutes les catégories
@@ -198,8 +198,8 @@ const Products = () => {
                                                 onClick={() => { setCategorieId(cat.id); setPage(1); }}
                                                 className={`w-full text-left px-3 py-2 rounded-xl text-sm font-semibold transition-colors duration-200 flex items-center justify-between ${
                                                     categorieId === cat.id
-                                                        ? 'bg-emerald-600 text-white'
-                                                        : 'bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-emerald-600'
+                                                        ? 'bg-[#2d5a27] text-white'
+                                                        : 'bg-[#f9f5f0] text-black/60 hover:bg-[#d1fae5] hover:text-[#2d5a27]'
                                                 }`}
                                             >
                                                 <span>{cat.name_fr}</span>
@@ -223,7 +223,7 @@ const Products = () => {
                                                                 className={`text-left px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 flex items-center gap-2 ${
                                                                     categorieId === sub.id
                                                                         ? 'bg-emerald-500 text-white'
-                                                                        : 'text-black/50 hover:bg-[#d1fae5] hover:text-emerald-600'
+                                                                        : 'text-black/50 hover:bg-[#d1fae5] hover:text-[#2d5a27]'
                                                                 }`}
                                                             >
                                                                 <span className="text-black/20">└</span>
@@ -254,7 +254,7 @@ const Products = () => {
                                 <p className="text-black/50 mb-6">Essayez avec d'autres filtres</p>
                                 <button
                                     onClick={resetFiltres}
-                                    className="bg-emerald-600 text-white font-bold px-6 py-3 rounded-full hover:bg-emerald-500 transition-colors duration-300"
+                                    className="bg-[#2d5a27] text-white font-bold px-6 py-3 rounded-full hover:bg-emerald-500 transition-colors duration-300"
                                 >
                                     Réinitialiser les filtres
                                 </button>
@@ -300,7 +300,7 @@ const Products = () => {
                                                 <div className="flex items-start justify-between mb-2">
                                                     <Link to={`/produits/${produit.id}`} className="no-underline flex-1">
                                                         {/* ✅ Fixed: uses name_fr */}
-                                                        <h3 className="text-sm font-bold text-[#2c2c2c] hover:text-emerald-600 transition-colors duration-200">
+                                                        <h3 className="text-sm font-bold text-[#2c2c2c] hover:text-[#2d5a27] transition-colors duration-200">
                                                             {produit.name_fr}
                                                         </h3>
                                                     </Link>
@@ -319,7 +319,7 @@ const Products = () => {
                                                     {produit.supplier_name && (
                                                         <Link
                                                             to={`/producteurs/${produit.supplier_slug || encodeURIComponent(produit.supplier_name)}`}
-                                                            className="bg-[#d1fae5] text-emerald-600 text-xs font-bold px-3 py-1 rounded-full no-underline hover:bg-emerald-200 transition-colors duration-200"
+                                                            className="bg-[#d1fae5] text-[#2d5a27] text-xs font-bold px-3 py-1 rounded-full no-underline hover:bg-emerald-200 transition-colors duration-200"
                                                             onClick={e => e.stopPropagation()}
                                                         >
                                                             {produit.supplier_name}
@@ -333,14 +333,14 @@ const Products = () => {
 
                                                 <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                                                     {/* ✅ Fixed: uses min_price */}
-                                                    <span className="text-lg font-extrabold text-emerald-600">
+                                                    <span className="text-lg font-extrabold text-[#2d5a27]">
                                                         {produit.min_price
                                                             ? formatPrice(parseFloat(produit.min_price))
                                                             : 'Prix N/A'}
                                                     </span>
                                                     <button
                                                         onClick={() => navigate(`/produits/${produit.id}`)}
-                                                        className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300"
+                                                        className="bg-[#2d5a27] hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300"
                                                     >
                                                         Voir le produit
                                                     </button>
@@ -359,7 +359,7 @@ const Products = () => {
                                                 onClick={() => setPage(i + 1)}
                                                 className={`w-10 h-10 rounded-full font-bold text-sm transition-all duration-200 ${
                                                     page === i + 1
-                                                        ? 'bg-emerald-600 text-white'
+                                                        ? 'bg-[#2d5a27] text-white'
                                                         : 'bg-white text-black/50 hover:bg-emerald-100'
                                                 }`}
                                             >

@@ -14,7 +14,7 @@ const NewProducts = ({ produits, loading }) => {
             <div className="container mx-auto px-4">
                 <div className="flex items-start justify-between mb-10">
                     <div>
-                        <span className="bg-emerald-600 text-white text-xs font-bold px-4 py-1.5 rounded-full inline-block mb-3">
+                        <span className="bg-[#2d5a27] text-white text-xs font-bold px-4 py-1.5 rounded-full inline-block mb-3">
                             ✨ NOUVEAUTÉS
                         </span>
                         <h2 className="text-3xl font-bold font-serif text-[#2c2c2c] mb-1">
@@ -24,7 +24,7 @@ const NewProducts = ({ produits, loading }) => {
                             Découvrez les nouveaux produits de la semaine
                         </p>
                     </div>
-                    <Link to="/produits" className="text-emerald-600 font-bold text-sm hover:underline mt-2 no-underline">
+                    <Link to="/produits" className="text-[#2d5a27] font-bold text-sm hover:underline mt-2 no-underline">
                         Voir tout →
                     </Link>
                 </div>
@@ -53,7 +53,7 @@ const NewProducts = ({ produits, loading }) => {
                                         ) : (
                                             <span className="text-7xl">🌿</span>
                                         )}
-                                        <span className="absolute top-3 left-3 bg-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                                        <span className="absolute top-3 left-3 bg-[#2d5a27] text-white text-xs font-bold px-3 py-1 rounded-full">
                                             ✨ Nouveau
                                         </span>
                                         {produit.rating_avg && (
@@ -67,7 +67,7 @@ const NewProducts = ({ produits, loading }) => {
                                 <div className="p-5">
                                     <div className="flex items-start justify-between mb-3">
                                         <Link to={`/produits/${produit.id}`} className="no-underline flex-1">
-                                            <h3 className="text-base font-bold text-[#2c2c2c] hover:text-emerald-600 transition-colors duration-200">
+                                            <h3 className="text-base font-bold text-[#2c2c2c] hover:text-[#2d5a27] transition-colors duration-200">
                                                 {produit.name_fr}
                                             </h3>
                                         </Link>
@@ -86,7 +86,7 @@ const NewProducts = ({ produits, loading }) => {
                                         {produit.supplier_name && (
                                             <Link
                                                 to={`/producteurs/${produit.supplier_slug}`}
-                                                className="bg-[#d1fae5] text-emerald-600 text-xs font-semibold px-3 py-1 rounded-full no-underline hover:bg-emerald-200 transition-colors duration-200"
+                                                className="bg-[#d1fae5] text-[#2d5a27] text-xs font-semibold px-3 py-1 rounded-full no-underline hover:bg-emerald-200 transition-colors duration-200"
                                                 onClick={(e) => e.stopPropagation()}
                                             >
                                                 {produit.supplier_name}
@@ -99,7 +99,7 @@ const NewProducts = ({ produits, loading }) => {
 
                                     <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                                         <div>
-                                            <span className="text-xl font-extrabold text-emerald-600">
+                                            <span className="text-xl font-extrabold text-[#2d5a27]">
                                                 {produit.price ? formatPrice(parseFloat(produit.price)) : 'Prix N/A'}
                                             </span>
                                             {produit.compare_price && parseFloat(produit.compare_price) > parseFloat(produit.price) && (
@@ -117,7 +117,7 @@ const NewProducts = ({ produits, loading }) => {
                                                 attributes:   [],
                                                 stock:        99,
                                             })}
-                                            className="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold px-5 py-2 rounded-xl transition-colors duration-300"
+                                            className="bg-[#2d5a27] hover:bg-emerald-500 text-white text-sm font-bold px-5 py-2 rounded-xl transition-colors duration-300"
                                         >
                                             Ajouter
                                         </button>

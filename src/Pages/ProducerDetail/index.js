@@ -35,7 +35,7 @@ const ProducerDetail = () => {
             <div className="min-h-[60vh] flex flex-col items-center justify-center bg-[#fdf6ec] px-4 text-center">
                 <div className="text-6xl mb-4">🔍</div>
                 <h2 className="text-2xl font-bold font-serif text-[#2c2c2c] mb-3">Producteur introuvable</h2>
-                <Link to="/producteurs" className="bg-emerald-600 text-white font-bold px-8 py-3 rounded-full no-underline hover:bg-emerald-500 transition-colors">
+                <Link to="/producteurs" className="bg-[#2d5a27] text-white font-bold px-8 py-3 rounded-full no-underline hover:bg-emerald-500 transition-colors">
                     Voir tous les producteurs
                 </Link>
             </div>
@@ -48,9 +48,9 @@ const ProducerDetail = () => {
 
                 {/* FIL D'ARIANE */}
                 <div className="flex items-center gap-2 text-sm text-black/50 mb-8">
-                    <Link to="/" className="hover:text-emerald-600 no-underline transition-colors">Accueil</Link>
+                    <Link to="/" className="hover:text-[#2d5a27] no-underline transition-colors">Accueil</Link>
                     <span>›</span>
-                    <Link to="/producteurs" className="hover:text-emerald-600 no-underline transition-colors">Producteurs</Link>
+                    <Link to="/producteurs" className="hover:text-[#2d5a27] no-underline transition-colors">Producteurs</Link>
                     <span>›</span>
                     <span className="text-[#2c2c2c] font-semibold">{producteur.name}</span>
                 </div>
@@ -98,7 +98,7 @@ const ProducerDetail = () => {
                                     {producteur.address && <span>🏠 {producteur.address}</span>}
                                     {producteur.contact && <span>📞 {producteur.contact}</span>}
                                     {producteur.email   && (
-                                        <a href={`mailto:${producteur.email}`} className="text-emerald-600 no-underline hover:underline">
+                                        <a href={`mailto:${producteur.email}`} className="text-[#2d5a27] no-underline hover:underline">
                                             ✉️ {producteur.email}
                                         </a>
                                     )}
@@ -108,7 +108,7 @@ const ProducerDetail = () => {
                                 )}
                             </div>
                             <div className="shrink-0 text-center bg-emerald-50 rounded-2xl px-8 py-4">
-                                <div className="text-3xl font-black text-emerald-600">{producteur.product_count || 0}</div>
+                                <div className="text-3xl font-black text-[#2d5a27]">{producteur.product_count || 0}</div>
                                 <div className="text-xs text-black/40 font-semibold">Produits</div>
                             </div>
                         </div>
@@ -157,7 +157,7 @@ const ProducerDetail = () => {
                                     <div className="p-4">
                                         <div className="flex items-start justify-between mb-2">
                                             <Link to={`/produits/${produit.id}`} className="no-underline flex-1">
-                                                <h3 className="text-sm font-bold text-[#2c2c2c] hover:text-emerald-600 transition-colors line-clamp-2">
+                                                <h3 className="text-sm font-bold text-[#2c2c2c] hover:text-[#2d5a27] transition-colors line-clamp-2">
                                                     {produit.name_fr}
                                                 </h3>
                                             </Link>
@@ -172,11 +172,11 @@ const ProducerDetail = () => {
                                             <span className="text-xs text-black/40 mb-2 block">{produit.category_name}</span>
                                         )}
                                         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                                            <span className="text-lg font-extrabold text-emerald-600">
+                                            <span className="text-lg font-extrabold text-[#2d5a27]">
                                                 {produit.min_price ? formatPrice(parseFloat(produit.min_price)) : 'Prix N/A'}
                                             </span>
                                             <button onClick={() => navigate(`/produits/${produit.id}`)}
-                                                className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors">
+                                                className="bg-[#2d5a27] hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors">
                                                 Voir →
                                             </button>
                                         </div>
