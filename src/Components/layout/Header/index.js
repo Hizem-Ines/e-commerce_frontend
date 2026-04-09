@@ -1,29 +1,22 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiUser, FiHeart, FiLogOut, FiSettings } from "react-icons/fi";
+import { FiSearch } from "react-icons/fi";
 import { BsFillBasket3Fill } from "react-icons/bs";
 import { useCart } from '../../../context/CartContext';
 import { useWishlist } from '../../../context/WishlistContext';
 import formatPrice from '../../../utils/formatPrice';
 import { useAuth } from '../../../context/authContext';
 import { getAllProducts } from '../../../services/productService';
+import logo from '../../../assets/images/goffa-logo.png';
 
 const Logo = () => (
     <Link to="/" className="shrink-0 no-underline flex items-center gap-2">
-        <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M14 16 Q14 8 21 8 Q28 8 28 16" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
-            <rect x="8" y="16" width="26" height="20" rx="4" fill="white" fillOpacity="0.2" stroke="white" strokeWidth="2"/>
-            <path d="M21 20 L25 24 L21 28 L17 24 Z" fill="white" fillOpacity="0.6"/>
-            <circle cx="12" cy="22" r="1.2" fill="white" fillOpacity="0.7"/>
-            <circle cx="30" cy="22" r="1.2" fill="white" fillOpacity="0.7"/>
-            <circle cx="12" cy="28" r="1.2" fill="white" fillOpacity="0.7"/>
-            <circle cx="30" cy="28" r="1.2" fill="white" fillOpacity="0.7"/>
-            <path d="M16 16 L26 16" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-        </svg>
-        <div className="flex flex-col leading-none">
-            <span className="text-white font-black text-2xl tracking-widest font-serif">GOFFA</span>
-            <span className="text-white/60 text-xs tracking-wider">artisanat tunisien</span>
-        </div>
+        <img
+            src={logo}
+            alt="GOFFA logo"
+            className="w-20 h-20 object-contain drop-shadow-md"
+        />
     </Link>
 );
 
@@ -96,7 +89,7 @@ const Header = () => {
     };
 
     return (
-        <div className="bg-emerald-600">
+        <div className="bg-[#2d5a27]">
             <header className="container mx-auto px-4">
                 <div className="flex items-center py-3 gap-4">
 
@@ -111,16 +104,14 @@ const Header = () => {
                                     value={search}
                                     onChange={handleSearchChange}
                                     onFocus={() => suggestions.length > 0 && setSearchOpen(true)}
-                                    placeholder="Rechercher un produit, producteur..."
+                                    placeholder="Rechercher produits..."
                                     className="flex-1 bg-transparent outline-none text-white placeholder-white/60 text-sm"
                                 />
                                 <button
                                     type="submit"
                                     className="bg-white/20 hover:bg-white/30 text-white rounded-full w-8 h-8 flex items-center justify-center transition shrink-0"
                                 >
-                                    {searchLoading ? (
-                                        <span className="animate-spin text-xs">🌿</span>
-                                    ) : '🔍'}
+                                    {searchLoading ? <span className="animate-spin text-xs">🌿</span> : <FiSearch size={16} />}
                                 </button>
                             </div>
                         </form>
@@ -162,7 +153,7 @@ const Header = () => {
                                             </p>
                                         </div>
                                         {/* PRIX */}
-                                        <span className="text-sm font-extrabold text-emerald-600 shrink-0">
+                                        <span className="text-sm font-extrabold text-[#2d5a27] shrink-0">
                                             {produit.min_price
                                                 ? `${parseFloat(produit.min_price).toFixed(2)} DT`
                                                 : 'N/A'}
@@ -173,7 +164,7 @@ const Header = () => {
                                 {/* VOIR TOUS */}
                                 <button
                                     onClick={() => handleSearchSubmit()}
-                                    className="w-full px-4 py-3 text-sm font-bold text-emerald-600 hover:bg-emerald-50 transition text-center border-t border-gray-100"
+                                    className="w-full px-4 py-3 text-sm font-bold text-[#2d5a27] hover:bg-emerald-50 transition text-center border-t border-gray-100"
                                 >
                                     Voir tous les résultats pour "{search}" →
                                 </button>
@@ -232,7 +223,7 @@ const Header = () => {
                                         <Link
                                             to="/profil"
                                             onClick={() => setDropdownOpen(false)}
-                                            className="flex items-center gap-3 px-4 py-3 text-sm text-[#2c2c2c] hover:bg-emerald-50 hover:text-emerald-600 transition no-underline"
+                                            className="flex items-center gap-3 px-4 py-3 text-sm text-[#2c2c2c] hover:bg-emerald-50 hover:text-[#2d5a27] transition no-underline"
                                         >
                                             <FiSettings size={15} /> Mon profil
                                         </Link>
@@ -240,7 +231,7 @@ const Header = () => {
                                             <Link
                                                 to="/admin"
                                                 onClick={() => setDropdownOpen(false)}
-                                                className="flex items-center gap-3 px-4 py-3 text-sm text-[#2c2c2c] hover:bg-emerald-50 hover:text-emerald-600 transition no-underline"
+                                                className="flex items-center gap-3 px-4 py-3 text-sm text-[#2c2c2c] hover:bg-emerald-50 hover:text-[#2d5a27] transition no-underline"
                                             >
                                                 👑 Dashboard Admin
                                             </Link>

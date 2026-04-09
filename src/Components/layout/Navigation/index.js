@@ -31,8 +31,8 @@ const Navigation = () => {
                             to={lien.url}
                             className={`flex items-center gap-2 text-base font-semibold tracking-wide pb-2 border-b-2 transition-all duration-200 no-underline ${
                                 estActif(lien)
-                                    ? 'text-emerald-600 border-emerald-600'
-                                    : 'text-gray-500 border-transparent hover:text-emerald-600 hover:border-emerald-600'
+                                    ? 'text-[#2d5a27] border-[#2d5a27]'
+                                    : 'text-gray-500 border-transparent hover:text-[#2d5a27] hover:border-[#2d5a27]'
                             }`}
                         >
                             {lien.icone}

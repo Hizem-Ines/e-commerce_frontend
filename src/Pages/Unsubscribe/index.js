@@ -20,33 +20,33 @@ export default function UnsubscribePage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow p-8 flex flex-col gap-4">
-        <h2 className="text-xl font-bold text-gray-800">Se désabonner</h2>
-        <p className="text-sm text-gray-500">
-          Entrez votre email pour ne plus recevoir nos offres.
-        </p>
-        <form onSubmit={handleUnsubscribe} className="flex flex-col gap-3">
-          <input
-            type="email"
-            placeholder="Votre email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-gray-300 text-sm"
-          />
-          <button
-            type="submit"
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
-          >
-            Se désabonner
-          </button>
-        </form>
-        {msg && (
-          <p className={`text-sm ${status === "success" ? "text-green-600" : "text-red-500"}`}>
-            {msg}
-          </p>
-        )}
-      </div>
-    </div>
+    <div className="min-h-screen flex items-center justify-center bg-[#fdf6ec]">
+  <div className="max-w-md w-full bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-8 flex flex-col gap-4">
+    <h2 className="text-xl font-bold text-[#2c2c2c]">Se désabonner</h2>
+    <p className="text-sm text-black/50">
+      Entrez votre email pour ne plus recevoir nos offres.
+    </p>
+    <form onSubmit={handleUnsubscribe} className="flex flex-col gap-3">
+      <input
+        type="email"
+        placeholder="Votre email"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        className="px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#2d5a27] focus:outline-none text-sm transition"
+      />
+      <button
+        type="submit"
+        className="bg-[#7a1c1c] hover:bg-[#5e1515] text-white px-4 py-3 rounded-xl text-sm font-bold transition"
+      >
+        Se désabonner
+      </button>
+    </form>
+    {msg && (
+      <p className={`text-sm font-semibold ${status === "success" ? "text-[#2d5a27]" : "text-red-500"}`}>
+        {msg}
+      </p>
+    )}
+  </div>
+</div>
   );
 }

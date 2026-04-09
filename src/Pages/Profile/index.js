@@ -139,7 +139,7 @@ const Profile = () => {
 
                 {/* CARTE UTILISATEUR */}
                 <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-6 mb-6 flex items-center gap-5">
-                    <div className="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center text-2xl font-black text-emerald-600 shrink-0 overflow-hidden">
+                    <div className="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center text-2xl font-black text-[#2d5a27] shrink-0 overflow-hidden">
                         {avatarPreview
                             ? <img src={avatarPreview} alt={user?.name} className="w-full h-full object-cover" />
                             : user?.name?.[0]?.toUpperCase()}
@@ -160,7 +160,7 @@ const Profile = () => {
                         </Link>
                         <Link to="/panier" className="no-underline">
                             <div className="bg-emerald-50 p-3 rounded-xl">
-                                <FiShoppingBag className="text-emerald-600 mx-auto mb-1" size={20} />
+                                <FiShoppingBag className="text-[#2d5a27] mx-auto mb-1" size={20} />
                                 <p className="text-xs font-bold text-black/50">Panier</p>
                             </div>
                         </Link>
@@ -180,7 +180,7 @@ const Profile = () => {
                     {tabs.map((tab) => (
                         <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                             className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
-                                activeTab === tab.id ? 'bg-emerald-600 text-white shadow-lg' : 'text-black/50 hover:text-emerald-600'
+                                activeTab === tab.id ? 'bg-[#2d5a27] text-white shadow-lg' : 'text-black/50 hover:text-[#2d5a27]'
                             }`}>
                             {tab.icon} {tab.label}
                         </button>
@@ -198,10 +198,10 @@ const Profile = () => {
                                     <div className="w-20 h-20 rounded-2xl bg-emerald-100 flex items-center justify-center overflow-hidden border-2 border-emerald-200">
                                         {avatarPreview
                                             ? <img src={avatarPreview} alt="avatar" className="w-full h-full object-cover" />
-                                            : <span className="text-3xl font-black text-emerald-600">{user?.name?.[0]?.toUpperCase()}</span>}
+                                            : <span className="text-3xl font-black text-[#2d5a27]">{user?.name?.[0]?.toUpperCase()}</span>}
                                     </div>
                                     <button type="button" onClick={() => fileInputRef.current.click()}
-                                        className="absolute -bottom-2 -right-2 bg-emerald-600 text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-emerald-500 transition shadow-lg text-xs">
+                                        className="absolute -bottom-2 -right-2 bg-[#2d5a27] text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-emerald-500 transition shadow-lg text-xs">
                                         ✏️
                                     </button>
                                 </div>
@@ -209,7 +209,7 @@ const Profile = () => {
                                     <p className="font-bold text-sm text-[#2c2c2c] mb-1">Photo de profil</p>
                                     <p className="text-xs text-black/40 mb-2">JPG, PNG — max 2MB</p>
                                     <button type="button" onClick={() => fileInputRef.current.click()}
-                                        className="text-xs font-bold text-emerald-600 hover:underline">Changer la photo</button>
+                                        className="text-xs font-bold text-[#2d5a27] hover:underline">Changer la photo</button>
                                 </div>
                                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
                             </div>
@@ -235,7 +235,7 @@ const Profile = () => {
                                 <p className="text-xs text-black/30 mt-1">L'email ne peut pas être modifié</p>
                             </div>
                             <button type="submit" disabled={loadingProfile}
-                                className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-xl transition-all duration-300 disabled:opacity-50">
+                                className="flex items-center gap-2 bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-xl transition-all duration-300 disabled:opacity-50">
                                 <FiSave size={16} />
                                 {loadingProfile ? 'Sauvegarde...' : 'Sauvegarder'}
                             </button>
@@ -414,7 +414,7 @@ const Profile = () => {
                                 </div>
                             </div>
                             <button type="submit" disabled={loadingPassword}
-                                className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-xl transition-all duration-300 disabled:opacity-50">
+                                className="flex items-center gap-2 bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-xl transition-all duration-300 disabled:opacity-50">
                                 <FiLock size={16} />
                                 {loadingPassword ? 'Modification...' : 'Changer le mot de passe'}
                             </button>

@@ -63,7 +63,7 @@ export default function RecipeDetailPage() {
         <h2 className="text-xl font-bold text-[#2c2c2c] mb-2">{error}</h2>
         <button
           onClick={() => navigate("/recettes")}
-          className="mt-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-full transition-colors duration-300"
+          className="mt-4 bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-full transition-colors duration-300"
         >
           ← Retour aux recettes
         </button>
@@ -86,7 +86,7 @@ export default function RecipeDetailPage() {
         <div className="mb-6">
           <Link
             to="/recettes"
-            className="inline-flex items-center gap-2 text-black/50 hover:text-emerald-600 font-semibold text-sm transition-colors duration-200 no-underline"
+            className="inline-flex items-center gap-2 text-black/50 hover:text-[#2d5a27] font-semibold text-sm transition-colors duration-200 no-underline"
           >
             <FiArrowLeft size={16} />
             Retour aux recettes
@@ -160,7 +160,7 @@ export default function RecipeDetailPage() {
             {totalTime > 0 && (
               <div className="text-center px-4">
                 <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-1">Total</p>
-                <p className="font-extrabold text-emerald-600 text-xl flex items-center gap-1 justify-center">
+                <p className="font-extrabold text-[#2d5a27] text-xl flex items-center gap-1 justify-center">
                   <FiClock size={16} />
                   {totalTime} <span className="text-sm font-normal text-black/40">min</span>
                 </p>
@@ -216,7 +216,7 @@ export default function RecipeDetailPage() {
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-bold text-[#2c2c2c] text-base flex items-center gap-2">
-                  <GiPlantSeed size={18} className="text-emerald-600" />
+                  <GiPlantSeed size={18} className="text-[#2d5a27]" />
                   Ingrédients
                 </h2>
                 {totalIngredients > 0 && (
@@ -273,7 +273,7 @@ export default function RecipeDetailPage() {
                         )}
                         <div className="flex items-center gap-2 mt-1 flex-wrap">
                           {ing.is_bio && (
-                            <span className="text-xs text-emerald-600 bg-emerald-50 font-bold px-2 py-0.5 rounded-full">
+                            <span className="text-xs text-[#2d5a27] bg-emerald-50 font-bold px-2 py-0.5 rounded-full">
                               🌱 Bio
                             </span>
                           )}
@@ -281,7 +281,7 @@ export default function RecipeDetailPage() {
                             <Link
                               to={`/produits/${ing.product_slug}`}
                               onClick={e => e.stopPropagation()}
-                              className="text-xs text-emerald-600 bg-[#d1fae5] font-bold px-2 py-0.5 rounded-full no-underline hover:bg-emerald-200 transition-colors duration-200"
+                              className="text-xs text-[#2d5a27] bg-[#d1fae5] font-bold px-2 py-0.5 rounded-full no-underline hover:bg-emerald-200 transition-colors duration-200"
                             >
                               🛒 Voir le produit
                               {ing.product_price && (
@@ -322,7 +322,7 @@ export default function RecipeDetailPage() {
                     onClick={() => setActiveStep(i)}
                     className={`h-2 rounded-full transition-all duration-300 ${
                       i === activeStep
-                        ? "bg-emerald-600 w-6"
+                        ? "bg-[#2d5a27] w-6"
                         : i < activeStep
                         ? "bg-emerald-300 w-2"
                         : "bg-gray-200 w-2"
@@ -352,9 +352,9 @@ export default function RecipeDetailPage() {
                       {/* Step number */}
                       <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-extrabold flex-shrink-0 transition-all duration-300 ${
                         activeStep === i
-                          ? "bg-emerald-600 text-white"
+                          ? "bg-[#2d5a27] text-white"
                           : i < activeStep
-                          ? "bg-emerald-100 text-emerald-600"
+                          ? "bg-emerald-100 text-[#2d5a27]"
                           : "bg-[#f9f5f0] text-black/40"
                       }`}>
                         {i < activeStep ? "✓" : step.step_number}
@@ -372,7 +372,7 @@ export default function RecipeDetailPage() {
                           </p>
                         )}
                         {step.duration && (
-                          <div className="mt-2 inline-flex items-center gap-1 text-xs text-emerald-600 bg-emerald-50 font-bold px-2.5 py-1 rounded-full">
+                          <div className="mt-2 inline-flex items-center gap-1 text-xs text-[#2d5a27] bg-emerald-50 font-bold px-2.5 py-1 rounded-full">
                             <FiClock size={11} /> {step.duration} min
                           </div>
                         )}
@@ -396,7 +396,7 @@ export default function RecipeDetailPage() {
                 <button
                   onClick={() => setActiveStep(s => Math.min(recipe.steps.length - 1, s + 1))}
                   disabled={activeStep === recipe.steps.length - 1}
-                  className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
+                  className="flex-1 py-3 rounded-xl bg-[#2d5a27] hover:bg-emerald-500 text-white text-sm font-bold disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
                 >
                   Suivante →
                 </button>
@@ -416,7 +416,7 @@ export default function RecipeDetailPage() {
         <div className="mt-10 text-center">
           <Link
             to="/recettes"
-            className="inline-flex items-center gap-2 bg-white border-2 border-gray-200 hover:border-emerald-500 text-black/60 hover:text-emerald-600 font-bold px-6 py-3 rounded-full transition-all duration-300 no-underline text-sm"
+            className="inline-flex items-center gap-2 bg-white border-2 border-gray-200 hover:border-emerald-500 text-black/60 hover:text-[#2d5a27] font-bold px-6 py-3 rounded-full transition-all duration-300 no-underline text-sm"
           >
             <FiArrowLeft size={16} />
             Voir toutes les recettes

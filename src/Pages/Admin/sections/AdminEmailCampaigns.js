@@ -96,7 +96,7 @@ const AdminEmailCampaigns = () => {
                 </div>
                 <button
                     onClick={() => { setShowForm(!showForm); setError(""); setSuccess(""); }}
-                    className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition"
+                    className="flex items-center gap-2 bg-[#2d5a27] hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition"
                 >
                     <FiPlus size={16} />
                     Nouvelle campagne
@@ -110,7 +110,7 @@ const AdminEmailCampaigns = () => {
             {/* STATS */}
             <div className="grid grid-cols-3 gap-4">
                 <div className="bg-white rounded-2xl p-5 border border-gray-100 flex items-center gap-4">
-                    <div className="bg-emerald-100 p-3 rounded-xl"><FiUsers className="text-emerald-600" size={20} /></div>
+                    <div className="bg-emerald-100 p-3 rounded-xl"><FiUsers className="text-[#2d5a27]" size={20} /></div>
                     <div>
                         <p className="text-2xl font-black text-gray-800">{subscribers.active}</p>
                         <p className="text-xs text-gray-500">Abonnés actifs</p>
@@ -190,7 +190,7 @@ const AdminEmailCampaigns = () => {
                     <div className="flex gap-3">
                         <button
                             onClick={handleCreate}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-sm font-semibold transition"
+                            className="bg-[#2d5a27] hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-sm font-semibold transition"
                         >
                             Créer la campagne
                         </button>
@@ -249,7 +249,7 @@ const AdminEmailCampaigns = () => {
                                     className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition shrink-0 ${
                                         c.status === 'sent'
                                             ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                            : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                            : 'bg-[#2d5a27] hover:bg-emerald-700 text-white'
                                     }`}
                                 >
                                     <FiSend size={14} />

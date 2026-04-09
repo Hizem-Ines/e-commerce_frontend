@@ -74,7 +74,7 @@ const HeroSlider = () => {
                     <div className="flex items-center gap-4">
                         <Link
                             to={slide.url}
-                            className="inline-flex items-center gap-2 px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full font-bold text-base transition-all duration-300 no-underline shadow-lg hover:shadow-emerald-500/30 hover:scale-105"
+                            className="inline-flex items-center gap-2 px-8 py-4 bg-[#2d5a27] hover:bg-emerald-500 text-white rounded-full font-bold text-base transition-all duration-300 no-underline shadow-lg hover:shadow-emerald-500/30 hover:scale-105"
                         >
                             {slide.cta}
                             <span>→</span>
@@ -113,14 +113,14 @@ const HeroSlider = () => {
             <button
                 onClick={precedent}
                 aria-label="Slide précédent"
-                className="absolute left-6 top-1/2 -translate-y-1/2 bg-white/10 backdrop-blur-sm border border-white/25 rounded-full w-12 h-12 flex items-center justify-center text-white hover:bg-emerald-600 hover:border-emerald-600 transition-all duration-300"
+                className="absolute left-6 top-1/2 -translate-y-1/2 bg-white/10 backdrop-blur-sm border border-white/25 rounded-full w-12 h-12 flex items-center justify-center text-white hover:bg-[#2d5a27] hover:border-[#2d5a27] transition-all duration-300"
             >
                 <FaChevronLeft size={14} />
             </button>
             <button
                 onClick={suivant}
                 aria-label="Slide suivant"
-                className="absolute right-6 top-1/2 -translate-y-1/2 bg-white/10 backdrop-blur-sm border border-white/25 rounded-full w-12 h-12 flex items-center justify-center text-white hover:bg-emerald-600 hover:border-emerald-600 transition-all duration-300"
+                className="absolute right-6 top-1/2 -translate-y-1/2 bg-white/10 backdrop-blur-sm border border-white/25 rounded-full w-12 h-12 flex items-center justify-center text-white hover:bg-[#2d5a27] hover:border-[#2d5a27] transition-all duration-300"
             >
                 <FaChevronRight size={14} />
             </button>

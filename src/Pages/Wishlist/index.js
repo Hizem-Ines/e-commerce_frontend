@@ -19,7 +19,7 @@ const Wishlist = () => {
                 </h2>
                 <Link
                     to="/connexion"
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-full transition-colors duration-300 no-underline"
+                    className="bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-full transition-colors duration-300 no-underline"
                 >
                     Se connecter
                 </Link>
@@ -39,7 +39,7 @@ const Wishlist = () => {
                 </p>
                 <Link
                     to="/produits"
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-full transition-colors duration-300 no-underline"
+                    className="bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-full transition-colors duration-300 no-underline"
                 >
                     Découvrir les produits
                 </Link>
@@ -96,7 +96,7 @@ const Wishlist = () => {
                                 <div className="p-4">
                                     <div className="flex items-start justify-between mb-2">
                                         <Link to={`/produits/${productId}`} className="no-underline flex-1">
-                                            <h3 className="text-sm font-bold text-[#2c2c2c] hover:text-emerald-600 transition-colors duration-200">
+                                            <h3 className="text-sm font-bold text-[#2c2c2c] hover:text-[#2d5a27] transition-colors duration-200">
                                                 {productName}
                                             </h3>
                                         </Link>
@@ -110,19 +110,19 @@ const Wishlist = () => {
 
                                     {produit.supplier_name && (
                                         <div className="flex items-center gap-2 mb-3">
-                                            <span className="bg-[#d1fae5] text-emerald-600 text-xs font-semibold px-3 py-1 rounded-full">
+                                            <span className="bg-[#d1fae5] text-[#2d5a27] text-xs font-semibold px-3 py-1 rounded-full">
                                                 {produit.supplier_name}
                                             </span>
                                         </div>
                                     )}
 
                                     <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                                        <span className="text-lg font-extrabold text-emerald-600">
+                                        <span className="text-lg font-extrabold text-[#2d5a27]">
                                             {productPrix ? formatPrice(parseFloat(productPrix)) : 'Prix N/A'}
                                         </span>
                                         <button
                                             onClick={() => ajouterAuPanier({ ...produit, id: productId })}
-                                            className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300"
+                                            className="bg-[#2d5a27] hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300"
                                         >
                                             Ajouter
                                         </button>
@@ -137,7 +137,7 @@ const Wishlist = () => {
                 <div className="mt-10 text-center">
                     <button
                         onClick={() => favoris.forEach(p => ajouterAuPanier({ ...p, id: p.product_id || p.id }))}
-                        className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-10 py-4 rounded-full transition-colors duration-300 shadow-lg"
+                        className="bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-10 py-4 rounded-full transition-colors duration-300 shadow-lg"
                     >
                         🛒 Tout ajouter au panier
                     </button>

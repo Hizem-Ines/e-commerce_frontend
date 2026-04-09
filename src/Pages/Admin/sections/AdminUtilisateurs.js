@@ -133,7 +133,7 @@ const AdminUtilisateurs = () => {
                         className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
                     />
                 </div>
-                <button type="submit" className="bg-emerald-600 text-white font-bold px-5 py-3 rounded-xl hover:bg-emerald-500 transition text-sm">
+                <button type="submit" className="bg-[#2d5a27] text-white font-bold px-5 py-3 rounded-xl hover:bg-emerald-500 transition text-sm">
                     Rechercher
                 </button>
             </form>
@@ -165,7 +165,7 @@ const AdminUtilisateurs = () => {
                                 <tr key={user.id} className="border-b border-gray-50 hover:bg-[#fdf6ec] transition">
                                     <td className="px-5 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-black text-sm overflow-hidden shrink-0">
+                                            <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center text-[#2d5a27] font-black text-sm overflow-hidden shrink-0">
                                                 {user.avatar
                                                     ? <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                                                     : user.name?.[0]?.toUpperCase()
@@ -205,7 +205,7 @@ const AdminUtilisateurs = () => {
                                         <div className="flex items-center justify-center gap-1">
                                             <button
                                                 onClick={() => openEdit(user)}
-                                                className="p-2 hover:bg-emerald-50 text-emerald-600 rounded-xl transition"
+                                                className="p-2 hover:bg-emerald-50 text-[#2d5a27] rounded-xl transition"
                                                 title="Modifier"
                                             >
                                                 <FiEdit2 size={15} />
@@ -258,7 +258,7 @@ const AdminUtilisateurs = () => {
                         {/* Header */}
                         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-[#f9f5f0]">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-black overflow-hidden shrink-0">
+                                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-[#2d5a27] font-black overflow-hidden shrink-0">
                                     {editUser.avatar
                                         ? <img src={editUser.avatar} alt={editUser.name} className="w-full h-full object-cover" />
                                         : editUser.name?.[0]?.toUpperCase()
@@ -394,7 +394,7 @@ const AdminUtilisateurs = () => {
                             <button
                                 onClick={handleEditSubmit}
                                 disabled={editLoading}
-                                className="flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition text-sm flex items-center justify-center gap-2"
+                                className="flex-1 bg-[#2d5a27] hover:bg-emerald-500 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition text-sm flex items-center justify-center gap-2"
                             >
                                 {editLoading ? (
                                     <span className="animate-spin">🌿</span>

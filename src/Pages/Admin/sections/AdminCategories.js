@@ -126,7 +126,7 @@ setCategories(flat);
                 <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Catégories</h2>
                 <button
                     onClick={() => { setShowForm(true); setEditItem(null); setFormData({ name_fr: '', name_ar: '', parent_id: '' }); }}
-                    className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
+                    className="flex items-center gap-2 bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
                 >
                     <FiPlus size={16} /> Nouvelle catégorie
                 </button>
@@ -301,7 +301,7 @@ setCategories(flat);
                                     Annuler
                                 </button>
                                 <button type="submit" disabled={formLoading}
-                                    className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition disabled:opacity-50">
+                                    className="flex-1 bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition disabled:opacity-50">
                                     {formLoading ? 'Sauvegarde...' : editItem ? 'Modifier' : 'Créer'}
                                 </button>
                             </div>

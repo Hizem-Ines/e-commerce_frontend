@@ -79,7 +79,7 @@ const Admin = () => {
                             onClick={() => setActiveSection(section.id)}
                             className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-left ${
                                 activeSection === section.id
-                                    ? 'bg-emerald-600 text-white'
+                                    ? 'bg-[#2d5a27] text-white'
                                     : 'text-emerald-200 hover:bg-emerald-800'
                             }`}
                         >
@@ -93,7 +93,7 @@ const Admin = () => {
                 {sidebarOpen && (
                     <div className="p-4 border-t border-emerald-700">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-sm font-black">
+                            <div className="w-8 h-8 rounded-full bg-[#2d5a27] flex items-center justify-center text-sm font-black">
                                 {user.name?.[0]?.toUpperCase()}
                             </div>
                             <div>

@@ -74,7 +74,7 @@ const Offres = () => {
             <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
                     <Link to={`/produits/${produit.id}`} className="no-underline flex-1">
-                        <h3 className="text-sm font-bold text-[#2c2c2c] hover:text-emerald-600 transition-colors duration-200 line-clamp-2">
+                        <h3 className="text-sm font-bold text-[#2c2c2c] hover:text-[#2d5a27] transition-colors duration-200 line-clamp-2">
                             {produit.name_fr}
                         </h3>
                     </Link>
@@ -92,7 +92,7 @@ const Offres = () => {
                 {produit.supplier_name && (
                     <Link
                         to={`/producteurs/${produit.supplier_slug}`}
-                        className="inline-block bg-[#d1fae5] text-emerald-600 text-xs font-semibold px-3 py-1 rounded-full no-underline hover:bg-emerald-200 transition-colors mb-3"
+                        className="inline-block bg-[#d1fae5] text-[#2d5a27] text-xs font-semibold px-3 py-1 rounded-full no-underline hover:bg-emerald-200 transition-colors mb-3"
                     >
                         {produit.supplier_name}
                     </Link>
@@ -100,7 +100,7 @@ const Offres = () => {
 
                 <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                     <div>
-                        <span className="text-lg font-extrabold text-emerald-600">
+                        <span className="text-lg font-extrabold text-[#2d5a27]">
                             {produit.price ? formatPrice(parseFloat(produit.price)) : 'Prix N/A'}
                         </span>
                         {produit.compare_price && parseFloat(produit.compare_price) > parseFloat(produit.price) && (
@@ -118,7 +118,7 @@ const Offres = () => {
                             attributes:   [],
                             stock:        99,
                         })}
-                        className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300"
+                        className="bg-[#2d5a27] hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300"
                     >
                         Ajouter
                     </button>
@@ -156,20 +156,20 @@ const Offres = () => {
                 {!loading && data?.activePromos?.length > 0 && (
                     <div className="mb-12">
                         <h2 className="text-2xl font-bold font-serif text-[#2c2c2c] mb-6 flex items-center gap-2">
-                            <FiTag className="text-emerald-600" /> Codes Promo Actifs
+                            <FiTag className="text-[#2d5a27]" /> Codes Promo Actifs
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {data.activePromos.map((promo) => (
                                 <div key={promo.id} className="bg-white rounded-2xl p-5 shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-dashed border-emerald-200">
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="bg-emerald-50 px-4 py-2 rounded-xl">
-                                            <span className="text-xl font-black text-emerald-600 tracking-widest">
+                                            <span className="text-xl font-black text-[#2d5a27] tracking-widest">
                                                 {promo.code}
                                             </span>
                                         </div>
                                         <button
                                             onClick={() => handleCopyCode(promo.code)}
-                                            className="flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-500 transition"
+                                            className="flex items-center gap-1 text-xs font-bold text-[#2d5a27] hover:text-emerald-500 transition"
                                         >
                                             {copiedCode === promo.code
                                                 ? <><FiCheck size={14} /> Copié !</>
@@ -217,7 +217,7 @@ const Offres = () => {
                         <button
                             type="submit"
                             disabled={promoLoading}
-                            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-xl transition disabled:opacity-50"
+                            className="bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-xl transition disabled:opacity-50"
                         >
                             {promoLoading ? '...' : 'Vérifier'}
                         </button>
@@ -231,7 +231,7 @@ const Offres = () => {
                                     : `${promoResult.discount_value} DT de réduction`}
                             </p>
                             {promoResult.description_fr && (
-                                <p className="text-emerald-600 text-xs mt-1">{promoResult.description_fr}</p>
+                                <p className="text-[#2d5a27] text-xs mt-1">{promoResult.description_fr}</p>
                             )}
                         </div>
                     )}
@@ -253,7 +253,7 @@ const Offres = () => {
                                 Réductions Exclusives
                             </h2>
                         </div>
-                        <Link to="/produits" className="text-emerald-600 font-bold text-sm hover:underline no-underline mt-2">
+                        <Link to="/produits" className="text-[#2d5a27] font-bold text-sm hover:underline no-underline mt-2">
                             Voir tout →
                         </Link>
                     </div>
@@ -276,14 +276,14 @@ const Offres = () => {
                 <div className="mb-12">
                     <div className="flex items-start justify-between mb-6">
                         <div>
-                            <span className="bg-emerald-600 text-white text-xs font-bold px-4 py-1.5 rounded-full inline-block mb-3">
+                            <span className="bg-[#2d5a27] text-white text-xs font-bold px-4 py-1.5 rounded-full inline-block mb-3">
                                 ✨ NOUVEAUTÉS
                             </span>
                             <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">
                                 Derniers Arrivages
                             </h2>
                         </div>
-                        <Link to="/produits" className="text-emerald-600 font-bold text-sm hover:underline no-underline mt-2">
+                        <Link to="/produits" className="text-[#2d5a27] font-bold text-sm hover:underline no-underline mt-2">
                             Voir tout →
                         </Link>
                     </div>

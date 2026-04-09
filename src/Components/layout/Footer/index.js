@@ -26,7 +26,7 @@ const Footer = () => {
     };
 
     return (
-        <footer className="bg-[#064e3b] text-white pt-16 pb-6">
+        <footer className="bg-[#2d5a27] text-white pt-16 pb-6">
             <div className="container mx-auto px-4">
 
                 {/* GRILLE PRINCIPALE */}
@@ -133,7 +133,7 @@ const Footer = () => {
                             <button
                                 type="submit"
                                 disabled={status === 'loading'}
-                                className="bg-[#059669] hover:bg-[#047857] text-white font-bold px-5 py-3 rounded-r-xl transition-colors duration-300 disabled:opacity-50"
+                                className="bg-[#1a3d15] hover:bg-[#122d0f] text-white font-bold px-5 py-3 rounded-r-xl transition-colors duration-300 disabled:opacity-50"
                             >
                                 {status === 'loading' ? '...' : "S'abonner"}
                             </button>

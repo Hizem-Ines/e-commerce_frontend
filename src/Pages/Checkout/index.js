@@ -132,7 +132,7 @@ const StripePaymentStep = ({ order, promoResult, onBack }) => {
 
                     {order.discount_amount > 0 && (
                         <div className="flex justify-between items-center text-sm mb-2">
-                            <span className="text-emerald-600 font-semibold flex items-center gap-1">
+                            <span className="text-[#2d5a27] font-semibold flex items-center gap-1">
                                 <FiTag size={13} />
                                 Code promo
                                 {promoResult?.promoCode && (
@@ -142,7 +142,7 @@ const StripePaymentStep = ({ order, promoResult, onBack }) => {
                                     </span>
                                 )}
                             </span>
-                            <span className="text-emerald-600 font-bold">
+                            <span className="text-[#2d5a27] font-bold">
                                 -{parseFloat(order.discount_amount).toFixed(2)} DT
                             </span>
                         </div>
