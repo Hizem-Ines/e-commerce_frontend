@@ -5,6 +5,7 @@ import Home from './Pages/Home';
 import Cart from './Pages/Cart';
 import NotFound from './Pages/NotFound';
 import Products from './Pages/Products';
+import Faq from './Pages/Faq';
 import ProductDetail from './Pages/ProductDetail';
 import Wishlist from './Pages/Wishlist';
 import Producers from './Pages/Producers';
@@ -50,6 +51,7 @@ function App() {
                             <Route path="/complete-account/:token" element={<CompleteAccount />} />
                             <Route element={<Layout />}>
                                 <Route path="/" element={<Home />} />
+                                <Route path="/faq" element={<Faq />} />
                                 <Route path="/produits" element={<Products />} />
                                 <Route path="/produits/:id" element={<ProductDetail />} />
                                 <Route path="/panier" element={<Cart />} />

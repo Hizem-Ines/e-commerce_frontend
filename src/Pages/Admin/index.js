@@ -3,6 +3,7 @@ import { useAuth } from '../../context/authContext';
 import { Navigate } from 'react-router-dom';
 import { FiGrid, FiPackage, FiShoppingBag, FiUsers, FiTag, FiList, FiPercent, FiMenu, FiX, FiMail } from 'react-icons/fi';
 import { GiCookingGlove } from "react-icons/gi";
+import { FaClipboardQuestion } from "react-icons/fa6";
 
 import AdminStats          from './sections/AdminStats';
 import AdminProduits       from './sections/AdminProduits';
@@ -13,6 +14,7 @@ import AdminCategories     from './sections/AdminCategories';
 import AdminPromotions     from './sections/AdminPromotions';
 import AdminRecipes        from './sections/AdminRecipes';
 import AdminEmailCampaigns from './sections/AdminEmailCampaigns';
+import AdminFaq            from './sections/AdminFaq';
 
 const SECTIONS = [
     { id: 'stats',        label: 'Tableau de bord',  icone: <FiGrid size={18} /> },
@@ -24,6 +26,7 @@ const SECTIONS = [
     { id: 'categories',   label: 'Catégories',        icone: <FiTag size={18} /> },
     { id: 'promotions',   label: 'Promotions',        icone: <FiPercent size={18} /> },
     { id: 'campaigns',    label: 'Campagnes email',   icone: <FiMail size={18} /> },
+    { id: 'faq',          label: 'Faq',               icone: <FaClipboardQuestion size={18} /> },
 ];
 
 const Admin = () => {
@@ -45,6 +48,7 @@ const Admin = () => {
             case 'promotions':   return <AdminPromotions />;
             case 'recipes':      return <AdminRecipes />;
             case 'campaigns':    return <AdminEmailCampaigns />;
+            case 'faq':          return <AdminFaq />;
             default:             return <AdminStats />;
         }
     };
