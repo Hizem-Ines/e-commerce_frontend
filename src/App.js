@@ -27,6 +27,7 @@ import Admin from './Pages/Admin';
 import Recipes    from "./Pages/Recipes";
 import RecipesDetail from "./Pages/RecipesDetail";
 import Unsubscribe from "./Pages/Unsubscribe";
+import CartSidebar from './Components/layout/CartSidebar';
 
 function App() {
     return (
@@ -34,12 +35,15 @@ function App() {
             <AuthProvider>
                 <CartProvider>
                     <WishlistProvider>
+                        {/* Sidebar panier globale — disponible sur toutes les pages */}
+                        <CartSidebar />
+
                         <Routes>
                             <Route path="/admin" element={<Admin />} />
                             <Route path="/connexion" element={<Auth />} />
                             <Route path="/verify-email/:token" element={<VerifyEmail />} />
-                            <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} /> 
-                            <Route path="/reset-password/:token" element={<ResetPassword />} /> 
+                            <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} />
+                            <Route path="/reset-password/:token" element={<ResetPassword />} />
                             <Route path="/login/success" element={<LoginSuccess />} />
                             <Route path="/checkout" element={<Checkout />} />
                             <Route path="/commande-confirmee/:orderId" element={<OrderConfirmation />} />
