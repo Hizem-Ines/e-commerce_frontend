@@ -223,6 +223,8 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
         phone:            user?.phone   || '',
         shipping_address: user?.address || '',
         shipping_city:    user?.city    || '',
+        shipping_governorate: '',
+        shipping_postal_code: '',
         notes:            '',
     });
 
@@ -294,6 +296,8 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
             shipping_phone:     user ? user.phone : formData.phone,
             shipping_address:   formData.shipping_address,
             shipping_city:      formData.shipping_city,
+            shipping_governorate: formData.shipping_governorate || undefined,
+            shipping_postal_code: formData.shipping_postal_code || undefined, 
             shipping_country:   'TN',
             notes:              formData.notes      || undefined,
             promo_code:         promoResult?.promoCode || undefined,
@@ -473,6 +477,28 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                             ))}
                                         </select>
                                     </div>
+                                    <div className="grid grid-cols-2 gap-4">
+    <div>
+        <label className="block text-xs font-bold text-gray-600 mb-1.5">Gouvernorat</label>
+        <input type="text" name="shipping_governorate"
+            value={formData.shipping_governorate}
+            onChange={handleChange}
+            placeholder="Ex: Tunis, Sfax..."
+            className={inputClass}
+            style={{ border: '2px solid #e5e7eb' }}
+            onFocus={onFocus} onBlur={onBlur} />
+    </div>
+    <div>
+        <label className="block text-xs font-bold text-gray-600 mb-1.5">Code postal</label>
+        <input type="text" name="shipping_postal_code"
+            value={formData.shipping_postal_code}
+            onChange={handleChange}
+            placeholder="Ex: 1000"
+            className={inputClass}
+            style={{ border: '2px solid #e5e7eb' }}
+            onFocus={onFocus} onBlur={onBlur} />
+    </div>
+</div>
                                     <div>
                                         <label className="block text-xs font-bold text-gray-600 mb-1.5">Notes (optionnel)</label>
                                         <textarea name="notes" value={formData.notes}

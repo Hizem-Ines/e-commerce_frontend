@@ -45,7 +45,7 @@ const CompleteAccount = () => {
             setSuccess(true);
 
             // Redirection vers home après 2 secondes
-            setTimeout(() => navigate('/Home'), 2000);
+            setTimeout(() => navigate('/'), 2000);
 
         } catch (err) {
             setError(err.response?.data?.message || 'Lien invalide ou expiré. Veuillez repasser une commande.');

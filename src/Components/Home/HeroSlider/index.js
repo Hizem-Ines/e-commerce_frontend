@@ -73,15 +73,8 @@ const HeroSlider = () => {
                     {/* BOUTONS */}
                     <div className="flex items-center gap-4">
                         <Link
-                            to={slide.url}
-                            className="inline-flex items-center gap-2 px-8 py-4 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white rounded-full font-bold text-base transition-all duration-300 no-underline shadow-lg hover:shadow-[#4a8c42] /30 hover:scale-105"
-                        >
-                            {slide.cta}
-                            <span>→</span>
-                        </Link>
-                        <Link
                             to="/produits"
-                            className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white border border-white/30 rounded-full font-bold text-base transition-all duration-300 no-underline"
+                            className="inline-flex items-center gap-2 px-8 py-4 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white rounded-full font-bold text-base transition-all duration-300 no-underline shadow-lg hover:shadow-[#4a8c42] /30 hover:scale-105"
                         >
                             Tout voir
                         </Link>

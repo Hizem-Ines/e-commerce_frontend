@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom';
 import { FiGrid, FiPackage, FiShoppingBag, FiUsers, FiTag, FiList, FiPercent, FiMenu, FiX, FiMail } from 'react-icons/fi';
 import { GiCookingGlove } from "react-icons/gi";
 import { FaClipboardQuestion } from "react-icons/fa6";
+import { FaRegCommentDots } from "react-icons/fa";
 
 import AdminStats          from './sections/AdminStats';
 import AdminProduits       from './sections/AdminProduits';
@@ -15,6 +16,7 @@ import AdminPromotions     from './sections/AdminPromotions';
 import AdminRecipes        from './sections/AdminRecipes';
 import AdminEmailCampaigns from './sections/AdminEmailCampaigns';
 import AdminFaq            from './sections/AdminFaq';
+import AdminReclamations   from './sections/AdminReclamation';
 
 const SECTIONS = [
     { id: 'stats',        label: 'Tableau de bord',  icone: <FiGrid size={18} /> },
@@ -27,6 +29,7 @@ const SECTIONS = [
     { id: 'promotions',   label: 'Promotions',        icone: <FiPercent size={18} /> },
     { id: 'campaigns',    label: 'Campagnes email',   icone: <FiMail size={18} /> },
     { id: 'faq',          label: 'Faq',               icone: <FaClipboardQuestion size={18} /> },
+    { id: 'reclamation',  label: 'Reclamations',      icone: <FaRegCommentDots size={18} /> },
 ];
 
 const Admin = () => {
@@ -49,6 +52,7 @@ const Admin = () => {
             case 'recipes':      return <AdminRecipes />;
             case 'campaigns':    return <AdminEmailCampaigns />;
             case 'faq':          return <AdminFaq />;
+            case 'reclamation':  return <AdminReclamations />;
             default:             return <AdminStats />;
         }
     };
