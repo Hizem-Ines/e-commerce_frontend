@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 
 const CartContext = createContext();
 
@@ -20,14 +20,35 @@ const saveCart = (items) => {
 
 export const CartProvider = ({ children }) => {
     const [panier, setPanier] = useState(loadCart);
+    const [isOpen, setIsOpen] = useState(false);
+    const closeTimeoutRef = useRef(null);
 
     // ── Sync localStorage à chaque changement ───────
     useEffect(() => {
         saveCart(panier);
     }, [panier]);
 
+    // ── Ouverture / fermeture avec délai (hover) ────
+    const ouvrirPanier = () => {
+        if (closeTimeoutRef.current) {
+            clearTimeout(closeTimeoutRef.current);
+            closeTimeoutRef.current = null;
+        }
+        setIsOpen(true);
+    };
+
+    const fermerPanierAvecDelai = (delai = 200) => {
+        closeTimeoutRef.current = setTimeout(() => {
+            setIsOpen(false);
+        }, delai);
+    };
+
+    const fermerPanier = () => {
+        if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+        setIsOpen(false);
+    };
+
     // ── Ajouter au panier ────────────────────────────
-    // item doit contenir : { variant_id, product_name, price, image, attributes, stock }
     const ajouterAuPanier = (item, quantity = 1) => {
         setPanier(prev => {
             const existe = prev.find(i => i.variant_id === item.variant_id);
@@ -40,6 +61,7 @@ export const CartProvider = ({ children }) => {
             }
             return [...prev, { ...item, quantity }];
         });
+        ouvrirPanier();
     };
 
     // ── Retirer du panier ────────────────────────────
@@ -81,6 +103,10 @@ export const CartProvider = ({ children }) => {
             viderPanier,
             totalArticles,
             totalPrix,
+            isOpen,
+            ouvrirPanier,
+            fermerPanier,
+            fermerPanierAvecDelai,
             loading: false,
         }}>
             {children}

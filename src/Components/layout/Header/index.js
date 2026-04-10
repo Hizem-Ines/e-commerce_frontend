@@ -21,7 +21,7 @@ const Logo = () => (
 );
 
 const Header = () => {
-    const { totalArticles, totalPrix } = useCart();
+    const { totalArticles, totalPrix, ouvrirPanier, fermerPanierAvecDelai } = useCart();
     const { totalFavoris } = useWishlist();
     const { user, logout } = useAuth();
     const navigate = useNavigate();
@@ -254,8 +254,13 @@ const Header = () => {
                             </Link>
                         )}
 
-                        {/* PANIER */}
-                        <Link to="/panier" className="flex items-center gap-2 no-underline">
+                        {/* PANIER — hover ouvre la sidebar, clic navigue vers /panier */}
+                        <div
+                            className="flex items-center gap-2 cursor-pointer"
+                            onMouseEnter={ouvrirPanier}
+                            onMouseLeave={() => fermerPanierAvecDelai(200)}
+                            onClick={() => navigate('/panier')}
+                        >
                             <span className="text-white font-bold text-sm">
                                 {formatPrice(totalPrix)}
                             </span>
@@ -269,7 +274,7 @@ const Header = () => {
                                     </span>
                                 )}
                             </div>
-                        </Link>
+                        </div>
 
                     </div>
                 </div>
