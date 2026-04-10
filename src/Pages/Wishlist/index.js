@@ -19,7 +19,7 @@ const Wishlist = () => {
                 </h2>
                 <Link
                     to="/connexion"
-                    className="bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-full transition-colors duration-300 no-underline"
+                    className="bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-8 py-3 rounded-full transition-colors duration-300 no-underline"
                 >
                     Se connecter
                 </Link>
@@ -39,7 +39,7 @@ const Wishlist = () => {
                 </p>
                 <Link
                     to="/produits"
-                    className="bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-full transition-colors duration-300 no-underline"
+                    className="bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-8 py-3 rounded-full transition-colors duration-300 no-underline"
                 >
                     Découvrir les produits
                 </Link>
@@ -74,7 +74,7 @@ const Wishlist = () => {
                         return (
                             <div
                                 key={produit.id}
-                                className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent hover:border-emerald-500 hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
+                                className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent hover:border-[#4a8c42]  hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
                             >
                                 {/* IMAGE */}
                                 <Link to={`/produits/${productId}`} className="no-underline">
@@ -122,7 +122,7 @@ const Wishlist = () => {
                                         </span>
                                         <button
                                             onClick={() => ajouterAuPanier({ ...produit, id: productId })}
-                                            className="bg-[#2d5a27] hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300"
+                                            className="bg-[#2d5a27] hover:bg-[#4a8c42]  text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300"
                                         >
                                             Ajouter
                                         </button>
@@ -137,7 +137,7 @@ const Wishlist = () => {
                 <div className="mt-10 text-center">
                     <button
                         onClick={() => favoris.forEach(p => ajouterAuPanier({ ...p, id: p.product_id || p.id }))}
-                        className="bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-10 py-4 rounded-full transition-colors duration-300 shadow-lg"
+                        className="bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-10 py-4 rounded-full transition-colors duration-300 shadow-lg"
                     >
                         🛒 Tout ajouter au panier
                     </button>

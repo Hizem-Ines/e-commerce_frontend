@@ -55,7 +55,7 @@ const Producers = () => {
                                 to={`/producteurs/${producteur.slug}`}
                                 className="no-underline group"
                             >
-                                <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent group-hover:border-emerald-500 group-hover:-translate-y-1 group-hover:shadow-xl transition-all duration-300">
+                                <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent group-hover:border-[#4a8c42]  group-hover:-translate-y-1 group-hover:shadow-xl transition-all duration-300">
                                     <div className="px-5 pb-5 pt-5">
 
                                         {/* LOGO + BADGE */}
@@ -120,7 +120,7 @@ const Producers = () => {
                                             <span className="text-xs text-black/40">
                                                 {producteur.product_count || 0} produits
                                             </span>
-                                            <span className="bg-[#2d5a27] group-hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300">
+                                            <span className="bg-[#2d5a27] group-hover:bg-[#4a8c42]  text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300">
                                                 Voir le profil →
                                             </span>
                                         </div>

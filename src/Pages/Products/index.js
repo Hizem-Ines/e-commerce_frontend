@@ -97,7 +97,7 @@ const Products = () => {
                             {produits.length} produit{produits.length > 1 ? 's' : ''} trouvé{produits.length > 1 ? 's' : ''}
                         </p>
                     </div>
-                    <button className="flex items-center gap-2 bg-gradient-to-r from-[#2d5a27] to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-6 py-3 rounded-full shadow-lg transition-all duration-300 group">
+                    <button className="flex items-center gap-2 bg-gradient-to-r from-[#2d5a27] to-teal-600 hover:from-[#4a8c42]  hover:to-teal-500 text-white font-bold px-6 py-3 rounded-full shadow-lg transition-all duration-300 group">
                         <BsStars size={18} className="group-hover:animate-spin" />
                         Recherche IA
                     </button>
@@ -205,7 +205,7 @@ const Products = () => {
                                                 <span>{cat.name_fr}</span>
                                                 {cat.children?.length > 0 && (
                                                     <span className={`text-xs transition-colors duration-200 ${
-                                                        categorieId === cat.id ? 'text-white/70' : 'text-black/30 group-hover:text-emerald-500'
+                                                        categorieId === cat.id ? 'text-white/70' : 'text-black/30 group-hover:text-[#4a8c42] '
                                                     }`}>
                                                         {cat.children.length} ›
                                                     </span>
@@ -222,7 +222,7 @@ const Products = () => {
                                                                 onClick={() => { setCategorieId(sub.id); setPage(1); }}
                                                                 className={`text-left px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 flex items-center gap-2 ${
                                                                     categorieId === sub.id
-                                                                        ? 'bg-emerald-500 text-white'
+                                                                        ? 'bg-[#4a8c42]  text-white'
                                                                         : 'text-black/50 hover:bg-[#d1fae5] hover:text-[#2d5a27]'
                                                                 }`}
                                                             >
@@ -254,7 +254,7 @@ const Products = () => {
                                 <p className="text-black/50 mb-6">Essayez avec d'autres filtres</p>
                                 <button
                                     onClick={resetFiltres}
-                                    className="bg-[#2d5a27] text-white font-bold px-6 py-3 rounded-full hover:bg-emerald-500 transition-colors duration-300"
+                                    className="bg-[#2d5a27] text-white font-bold px-6 py-3 rounded-full hover:bg-[#4a8c42]  transition-colors duration-300"
                                 >
                                     Réinitialiser les filtres
                                 </button>
@@ -265,7 +265,7 @@ const Products = () => {
                                     {produitsTries.map(produit => (
                                         <div
                                             key={produit.id}
-                                            className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent hover:border-emerald-500 hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
+                                            className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent hover:border-[#4a8c42]  hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
                                         >
                                             {/* IMAGE */}
                                             {/* ✅ Fixed: uses images[0].url (not thumbnail) */}
@@ -319,7 +319,7 @@ const Products = () => {
                                                     {produit.supplier_name && (
                                                         <Link
                                                             to={`/producteurs/${produit.supplier_slug || encodeURIComponent(produit.supplier_name)}`}
-                                                            className="bg-[#d1fae5] text-[#2d5a27] text-xs font-bold px-3 py-1 rounded-full no-underline hover:bg-emerald-200 transition-colors duration-200"
+                                                            className="bg-[#d1fae5] text-[#2d5a27] text-xs font-bold px-3 py-1 rounded-full no-underline hover:bg-#b6eac7 transition-colors duration-200"
                                                             onClick={e => e.stopPropagation()}
                                                         >
                                                             {produit.supplier_name}
@@ -340,7 +340,7 @@ const Products = () => {
                                                     </span>
                                                     <button
                                                         onClick={() => navigate(`/produits/${produit.id}`)}
-                                                        className="bg-[#2d5a27] hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300"
+                                                        className="bg-[#2d5a27] hover:bg-[#4a8c42]  text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300"
                                                     >
                                                         Voir le produit
                                                     </button>

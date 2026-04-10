@@ -1,6 +1,8 @@
 import api from './api';
 
-export const getStats          = ()           => api.get('/stats');
+export const getStats = (params = {}) => api.get('/stats', { params });
+export const exportStats = (params = {}) =>
+  api.get('/stats/export', { params, responseType: 'blob' });
 export const getAllUsers        = ()           => api.get('/auth/users');
 export const getAllOrders       = (params)     => api.get('/orders', { params });
 export const updateOrderStatus = (id, data)   => api.patch(`/orders/${id}/status`, data);

@@ -35,7 +35,7 @@ const ProducerDetail = () => {
             <div className="min-h-[60vh] flex flex-col items-center justify-center bg-[#fdf6ec] px-4 text-center">
                 <div className="text-6xl mb-4">🔍</div>
                 <h2 className="text-2xl font-bold font-serif text-[#2c2c2c] mb-3">Producteur introuvable</h2>
-                <Link to="/producteurs" className="bg-[#2d5a27] text-white font-bold px-8 py-3 rounded-full no-underline hover:bg-emerald-500 transition-colors">
+                <Link to="/producteurs" className="bg-[#2d5a27] text-white font-bold px-8 py-3 rounded-full no-underline hover:bg-[#4a8c42]  transition-colors">
                     Voir tous les producteurs
                 </Link>
             </div>
@@ -138,7 +138,7 @@ const ProducerDetail = () => {
                         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
                             {producteur.products.map(produit => (
                                 <div key={produit.id}
-                                    className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent hover:border-emerald-500 hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
+                                    className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent hover:border-[#4a8c42]  hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
                                     <Link to={`/produits/${produit.id}`} className="no-underline">
                                         <div className="relative h-44 bg-[#ecfdf5] flex items-center justify-center">
                                             {produit.images?.[0]?.url ? (
@@ -176,7 +176,7 @@ const ProducerDetail = () => {
                                                 {produit.min_price ? formatPrice(parseFloat(produit.min_price)) : 'Prix N/A'}
                                             </span>
                                             <button onClick={() => navigate(`/produits/${produit.id}`)}
-                                                className="bg-[#2d5a27] hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors">
+                                                className="bg-[#2d5a27] hover:bg-[#4a8c42]  text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors">
                                                 Voir →
                                             </button>
                                         </div>

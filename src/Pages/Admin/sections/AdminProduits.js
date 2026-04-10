@@ -35,7 +35,7 @@ const Field = ({ label, required, children }) => (
     </div>
 );
 
-const inputCls = "w-full bg-[#f9f5f0] border-2 border-transparent focus:border-emerald-500 focus:bg-white rounded-xl px-4 py-2.5 text-sm text-[#2c2c2c] outline-none transition placeholder-black/25";
+const inputCls = "w-full bg-[#f9f5f0] border-2 border-transparent focus:border-[#4a8c42]  focus:bg-white rounded-xl px-4 py-2.5 text-sm text-[#2c2c2c] outline-none transition placeholder-black/25";
 const textareaCls = inputCls + " resize-none";
 
 // ─── Variant Edit Row (for edit mode) ────────────────────────────────────────
@@ -118,7 +118,7 @@ const VariantEditRow = ({ variant, productId, onUpdated, onDeleted }) => {
                         </>
                     ) : (
                         <>
-                            <button onClick={save} disabled={saving} className="px-3 py-1.5 bg-[#2d5a27] hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition disabled:opacity-50">
+                            <button onClick={save} disabled={saving} className="px-3 py-1.5 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white rounded-xl text-xs font-bold transition disabled:opacity-50">
                                 {saving ? '⏳' : '💾 Sauver'}
                             </button>
                             <button onClick={() => { setEditing(false); setErr(''); }} className="px-3 py-1.5 border border-gray-200 text-black/50 rounded-xl text-xs font-bold hover:bg-gray-50 transition">
@@ -158,7 +158,7 @@ const VariantEditRow = ({ variant, productId, onUpdated, onDeleted }) => {
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => set('is_active', !vals.is_active)}
-                            className={`w-10 h-5 rounded-full transition-colors duration-200 relative shrink-0 ${vals.is_active ? 'bg-emerald-500' : 'bg-gray-300'}`}
+                            className={`w-10 h-5 rounded-full transition-colors duration-200 relative shrink-0 ${vals.is_active ? 'bg-[#4a8c42] ' : 'bg-gray-300'}`}
                         >
                             <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200 ${vals.is_active ? 'left-5' : 'left-0.5'}`}/>
                         </button>
@@ -252,7 +252,7 @@ const AddVariantForm = ({ productId, onAdded, onCancel }) => {
 
             <div className="flex gap-3 pt-2">
                 <button onClick={onCancel} className="flex-1 border border-gray-200 text-black/50 font-bold py-2 rounded-xl text-xs hover:bg-gray-50 transition">Annuler</button>
-                <button onClick={save} disabled={saving} className="flex-[2] bg-[#2d5a27] hover:bg-emerald-500 disabled:opacity-50 text-white font-bold py-2 rounded-xl text-xs transition">
+                <button onClick={save} disabled={saving} className="flex-[2] bg-[#2d5a27] hover:bg-[#4a8c42]  disabled:opacity-50 text-white font-bold py-2 rounded-xl text-xs transition">
                     {saving ? '⏳ Ajout...' : '✅ Ajouter la variante'}
                 </button>
             </div>
@@ -600,7 +600,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                     ) : (
                                         <button
                                             onClick={() => setShowAddVariant(true)}
-                                            className="w-full border-2 border-dashed border-emerald-300 hover:border-emerald-500 text-[#2d5a27] font-bold py-3 rounded-xl text-sm transition hover:bg-emerald-50"
+                                            className="w-full border-2 border-dashed border-emerald-300 hover:border-[#4a8c42]  text-[#2d5a27] font-bold py-3 rounded-xl text-sm transition hover:bg-emerald-50"
                                         >
                                             + Ajouter une variante
                                         </button>
@@ -666,7 +666,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                     ))}
                                     <button
                                         onClick={addVariant}
-                                        className="w-full border-2 border-dashed border-emerald-300 hover:border-emerald-500 text-[#2d5a27] font-bold py-3 rounded-xl text-sm transition hover:bg-emerald-50"
+                                        className="w-full border-2 border-dashed border-emerald-300 hover:border-[#4a8c42]  text-[#2d5a27] font-bold py-3 rounded-xl text-sm transition hover:bg-emerald-50"
                                     >
                                         + Ajouter une variante
                                     </button>
@@ -680,7 +680,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                         <div className="space-y-5">
                             <button
                                 onClick={() => fileRef.current?.click()}
-                                className="w-full border-2 border-dashed border-emerald-300 hover:border-emerald-500 rounded-2xl py-10 flex flex-col items-center gap-3 text-[#2d5a27] hover:bg-emerald-50 transition"
+                                className="w-full border-2 border-dashed border-emerald-300 hover:border-[#4a8c42]  rounded-2xl py-10 flex flex-col items-center gap-3 text-[#2d5a27] hover:bg-emerald-50 transition"
                             >
                                 <FiUpload size={28} />
                                 <p className="font-bold text-sm">Cliquer pour uploader des images</p>
@@ -733,7 +733,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                 </div>
                                 <button
                                     onClick={() => set('is_active', !form.is_active)}
-                                    className={`w-12 h-6 rounded-full transition-colors duration-200 relative ${form.is_active ? 'bg-emerald-500' : 'bg-gray-300'}`}
+                                    className={`w-12 h-6 rounded-full transition-colors duration-200 relative ${form.is_active ? 'bg-[#4a8c42] ' : 'bg-gray-300'}`}
                                 >
                                     <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 ${form.is_active ? 'left-6' : 'left-0.5'}`}/>
                                 </button>
@@ -762,7 +762,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                     <button
                         onClick={handleSubmit}
                         disabled={loading}
-                        className="flex-2 flex-[2] bg-[#2d5a27] hover:bg-emerald-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition text-sm"
+                        className="flex-2 flex-[2] bg-[#2d5a27] hover:bg-[#4a8c42]  disabled:opacity-50 text-white font-bold py-3 rounded-xl transition text-sm"
                     >
                         {loading
                             ? '⏳ Enregistrement...'
@@ -854,13 +854,13 @@ const AdminProduits = () => {
                 <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Produits</h2>
                 <button
                     onClick={openCreate}
-                    className="flex items-center gap-2 bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
+                    className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
                 >
                     <FiPlus size={16} /> Nouveau produit
                 </button>
             </div>
 
-            {successMsg && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">✅ {successMsg}</div>}
+            {successMsg && <div className="bg-emerald-50 border border-#b6eac7 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">✅ {successMsg}</div>}
             {errorMsg   && <div className="bg-red-50 border border-red-200 text-red-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">❌ {errorMsg}</div>}
 
             {/* RECHERCHE */}
@@ -870,10 +870,10 @@ const AdminProduits = () => {
                     <input
                         type="text" value={search} onChange={(e) => setSearch(e.target.value)}
                         placeholder="Rechercher un produit..."
-                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
+                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition"
                     />
                 </div>
-                <button type="submit" className="bg-[#2d5a27] text-white font-bold px-5 py-3 rounded-xl hover:bg-emerald-500 transition text-sm">
+                <button type="submit" className="bg-[#2d5a27] text-white font-bold px-5 py-3 rounded-xl hover:bg-[#4a8c42]  transition text-sm">
                     Rechercher
                 </button>
             </form>

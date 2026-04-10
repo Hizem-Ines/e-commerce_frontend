@@ -112,7 +112,7 @@ const AdminCommandes = () => {
 
             {/* ALERTES */}
             {successMsg && (
-                <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">
+                <div className="bg-emerald-50 border border-#b6eac7 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">
                     ✅ {successMsg}
                 </div>
             )}
@@ -429,7 +429,7 @@ const AdminCommandes = () => {
                                 <select
                                     value={selectedOrder.status}
                                     onChange={(e) => handleStatusChange(selectedOrder.id, e.target.value)}
-                                    className="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm font-bold focus:border-emerald-500 outline-none"
+                                    className="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm font-bold focus:border-[#4a8c42]  outline-none"
                                 >
                                     {STATUS_OPTIONS.map(s => (
                                         <option key={s} value={s}>{STATUS_LABELS[s]?.label}</option>

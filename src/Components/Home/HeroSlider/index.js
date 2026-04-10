@@ -47,7 +47,7 @@ const HeroSlider = () => {
 
                     {/* BADGE */}
                     <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/25 rounded-full px-4 py-2 mb-6">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span className="w-2 h-2 rounded-full bg-[#4a8c42] animate-pulse"></span>
                         <span className="text-white/90 text-sm font-semibold tracking-widest uppercase">
                             {slide.sousTitre}
                         </span>
@@ -60,7 +60,7 @@ const HeroSlider = () => {
 
                     {/* LIGNE DÉCORATIVE */}
                     <div className="flex items-center gap-3 mb-5">
-                        <div className="w-12 h-1 bg-emerald-400 rounded-full"></div>
+                        <div className="w-12 h-1 bg-[#4a8c42] rounded-full"></div>
                         <div className="w-4 h-1 bg-[#c8872a] rounded-full"></div>
                         <div className="w-2 h-1 bg-white/40 rounded-full"></div>
                     </div>
@@ -74,7 +74,7 @@ const HeroSlider = () => {
                     <div className="flex items-center gap-4">
                         <Link
                             to={slide.url}
-                            className="inline-flex items-center gap-2 px-8 py-4 bg-[#2d5a27] hover:bg-emerald-500 text-white rounded-full font-bold text-base transition-all duration-300 no-underline shadow-lg hover:shadow-emerald-500/30 hover:scale-105"
+                            className="inline-flex items-center gap-2 px-8 py-4 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white rounded-full font-bold text-base transition-all duration-300 no-underline shadow-lg hover:shadow-[#4a8c42] /30 hover:scale-105"
                         >
                             {slide.cta}
                             <span>→</span>
@@ -91,7 +91,7 @@ const HeroSlider = () => {
             </div>
 
             {/* CADRE DÉCORATIF EN BAS */}
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-[#c8872a] to-emerald-500 opacity-60" />
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#4a8c42]  via-[#c8872a] to-[#4a8c42]  opacity-60" />
 
             {/* COMPTEUR DE SLIDE — en bas à droite */}
             <div className="absolute bottom-8 right-16 flex items-center gap-3">
@@ -134,7 +134,7 @@ const HeroSlider = () => {
                         aria-label={`Aller au slide ${index + 1}`}
                         className={`transition-all duration-300 rounded-full border-none ${
                             index === current
-                                ? 'bg-emerald-400 w-8 h-2'
+                                ? 'bg-[#4a8c42] w-8 h-2'
                                 : 'bg-white/30 hover:bg-white/60 w-2 h-2'
                         }`}
                     />

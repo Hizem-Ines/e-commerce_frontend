@@ -14,7 +14,7 @@ const CATEGORY_LABELS = {
 };
 
 const difficultyConfig = {
-  facile:    { bg: "bg-emerald-100", text: "text-emerald-700", dot: "bg-emerald-500", label: "Facile" },
+  facile:    { bg: "bg-emerald-100", text: "text-emerald-700", dot: "bg-[#4a8c42] ", label: "Facile" },
   moyen:     { bg: "bg-amber-100",   text: "text-amber-700",   dot: "bg-amber-500",   label: "Moyen" },
   difficile: { bg: "bg-rose-100",    text: "text-rose-700",    dot: "bg-rose-500",    label: "Difficile" },
 };
@@ -63,7 +63,7 @@ export default function RecipeDetailPage() {
         <h2 className="text-xl font-bold text-[#2c2c2c] mb-2">{error}</h2>
         <button
           onClick={() => navigate("/recettes")}
-          className="mt-4 bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-full transition-colors duration-300"
+          className="mt-4 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-6 py-3 rounded-full transition-colors duration-300"
         >
           ← Retour aux recettes
         </button>
@@ -119,7 +119,7 @@ export default function RecipeDetailPage() {
               </span>
             )}
             {recipe.is_featured && (
-              <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+              <span className="bg-[#4a8c42]  text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
                 <BsStars size={11} /> Mis en avant
               </span>
             )}
@@ -196,7 +196,7 @@ export default function RecipeDetailPage() {
 
         {/* ── Description ── */}
         {recipe.description_fr && (
-          <div className="bg-white rounded-2xl p-6 shadow-[0_4px_15px_rgba(0,0,0,0.07)] mb-8 border-l-4 border-emerald-500">
+          <div className="bg-white rounded-2xl p-6 shadow-[0_4px_15px_rgba(0,0,0,0.07)] mb-8 border-l-4 border-[#4a8c42] ">
             <p className="text-black/70 leading-relaxed">{recipe.description_fr}</p>
             {recipe.description_ar && (
               <p className="text-black/40 leading-relaxed mt-3 text-right border-t border-gray-100 pt-3" dir="rtl">
@@ -230,7 +230,7 @@ export default function RecipeDetailPage() {
               {totalIngredients > 0 && (
                 <div className="w-full bg-gray-100 rounded-full h-1.5 mb-4">
                   <div
-                    className="bg-emerald-500 h-1.5 rounded-full transition-all duration-300"
+                    className="bg-[#4a8c42]  h-1.5 rounded-full transition-all duration-300"
                     style={{ width: `${(checkedCount / totalIngredients) * 100}%` }}
                   />
                 </div>
@@ -251,7 +251,7 @@ export default function RecipeDetailPage() {
                       }`}
                     >
                       <div className={`mt-0.5 shrink-0 transition-colors duration-200 ${
-                        checkedIngredients[i] ? "text-emerald-500" : "text-gray-300"
+                        checkedIngredients[i] ? "text-[#4a8c42] " : "text-gray-300"
                       }`}>
                         <FiCheckCircle size={16} />
                       </div>
@@ -281,11 +281,11 @@ export default function RecipeDetailPage() {
                             <Link
                               to={`/produits/${ing.product_slug}`}
                               onClick={e => e.stopPropagation()}
-                              className="text-xs text-[#2d5a27] bg-[#d1fae5] font-bold px-2 py-0.5 rounded-full no-underline hover:bg-emerald-200 transition-colors duration-200"
+                              className="text-xs text-[#2d5a27] bg-[#d1fae5] font-bold px-2 py-0.5 rounded-full no-underline hover:bg-#b6eac7 transition-colors duration-200"
                             >
                               🛒 Voir le produit
                               {ing.product_price && (
-                                <span className="text-emerald-500 ml-1">
+                                <span className="text-[#4a8c42]  ml-1">
                                   · {Number(ing.product_price).toFixed(3)} DT
                                 </span>
                               )}
@@ -344,8 +344,8 @@ export default function RecipeDetailPage() {
                     onClick={() => setActiveStep(i)}
                     className={`bg-white rounded-2xl p-5 border-2 cursor-pointer transition-all duration-300 shadow-[0_4px_15px_rgba(0,0,0,0.07)] ${
                       activeStep === i
-                        ? "border-emerald-500 shadow-emerald-100 shadow-lg -translate-y-0.5"
-                        : "border-transparent hover:border-emerald-200"
+                        ? "border-[#4a8c42]  shadow-emerald-100 shadow-lg -translate-y-0.5"
+                        : "border-transparent hover:border-#b6eac7"
                     }`}
                   >
                     <div className="flex gap-4">
@@ -396,7 +396,7 @@ export default function RecipeDetailPage() {
                 <button
                   onClick={() => setActiveStep(s => Math.min(recipe.steps.length - 1, s + 1))}
                   disabled={activeStep === recipe.steps.length - 1}
-                  className="flex-1 py-3 rounded-xl bg-[#2d5a27] hover:bg-emerald-500 text-white text-sm font-bold disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
+                  className="flex-1 py-3 rounded-xl bg-[#2d5a27] hover:bg-[#4a8c42]  text-white text-sm font-bold disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
                 >
                   Suivante →
                 </button>
@@ -405,7 +405,7 @@ export default function RecipeDetailPage() {
 
             {/* Completion message */}
             {recipe.steps?.length > 0 && activeStep === recipe.steps.length - 1 && (
-              <div className="mt-4 bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-4 text-center">
+              <div className="mt-4 bg-emerald-50 border-2 border-#b6eac7 rounded-2xl p-4 text-center">
                 <p className="text-emerald-700 font-bold text-sm">🎉 Recette terminée ! Bon appétit !</p>
               </div>
             )}
@@ -416,7 +416,7 @@ export default function RecipeDetailPage() {
         <div className="mt-10 text-center">
           <Link
             to="/recettes"
-            className="inline-flex items-center gap-2 bg-white border-2 border-gray-200 hover:border-emerald-500 text-black/60 hover:text-[#2d5a27] font-bold px-6 py-3 rounded-full transition-all duration-300 no-underline text-sm"
+            className="inline-flex items-center gap-2 bg-white border-2 border-gray-200 hover:border-[#4a8c42]  text-black/60 hover:text-[#2d5a27] font-bold px-6 py-3 rounded-full transition-all duration-300 no-underline text-sm"
           >
             <FiArrowLeft size={16} />
             Voir toutes les recettes

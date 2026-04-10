@@ -17,7 +17,7 @@ const CATEGORIES = [
 ];
 
 const difficultyConfig = {
-  facile:    { bg: "bg-emerald-100", text: "text-emerald-700", dot: "bg-emerald-500", label: "Facile" },
+  facile:    { bg: "bg-emerald-100", text: "text-emerald-700", dot: "bg-[#4a8c42] ", label: "Facile" },
   moyen:     { bg: "bg-amber-100",   text: "text-amber-700",   dot: "bg-amber-500",   label: "Moyen" },
   difficile: { bg: "bg-rose-100",    text: "text-rose-700",    dot: "bg-rose-500",    label: "Difficile" },
 };
@@ -27,7 +27,7 @@ function RecipeCard({ recipe }) {
   const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent hover:border-emerald-500 hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
+    <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent hover:border-[#4a8c42]  hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
       {/* IMAGE */}
       <Link to={`/recettes/${recipe.slug}`} className="no-underline">
         <div className="relative h-44 bg-[#ecfdf5] flex items-center justify-center cursor-pointer overflow-hidden">
@@ -114,7 +114,7 @@ function RecipeCard({ recipe }) {
           </span>
           <Link
             to={`/recettes/${recipe.slug}`}
-            className="bg-[#2d5a27] hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300 no-underline"
+            className="bg-[#2d5a27] hover:bg-[#4a8c42]  text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300 no-underline"
           >
             Voir la recette
           </Link>
@@ -240,7 +240,7 @@ export default function RecipesPage() {
                 </div>
                 <Link
                   to={`/recettes/${heroRecipe.slug}`}
-                  className="inline-block bg-[#2d5a27] hover:bg-emerald-500 text-white text-sm font-bold px-5 py-2 rounded-xl transition-colors duration-300 no-underline"
+                  className="inline-block bg-[#2d5a27] hover:bg-[#4a8c42]  text-white text-sm font-bold px-5 py-2 rounded-xl transition-colors duration-300 no-underline"
                 >
                   Voir la recette →
                 </Link>
@@ -362,7 +362,7 @@ export default function RecipesPage() {
                 <p className="text-black/50 mb-6">Essayez avec d'autres filtres</p>
                 <button
                   onClick={resetFiltres}
-                  className="bg-[#2d5a27] text-white font-bold px-6 py-3 rounded-full hover:bg-emerald-500 transition-colors duration-300"
+                  className="bg-[#2d5a27] text-white font-bold px-6 py-3 rounded-full hover:bg-[#4a8c42]  transition-colors duration-300"
                 >
                   Réinitialiser les filtres
                 </button>

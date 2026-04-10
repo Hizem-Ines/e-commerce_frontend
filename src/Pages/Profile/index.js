@@ -169,7 +169,7 @@ const Profile = () => {
 
                 {/* ALERTES */}
                 {successMsg && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-6 text-sm">✅ {successMsg}</div>
+                    <div className="bg-emerald-50 border border-#b6eac7 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-6 text-sm">✅ {successMsg}</div>
                 )}
                 {errorMsg && (
                     <div className="bg-red-50 border border-red-200 text-red-700 font-semibold px-5 py-3 rounded-xl mb-6 text-sm">❌ {errorMsg}</div>
@@ -195,13 +195,13 @@ const Profile = () => {
                             {/* AVATAR */}
                             <div className="flex items-center gap-5 pb-5 border-b border-gray-100">
                                 <div className="relative">
-                                    <div className="w-20 h-20 rounded-2xl bg-emerald-100 flex items-center justify-center overflow-hidden border-2 border-emerald-200">
+                                    <div className="w-20 h-20 rounded-2xl bg-emerald-100 flex items-center justify-center overflow-hidden border-2 border-#b6eac7">
                                         {avatarPreview
                                             ? <img src={avatarPreview} alt="avatar" className="w-full h-full object-cover" />
                                             : <span className="text-3xl font-black text-[#2d5a27]">{user?.name?.[0]?.toUpperCase()}</span>}
                                     </div>
                                     <button type="button" onClick={() => fileInputRef.current.click()}
-                                        className="absolute -bottom-2 -right-2 bg-[#2d5a27] text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-emerald-500 transition shadow-lg text-xs">
+                                        className="absolute -bottom-2 -right-2 bg-[#2d5a27] text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-[#4a8c42]  transition shadow-lg text-xs">
                                         ✏️
                                     </button>
                                 </div>
@@ -220,7 +220,7 @@ const Profile = () => {
                                     <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                                     <input type="text" value={profileData.name}
                                         onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
+                                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition"
                                         placeholder="Votre nom complet" />
                                 </div>
                             </div>
@@ -235,7 +235,7 @@ const Profile = () => {
                                 <p className="text-xs text-black/30 mt-1">L'email ne peut pas être modifié</p>
                             </div>
                             <button type="submit" disabled={loadingProfile}
-                                className="flex items-center gap-2 bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-xl transition-all duration-300 disabled:opacity-50">
+                                className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-8 py-3 rounded-xl transition-all duration-300 disabled:opacity-50">
                                 <FiSave size={16} />
                                 {loadingProfile ? 'Sauvegarde...' : 'Sauvegarder'}
                             </button>
@@ -385,7 +385,7 @@ const Profile = () => {
                                     <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                                     <input type={showPassword ? 'text' : 'password'} value={passwordData.currentPassword}
                                         onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                                        className="w-full pl-10 pr-10 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
+                                        className="w-full pl-10 pr-10 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition"
                                         placeholder="••••••••" required />
                                     <button type="button" onClick={() => setShowPassword(!showPassword)}
                                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -399,7 +399,7 @@ const Profile = () => {
                                     <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                                     <input type={showPassword ? 'text' : 'password'} value={passwordData.newPassword}
                                         onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
+                                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition"
                                         placeholder="••••••••" required />
                                 </div>
                             </div>
@@ -409,12 +409,12 @@ const Profile = () => {
                                     <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                                     <input type={showPassword ? 'text' : 'password'} value={passwordData.confirmPassword}
                                         onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
+                                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition"
                                         placeholder="••••••••" required />
                                 </div>
                             </div>
                             <button type="submit" disabled={loadingPassword}
-                                className="flex items-center gap-2 bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-xl transition-all duration-300 disabled:opacity-50">
+                                className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-8 py-3 rounded-xl transition-all duration-300 disabled:opacity-50">
                                 <FiLock size={16} />
                                 {loadingPassword ? 'Modification...' : 'Changer le mot de passe'}
                             </button>

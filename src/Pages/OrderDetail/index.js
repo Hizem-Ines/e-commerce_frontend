@@ -110,7 +110,7 @@ const OrderDetail = () => {
 
                 {/* ALERTES */}
                 {successMsg && (
-                    <div className="mb-6 px-5 py-3 rounded-xl text-sm font-semibold bg-emerald-50 border border-emerald-200 text-emerald-700">
+                    <div className="mb-6 px-5 py-3 rounded-xl text-sm font-semibold bg-emerald-50 border border-#b6eac7 text-emerald-700">
                         ✅ {successMsg}
                     </div>
                 )}
@@ -131,7 +131,7 @@ const OrderDetail = () => {
                             <div className="flex items-center justify-between relative">
                                 {/* Barre de progression */}
                                 <div className="absolute top-5 left-0 right-0 h-1 bg-gray-200 z-0" />
-                                <div className="absolute top-5 left-0 h-1 bg-emerald-500 z-0 transition-all duration-500"
+                                <div className="absolute top-5 left-0 h-1 bg-[#4a8c42]  z-0 transition-all duration-500"
                                     style={{ width: `${getDeliveryStep() * 50}%` }} />
 
                                 {DELIVERY_STEPS.map((step, i) => {

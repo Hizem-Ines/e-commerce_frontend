@@ -30,7 +30,7 @@ const Field = ({ label, required, children }) => (
   </div>
 );
 
-const inputCls    = "w-full bg-[#f9f5f0] border-2 border-transparent focus:border-emerald-500 focus:bg-white rounded-xl px-4 py-2.5 text-sm text-[#2c2c2c] outline-none transition placeholder-black/25";
+const inputCls    = "w-full bg-[#f9f5f0] border-2 border-transparent focus:border-[#4a8c42]  focus:bg-white rounded-xl px-4 py-2.5 text-sm text-[#2c2c2c] outline-none transition placeholder-black/25";
 const textareaCls = inputCls + " resize-none";
 const selectCls   = inputCls + " bg-[#f9f5f0]";
 
@@ -367,7 +367,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
                     <div className="flex items-center gap-2 mt-3">
                       <button
                         onClick={() => updateIngredient(i, "is_bio", !ing.is_bio)}
-                        className={`w-9 h-5 rounded-full transition-colors duration-200 relative shrink-0 ${ing.is_bio ? "bg-emerald-500" : "bg-gray-300"}`}>
+                        className={`w-9 h-5 rounded-full transition-colors duration-200 relative shrink-0 ${ing.is_bio ? "bg-[#4a8c42] " : "bg-gray-300"}`}>
                         <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200 ${ing.is_bio ? "left-4" : "left-0.5"}`} />
                       </button>
                       <span className="text-xs font-bold text-black/50">Bio</span>
@@ -376,7 +376,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
                 ))}
               </div>
               <button onClick={addIngredient}
-                className="w-full border-2 border-dashed border-emerald-300 hover:border-emerald-500 text-[#2d5a27] font-bold py-3 rounded-xl text-sm transition hover:bg-emerald-50">
+                className="w-full border-2 border-dashed border-emerald-300 hover:border-[#4a8c42]  text-[#2d5a27] font-bold py-3 rounded-xl text-sm transition hover:bg-emerald-50">
                 + Ajouter un ingrédient
               </button>
             </div>
@@ -395,7 +395,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
                           <label className="text-xs font-bold text-black/40 uppercase tracking-wider">Durée (min)</label>
                           <input type="number" min="0" value={step.duration}
                             onChange={e => updateStep(i, "duration", e.target.value)}
-                            className="w-20 bg-white border-2 border-transparent focus:border-emerald-500 rounded-xl px-3 py-1.5 text-xs text-[#2c2c2c] outline-none transition"
+                            className="w-20 bg-white border-2 border-transparent focus:border-[#4a8c42]  rounded-xl px-3 py-1.5 text-xs text-[#2c2c2c] outline-none transition"
                             placeholder="5" />
                         </div>
                         {steps.length > 1 && (
@@ -419,7 +419,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
                 ))}
               </div>
               <button onClick={addStep}
-                className="w-full border-2 border-dashed border-emerald-300 hover:border-emerald-500 text-[#2d5a27] font-bold py-3 rounded-xl text-sm transition hover:bg-emerald-50">
+                className="w-full border-2 border-dashed border-emerald-300 hover:border-[#4a8c42]  text-[#2d5a27] font-bold py-3 rounded-xl text-sm transition hover:bg-emerald-50">
                 + Ajouter une étape
               </button>
             </div>
@@ -440,7 +440,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
                 </div>
               ) : (
                 <button onClick={() => fileRef.current?.click()}
-                  className="w-full border-2 border-dashed border-emerald-300 hover:border-emerald-500 rounded-2xl py-14 flex flex-col items-center gap-3 text-[#2d5a27] hover:bg-emerald-50 transition">
+                  className="w-full border-2 border-dashed border-emerald-300 hover:border-[#4a8c42]  rounded-2xl py-14 flex flex-col items-center gap-3 text-[#2d5a27] hover:bg-emerald-50 transition">
                   <FiUpload size={28} />
                   <p className="font-bold text-sm">Cliquer pour uploader une image</p>
                   <p className="text-xs text-black/30">JPG, PNG, WEBP</p>
@@ -459,7 +459,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
                 </div>
                 <button
                   onClick={() => set("is_published", !form.is_published)}
-                  className={`w-12 h-6 rounded-full transition-colors duration-200 relative ${form.is_published ? "bg-emerald-500" : "bg-gray-300"}`}>
+                  className={`w-12 h-6 rounded-full transition-colors duration-200 relative ${form.is_published ? "bg-[#4a8c42] " : "bg-gray-300"}`}>
                   <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 ${form.is_published ? "left-6" : "left-0.5"}`} />
                 </button>
               </div>
@@ -485,7 +485,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
             Annuler
           </button>
           <button onClick={handleSubmit} disabled={saving}
-            className="flex-[2] bg-[#2d5a27] hover:bg-emerald-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition text-sm">
+            className="flex-[2] bg-[#2d5a27] hover:bg-[#4a8c42]  disabled:opacity-50 text-white font-bold py-3 rounded-xl transition text-sm">
             {saving ? "⏳ Enregistrement..." : editRecipe ? "💾 Enregistrer les modifications" : "✅ Créer la recette"}
           </button>
         </div>
@@ -571,14 +571,14 @@ export default function AdminRecettes() {
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Recettes</h2>
         <button onClick={openNew}
-          className="flex items-center gap-2 bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl transition text-sm">
+          className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-5 py-2.5 rounded-xl transition text-sm">
           <FiPlus size={16} /> Nouvelle recette
         </button>
       </div>
 
       {/* Feedback */}
       {successMsg && (
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">
+        <div className="bg-emerald-50 border border-#b6eac7 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">
           ✅ {successMsg}
         </div>
       )}
@@ -596,7 +596,7 @@ export default function AdminRecettes() {
             type="text" value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Rechercher par titre ou catégorie..."
-            className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
+            className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition"
           />
         </div>
       </div>

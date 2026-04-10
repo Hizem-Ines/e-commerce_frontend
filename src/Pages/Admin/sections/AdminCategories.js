@@ -126,14 +126,14 @@ setCategories(flat);
                 <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Catégories</h2>
                 <button
                     onClick={() => { setShowForm(true); setEditItem(null); setFormData({ name_fr: '', name_ar: '', parent_id: '' }); }}
-                    className="flex items-center gap-2 bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
+                    className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
                 >
                     <FiPlus size={16} /> Nouvelle catégorie
                 </button>
             </div>
 
             {/* ALERTES */}
-            {successMsg && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">✅ {successMsg}</div>}
+            {successMsg && <div className="bg-emerald-50 border border-#b6eac7 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">✅ {successMsg}</div>}
             {errorMsg   && <div className="bg-red-50 border border-red-200 text-red-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">❌ {errorMsg}</div>}
 
             {loading ? (
@@ -268,7 +268,7 @@ setCategories(flat);
                                     onChange={(e) => setFormData({ ...formData, name_fr: e.target.value })}
                                     placeholder="Ex: Huiles & Olives"
                                     required
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
+                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition"
                                 />
                             </div>
                             <div>
@@ -279,7 +279,7 @@ setCategories(flat);
                                     onChange={(e) => setFormData({ ...formData, name_ar: e.target.value })}
                                     placeholder="الزيوت والزيتون"
                                     dir="rtl"
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
+                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition"
                                 />
                             </div>
                             <div>
@@ -287,7 +287,7 @@ setCategories(flat);
                                 <select
                                     value={formData.parent_id}
                                     onChange={(e) => setFormData({ ...formData, parent_id: e.target.value })}
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
+                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition"
                                 >
                                     <option value="">Aucune (catégorie principale)</option>
                                     {parentCategories.map(p => (
@@ -301,7 +301,7 @@ setCategories(flat);
                                     Annuler
                                 </button>
                                 <button type="submit" disabled={formLoading}
-                                    className="flex-1 bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition disabled:opacity-50">
+                                    className="flex-1 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold py-3 rounded-xl transition disabled:opacity-50">
                                     {formLoading ? 'Sauvegarde...' : editItem ? 'Modifier' : 'Créer'}
                                 </button>
                             </div>
