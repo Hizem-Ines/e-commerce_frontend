@@ -218,15 +218,17 @@ const ProductDetail = () => {
 
                         {/* IMAGES */}
                         <div className="bg-[#ecfdf5] flex flex-col items-center justify-center p-8 gap-4 min-h-[400px]">
-                            <div className="flex items-center justify-center w-full h-64">
+                            <div className="w-full aspect-square max-w-sm mx-auto">
                                 {images[imageActive]?.url ? (
                                     <img
                                         src={images[imageActive].url}
                                         alt={produit.name_fr}
-                                        className="max-h-full max-w-full object-contain rounded-xl"
+                                        className="w-full h-full object-cover rounded-xl"
                                     />
                                 ) : (
-                                    <span className="text-[100px]">🌿</span>
+                                    <div className="w-full h-full flex items-center justify-center">
+                                        <span className="text-[100px]">🌿</span>
+                                    </div>
                                 )}
                             </div>
                             {images.length > 1 && (

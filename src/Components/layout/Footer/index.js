@@ -94,8 +94,6 @@ const Footer = () => {
                             {[
                                 { label: 'FAQ', url: '/faq' },
                                 { label: 'Contact', url: '/contact' },
-                                { label: 'Livraison', url: '/livraison' },
-                                { label: 'Retours', url: '/retours' },
                                 { label: 'Mentions légales', url: '/mentions-legales' },
                             ].map((lien) => (
                                 <li key={lien.label}>

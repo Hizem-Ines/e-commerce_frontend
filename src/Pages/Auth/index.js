@@ -307,10 +307,6 @@ const Auth = () => {
                         {/* SE SOUVENIR / MOT DE PASSE OUBLIÉ */}
                         {isLogin && (
                             <div className="flex items-center justify-between">
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" className="w-4 h-4" style={{ accentColor: '#166534' }} />
-                                    <span className="text-xs text-gray-600">Se souvenir de moi</span>
-                                </label>
                                 <button type="button" onClick={() => navigate('/mot-de-passe-oublie')} className="text-xs font-bold hover:underline" style={{ color: '#e63946' }}>
                                     Mot de passe oublié ?
                                 </button>

@@ -24,6 +24,7 @@ import OrderConfirmation from './Pages/OrderConfirmation';
 import CompleteAccount from './Pages/Auth/CompleteAccount';
 import OrderDetail from './Pages/OrderDetail';
 import Offres from './Pages/Offres';
+import Contact from "./Pages/Contact";
 import Admin from './Pages/Admin';
 import Recipes    from "./Pages/Recipes";
 import RecipesDetail from "./Pages/RecipesDetail";
@@ -56,6 +57,7 @@ function App() {
                                 <Route path="/produits/:id" element={<ProductDetail />} />
                                 <Route path="/panier" element={<Cart />} />
                                 <Route path="/favoris" element={<Wishlist />} />
+                                <Route path="/contact" element={<Contact />} />
                                 <Route path="/producteurs" element={<Producers />} />
                                 <Route path="/producteurs/:nom" element={<ProducerDetail />} />
                                 <Route path="/profil" element={<Profile />} />

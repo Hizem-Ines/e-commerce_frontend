@@ -129,16 +129,22 @@ const OrderConfirmation = () => {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-start gap-3">
                             <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                                 style={{ background: '#dcfce7' }}>
                                 <FiMapPin style={{ color: '#166534' }} size={16} />
                             </div>
                             <div>
                                 <p className="text-xs text-black/40">Livraison à</p>
-                                <p className="font-bold text-sm text-[#2c2c2c]">
-                                    {order.shipping_address}, {order.shipping_city}
+                                <p className="font-bold text-sm text-[#2c2c2c]">{order.shipping_full_name}</p>
+                                <p className="text-xs text-black/60">{order.shipping_address}</p>
+                                <p className="text-xs text-black/60">
+                                    {[order.shipping_city, order.shipping_governorate, order.shipping_postal_code]
+                                        .filter(Boolean).join(', ')}
                                 </p>
+                                {order.shipping_phone && (
+                                    <p className="text-xs text-black/60">📞 {order.shipping_phone}</p>
+                                )}
                             </div>
                         </div>
 
@@ -188,7 +194,7 @@ const OrderConfirmation = () => {
                 )}
 
                 {/* Notice guest */}
-                {order && !order.password && (
+                {order && order.is_guest && (
                     <div className="rounded-xl p-4 mb-6 text-sm"
                         style={{ background: '#fef9c3', border: '1px solid #fde047' }}>
                         <p className="font-bold text-yellow-800 mb-1">📧 Vérifiez votre email !</p>
