@@ -91,7 +91,7 @@ const TrendingProducts = ({ produits, loading }) => {
                                         {produit.supplier_name && (
                                             <Link
                                                 to={`/producteurs/${produit.supplier_slug}`}
-                                                className="bg-[#d1fae5] text-[#2d5a27] text-xs font-semibold px-3 py-1 rounded-full no-underline hover:bg-emerald-200 transition-colors duration-200"
+                                                className="bg-[#d1fae5] text-[#2d5a27] text-xs font-semibold px-3 py-1 rounded-full no-underline hover:bg-#b6eac7 transition-colors duration-200"
                                                 onClick={(e) => e.stopPropagation()}
                                             >
                                                 {produit.supplier_name}

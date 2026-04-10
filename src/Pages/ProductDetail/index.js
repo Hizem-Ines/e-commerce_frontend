@@ -37,7 +37,7 @@ const FormAvis = ({ productId, onSuccess }) => {
     };
 
     if (success) return (
-        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 text-center">
+        <div className="bg-emerald-50 border border-#b6eac7 rounded-xl p-5 text-center">
             <p className="text-2xl mb-2">✅</p>
             <p className="font-bold text-emerald-700">Merci pour votre avis !</p>
         </div>
@@ -86,7 +86,7 @@ const FormAvis = ({ productId, onSuccess }) => {
                         onChange={(e) => setComment(e.target.value)}
                         placeholder="Partagez votre expérience avec ce produit..."
                         rows={3}
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition resize-none"
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition resize-none"
                         required
                     />
                 </div>
@@ -94,7 +94,7 @@ const FormAvis = ({ productId, onSuccess }) => {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-xl transition-all duration-300 disabled:opacity-50 text-sm"
+                    className="bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-6 py-3 rounded-xl transition-all duration-300 disabled:opacity-50 text-sm"
                 >
                     {loading ? 'Envoi...' : 'Publier mon avis →'}
                 </button>
@@ -176,7 +176,7 @@ const ProductDetail = () => {
             <div className="min-h-[60vh] flex flex-col items-center justify-center bg-[#fdf6ec] px-4 text-center">
                 <div className="text-6xl mb-4">🔍</div>
                 <h2 className="text-2xl font-bold font-serif text-[#2c2c2c] mb-3">Produit introuvable</h2>
-                <Link to="/produits" className="bg-[#2d5a27] text-white font-bold px-8 py-3 rounded-full no-underline hover:bg-emerald-500 transition-colors duration-300">
+                <Link to="/produits" className="bg-[#2d5a27] text-white font-bold px-8 py-3 rounded-full no-underline hover:bg-[#4a8c42]  transition-colors duration-300">
                     Voir tous les produits
                 </Link>
             </div>
@@ -255,7 +255,7 @@ const ProductDetail = () => {
                                     {produit.supplier_name && (
                                         <Link
                                             to={`/producteurs/${produit.supplier_slug || encodeURIComponent(produit.supplier_name)}`}
-                                            className="bg-[#d1fae5] text-[#2d5a27] text-xs font-bold px-3 py-1 rounded-full no-underline hover:bg-emerald-200 transition-colors"
+                                            className="bg-[#d1fae5] text-[#2d5a27] text-xs font-bold px-3 py-1 rounded-full no-underline hover:bg-#b6eac7 transition-colors"
                                         >
                                             {produit.supplier_name}
                                             {produit.is_certified_bio && ' 🌿'}
@@ -322,7 +322,7 @@ const ProductDetail = () => {
                                                 className={`px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all duration-200 ${
                                                     varianteActive?.id === v.id
                                                         ? 'border-[#2d5a27] bg-[#2d5a27] text-white'
-                                                        : 'border-gray-200 text-black/60 hover:border-emerald-400'
+                                                        : 'border-gray-200 text-black/60 hover:border-[#4a8c42]'
                                                 }`}
                                             >
                                                 {v.attributes?.map(a => a.value_fr).join(' / ') || `Variante ${v.id.slice(0, 4)}`}
@@ -368,7 +368,7 @@ const ProductDetail = () => {
                                     className={`flex-1 font-bold py-4 rounded-xl transition-all duration-300 text-base ${
                                         ajoute
                                             ? 'bg-green-500 text-white'
-                                            : 'bg-[#2d5a27] hover:bg-emerald-500 text-white'
+                                            : 'bg-[#2d5a27] hover:bg-[#4a8c42]  text-white'
                                     }`}
                                 >
                                     {ajoute ? '✅ Ajouté au panier !' : 'Ajouter au panier'}
@@ -429,7 +429,7 @@ const ProductDetail = () => {
                                 </div>
 
                                 {produit.ethical_info_fr && (
-                                    <div className="bg-emerald-50 border-l-4 border-emerald-500 rounded-r-xl p-4">
+                                    <div className="bg-emerald-50 border-l-4 border-[#4a8c42]  rounded-r-xl p-4">
                                         <p className="font-bold text-emerald-700 text-sm mb-1">🌱 Engagement éthique</p>
                                         <p className="text-emerald-700 text-sm leading-relaxed">{produit.ethical_info_fr}</p>
                                     </div>
@@ -609,11 +609,11 @@ const ProductDetail = () => {
                 getProductById(id).then(res => setProduit(res.data.product));
             }} />
         ) : (
-            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
+            <div className="bg-emerald-50 border border-#b6eac7 rounded-xl p-4 text-center">
                 <p className="text-emerald-700 font-semibold text-sm mb-2">
                     Connectez-vous pour laisser un avis
                 </p>
-                <Link to="/connexion" className="bg-[#2d5a27] text-white font-bold px-5 py-2 rounded-xl no-underline hover:bg-emerald-500 transition text-sm inline-block">
+                <Link to="/connexion" className="bg-[#2d5a27] text-white font-bold px-5 py-2 rounded-xl no-underline hover:bg-[#4a8c42]  transition text-sm inline-block">
                     Se connecter
                 </Link>
             </div>
@@ -684,7 +684,7 @@ const ProductDetail = () => {
                         </div>
                         <Link
                             to={`/producteurs/${produit.supplier_slug}`}
-                            className="bg-[#2d5a27] text-white font-bold px-5 py-2.5 rounded-xl no-underline hover:bg-emerald-500 transition-colors text-sm shrink-0"
+                            className="bg-[#2d5a27] text-white font-bold px-5 py-2.5 rounded-xl no-underline hover:bg-[#4a8c42]  transition-colors text-sm shrink-0"
                         >
                             Voir le producteur →
                         </Link>
@@ -700,7 +700,7 @@ const ProductDetail = () => {
                                 <Link
                                     key={p.id}
                                     to={`/produits/${p.id}`}
-                                    className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent hover:border-emerald-500 hover:-translate-y-1 transition-all duration-300 no-underline"
+                                    className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent hover:border-[#4a8c42]  hover:-translate-y-1 transition-all duration-300 no-underline"
                                 >
                                     <div className="h-32 bg-[#ecfdf5] flex items-center justify-center">
                                         {p.images?.[0]?.url ? (

@@ -60,7 +60,7 @@ const Admin = () => {
                     {sidebarOpen && (
                         <div>
                             <h1 className="text-lg font-black tracking-widest font-serif">GOFFA</h1>
-                            <p className="text-emerald-400 text-xs">Admin Dashboard</p>
+                            <p className="text-[#4a8c42] text-xs">Admin Dashboard</p>
                         </div>
                     )}
                     <button
@@ -80,7 +80,7 @@ const Admin = () => {
                             className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-left ${
                                 activeSection === section.id
                                     ? 'bg-[#2d5a27] text-white'
-                                    : 'text-emerald-200 hover:bg-emerald-800'
+                                    : 'text-#b6eac7 hover:bg-emerald-800'
                             }`}
                         >
                             <span className="shrink-0">{section.icone}</span>
@@ -98,7 +98,7 @@ const Admin = () => {
                             </div>
                             <div>
                                 <p className="text-sm font-bold">{user.name}</p>
-                                <p className="text-xs text-emerald-400">Administrateur</p>
+                                <p className="text-xs text-[#4a8c42]">Administrateur</p>
                             </div>
                         </div>
                     </div>

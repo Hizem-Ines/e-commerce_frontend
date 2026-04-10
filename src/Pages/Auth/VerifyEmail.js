@@ -50,7 +50,7 @@ const VerifyEmail = () => {
                     </div>
                     <div>
                         <h1 className="text-2xl font-black text-[#2d5a27] tracking-widest font-serif">GOFFA</h1>
-                        <p className="text-xs text-emerald-500 font-semibold tracking-wider">artisanat tunisien</p>
+                        <p className="text-xs text-[#4a8c42]  font-semibold tracking-wider">artisanat tunisien</p>
                     </div>
                 </Link>
 
@@ -82,7 +82,7 @@ const VerifyEmail = () => {
                         </div>
                         <Link
                             to="/"
-                            className="bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-xl no-underline transition-all duration-300 inline-block"
+                            className="bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-8 py-3 rounded-xl no-underline transition-all duration-300 inline-block"
                         >
                             Aller à l'accueil →
                         </Link>
@@ -102,7 +102,7 @@ const VerifyEmail = () => {
                         <div className="flex flex-col gap-3">
                             <Link
                                 to="/connexion"
-                                className="bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-xl no-underline transition-all duration-300 inline-block"
+                                className="bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-8 py-3 rounded-xl no-underline transition-all duration-300 inline-block"
                             >
                                 Se connecter
                             </Link>

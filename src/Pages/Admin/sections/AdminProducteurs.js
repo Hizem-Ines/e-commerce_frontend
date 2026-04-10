@@ -116,13 +116,13 @@ const AdminProducteurs = () => {
                 <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Producteurs</h2>
                 <button
                     onClick={openCreate}
-                    className="flex items-center gap-2 bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
+                    className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
                 >
                     <FiPlus size={16} /> Nouveau producteur
                 </button>
             </div>
 
-            {successMsg && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">✅ {successMsg}</div>}
+            {successMsg && <div className="bg-emerald-50 border border-#b6eac7 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">✅ {successMsg}</div>}
             {errorMsg && <div className="bg-red-50 border border-red-200 text-red-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">❌ {errorMsg}</div>}
 
             <div className="relative mb-6">
@@ -132,7 +132,7 @@ const AdminProducteurs = () => {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Rechercher un producteur..."
-                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
+                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition"
                 />
             </div>
 
@@ -211,7 +211,7 @@ const AdminProducteurs = () => {
                                         onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
                                         placeholder={field.placeholder}
                                         required={field.required}
-                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
+                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition"
                                     />
                                 </div>
                             ))}
@@ -222,7 +222,7 @@ const AdminProducteurs = () => {
                                     onChange={(e) => setFormData({ ...formData, description_fr: e.target.value })}
                                     placeholder="Description du producteur..."
                                     rows={3}
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition resize-none"
+                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition resize-none"
                                 />
                             </div>
                             <div>
@@ -233,7 +233,7 @@ const AdminProducteurs = () => {
                                     placeholder="وصف المنتج..."
                                     rows={3}
                                     dir="rtl"
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition resize-none"
+                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition resize-none"
                                 />
                             </div>
                             <div className="flex items-center gap-2">
@@ -257,7 +257,7 @@ const AdminProducteurs = () => {
                                 <button
                                     type="submit"
                                     disabled={formLoading}
-                                    className="flex-1 bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition disabled:opacity-50"
+                                    className="flex-1 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold py-3 rounded-xl transition disabled:opacity-50"
                                 >
                                     {formLoading ? '...' : editTarget ? 'Enregistrer' : 'Créer'}
                                 </button>

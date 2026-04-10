@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import {
   FiPlus, FiSearch, FiEdit, FiTrash2,
-  FiTag, FiCheckCircle, FiClock, FiBarChart2
+  FiTag, FiCheckCircle, FiClock, FiBarChart2, FiX
 } from "react-icons/fi";
 
 // ─── CONFIG ───────────────────────────────────────────────
@@ -53,7 +53,7 @@ const StatusBadge = ({ row }) => {
     return <span className={`${base} bg-amber-50 text-amber-600`}><span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block" />À venir</span>;
   if (row.max_uses && row.used_count >= row.max_uses)
     return <span className={`${base} bg-orange-50 text-orange-600`}><span className="w-1.5 h-1.5 rounded-full bg-orange-500 inline-block" />Épuisé</span>;
-  return <span className={`${base} bg-emerald-50 text-emerald-700`}><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />Actif</span>;
+  return <span className={`${base} bg-emerald-50 text-emerald-700`}><span className="w-1.5 h-1.5 rounded-full bg-[#4a8c42] inline-block animate-pulse" />Actif</span>;
 };
 
 // ─── MODAL FORM ───────────────────────────────────────────
@@ -114,31 +114,39 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
     }
   };
 
-  const inputCls = "w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition";
+  const inputCls = "w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42] focus:outline-none text-sm transition";
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl p-8 max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold text-[#2c2c2c]">
-            {mode === "edit" ? `Modifier : ${initial?.code}` : "Nouvelle promotion"}
-          </h3>
-          <button onClick={onClose} className="text-black/40 hover:text-black text-2xl font-bold">×</button>
+        {/* Header — same style as AdminUtilisateurs */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-[#f9f5f0]">
+          <div>
+            <p className="font-bold text-[#2c2c2c]">
+              {mode === "edit" ? `Modifier : ${initial?.code}` : "Nouvelle promotion"}
+            </p>
+            <p className="text-xs text-black/40 mt-0.5">
+              {mode === "edit" ? "Modifiez les informations du code promo" : "Créer un nouveau code promo"}
+            </p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl transition text-black/40">
+            <FiX size={18} />
+          </button>
         </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">
-            ❌ {error}
-          </div>
-        )}
+        {/* Body */}
+        <div className="px-6 py-5 space-y-4 overflow-y-auto">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 font-semibold px-5 py-3 rounded-xl text-sm">
+              ❌ {error}
+            </div>
+          )}
 
-        <div className="space-y-4">
           {/* Code + Actif */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1.5">Code promo *</label>
+              <label className="block text-xs font-bold text-black/50 mb-1.5">Code promo *</label>
               <input name="code" value={form.code} onChange={handle}
                 placeholder="EX: ETE25"
                 className={`${inputCls} font-mono uppercase`} />
@@ -150,7 +158,7 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
                   <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-[#2d5a27] transition-colors" />
                   <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5" />
                 </div>
-                <span className="text-sm font-bold text-gray-600">Active</span>
+                <span className="text-sm font-bold text-black/50">Active</span>
               </label>
             </div>
           </div>
@@ -158,14 +166,14 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
           {/* Type + Valeur */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1.5">Type de réduction *</label>
+              <label className="block text-xs font-bold text-black/50 mb-1.5">Type de réduction *</label>
               <select name="discount_type" value={form.discount_type} onChange={handle} className={inputCls}>
                 <option value="percent">Pourcentage (%)</option>
                 <option value="fixed">Montant fixe (TND)</option>
               </select>
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1.5">
+              <label className="block text-xs font-bold text-black/50 mb-1.5">
                 Valeur * {form.discount_type === "percent" ? "(1–100%)" : "(TND)"}
               </label>
               <input type="number" name="discount_value" value={form.discount_value} onChange={handle}
@@ -179,11 +187,11 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
           {/* Dates */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1.5">Date de début *</label>
+              <label className="block text-xs font-bold text-black/50 mb-1.5">Date de début *</label>
               <input type="date" name="starts_at" value={form.starts_at} onChange={handle} className={inputCls} />
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1.5">Date d'expiration *</label>
+              <label className="block text-xs font-bold text-black/50 mb-1.5">Date d'expiration *</label>
               <input type="date" name="expires_at" value={form.expires_at} onChange={handle} className={inputCls} />
             </div>
           </div>
@@ -191,12 +199,12 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
           {/* Min commande + Max utilisations */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1.5">Montant minimum (TND)</label>
+              <label className="block text-xs font-bold text-black/50 mb-1.5">Montant minimum (TND)</label>
               <input type="number" name="min_order_amount" value={form.min_order_amount} onChange={handle}
                 min="0" step="0.5" placeholder="Aucun minimum" className={inputCls} />
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1.5">Utilisations max</label>
+              <label className="block text-xs font-bold text-black/50 mb-1.5">Utilisations max</label>
               <input type="number" name="max_uses" value={form.max_uses} onChange={handle}
                 min="0" step="1" placeholder="Illimité" className={inputCls} />
             </div>
@@ -205,13 +213,13 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
           {/* Descriptions */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1.5">Description (FR)</label>
+              <label className="block text-xs font-bold text-black/50 mb-1.5">Description (FR)</label>
               <textarea name="description_fr" value={form.description_fr} onChange={handle}
                 rows={2} placeholder="Description en français..."
                 className={`${inputCls} resize-none`} />
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1.5">Description (AR)</label>
+              <label className="block text-xs font-bold text-black/50 mb-1.5">Description (AR)</label>
               <textarea name="description_ar" value={form.description_ar} onChange={handle}
                 rows={2} placeholder="وصف بالعربية..." dir="rtl"
                 className={`${inputCls} resize-none`} />
@@ -219,14 +227,14 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="flex gap-3 pt-6">
+        {/* Footer — same style as AdminUtilisateurs */}
+        <div className="flex gap-3 px-6 py-4 border-t border-gray-100 bg-[#fafafa]">
           <button onClick={onClose}
-            className="flex-1 border-2 border-gray-200 text-black/60 font-bold py-3 rounded-xl hover:bg-gray-50 transition">
+            className="flex-1 border-2 border-gray-200 text-black/60 font-bold py-3 rounded-xl hover:bg-gray-50 transition text-sm">
             Annuler
           </button>
           <button onClick={submit} disabled={loading}
-            className="flex-1 bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition disabled:opacity-50">
+            className="flex-1 bg-[#2d5a27] hover:bg-[#4a8c42] text-white font-bold py-3 rounded-xl transition disabled:opacity-50 text-sm">
             {loading ? "..." : mode === "edit" ? "Enregistrer" : "Créer la promotion"}
           </button>
         </div>
@@ -252,9 +260,7 @@ const DeleteModal = ({ promotion, onClose, onDeleted }) => {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-2xl text-center">
-        <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-4">
-          <FiTrash2 size={28} className="text-red-500" />
-        </div>
+        <div className="text-5xl mb-4">⚠️</div>
         <h3 className="text-xl font-bold text-[#2c2c2c] mb-2">Supprimer la promotion ?</h3>
         <p className="text-black/50 text-sm mb-2">
           Le code <span className="font-mono font-bold text-[#2c2c2c]">{promotion.code}</span> sera définitivement supprimé.
@@ -330,7 +336,7 @@ const AdminPromotions = () => {
         <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Promotions</h2>
         <button
           onClick={() => setModal({ type: "create" })}
-          className="flex items-center gap-2 bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
+          className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42] text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
         >
           <FiPlus size={16} /> Nouvelle promotion
         </button>
@@ -339,10 +345,10 @@ const AdminPromotions = () => {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         {[
-          { label: "Total",        value: stats.total,     icon: <FiTag size={18} />,      bg: "bg-blue-50 text-blue-600"    },
-          { label: "Actives",      value: stats.active,    icon: <FiCheckCircle size={18}/>,bg: "bg-emerald-50 text-[#2d5a27]"},
-          { label: "Expirées",     value: stats.expired,   icon: <FiClock size={18} />,    bg: "bg-red-50 text-red-500"      },
-          { label: "Utilisations", value: stats.totalUses, icon: <FiBarChart2 size={18} />,bg: "bg-amber-50 text-amber-600"  },
+          { label: "Total",        value: stats.total,     icon: <FiTag size={18} />,       bg: "bg-blue-50 text-blue-600"     },
+          { label: "Actives",      value: stats.active,    icon: <FiCheckCircle size={18}/>, bg: "bg-emerald-50 text-[#2d5a27]" },
+          { label: "Expirées",     value: stats.expired,   icon: <FiClock size={18} />,     bg: "bg-red-50 text-red-500"       },
+          { label: "Utilisations", value: stats.totalUses, icon: <FiBarChart2 size={18} />, bg: "bg-amber-50 text-amber-600"   },
         ].map((s) => (
           <div key={s.label} className="bg-white rounded-2xl p-4 shadow-[0_4px_15px_rgba(0,0,0,0.07)] flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.bg}`}>
@@ -356,17 +362,20 @@ const AdminPromotions = () => {
         ))}
       </div>
 
-      {/* Recherche + Filtres */}
-      <div className="relative mb-4">
-        <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Rechercher un code promo..."
-          className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
-        />
-      </div>
+      {/* Recherche */}
+      <form onSubmit={(e) => e.preventDefault()} className="flex gap-3 mb-4">
+        <div className="relative flex-1">
+          <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher un code promo..."
+            className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42] focus:outline-none text-sm transition"
+          />
+        </div>
+      </form>
 
+      {/* Filtres */}
       <div className="flex gap-2 flex-wrap mb-6">
         {[
           { value: "all",      label: "Tous"       },
@@ -381,7 +390,7 @@ const AdminPromotions = () => {
             className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
               filterStatus === f.value
                 ? "bg-[#2d5a27] text-white"
-                : "bg-white text-black/50 border-2 border-gray-200 hover:border-emerald-400"
+                : "bg-white text-black/50 border-2 border-gray-200 hover:border-[#4a8c42]"
             }`}
           >
             {f.label}
@@ -404,9 +413,10 @@ const AdminPromotions = () => {
         <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/60">
+              {/* Same as AdminUtilisateurs: bg-[#f9f5f0] + font-bold text-[#2c2c2c] */}
+              <tr className="bg-[#f9f5f0] border-b border-gray-100">
                 {["Code", "Réduction", "Dates", "Utilisations", "Statut", "Actions"].map((h) => (
-                  <th key={h} className="px-5 py-3 text-left text-xs font-bold text-black/40 uppercase tracking-wide">
+                  <th key={h} className="px-5 py-4 text-left font-bold text-[#2c2c2c]">
                     {h}
                   </th>
                 ))}
@@ -415,11 +425,11 @@ const AdminPromotions = () => {
             <tbody>
               {filtered.map((promo, i) => (
                 <tr key={promo.id}
-                  className={`border-t border-gray-50 hover:bg-emerald-50/30 transition-colors ${i % 2 !== 0 ? "bg-gray-50/30" : ""}`}>
+                  className={`border-b border-gray-50 hover:bg-[#fdf6ec] transition-colors ${i % 2 !== 0 ? "bg-gray-50/30" : ""}`}>
 
                   {/* Code */}
                   <td className="px-5 py-4">
-                    <span className="font-mono font-bold text-[#2c2c2c] text-sm bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-xl inline-block">
+                    <span className="font-mono font-bold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-xl inline-block text-sm">
                       {promo.code}
                     </span>
                     {promo.description_fr && (
@@ -457,7 +467,7 @@ const AdminPromotions = () => {
                         <span className="text-xs text-black/40"> / {promo.max_uses}</span>
                         <div className="w-16 h-1.5 bg-gray-100 rounded-full mt-1 mx-auto">
                           <div
-                            className="h-1.5 bg-emerald-500 rounded-full"
+                            className="h-1.5 bg-[#4a8c42] rounded-full"
                             style={{ width: `${Math.min(100, ((promo.used_count || 0) / promo.max_uses) * 100)}%` }}
                           />
                         </div>
@@ -477,17 +487,17 @@ const AdminPromotions = () => {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => setModal({ type: "edit", data: promo })}
-                        className="p-1.5 hover:bg-blue-50 text-blue-500 rounded-xl transition"
+                        className="p-2 hover:bg-blue-50 text-blue-500 rounded-xl transition"
                         title="Modifier"
                       >
-                        <FiEdit size={14} />
+                        <FiEdit size={15} />
                       </button>
                       <button
                         onClick={() => setModal({ type: "delete", data: promo })}
-                        className="p-1.5 hover:bg-red-50 text-red-500 rounded-xl transition"
+                        className="p-2 hover:bg-red-50 text-red-500 rounded-xl transition"
                         title="Supprimer"
                       >
-                        <FiTrash2 size={14} />
+                        <FiTrash2 size={15} />
                       </button>
                     </div>
                   </td>

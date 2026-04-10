@@ -49,7 +49,7 @@ const Offres = () => {
     };
 
     const ProductCard = ({ produit, accentColor = 'emerald', badge = null }) => (
-        <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent hover:border-emerald-500 hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
+        <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent hover:border-[#4a8c42]  hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
             <Link to={`/produits/${produit.id}`} className="no-underline">
                 <div className="relative h-48 bg-[#ecfdf5] flex items-center justify-center overflow-hidden">
                     {produit.images?.[0]?.url ? (
@@ -92,7 +92,7 @@ const Offres = () => {
                 {produit.supplier_name && (
                     <Link
                         to={`/producteurs/${produit.supplier_slug}`}
-                        className="inline-block bg-[#d1fae5] text-[#2d5a27] text-xs font-semibold px-3 py-1 rounded-full no-underline hover:bg-emerald-200 transition-colors mb-3"
+                        className="inline-block bg-[#d1fae5] text-[#2d5a27] text-xs font-semibold px-3 py-1 rounded-full no-underline hover:bg-#b6eac7 transition-colors mb-3"
                     >
                         {produit.supplier_name}
                     </Link>
@@ -118,7 +118,7 @@ const Offres = () => {
                             attributes:   [],
                             stock:        99,
                         })}
-                        className="bg-[#2d5a27] hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300"
+                        className="bg-[#2d5a27] hover:bg-[#4a8c42]  text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300"
                     >
                         Ajouter
                     </button>
@@ -160,7 +160,7 @@ const Offres = () => {
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {data.activePromos.map((promo) => (
-                                <div key={promo.id} className="bg-white rounded-2xl p-5 shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-dashed border-emerald-200">
+                                <div key={promo.id} className="bg-white rounded-2xl p-5 shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-dashed border-#b6eac7">
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="bg-emerald-50 px-4 py-2 rounded-xl">
                                             <span className="text-xl font-black text-[#2d5a27] tracking-widest">
@@ -169,7 +169,7 @@ const Offres = () => {
                                         </div>
                                         <button
                                             onClick={() => handleCopyCode(promo.code)}
-                                            className="flex items-center gap-1 text-xs font-bold text-[#2d5a27] hover:text-emerald-500 transition"
+                                            className="flex items-center gap-1 text-xs font-bold text-[#2d5a27] hover:text-[#4a8c42]  transition"
                                         >
                                             {copiedCode === promo.code
                                                 ? <><FiCheck size={14} /> Copié !</>
@@ -212,18 +212,18 @@ const Offres = () => {
                             value={promoCode}
                             onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
                             placeholder="Entrez votre code promo..."
-                            className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm font-bold tracking-widest transition"
+                            className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm font-bold tracking-widest transition"
                         />
                         <button
                             type="submit"
                             disabled={promoLoading}
-                            className="bg-[#2d5a27] hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-xl transition disabled:opacity-50"
+                            className="bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-6 py-3 rounded-xl transition disabled:opacity-50"
                         >
                             {promoLoading ? '...' : 'Vérifier'}
                         </button>
                     </form>
                     {promoResult && (
-                        <div className="mt-4 bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                        <div className="mt-4 bg-emerald-50 border border-#b6eac7 rounded-xl p-4">
                             <p className="text-emerald-700 font-bold text-sm">
                                 ✅ Code valide !{' '}
                                 {promoResult.discount_type === 'percent'

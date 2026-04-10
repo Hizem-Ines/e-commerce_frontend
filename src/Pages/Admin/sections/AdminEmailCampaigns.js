@@ -105,7 +105,7 @@ const AdminEmailCampaigns = () => {
 
             {/* ALERTS */}
             {error   && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{error}</div>}
-            {success && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm">{success}</div>}
+            {success && <div className="bg-emerald-50 border border-#b6eac7 text-emerald-700 px-4 py-3 rounded-xl text-sm">{success}</div>}
 
             {/* STATS */}
             <div className="grid grid-cols-3 gap-4">
@@ -143,7 +143,7 @@ const AdminEmailCampaigns = () => {
                                 placeholder="Ex: Soldes d'été"
                                 value={form.title}
                                 onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-400"
+                                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#4a8c42]"
                             />
                         </div>
                         <div>
@@ -152,7 +152,7 @@ const AdminEmailCampaigns = () => {
                                 placeholder="Ex: 🎉 -20% sur toute la boutique"
                                 value={form.subject}
                                 onChange={e => setForm(f => ({ ...f, subject: e.target.value }))}
-                                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-400"
+                                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#4a8c42]"
                             />
                         </div>
                         <div>
@@ -160,7 +160,7 @@ const AdminEmailCampaigns = () => {
                             <select
                                 value={form.type}
                                 onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
-                                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-400"
+                                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#4a8c42]"
                             >
                                 {TYPES.map(t => (
                                     <option key={t} value={t}>{TYPE_LABELS[t]}</option>
@@ -173,7 +173,7 @@ const AdminEmailCampaigns = () => {
                                 type="datetime-local"
                                 value={form.scheduled_at}
                                 onChange={e => setForm(f => ({ ...f, scheduled_at: e.target.value }))}
-                                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-400"
+                                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#4a8c42]"
                             />
                         </div>
                     </div>
@@ -184,7 +184,7 @@ const AdminEmailCampaigns = () => {
                             value={form.content_fr}
                             rows={4}
                             onChange={e => setForm(f => ({ ...f, content_fr: e.target.value }))}
-                            className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-400 resize-none"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#4a8c42] resize-none"
                         />
                     </div>
                     <div className="flex gap-3">
@@ -211,7 +211,7 @@ const AdminEmailCampaigns = () => {
                     placeholder="Ex: ETE20"
                     value={promoCode}
                     onChange={e => setPromoCode(e.target.value)}
-                    className="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-400 w-48"
+                    className="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#4a8c42] w-48"
                 />
                 <p className="text-xs text-gray-400">Sera inclus dans l'email lors de l'envoi</p>
             </div>

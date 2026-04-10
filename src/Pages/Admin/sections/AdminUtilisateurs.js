@@ -118,7 +118,7 @@ const AdminUtilisateurs = () => {
             </div>
 
             {/* ALERTES */}
-            {successMsg && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">✅ {successMsg}</div>}
+            {successMsg && <div className="bg-emerald-50 border border-#b6eac7 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">✅ {successMsg}</div>}
             {errorMsg && <div className="bg-red-50 border border-red-200 text-red-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">❌ {errorMsg}</div>}
 
             {/* RECHERCHE */}
@@ -130,10 +130,10 @@ const AdminUtilisateurs = () => {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Rechercher un utilisateur..."
-                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-sm transition"
+                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition"
                     />
                 </div>
-                <button type="submit" className="bg-[#2d5a27] text-white font-bold px-5 py-3 rounded-xl hover:bg-emerald-500 transition text-sm">
+                <button type="submit" className="bg-[#2d5a27] text-white font-bold px-5 py-3 rounded-xl hover:bg-[#4a8c42]  transition text-sm">
                     Rechercher
                 </button>
             </form>
@@ -284,7 +284,7 @@ const AdminUtilisateurs = () => {
                                         type="text"
                                         value={editForm.name}
                                         onChange={e => handleEditChange('name', e.target.value)}
-                                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none transition"
+                                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-[#4a8c42]  focus:outline-none transition"
                                     />
                                 </div>
                                 <div>
@@ -293,7 +293,7 @@ const AdminUtilisateurs = () => {
                                         type="email"
                                         value={editForm.email}
                                         onChange={e => handleEditChange('email', e.target.value)}
-                                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none transition"
+                                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-[#4a8c42]  focus:outline-none transition"
                                     />
                                 </div>
                             </div>
@@ -306,7 +306,7 @@ const AdminUtilisateurs = () => {
                                         type="text"
                                         value={editForm.phone}
                                         onChange={e => handleEditChange('phone', e.target.value)}
-                                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none transition"
+                                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-[#4a8c42]  focus:outline-none transition"
                                     />
                                 </div>
                                 <div>
@@ -315,7 +315,7 @@ const AdminUtilisateurs = () => {
                                         type="text"
                                         value={editForm.city}
                                         onChange={e => handleEditChange('city', e.target.value)}
-                                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none transition"
+                                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-[#4a8c42]  focus:outline-none transition"
                                     />
                                 </div>
                             </div>
@@ -327,7 +327,7 @@ const AdminUtilisateurs = () => {
                                     type="text"
                                     value={editForm.address}
                                     onChange={e => handleEditChange('address', e.target.value)}
-                                    className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none transition"
+                                    className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-[#4a8c42]  focus:outline-none transition"
                                 />
                             </div>
 
@@ -338,7 +338,7 @@ const AdminUtilisateurs = () => {
                                     <select
                                         value={editForm.role}
                                         onChange={e => handleEditChange('role', e.target.value)}
-                                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none transition bg-white"
+                                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-[#4a8c42]  focus:outline-none transition bg-white"
                                     >
                                         <option value="user">Client</option>
                                         <option value="admin">Admin</option>
@@ -349,7 +349,7 @@ const AdminUtilisateurs = () => {
                                     <select
                                         value={editForm.is_verified ? 'true' : 'false'}
                                         onChange={e => handleEditChange('is_verified', e.target.value === 'true')}
-                                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none transition bg-white"
+                                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-[#4a8c42]  focus:outline-none transition bg-white"
                                     >
                                         <option value="true">✅ Oui</option>
                                         <option value="false">⏳ Non</option>
@@ -360,7 +360,7 @@ const AdminUtilisateurs = () => {
                                     <select
                                         value={editForm.is_active ? 'true' : 'false'}
                                         onChange={e => handleEditChange('is_active', e.target.value === 'true')}
-                                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none transition bg-white"
+                                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-[#4a8c42]  focus:outline-none transition bg-white"
                                     >
                                         <option value="true">🟢 Actif</option>
                                         <option value="false">🔴 Suspendu</option>
@@ -378,7 +378,7 @@ const AdminUtilisateurs = () => {
                                     value={editForm.newPassword}
                                     onChange={e => handleEditChange('newPassword', e.target.value)}
                                     placeholder="••••••••"
-                                    className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none transition"
+                                    className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-[#4a8c42]  focus:outline-none transition"
                                 />
                             </div>
                         </div>
@@ -394,7 +394,7 @@ const AdminUtilisateurs = () => {
                             <button
                                 onClick={handleEditSubmit}
                                 disabled={editLoading}
-                                className="flex-1 bg-[#2d5a27] hover:bg-emerald-500 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition text-sm flex items-center justify-center gap-2"
+                                className="flex-1 bg-[#2d5a27] hover:bg-[#4a8c42]  disabled:opacity-60 text-white font-bold py-3 rounded-xl transition text-sm flex items-center justify-center gap-2"
                             >
                                 {editLoading ? (
                                     <span className="animate-spin">🌿</span>
