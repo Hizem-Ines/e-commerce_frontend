@@ -187,8 +187,7 @@ const OrderDetail = () => {
                         </h2>
                         <div className="space-y-4">
                             {order.items?.map((item, i) => {
-                                const images = item.images || [];
-                                const image  = images[0]?.url || null;
+                                const image = item.product_image || null;
                                 const details = typeof item.variant_details === 'string'
                                     ? JSON.parse(item.variant_details)
                                     : item.variant_details || [];
