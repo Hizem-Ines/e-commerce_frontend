@@ -9,7 +9,24 @@ const Wishlist = () => {
     const { favoris, retirerFavori } = useWishlist();
     const { ajouterAuPanier } = useCart();
     const { user } = useAuth();
+    const addToCart = (produit) => {
+    const productId   = produit.product_id || produit.id;
+    const productName = produit.product_name_fr || produit.name_fr || produit.name;
+    const productImg  = produit.images?.[0]?.url || produit.image || null;
+    const productPrix = produit.price || produit.min_price || produit.prix;
 
+    ajouterAuPanier({
+    ...produit,
+    id: productId,
+    product_id: productId,
+    variant_id: productId,        
+    product_name: productName,    
+    name_fr: productName,
+    image: productImg,
+    images: produit.images,
+    price: productPrix,
+});
+};
     if (!user) {
         return (
             <div className="min-h-[60vh] flex flex-col items-center justify-center bg-[#fdf6ec] px-4 text-center">
@@ -121,7 +138,7 @@ const Wishlist = () => {
                                             {productPrix ? formatPrice(parseFloat(productPrix)) : 'Prix N/A'}
                                         </span>
                                         <button
-                                            onClick={() => ajouterAuPanier({ ...produit, id: productId })}
+                                            onClick={() => addToCart(produit)}
                                             className="bg-[#2d5a27] hover:bg-[#4a8c42]  text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300"
                                         >
                                             Ajouter
@@ -136,7 +153,7 @@ const Wishlist = () => {
                 {/* TOUT AJOUTER AU PANIER */}
                 <div className="mt-10 text-center">
                     <button
-                        onClick={() => favoris.forEach(p => ajouterAuPanier({ ...p, id: p.product_id || p.id }))}
+                        onClick={() => favoris.forEach(p => addToCart(p))}
                         className="bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-10 py-4 rounded-full transition-colors duration-300 shadow-lg"
                     >
                         🛒 Tout ajouter au panier
