@@ -30,6 +30,7 @@ const Profile = () => {
     const [loadingProfile, setLoadingProfile] = useState(false);
     const [loadingPassword, setLoadingPassword] = useState(false);
     const [avatarPreview, setAvatarPreview] = useState(user?.avatar || null);
+    const [deleteAvatar, setDeleteAvatar] = useState(false);
 
     // ── Commandes ────────────────────────────────────────
     const [orders, setOrders] = useState([]);
@@ -67,8 +68,17 @@ const Profile = () => {
     }, [activeTab]);
 
     const handleAvatarChange = (e) => {
-        const file = e.target.files[0];
-        if (file) setAvatarPreview(URL.createObjectURL(file));
+    const file = e.target.files[0];
+    if (file) {
+        setAvatarPreview(URL.createObjectURL(file));
+        setDeleteAvatar(false);
+    }
+    };
+
+    const handleDeleteAvatar = () => {
+        setAvatarPreview(null);
+        setDeleteAvatar(true);
+        if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
     const handleProfileSubmit = async (e) => {
@@ -79,7 +89,11 @@ const Profile = () => {
             formData.append('name', profileData.name);
             formData.append('phone', profileData.phone);
             formData.append('address', profileData.address);
-            if (fileInputRef.current?.files[0]) formData.append('avatar', fileInputRef.current.files[0]);
+            if (fileInputRef.current?.files[0]) {
+                formData.append('avatar', fileInputRef.current.files[0]);
+            } else if (deleteAvatar) {
+                formData.append('deleteAvatar', 'true');
+            }
             await updateProfile(formData);
             showSuccess('Profil mis à jour avec succès !');
         } catch (err) {
@@ -201,15 +215,28 @@ const Profile = () => {
                                             : <span className="text-3xl font-black text-[#2d5a27]">{user?.name?.[0]?.toUpperCase()}</span>}
                                     </div>
                                     <button type="button" onClick={() => fileInputRef.current.click()}
-                                        className="absolute -bottom-2 -right-2 bg-[#2d5a27] text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-[#4a8c42]  transition shadow-lg text-xs">
+                                        className="absolute -bottom-2 -right-2 bg-[#2d5a27] text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-[#4a8c42] transition shadow-lg text-xs">
                                         ✏️
                                     </button>
                                 </div>
                                 <div>
                                     <p className="font-bold text-sm text-[#2c2c2c] mb-1">Photo de profil</p>
                                     <p className="text-xs text-black/40 mb-2">JPG, PNG — max 2MB</p>
-                                    <button type="button" onClick={() => fileInputRef.current.click()}
-                                        className="text-xs font-bold text-[#2d5a27] hover:underline">Changer la photo</button>
+                                    <div className="flex items-center gap-3">
+                                        <button type="button" onClick={() => fileInputRef.current.click()}
+                                            className="text-xs font-bold text-[#2d5a27] hover:underline">
+                                            Changer la photo
+                                        </button>
+                                        {avatarPreview && (
+                                            <>
+                                                <span className="text-black/20">|</span>
+                                                <button type="button" onClick={handleDeleteAvatar}
+                                                    className="text-xs font-bold text-red-500 hover:underline">
+                                                    Supprimer
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
                             </div>
@@ -318,7 +345,29 @@ const Profile = () => {
                                         {isExpanded && (
                                             <div className="border-t border-gray-100 p-5 space-y-4"
                                                 style={{ background: '#fafafa' }}>
-
+                                                {/* ARTICLES */}
+                                                    {order.items && order.items.length > 0 && (
+                                                    <div className="space-y-2">
+                                                        <p className="text-xs font-bold text-black/40 uppercase tracking-wide">Articles commandés</p>
+                                                        {order.items.map((item, idx) => (
+                                                            <div key={idx} className="flex items-center gap-3 bg-white rounded-xl p-3 shadow-sm">
+                                                                <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-gray-100 border border-gray-200">
+                                                                    {item.product_image
+                                                                        ? <img src={item.product_image} alt={item.product_name} className="w-full h-full object-cover" onError={(e) => { e.target.style.display='none'; }} />
+                                                                        : <div className="w-full h-full flex items-center justify-center text-2xl">🌿</div>
+                                                                    }
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="font-bold text-sm text-[#2c2c2c] truncate">{item.product_name}</p>
+                                                                    <p className="text-xs text-black/40">Qté : {item.quantity}</p>
+                                                                </div>
+                                                                <span className="font-black text-sm shrink-0" style={{ color: '#166534' }}>
+                                                                    {(parseFloat(item.unit_price) * item.quantity).toFixed(2)} DT
+                                                                </span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
                                                 {/* LIVRAISON */}
                                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                                     <div>

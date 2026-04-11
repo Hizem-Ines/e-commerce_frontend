@@ -124,42 +124,46 @@ const Header = () => {
                                         {suggestions.length} résultat{suggestions.length > 1 ? 's' : ''} pour "{search}"
                                     </p>
                                 </div>
-                                {suggestions.map((produit) => (
-                                    <button
-                                        key={produit.id}
-                                        onClick={() => handleSuggestionClick(produit)}
-                                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-emerald-50 transition text-left border-b border-gray-50 last:border-0"
-                                    >
-                                        {/* IMAGE */}
-                                        <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0 overflow-hidden">
-                                            {produit.thumbnail?.[0]?.url ? (
-                                                <img
-                                                    src={produit.thumbnail[0].url}
-                                                    alt={produit.name}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                <span className="text-lg">🌿</span>
-                                            )}
-                                        </div>
-                                        {/* INFOS */}
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-bold text-[#2c2c2c] truncate">
-                                                {produit.name}
-                                            </p>
-                                            <p className="text-xs text-black/40">
-                                                {produit.category_name}
-                                                {produit.supplier_name ? ` · ${produit.supplier_name}` : ''}
-                                            </p>
-                                        </div>
-                                        {/* PRIX */}
-                                        <span className="text-sm font-extrabold text-[#2d5a27] shrink-0">
-                                            {produit.min_price
-                                                ? `${parseFloat(produit.min_price).toFixed(2)} DT`
-                                                : 'N/A'}
-                                        </span>
-                                    </button>
-                                ))}
+                                {suggestions.map((produit) => {
+    
+    const images = Array.isArray(produit.images)
+        ? produit.images
+        : (() => { try { return JSON.parse(produit.images || '[]'); } catch { return []; } })();
+
+    return (
+        <button
+            key={produit.id}
+            onClick={() => handleSuggestionClick(produit)}
+            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-emerald-50 transition text-left border-b border-gray-50 last:border-0"
+        >
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0 overflow-hidden">
+                {images[0]?.url ? (
+                    <img
+                        src={images[0].url}
+                        alt={produit.name_fr}
+                        className="w-full h-full object-cover"
+                    />
+                ) : (
+                    <span className="text-lg">🌿</span>
+                )}
+            </div>
+            <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-[#2c2c2c] truncate">
+                    {produit.name_fr}
+                </p>
+                <p className="text-xs text-black/40">
+                    {produit.category_name}
+                    {produit.supplier_name ? ` · ${produit.supplier_name}` : ''}
+                </p>
+            </div>
+            <span className="text-sm font-extrabold text-[#2d5a27] shrink-0">
+                {produit.min_price
+                    ? `${parseFloat(produit.min_price).toFixed(2)} DT`
+                    : 'N/A'}
+            </span>
+        </button>
+    );
+})}
 
                                 {/* VOIR TOUS */}
                                 <button
