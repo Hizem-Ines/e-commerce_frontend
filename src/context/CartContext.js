@@ -62,6 +62,7 @@ export const CartProvider = ({ children }) => {
             return [...prev, { ...item, quantity }];
         });
         ouvrirPanier();
+        closeTimeoutRef.current = setTimeout(() => fermerPanier(), 3000);
     };
 
     // ── Retirer du panier ────────────────────────────
