@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
-import { getOffresData, validatePromoCode } from '../../services/offresService';
+import { getOffresData } from '../../services/offresService';
 import formatPrice from '../../utils/formatPrice';
 import { FiHeart, FiTag, FiCopy, FiCheck } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
@@ -13,10 +13,6 @@ const Offres = () => {
 
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [promoCode, setPromoCode] = useState('');
-    const [promoResult, setPromoResult] = useState(null);
-    const [promoError, setPromoError] = useState('');
-    const [promoLoading, setPromoLoading] = useState(false);
     const [copiedCode, setCopiedCode] = useState('');
 
     useEffect(() => {
@@ -30,22 +26,6 @@ const Offres = () => {
         navigator.clipboard.writeText(code);
         setCopiedCode(code);
         setTimeout(() => setCopiedCode(''), 2000);
-    };
-
-    const handleValidatePromo = async (e) => {
-        e.preventDefault();
-        if (!promoCode.trim()) return;
-        setPromoLoading(true);
-        setPromoError('');
-        setPromoResult(null);
-        try {
-            const res = await validatePromoCode(promoCode);
-            setPromoResult(res.data.promo);
-        } catch (err) {
-            setPromoError(err.response?.data?.message || 'Code invalide');
-        } finally {
-            setPromoLoading(false);
-        }
     };
 
     const ProductCard = ({ produit, accentColor = 'emerald', badge = null }) => (
@@ -201,46 +181,6 @@ const Offres = () => {
                     </div>
                 )}
 
-                {/* VÉRIFIER UN CODE PROMO */}
-                <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-6 mb-12">
-                    <h2 className="text-xl font-bold text-[#2c2c2c] mb-4">
-                        🎟️ Vérifier un code promo
-                    </h2>
-                    <form onSubmit={handleValidatePromo} className="flex gap-3">
-                        <input
-                            type="text"
-                            value={promoCode}
-                            onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                            placeholder="Entrez votre code promo..."
-                            className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm font-bold tracking-widest transition"
-                        />
-                        <button
-                            type="submit"
-                            disabled={promoLoading}
-                            className="bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-6 py-3 rounded-xl transition disabled:opacity-50"
-                        >
-                            {promoLoading ? '...' : 'Vérifier'}
-                        </button>
-                    </form>
-                    {promoResult && (
-                        <div className="mt-4 bg-emerald-50 border border-#b6eac7 rounded-xl p-4">
-                            <p className="text-emerald-700 font-bold text-sm">
-                                ✅ Code valide !{' '}
-                                {promoResult.discount_type === 'percent'
-                                    ? `${promoResult.discount_value}% de réduction`
-                                    : `${promoResult.discount_value} DT de réduction`}
-                            </p>
-                            {promoResult.description_fr && (
-                                <p className="text-[#2d5a27] text-xs mt-1">{promoResult.description_fr}</p>
-                            )}
-                        </div>
-                    )}
-                    {promoError && (
-                        <div className="mt-4 bg-red-50 border border-red-200 rounded-xl p-4">
-                            <p className="text-red-600 font-semibold text-sm">❌ {promoError}</p>
-                        </div>
-                    )}
-                </div>
 
                 {/* OFFRES FLASH */}
                 <div className="mb-12">
