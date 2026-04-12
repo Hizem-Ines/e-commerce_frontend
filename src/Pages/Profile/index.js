@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/authContext';
 import { updateProfile, updatePassword } from '../../services/authService';
 import { getMyOrders, cancelOrder } from '../../services/orderService';
-import { FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiSave, FiShoppingBag, FiHeart, FiPackage, FiChevronDown, FiChevronUp, FiX, FiExternalLink } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
+import { FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiSave, FiShoppingBag, FiHeart, FiPackage, FiChevronDown, FiChevronUp, FiX, FiExternalLink, FiAlertCircle } from 'react-icons/fi';
+import { Link, useNavigate } from 'react-router-dom';
 
 // ── Helpers ──────────────────────────────────────────────
 const STATUS_LABELS = {
@@ -32,6 +32,17 @@ const Profile = () => {
     const [avatarPreview, setAvatarPreview] = useState(user?.avatar || null);
     const [deleteAvatar, setDeleteAvatar] = useState(false);
 
+    // ── Dirty tracking ───────────────────────────────────
+    const [profileDirty, setProfileDirty] = useState(false);
+    const [passwordDirty, setPasswordDirty] = useState(false);
+    const [avatarDirty, setAvatarDirty] = useState(false);
+
+    const isProfileDirty = profileDirty || avatarDirty;
+    const isPasswordDirty = passwordDirty;
+
+    // Current tab dirty state
+    const currentTabDirty = activeTab === 'profil' ? isProfileDirty : activeTab === 'securite' ? isPasswordDirty : false;
+
     // ── Commandes ────────────────────────────────────────
     const [orders, setOrders] = useState([]);
     const [ordersLoading, setOrdersLoading] = useState(false);
@@ -47,6 +58,13 @@ const Profile = () => {
         address: user?.address || '',
     });
 
+    // Saved reference for dirty comparison
+    const savedProfileRef = useRef({
+        name:    user?.name    || '',
+        phone:   user?.phone   || '',
+        address: user?.address || '',
+    });
+
     const [passwordData, setPasswordData] = useState({
         currentPassword:  '',
         newPassword:      '',
@@ -55,6 +73,57 @@ const Profile = () => {
 
     const showSuccess = (msg) => { setSuccessMsg(msg); setErrorMsg(''); setTimeout(() => setSuccessMsg(''), 3000); };
     const showError   = (msg) => { setErrorMsg(msg); setSuccessMsg(''); setTimeout(() => setErrorMsg(''), 3000); };
+
+    // ── Warn before browser unload ───────────────────────
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (isProfileDirty || isPasswordDirty) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [isProfileDirty, isPasswordDirty]);
+
+    // ── Tab switch guard ─────────────────────────────────
+    const handleTabChange = (tabId) => {
+        if (tabId === activeTab) return;
+        if (currentTabDirty) {
+            const confirmed = window.confirm(
+                'Vous avez des modifications non sauvegardées. Quitter cet onglet les annulera. Continuer ?'
+            );
+            if (!confirmed) return;
+            // Reset dirty state of current tab
+            if (activeTab === 'profil') {
+                setProfileDirty(false);
+                setAvatarDirty(false);
+                setAvatarPreview(user?.avatar || null);
+                setProfileData({
+                    name:    savedProfileRef.current.name,
+                    email:   user?.email || '',
+                    phone:   savedProfileRef.current.phone,
+                    address: savedProfileRef.current.address,
+                });
+            } else if (activeTab === 'securite') {
+                setPasswordDirty(false);
+                setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+            }
+        }
+        setActiveTab(tabId);
+    };
+
+    // ── Profile field change ─────────────────────────────
+    const handleProfileChange = (field, value) => {
+        setProfileData(prev => ({ ...prev, [field]: value }));
+        const saved = savedProfileRef.current;
+        const updated = { ...profileData, [field]: value };
+        const dirty =
+            updated.name    !== saved.name    ||
+            updated.phone   !== saved.phone   ||
+            updated.address !== saved.address;
+        setProfileDirty(dirty);
+    };
 
     // ── Charger les commandes ────────────────────────────
     useEffect(() => {
@@ -68,16 +137,18 @@ const Profile = () => {
     }, [activeTab]);
 
     const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        setAvatarPreview(URL.createObjectURL(file));
-        setDeleteAvatar(false);
-    }
+        const file = e.target.files[0];
+        if (file) {
+            setAvatarPreview(URL.createObjectURL(file));
+            setDeleteAvatar(false);
+            setAvatarDirty(true);
+        }
     };
 
     const handleDeleteAvatar = () => {
         setAvatarPreview(null);
         setDeleteAvatar(true);
+        setAvatarDirty(!!user?.avatar); // dirty only if there was an avatar to delete
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
@@ -95,12 +166,27 @@ const Profile = () => {
                 formData.append('deleteAvatar', 'true');
             }
             await updateProfile(formData);
+            // Mark as saved
+            savedProfileRef.current = {
+                name:    profileData.name,
+                phone:   profileData.phone,
+                address: profileData.address,
+            };
+            setProfileDirty(false);
+            setAvatarDirty(false);
             showSuccess('Profil mis à jour avec succès !');
         } catch (err) {
             showError(err.response?.data?.message || 'Erreur lors de la mise à jour');
         } finally {
             setLoadingProfile(false);
         }
+    };
+
+    const handlePasswordChange = (field, value) => {
+        const updated = { ...passwordData, [field]: value };
+        setPasswordData(updated);
+        const dirty = updated.currentPassword !== '' || updated.newPassword !== '' || updated.confirmPassword !== '';
+        setPasswordDirty(dirty);
     };
 
     const handlePasswordSubmit = async (e) => {
@@ -111,6 +197,7 @@ const Profile = () => {
             await updatePassword({ currentPassword: passwordData.currentPassword, newPassword: passwordData.newPassword });
             showSuccess('Mot de passe modifié avec succès !');
             setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+            setPasswordDirty(false);
         } catch (err) {
             showError(err.response?.data?.message || 'Erreur lors du changement de mot de passe');
         } finally {
@@ -119,26 +206,27 @@ const Profile = () => {
     };
 
     const handleCancelOrder = async (orderId) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir annuler cette commande ?')) return;
-    setCancellingId(orderId);
-    try {
-        await cancelOrder(orderId);
-        setOrders(prev => prev.map(o => o.id === orderId 
-            ? { ...o, status: 'cancelled', delivery_status: 'cancelled' } 
-            : o
-        ));
-        setExpandedOrder(null); // ✅ ferme l'accordion → cache le statut livraison
-        showSuccess('Commande annulée avec succès.');
-    } catch (err) {
-        showError(err.response?.data?.message || 'Impossible d\'annuler cette commande.');
-    } finally {
-        setCancellingId(null);
-    }
-};
+        if (!window.confirm('Êtes-vous sûr de vouloir annuler cette commande ?')) return;
+        setCancellingId(orderId);
+        try {
+            await cancelOrder(orderId);
+            setOrders(prev => prev.map(o => o.id === orderId
+                ? { ...o, status: 'cancelled', delivery_status: 'cancelled' }
+                : o
+            ));
+            setExpandedOrder(null);
+            showSuccess('Commande annulée avec succès.');
+        } catch (err) {
+            showError(err.response?.data?.message || 'Impossible d\'annuler cette commande.');
+        } finally {
+            setCancellingId(null);
+        }
+    };
+
     const tabs = [
-        { id: 'profil',    label: 'Informations', icon: <FiUser size={16} /> },
-        { id: 'commandes', label: 'Commandes',    icon: <FiPackage size={16} /> },
-        { id: 'securite',  label: 'Sécurité',     icon: <FiLock size={16} /> },
+        { id: 'profil',    label: 'Informations', icon: <FiUser size={16} />,    dirty: isProfileDirty  },
+        { id: 'commandes', label: 'Commandes',    icon: <FiPackage size={16} />, dirty: false            },
+        { id: 'securite',  label: 'Sécurité',     icon: <FiLock size={16} />,    dirty: isPasswordDirty },
     ];
 
     return (
@@ -192,11 +280,17 @@ const Profile = () => {
                 {/* TABS */}
                 <div className="flex bg-white rounded-2xl p-1 shadow-[0_4px_15px_rgba(0,0,0,0.07)] mb-6 gap-1">
                     {tabs.map((tab) => (
-                        <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
+                        <button key={tab.id} onClick={() => handleTabChange(tab.id)}
+                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all duration-300 relative ${
                                 activeTab === tab.id ? 'bg-[#2d5a27] text-white shadow-lg' : 'text-black/50 hover:text-[#2d5a27]'
                             }`}>
                             {tab.icon} {tab.label}
+                            {/* Unsaved dot indicator */}
+                            {tab.dirty && (
+                                <span className={`absolute top-2 right-2 w-2 h-2 rounded-full ${
+                                    activeTab === tab.id ? 'bg-amber-300' : 'bg-amber-400'
+                                }`} title="Modifications non sauvegardées" />
+                            )}
                         </button>
                     ))}
                 </div>
@@ -204,12 +298,22 @@ const Profile = () => {
                 {/* ── TAB PROFIL ── */}
                 {activeTab === 'profil' && (
                     <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-8">
-                        <h3 className="text-xl font-bold text-[#2c2c2c] mb-6">Informations personnelles</h3>
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-xl font-bold text-[#2c2c2c]">Informations personnelles</h3>
+                            {isProfileDirty && (
+                                <span className="flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full">
+                                    <FiAlertCircle size={13} />
+                                    Modifications non sauvegardées
+                                </span>
+                            )}
+                        </div>
                         <form onSubmit={handleProfileSubmit} className="space-y-5">
                             {/* AVATAR */}
                             <div className="flex items-center gap-5 pb-5 border-b border-gray-100">
                                 <div className="relative">
-                                    <div className="w-20 h-20 rounded-2xl bg-emerald-100 flex items-center justify-center overflow-hidden border-2 border-#b6eac7">
+                                    <div className={`w-20 h-20 rounded-2xl bg-emerald-100 flex items-center justify-center overflow-hidden border-2 transition ${
+                                        avatarDirty ? 'border-amber-400' : 'border-[#b6eac7]'
+                                    }`}>
                                         {avatarPreview
                                             ? <img src={avatarPreview} alt="avatar" className="w-full h-full object-cover" />
                                             : <span className="text-3xl font-black text-[#2d5a27]">{user?.name?.[0]?.toUpperCase()}</span>}
@@ -246,8 +350,12 @@ const Profile = () => {
                                 <div className="relative">
                                     <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                                     <input type="text" value={profileData.name}
-                                        onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition"
+                                        onChange={(e) => handleProfileChange('name', e.target.value)}
+                                        className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none text-sm transition ${
+                                            profileDirty && profileData.name !== savedProfileRef.current.name
+                                                ? 'border-amber-300 focus:border-amber-400'
+                                                : 'border-gray-200 focus:border-[#4a8c42]'
+                                        }`}
                                         placeholder="Votre nom complet" />
                                 </div>
                             </div>
@@ -261,10 +369,15 @@ const Profile = () => {
                                 </div>
                                 <p className="text-xs text-black/30 mt-1">L'email ne peut pas être modifié</p>
                             </div>
-                            <button type="submit" disabled={loadingProfile}
-                                className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-8 py-3 rounded-xl transition-all duration-300 disabled:opacity-50">
+                            <button type="submit" disabled={loadingProfile || !isProfileDirty}
+                                className={`flex items-center gap-2 font-bold px-8 py-3 rounded-xl transition-all duration-300 ${
+                                    isProfileDirty
+                                        ? 'bg-[#2d5a27] hover:bg-[#4a8c42] text-white shadow-md'
+                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                } disabled:opacity-50`}>
                                 <FiSave size={16} />
                                 {loadingProfile ? 'Sauvegarde...' : 'Sauvegarder'}
+                                {isProfileDirty && <span className="ml-1 w-2 h-2 rounded-full bg-amber-300 animate-pulse" />}
                             </button>
                         </form>
                     </div>
@@ -346,7 +459,7 @@ const Profile = () => {
                                             <div className="border-t border-gray-100 p-5 space-y-4"
                                                 style={{ background: '#fafafa' }}>
                                                 {/* ARTICLES */}
-                                                    {order.items && order.items.length > 0 && (
+                                                {order.items && order.items.length > 0 && (
                                                     <div className="space-y-2">
                                                         <p className="text-xs font-bold text-black/40 uppercase tracking-wide">Articles commandés</p>
                                                         {order.items.map((item, idx) => (
@@ -426,15 +539,23 @@ const Profile = () => {
                 {/* ── TAB SÉCURITÉ ── */}
                 {activeTab === 'securite' && (
                     <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-8">
-                        <h3 className="text-xl font-bold text-[#2c2c2c] mb-6">Changer le mot de passe</h3>
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-xl font-bold text-[#2c2c2c]">Changer le mot de passe</h3>
+                            {isPasswordDirty && (
+                                <span className="flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full">
+                                    <FiAlertCircle size={13} />
+                                    Modifications non sauvegardées
+                                </span>
+                            )}
+                        </div>
                         <form onSubmit={handlePasswordSubmit} className="space-y-5">
                             <div>
                                 <label className="block text-xs font-bold text-gray-600 mb-1.5">Mot de passe actuel</label>
                                 <div className="relative">
                                     <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                                     <input type={showPassword ? 'text' : 'password'} value={passwordData.currentPassword}
-                                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                                        className="w-full pl-10 pr-10 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition"
+                                        onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
+                                        className="w-full pl-10 pr-10 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42] focus:outline-none text-sm transition"
                                         placeholder="••••••••" required />
                                     <button type="button" onClick={() => setShowPassword(!showPassword)}
                                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -447,8 +568,8 @@ const Profile = () => {
                                 <div className="relative">
                                     <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                                     <input type={showPassword ? 'text' : 'password'} value={passwordData.newPassword}
-                                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition"
+                                        onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
+                                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42] focus:outline-none text-sm transition"
                                         placeholder="••••••••" required />
                                 </div>
                             </div>
@@ -457,15 +578,20 @@ const Profile = () => {
                                 <div className="relative">
                                     <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                                     <input type={showPassword ? 'text' : 'password'} value={passwordData.confirmPassword}
-                                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition"
+                                        onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
+                                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42] focus:outline-none text-sm transition"
                                         placeholder="••••••••" required />
                                 </div>
                             </div>
-                            <button type="submit" disabled={loadingPassword}
-                                className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-8 py-3 rounded-xl transition-all duration-300 disabled:opacity-50">
+                            <button type="submit" disabled={loadingPassword || !isPasswordDirty}
+                                className={`flex items-center gap-2 font-bold px-8 py-3 rounded-xl transition-all duration-300 ${
+                                    isPasswordDirty
+                                        ? 'bg-[#2d5a27] hover:bg-[#4a8c42] text-white shadow-md'
+                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                } disabled:opacity-50`}>
                                 <FiLock size={16} />
                                 {loadingPassword ? 'Modification...' : 'Changer le mot de passe'}
+                                {isPasswordDirty && <span className="ml-1 w-2 h-2 rounded-full bg-amber-300 animate-pulse" />}
                             </button>
                         </form>
                     </div>

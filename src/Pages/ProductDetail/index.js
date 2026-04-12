@@ -117,6 +117,10 @@ const ProductDetail = () => {
     const [imageActive, setImageActive]       = useState(0);
     const [ongletActif, setOngletActif]       = useState('description');
 
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [id]);
+    
     // ── Fetch product ──────────────────────────────────────
     useEffect(() => {
         const fetchProduit = async () => {
@@ -308,7 +312,7 @@ const ProductDetail = () => {
                             </div>
 
                             {/* DESCRIPTION COURTE — intro seulement (3 lignes max) */}
-                            <p className="text-black/60 text-sm leading-relaxed mb-6 line-clamp-3">
+                           <p className="text-black/60 text-sm leading-relaxed whitespace-pre-line mb-6 line-clamp-3">
                                 {produit.description_fr}
                             </p>
 
@@ -422,7 +426,7 @@ const ProductDetail = () => {
 
                                 <div>
                                     <h3 className="text-base font-bold text-[#2c2c2c] mb-3">À propos du produit</h3>
-                                    <p className="text-sm text-black/70 leading-relaxed">{produit.description_fr}</p>
+                                    <p className="text-sm text-black/70 leading-relaxed whitespace-pre-line">{produit.description_fr}</p>
                                     {produit.description_ar && (
                                         <p className="text-sm text-black/50 mt-3 leading-relaxed text-right" dir="rtl">
                                             {produit.description_ar}
@@ -474,7 +478,7 @@ const ProductDetail = () => {
                                     <span className="text-xl shrink-0">📋</span>
                                     <div>
                                         <p className="font-bold text-[#2c2c2c] text-sm mb-2">Mode d'emploi</p>
-                                        <p className="text-sm text-black/60 leading-relaxed">
+                                        <p className="text-sm text-black/60 leading-relaxed whitespace-pre-line">
                                             {produit.usage_fr || "Consulter les indications du producteur sur l'emballage."}
                                         </p>
                                     </div>
@@ -486,7 +490,7 @@ const ProductDetail = () => {
                                         <span className="text-xl shrink-0">📋</span>
                                         <div>
                                             <p className="font-bold text-[#2c2c2c] text-sm mb-2">طريقة الاستخدام</p>
-                                            <p className="text-sm text-black/60 leading-relaxed">{produit.usage_ar}</p>
+                                            <p className="text-sm text-black/60 leading-relaxed whitespace-pre-line">{produit.usage_ar}</p>
                                         </div>
                                     </div>
                                 )}
@@ -496,12 +500,12 @@ const ProductDetail = () => {
                                     <div className="border-t border-gray-100 pt-5">
                                         <p className="text-sm font-bold text-[#2c2c2c] mb-3">⚠️ Précautions</p>
                                         {produit.precautions_fr && (
-                                            <p className="text-sm text-black/60 leading-relaxed">
+                                            <p className="text-sm text-black/60 leading-relaxed whitespace-pre-line">
                                                 {produit.precautions_fr}
                                             </p>
                                         )}
                                         {produit.precautions_ar && (
-                                            <p className="text-sm text-black/50 leading-relaxed mt-3 text-right" dir="rtl">
+                                            <p className="text-sm text-black/50 leading-relaxed whitespace-pre-line mt-3 text-right" dir="rtl">
                                                 {produit.precautions_ar}
                                             </p>
                                         )}

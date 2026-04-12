@@ -17,8 +17,7 @@ const Products = () => {
     const [produits, setProduits]       = useState([]);
     const [categories, setCategories]   = useState([]);
     const [loading, setLoading]         = useState(true);
-    const [totalPages, setTotalPages]   = useState(1);
-    const [page, setPage]               = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     // Filtres
     const [tri, setTri]                 = useState('defaut');
@@ -38,6 +37,7 @@ const Products = () => {
         return;
     }
 
+    const pageFromUrl = Number(new URLSearchParams(location.search).get('page')) || 1;
     const fetchProduits = async () => {
         setLoading(true);
         try {
@@ -46,8 +46,9 @@ const Products = () => {
                 min_price:   prixMin   || undefined,
                 max_price:   prixMax   || undefined,
                 min_rating:  noteMin   || undefined,
-                page,
+                page:        pageFromUrl,
             });
+
             setProduits(res.data.products);
             setTotalPages(res.data.totalPages);
         } catch (err) {
@@ -58,7 +59,7 @@ const Products = () => {
     };
     fetchProduits();
 // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [location.search, categorieId, prixMin, prixMax, noteMin, page]);
+}, [location.search, categorieId, prixMin, prixMax, noteMin]);
 
     useEffect(() => {
         getAllCategories()
@@ -80,7 +81,14 @@ const Products = () => {
         setPrixMax('');
         setNoteMin('');
         setCategorieId('');
-        setPage(1);
+        handlePageChange(1);
+    };
+
+
+    const handlePageChange = (newPage) => {
+        const p = new URLSearchParams(location.search);
+        p.set('page', newPage);
+        navigate(`?${p.toString()}`);
     };
 
     return (
@@ -179,7 +187,7 @@ const Products = () => {
 
                                     {/* Toutes */}
                                     <button
-                                        onClick={() => { setCategorieId(''); setPage(1); }}
+                                        onClick={() => { setCategorieId(''); handlePageChange(1); }}
                                         className={`text-left px-3 py-2 rounded-xl text-sm font-semibold transition-colors duration-200 ${
                                             categorieId === ''
                                                 ? 'bg-[#2d5a27] text-white'
@@ -195,7 +203,7 @@ const Products = () => {
 
                                             {/* Bouton catégorie principale */}
                                             <button
-                                                onClick={() => { setCategorieId(cat.id); setPage(1); }}
+                                                onClick={() => { setCategorieId(cat.id); handlePageChange(1); }}
                                                 className={`w-full text-left px-3 py-2 rounded-xl text-sm font-semibold transition-colors duration-200 flex items-center justify-between ${
                                                     categorieId === cat.id
                                                         ? 'bg-[#2d5a27] text-white'
@@ -219,7 +227,7 @@ const Products = () => {
                                                         {cat.children.map(sub => (
                                                             <button
                                                                 key={sub.id}
-                                                                onClick={() => { setCategorieId(sub.id); setPage(1); }}
+                                                                onClick={() => { setCategorieId(sub.id); handlePageChange(1); }}
                                                                 className={`text-left px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 flex items-center gap-2 ${
                                                                     categorieId === sub.id
                                                                         ? 'bg-[#4a8c42]  text-white'
@@ -356,9 +364,9 @@ const Products = () => {
                                         {[...Array(totalPages)].map((_, i) => (
                                             <button
                                                 key={i}
-                                                onClick={() => setPage(i + 1)}
+                                                onClick={() => handlePageChange(i + 1)}
                                                 className={`w-10 h-10 rounded-full font-bold text-sm transition-all duration-200 ${
-                                                    page === i + 1
+                                                    (Number(new URLSearchParams(location.search).get('page')) || 1) === i + 1
                                                         ? 'bg-[#2d5a27] text-white'
                                                         : 'bg-white text-black/50 hover:bg-emerald-100'
                                                 }`}
