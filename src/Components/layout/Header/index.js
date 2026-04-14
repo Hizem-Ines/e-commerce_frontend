@@ -263,9 +263,10 @@ const Header = () => {
                             className="flex items-center gap-2 cursor-pointer"
                             onClick={() => navigate('/panier')}
                         >
-                            <span className="text-white font-bold text-sm">
+                            <span className="hidden sm:block text-white font-bold text-sm">
                                 {formatPrice(totalPrix)}
                             </span>
+                            
                             <div className="relative">
                                 <button className="border border-white/30 bg-white/15 rounded-full w-10 h-10 flex items-center justify-center text-white hover:bg-white/20 transition">
                                     <BsFillBasket3Fill size={18} />

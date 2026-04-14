@@ -30,7 +30,7 @@ const NewProducts = ({ produits, loading }) => {
                 </div>
 
                 {loading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-7">
                         {[...Array(3)].map((_, i) => (
                             <div key={i} className="bg-white rounded-2xl h-72 animate-pulse" />
                         ))}
@@ -40,7 +40,7 @@ const NewProducts = ({ produits, loading }) => {
                         <p className="text-black/40">Aucun produit disponible</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-7">
                         {produits.map((produit) => (
                             <div
                                 key={produit.id}

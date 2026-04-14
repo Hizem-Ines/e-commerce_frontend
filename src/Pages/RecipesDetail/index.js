@@ -27,6 +27,7 @@ export default function RecipeDetailPage() {
   const [error, setError]           = useState(null);
   const [activeStep, setActiveStep] = useState(0);
   const [checkedIngredients, setCheckedIngredients] = useState({});
+  
 
   useEffect(() => {
     setLoading(true);

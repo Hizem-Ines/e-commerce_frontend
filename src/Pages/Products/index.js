@@ -26,6 +26,8 @@ const Products = () => {
     const [noteMin, setNoteMin]         = useState('');
     const [categorieId, setCategorieId] = useState('');
 
+    const [filtresOuverts, setFiltresOuverts] = useState(false);
+
    useEffect(() => {
     const params = new URLSearchParams(location.search);
     const categoryFromUrl = params.get('category_id');
@@ -96,7 +98,7 @@ const Products = () => {
             <div className="container mx-auto px-4">
 
                 {/* TITRE */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
                     <div>
                         <h1 className="text-4xl font-bold font-serif text-[#2c2c2c] mb-1">
                             Tous les Produits
@@ -105,16 +107,22 @@ const Products = () => {
                             {produits.length} produit{produits.length > 1 ? 's' : ''} trouvé{produits.length > 1 ? 's' : ''}
                         </p>
                     </div>
+                    <button
+                        onClick={() => setFiltresOuverts(!filtresOuverts)}
+                        className="md:hidden flex items-center gap-2 bg-[#2d5a27] text-white font-bold px-4 py-2 rounded-full text-sm"
+                    >
+                        ⚙️ Filtres
+                    </button>
                     <button className="flex items-center gap-2 bg-gradient-to-r from-[#2d5a27] to-teal-600 hover:from-[#4a8c42]  hover:to-teal-500 text-white font-bold px-6 py-3 rounded-full shadow-lg transition-all duration-300 group">
                         <BsStars size={18} className="group-hover:animate-spin" />
                         Recherche IA
                     </button>
                 </div>
 
-                <div className="flex gap-6">
+                <div className="flex flex-col md:flex-row gap-6">
 
                     {/* SIDEBAR FILTRES */}
-                    <div className="w-64 shrink-0">
+                    <div className={`${filtresOuverts ? 'block' : 'hidden'} md:block w-full md:w-64 shrink-0`}>
                         <div className="bg-white rounded-2xl p-5 shadow-[0_4px_15px_rgba(0,0,0,0.07)] sticky top-4">
                             <div className="flex items-center justify-between mb-5">
                                 <h3 className="font-bold text-[#2c2c2c] text-base">Filtres</h3>

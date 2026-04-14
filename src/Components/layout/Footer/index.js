@@ -38,7 +38,7 @@ const Footer = () => {
                         <p className="text-white/60 text-sm leading-relaxed mb-5">
                             Votre plateforme e-commerce de produits artisanaux et naturels en Tunisie.
                         </p>
-                        <div className="flex gap-3">
+                        <div className="flex flex-wrap gap-3">
                             <button
                                 aria-label="Facebook"
                                 className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full text-sm flex items-center gap-2 transition-colors duration-300"

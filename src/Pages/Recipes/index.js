@@ -134,6 +134,7 @@ export default function RecipesPage() {
   const [searchInput, setSearchInput] = useState("");
   const [category, setCategory]       = useState("");
   const [difficulty, setDifficulty]   = useState("");
+  const [filtresOuverts, setFiltresOuverts] = useState(false);
 
   // Fetch featured (once)
   useEffect(() => {
@@ -185,17 +186,20 @@ export default function RecipesPage() {
       <div className="container mx-auto px-4">
 
         {/* ── TITRE + HERO ── */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
           <div>
-            <h1 className="text-4xl font-bold font-serif text-[#2c2c2c] mb-1">
-              Nos Recettes
-            </h1>
+            <h1 className="text-4xl font-bold font-serif text-[#2c2c2c] mb-1">Nos Recettes</h1>
             <p className="text-black/50">
               {recipes.length} recette{recipes.length > 1 ? "s" : ""} trouvée{recipes.length > 1 ? "s" : ""}
               {search && <span> pour "<strong>{search}</strong>"</span>}
             </p>
           </div>
-          
+          <button
+            onClick={() => setFiltresOuverts(!filtresOuverts)}
+            className="md:hidden flex items-center gap-2 bg-[#2d5a27] text-white font-bold px-4 py-2 rounded-full text-sm"
+          >
+            ⚙️ Filtres
+          </button>
         </div>
 
         {/* ── Hero featured recipe banner ── */}
@@ -249,10 +253,10 @@ export default function RecipesPage() {
           </div>
         )}
 
-        <div className="flex gap-6">
+        <div className="flex flex-col md:flex-row gap-6">
 
           {/* ── SIDEBAR FILTRES ── */}
-          <div className="w-64 shrink-0">
+          <div className={`${filtresOuverts ? 'block' : 'hidden'} md:block w-full md:w-64 shrink-0`}>
             <div className="bg-white rounded-2xl p-5 shadow-[0_4px_15px_rgba(0,0,0,0.07)] sticky top-4">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="font-bold text-[#2c2c2c] text-base">Filtres</h3>
