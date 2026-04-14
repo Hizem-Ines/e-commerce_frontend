@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getAllSuppliers } from '../../services/suplierService';
+import { getAllSuppliers } from '../../services/supplierService';
 import { MdVerified } from 'react-icons/md';
 import { FaLeaf } from 'react-icons/fa';
 
 const Producers = () => {
     const [producteurs, setProducteurs] = useState([]);
     const [loading, setLoading]         = useState(true);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     useEffect(() => {
         getAllSuppliers()
