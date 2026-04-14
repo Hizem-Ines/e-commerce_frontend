@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useWishlist } from '../../context/WishlistContext';
-import { getSupplierBySlug } from '../../services/suplierService';
+import { getSupplierBySlug } from '../../services/supplierService';
 import formatPrice from '../../utils/formatPrice';
 import { FiHeart } from 'react-icons/fi';
 import { FaHeart, FaLeaf } from 'react-icons/fa';
