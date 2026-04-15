@@ -34,11 +34,18 @@ export default function CartSidebar() {
                 onClick={fermerPanier}
             />
 
+            {/* Drag handle — mobile only */}
+            <div className="sm:hidden flex justify-center pt-3 pb-1">
+                <div className="w-10 h-1 rounded-full bg-stone-300" />
+            </div>
+
             {/* Sidebar */}
+        
             <aside
-                className={`fixed top-0 right-0 h-full w-full sm:w-[400px] bg-white z-50 flex flex-col shadow-2xl
-                    transition-transform duration-300 ease-in-out
-                    ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                className={`fixed bg-white z-50 flex flex-col shadow-2xl transition-transform duration-300 ease-in-out
+                    bottom-0 left-0 right-0 max-h-[85vh] rounded-t-2xl
+                    sm:top-0 sm:right-0 sm:left-auto sm:bottom-auto sm:h-full sm:w-[400px] sm:rounded-none sm:max-h-none
+                    ${isOpen ? 'translate-y-0 sm:translate-x-0' : 'translate-y-full sm:translate-x-full sm:translate-y-0'}`}
             >
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-5 border-b border-stone-100">
@@ -63,7 +70,7 @@ export default function CartSidebar() {
                 </div>
 
                 {/* Liste articles */}
-                <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+                <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3 overscroll-contain">
                     {panier.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full gap-3 text-stone-400 py-16">
                             <BsBoxSeam FiX size={16}/>

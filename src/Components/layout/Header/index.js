@@ -15,7 +15,7 @@ const Logo = () => (
         <img
             src={logo}
             alt="GOFFA logo"
-            className="w-20 h-20 object-contain drop-shadow-md"
+            className="w-12 h-12 sm:w-20 sm:h-20 object-contain drop-shadow-md"
         />
     </Link>
 );
@@ -91,12 +91,12 @@ const Header = () => {
     return (
         <div className="bg-[#2d5a27]">
             <header className="container mx-auto px-4">
-                <div className="flex items-center py-3 gap-4">
+                <div className="flex flex-wrap items-center py-3 gap-2">
 
                     <Logo />
 
                     {/* BARRE DE RECHERCHE */}
-                    <div className="flex-1 relative" ref={searchRef}>
+                    <div className="order-last sm:order-none w-full sm:w-auto sm:flex-1 min-w-0 relative" ref={searchRef}>
                         <form onSubmit={handleSearchSubmit}>
                             <div className="flex items-center bg-white/15 border border-white/30 rounded-full px-4 py-2 gap-2">
                                 <input
@@ -185,7 +185,7 @@ const Header = () => {
                         )}
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0 ml-auto sm:ml-0">
 
                         {/* FAVORIS */}
                         <Link to="/favoris" className="relative no-underline">

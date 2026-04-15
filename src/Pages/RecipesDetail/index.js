@@ -141,9 +141,9 @@ export default function RecipeDetailPage() {
 
         {/* ── Meta bar ── */}
         <div className="bg-white rounded-2xl p-5 shadow-[0_4px_15px_rgba(0,0,0,0.07)] mb-8">
-          <div className="flex flex-wrap gap-6 items-center justify-center md:justify-start divide-x divide-gray-100">
+          <div className="grid grid-cols-3 md:flex md:flex-wrap gap-4 md:gap-6 items-center justify-center md:justify-start">
             {recipe.prep_time && (
-              <div className="text-center px-4 first:pl-0">
+              <div className="text-center md:px-4">
                 <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-1">Préparation</p>
                 <p className="font-extrabold text-[#2c2c2c] text-xl">
                   {recipe.prep_time} <span className="text-sm font-normal text-black/40">min</span>
@@ -151,7 +151,7 @@ export default function RecipeDetailPage() {
               </div>
             )}
             {recipe.cook_time && (
-              <div className="text-center px-4">
+              <div className="text-center md:px-4">
                 <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-1">Cuisson</p>
                 <p className="font-extrabold text-[#2c2c2c] text-xl">
                   {recipe.cook_time} <span className="text-sm font-normal text-black/40">min</span>
@@ -159,7 +159,7 @@ export default function RecipeDetailPage() {
               </div>
             )}
             {totalTime > 0 && (
-              <div className="text-center px-4">
+              <div className="text-center md:px-4">
                 <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-1">Total</p>
                 <p className="font-extrabold text-[#2d5a27] text-xl flex items-center gap-1 justify-center">
                   <FiClock size={16} />
@@ -168,7 +168,7 @@ export default function RecipeDetailPage() {
               </div>
             )}
             {recipe.servings && (
-              <div className="text-center px-4">
+              <div className="text-center md:px-4">
                 <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-1">Portions</p>
                 <p className="font-extrabold text-[#2c2c2c] text-xl flex items-center gap-1 justify-center">
                   <FiUsers size={16} />
@@ -176,7 +176,7 @@ export default function RecipeDetailPage() {
                 </p>
               </div>
             )}
-            <div className="text-center px-4">
+            <div className="text-center md:px-4">
               <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-1">Difficulté</p>
               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold ${diff.bg} ${diff.text}`}>
                 <span className={`w-2 h-2 rounded-full ${diff.dot}`} />
@@ -184,7 +184,7 @@ export default function RecipeDetailPage() {
               </span>
             </div>
             {recipe.views_count > 0 && (
-              <div className="text-center px-4">
+              <div className="text-center md:px-4">
                 <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-1">Vues</p>
                 <p className="font-extrabold text-[#2c2c2c] text-xl flex items-center gap-1 justify-center">
                   <FiEye size={16} />
@@ -316,20 +316,16 @@ export default function RecipeDetailPage() {
 
             {/* Step progress dots */}
             {recipe.steps?.length > 0 && (
-              <div className="flex gap-1.5 mb-5 flex-wrap">
-                {recipe.steps.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveStep(i)}
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      i === activeStep
-                        ? "bg-[#2d5a27] w-6"
-                        : i < activeStep
-                        ? "bg-emerald-300 w-2"
-                        : "bg-gray-200 w-2"
-                    }`}
+              <div className="mb-5">
+                <div className="w-full bg-gray-100 rounded-full h-2">
+                  <div
+                    className="bg-[#2d5a27] h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${((activeStep + 1) / recipe.steps.length) * 100}%` }}
                   />
-                ))}
+                </div>
+                <p className="text-xs text-black/40 font-semibold mt-1.5 text-right">
+                  {activeStep + 1} / {recipe.steps.length} étapes
+                </p>
               </div>
             )}
 
@@ -342,23 +338,27 @@ export default function RecipeDetailPage() {
                 {recipe.steps.map((step, i) => (
                   <div
                     key={i}
-                    onClick={() => setActiveStep(i)}
+                    onClick={() => {
+                      setActiveStep(i);
+                      setCheckedIngredients(prev => ({ ...prev, [`step_${i}`]: !prev[`step_${i}`] }));
+                    }}
                     className={`bg-white rounded-2xl p-5 border-2 cursor-pointer transition-all duration-300 shadow-[0_4px_15px_rgba(0,0,0,0.07)] ${
-                      activeStep === i
-                        ? "border-[#4a8c42]  shadow-emerald-100 shadow-lg -translate-y-0.5"
-                        : "border-transparent hover:border-#b6eac7"
+                      checkedIngredients[`step_${i}`]
+                        ? "border-emerald-200 bg-emerald-50/30"
+                        : activeStep === i
+                        ? "border-[#4a8c42] shadow-emerald-100 shadow-lg"
+                        : "border-transparent hover:border-emerald-100"
                     }`}
                   >
                     <div className="flex gap-4">
-                      {/* Step number */}
                       <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-extrabold flex-shrink-0 transition-all duration-300 ${
-                        activeStep === i
+                        checkedIngredients[`step_${i}`]
+                          ? "bg-emerald-500 text-white"
+                          : activeStep === i
                           ? "bg-[#2d5a27] text-white"
-                          : i < activeStep
-                          ? "bg-emerald-100 text-[#2d5a27]"
                           : "bg-[#f9f5f0] text-black/40"
                       }`}>
-                        {i < activeStep ? "✓" : step.step_number}
+                        {checkedIngredients[`step_${i}`] ? "✓" : step.step_number}
                       </div>
 
                       <div className="flex-1 min-w-0">
@@ -381,26 +381,6 @@ export default function RecipeDetailPage() {
                     </div>
                   </div>
                 ))}
-              </div>
-            )}
-
-            {/* Step navigation buttons */}
-            {recipe.steps?.length > 1 && (
-              <div className="flex gap-3 mt-6">
-                <button
-                  onClick={() => setActiveStep(s => Math.max(0, s - 1))}
-                  disabled={activeStep === 0}
-                  className="flex-1 py-3 rounded-xl border-2 border-gray-200 text-sm font-bold text-black/50 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
-                >
-                  ← Précédente
-                </button>
-                <button
-                  onClick={() => setActiveStep(s => Math.min(recipe.steps.length - 1, s + 1))}
-                  disabled={activeStep === recipe.steps.length - 1}
-                  className="flex-1 py-3 rounded-xl bg-[#2d5a27] hover:bg-[#4a8c42]  text-white text-sm font-bold disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
-                >
-                  Suivante →
-                </button>
               </div>
             )}
 
