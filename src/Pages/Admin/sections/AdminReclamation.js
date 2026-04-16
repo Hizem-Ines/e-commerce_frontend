@@ -194,7 +194,8 @@ export default function AdminReclamations() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
+
         <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Réclamations</h2>
         <span className="text-sm text-black/40 font-medium">{reclamations.length} au total</span>
       </div>
@@ -212,7 +213,7 @@ export default function AdminReclamations() {
       )}
 
       {/* Stat cards */}
-      <div className="grid grid-cols-3 gap-4 mb-7">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-7">
         {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
           <button
             key={key}
@@ -251,7 +252,7 @@ export default function AdminReclamations() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-x-auto">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="text-4xl animate-spin">🌿</div>
@@ -266,7 +267,7 @@ export default function AdminReclamations() {
             </p>
           </div>
         ) : (
-          <table className="w-full text-sm">
+          <table className="w-full text-sm min-w-[380px]">
             <thead>
               <tr className="bg-[#f9f5f0] border-b border-gray-100">
                 <th className="text-left px-5 py-4 font-bold text-[#2c2c2c]">Client</th>

@@ -144,7 +144,7 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
           )}
 
           {/* Code + Actif */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-black/50 mb-1.5">Code promo *</label>
               <input name="code" value={form.code} onChange={handle}
@@ -164,7 +164,7 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
           </div>
 
           {/* Type + Valeur */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-black/50 mb-1.5">Type de réduction *</label>
               <select name="discount_type" value={form.discount_type} onChange={handle} className={inputCls}>
@@ -185,7 +185,7 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
           </div>
 
           {/* Dates */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-black/50 mb-1.5">Date de début *</label>
               <input type="date" name="starts_at" value={form.starts_at} onChange={handle} className={inputCls} />
@@ -197,7 +197,7 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
           </div>
 
           {/* Min commande + Max utilisations */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-black/50 mb-1.5">Montant minimum (TND)</label>
               <input type="number" name="min_order_amount" value={form.min_order_amount} onChange={handle}
@@ -211,7 +211,7 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
           </div>
 
           {/* Descriptions */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-black/50 mb-1.5">Description (FR)</label>
               <textarea name="description_fr" value={form.description_fr} onChange={handle}
@@ -332,8 +332,8 @@ const AdminPromotions = () => {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Promotions</h2>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
+  <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Promotions</h2>
         <button
           onClick={() => setModal({ type: "create" })}
           className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42] text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
@@ -411,9 +411,10 @@ const AdminPromotions = () => {
         <div className="text-center py-20 text-black/40">Aucune promotion trouvée</div>
       ) : (
         <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-hidden">
-          <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[640px]">
             <thead>
-              {/* Same as AdminUtilisateurs: bg-[#f9f5f0] + font-bold text-[#2c2c2c] */}
+             
               <tr className="bg-[#f9f5f0] border-b border-gray-100">
                 {["Code", "Réduction", "Dates", "Utilisations", "Statut", "Actions"].map((h) => (
                   <th key={h} className="px-5 py-4 text-left font-bold text-[#2c2c2c]">
@@ -505,6 +506,7 @@ const AdminPromotions = () => {
               ))}
             </tbody>
           </table>
+          </div>
 
           <div className="px-5 py-3 border-t border-gray-100">
             <p className="text-xs text-black/40">

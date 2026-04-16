@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../../../services/api';
-import { FiSearch, FiTrash2, FiEdit2, FiX, FiCheck } from 'react-icons/fi';
+import { FiSearch, FiTrash2, FiEdit, FiX, FiCheck } from 'react-icons/fi';
 
 const AdminUtilisateurs = () => {
     const [users, setUsers] = useState([]);
@@ -110,7 +110,7 @@ const AdminUtilisateurs = () => {
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
                 <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Utilisateurs</h2>
                 <span className="bg-emerald-100 text-emerald-700 text-sm font-bold px-4 py-2 rounded-full">
                     {users.length} utilisateur{users.length > 1 ? 's' : ''}
@@ -205,10 +205,10 @@ const AdminUtilisateurs = () => {
                                         <div className="flex items-center justify-center gap-1">
                                             <button
                                                 onClick={() => openEdit(user)}
-                                                className="p-2 hover:bg-emerald-50 text-[#2d5a27] rounded-xl transition"
+                                                className="p-2 hover:bg-blue-50 text-blue-500 rounded-xl transition"
                                                 title="Modifier"
                                             >
-                                                <FiEdit2 size={15} />
+                                                <FiEdit size={15} />
                                             </button>
                                             <button
                                                 onClick={() => setDeleteConfirm(user.id)}
