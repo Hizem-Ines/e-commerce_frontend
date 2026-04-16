@@ -133,7 +133,7 @@ const VariantEditRow = ({ variant, productId, onUpdated, onDeleted }) => {
 
             {editing && (
                 <div className="space-y-3 pt-2 border-t border-black/5">
-                    <div className="grid grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         <Field label="Prix *">
                             <input type="number" min="0" step="0.01" className={inputCls} value={vals.price} onChange={e => set('price', e.target.value)} />
                         </Field>
@@ -147,7 +147,8 @@ const VariantEditRow = ({ variant, productId, onUpdated, onDeleted }) => {
                             <input type="number" min="0" className={inputCls} value={vals.stock} onChange={e => set('stock', e.target.value)} />
                         </Field>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
                         <Field label="SKU">
                             <input className={inputCls} value={vals.sku} onChange={e => set('sku', e.target.value)} placeholder="ex: ARG-500ML" />
                         </Field>
@@ -211,7 +212,7 @@ const AddVariantForm = ({ productId, onAdded, onCancel }) => {
             <p className="font-bold text-sm text-emerald-700">➕ Nouvelle variante</p>
             {err && <p className="text-red-500 text-xs font-semibold">❌ {err}</p>}
 
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <Field label="Prix *">
                     <input type="number" min="0" step="0.01" className={inputCls} value={v.price} onChange={e => set('price', e.target.value)} placeholder="0.00" />
                 </Field>
@@ -225,7 +226,8 @@ const AddVariantForm = ({ productId, onAdded, onCancel }) => {
                     <input type="number" min="0" className={inputCls} value={v.stock} onChange={e => set('stock', e.target.value)} placeholder="0" />
                 </Field>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
                 <Field label="SKU">
                     <input className={inputCls} value={v.sku} onChange={e => set('sku', e.target.value)} placeholder="ex: ARG-500ML" />
                 </Field>
@@ -429,7 +431,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] flex flex-col overflow-hidden">
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-7 py-5 border-b border-gray-100 shrink-0">
+                <div className="flex items-center justify-between px-4 sm:px-7 py-5 border-b border-gray-100 shrink-0">
                     <div>
                         <h2 className="text-xl font-bold font-serif text-[#2c2c2c]">
                             {isEdit ? '✏️ Modifier le produit' : '✨ Nouveau produit'}
@@ -442,19 +444,19 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                 </div>
 
                 {/* Required fields legend */}
-                <div className="px-7 pt-3 shrink-0">
+                <div className="px-4 sm:px-7 pt-3 shrink-0">
                     <p className="text-xs text-black/35"><span className="text-red-400 font-bold">*</span> Champ obligatoire</p>
                 </div>
 
                 {/* Error */}
                 {error && (
-                    <div className="mx-7 mt-3 bg-red-50 border border-red-200 text-red-700 font-semibold px-4 py-3 rounded-xl text-sm flex items-center gap-2 shrink-0">
+                    <div className="mx-4 sm:mx-7 mt-3 bg-red-50 border border-red-200 text-red-700 font-semibold px-4 py-3 rounded-xl text-sm flex items-center gap-2 shrink-0">
                         ❌ {error}
                     </div>
                 )}
 
                 {/* Tabs */}
-                <div className="flex border-b border-gray-100 px-7 shrink-0 overflow-x-auto mt-3">
+                <div className="flex border-b border-gray-100 px-4 sm:px-7 shrink-0 overflow-x-auto mt-3">
                     {tabs.map(t => (
                         <button
                             key={t.id}
@@ -476,7 +478,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                 </div>
 
                 {/* Body */}
-                <div className="overflow-y-auto flex-1 px-7 py-6">
+                <div className="overflow-y-auto flex-1 px-4 sm:px-7 py-6">
 
                     {formLoading ? (
                         <div className="flex flex-col items-center justify-center py-20 gap-3">
@@ -488,7 +490,8 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                     {/* ── GÉNÉRAL ──────────────────────────────────── */}
                     {!formLoading && tab === 'general' && (
                         <div className="space-y-5">
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
                                 <Field label="Nom (FR)" required>
                                     <input className={inputCls} value={form.name_fr} onChange={e => set('name_fr', e.target.value)} placeholder="ex: Huile d'argan bio" />
                                 </Field>
@@ -511,7 +514,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                 <textarea className={textareaCls} rows={4} value={form.description_fr} onChange={e => set('description_fr', e.target.value)} placeholder="Décrivez le produit en détail..." />
                             </Field>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <Field label="Fournisseur">
                                     <select className={inputCls} value={form.supplier_id} onChange={e => set('supplier_id', e.target.value)}>
                                         <option value="">— Aucun —</option>
@@ -619,7 +622,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                                 )}
                                             </div>
 
-                                            <div className="grid grid-cols-4 gap-3">
+                                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                                 <Field label="Prix" required>
                                                     <input type="number" min="0" step="0.01" className={inputCls} value={v.price} onChange={e => setVariant(vi, 'price', e.target.value)} placeholder="0.00" />
                                                 </Field>
@@ -634,7 +637,8 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                                 </Field>
                                             </div>
 
-                                            <div className="grid grid-cols-2 gap-3">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
                                                 <Field label="SKU">
                                                     <input className={inputCls} value={v.sku} onChange={e => setVariant(vi, 'sku', e.target.value)} placeholder="ex: ARG-500ML" />
                                                 </Field>
@@ -689,7 +693,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                             <input ref={fileRef} type="file" multiple accept="image/*" className="hidden" onChange={handleImages} />
 
                             {previews.length > 0 && (
-                                <div className="grid grid-cols-4 gap-3">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                     {previews.map((src, i) => (
                                         <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-[#ecfdf5]">
                                             <img src={src} alt="" className="w-full h-full object-cover" />
@@ -710,7 +714,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                             {isEdit && product.images?.length > 0 && previews.length === 0 && (
                                 <div>
                                     <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-3">Images actuelles</p>
-                                    <div className="grid grid-cols-4 gap-3">
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                         {product.images.map((img, i) => (
                                             <div key={i} className="aspect-square rounded-xl overflow-hidden bg-[#ecfdf5]">
                                                 <img src={img.url} alt="" className="w-full h-full object-cover" />
@@ -755,7 +759,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                 </div>
 
                 {/* Footer */}
-                <div className="flex gap-3 px-7 py-5 border-t border-gray-100 bg-[#fdf6ec] shrink-0">
+                <div className="flex gap-3 px-4 sm:px-7 py-5 border-t border-gray-100 bg-[#fdf6ec] shrink-0">
                     <button onClick={onClose} className="flex-1 border-2 border-gray-200 text-black/60 font-bold py-3 rounded-xl hover:bg-gray-100 transition text-sm">
                         Annuler
                     </button>
@@ -879,13 +883,13 @@ const AdminProduits = () => {
             </form>
 
             {/* TABLE */}
-            <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-x-auto">
                 {loading ? (
                     <div className="flex items-center justify-center py-20">
                         <div className="text-4xl animate-spin">🌿</div>
                     </div>
                 ) : (
-                    <table className="w-full text-sm">
+                    <table className="w-full text-sm min-w-[650px]">
                         <thead>
                             <tr className="bg-[#f9f5f0] border-b border-gray-100">
                                 <th className="text-left px-5 py-4 font-bold text-[#2c2c2c]">Produit</th>

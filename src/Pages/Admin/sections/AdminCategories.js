@@ -58,12 +58,11 @@ setCategories(flat);
 
     useEffect(() => { fetchCategories(); }, []);
 
-    // These now work correctly because the list is flat
+    
     const parentCategories = categories.filter(c => !c.parent_id);
     const subCategories    = categories.filter(c =>  c.parent_id);
 
-    // ✅ FIX 3: Called by CategoryImageUpload after a successful image save
-    // Updates just that one category in state without re-fetching everything
+    
     const handleCategoryUpdated = (updatedCategory) => {
         setCategories(prev =>
             prev.map(c => c.id === updatedCategory.id ? {
@@ -122,7 +121,7 @@ setCategories(flat);
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
                 <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Catégories</h2>
                 <button
                     onClick={() => { setShowForm(true); setEditItem(null); setFormData({ name_fr: '', name_ar: '', parent_id: '' }); }}
@@ -144,11 +143,11 @@ setCategories(flat);
                 <div className="space-y-6">
 
                     {/* ── CATÉGORIES PRINCIPALES ─────────────────────────── */}
-                    <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-hidden">
+                    <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-x-auto">
                         <div className="px-5 py-4 border-b border-gray-100 bg-[#f9f5f0]">
                             <h3 className="font-bold text-[#2c2c2c]">Catégories principales ({parentCategories.length})</h3>
                         </div>
-                        <table className="w-full text-sm">
+                        <table className="w-full text-sm min-w-[500px]">
                             <thead>
                                 <tr className="border-b border-gray-100">
                                 
@@ -163,7 +162,6 @@ setCategories(flat);
                                 {parentCategories.map(cat => (
                                     <tr key={cat.id} className="border-b border-gray-50 hover:bg-[#fdf6ec] transition">
 
-                                        {/* ✅ FIX 2: Show image + upload component inline */}
                                         <td className="px-5 py-3">
                                             <CategoryImageUpload
                                                 category={cat}
@@ -196,11 +194,11 @@ setCategories(flat);
 
                     {/* ── SOUS-CATÉGORIES ────────────────────────────────── */}
                     {subCategories.length > 0 && (
-                        <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-hidden">
+                        <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-x-auto">
                             <div className="px-5 py-4 border-b border-gray-100 bg-[#f9f5f0]">
                                 <h3 className="font-bold text-[#2c2c2c]">Sous-catégories ({subCategories.length})</h3>
                             </div>
-                            <table className="w-full text-sm">
+                            <table className="w-full text-sm min-w-[620px]">
                                 <thead>
                                     <tr className="border-b border-gray-100">
                                         <th className="text-left px-5 py-3 font-bold text-black/50">Image</th>
@@ -252,7 +250,7 @@ setCategories(flat);
             {/* MODAL FORMULAIRE */}
             {showForm && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+                    <div className="bg-white rounded-2xl p-5 sm:p-8 max-w-md w-full shadow-2xl">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-xl font-bold text-[#2c2c2c]">
                                 {editItem ? 'Modifier la catégorie' : 'Nouvelle catégorie'}

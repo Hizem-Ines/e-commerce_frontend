@@ -117,9 +117,6 @@ const ProductDetail = () => {
     const [imageActive, setImageActive]       = useState(0);
     const [ongletActif, setOngletActif]       = useState('description');
 
-    useEffect(() => {
-        window.scrollTo(0, 0);
-    }, [id]);
     
     // ── Fetch product ──────────────────────────────────────
     useEffect(() => {

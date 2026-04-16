@@ -146,13 +146,13 @@ const AdminCommandes = () => {
             </div>
 
             {/* TABLE */}
-            <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-x-auto">
                 {loading ? (
                     <div className="flex items-center justify-center py-20">
                         <div className="text-4xl animate-spin">🌿</div>
                     </div>
                 ) : (
-                    <table className="w-full text-sm">
+                    <table className="w-full text-sm min-w-[640px]">
                         <thead>
                             <tr className="bg-[#f9f5f0] border-b border-gray-100">
                                 <th className="text-left px-5 py-4 font-bold text-[#2c2c2c]">Commande</th>
@@ -247,7 +247,7 @@ const AdminCommandes = () => {
                     <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl max-h-[90vh] flex flex-col">
 
                         {/* Header modal */}
-                        <div className="flex items-center justify-between px-8 py-6 border-b border-gray-100">
+                        <div className="flex items-center justify-between px-4 sm:px-8 py-6 border-b border-gray-100">
                             <div>
                                 <h3 className="text-xl font-bold text-[#2c2c2c]">
                                     Commande #{selectedOrder.order_number || selectedOrder.id.slice(0, 8).toUpperCase()}
@@ -268,10 +268,10 @@ const AdminCommandes = () => {
                         </div>
 
                         {/* Corps scrollable */}
-                        <div className="overflow-y-auto flex-1 px-8 py-6 space-y-6">
+                        <div className="overflow-y-auto flex-1 px-4 sm:px-8 py-6 space-y-6">
 
                             {/* ── Infos client + statut ── */}
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="bg-[#f9f5f0] rounded-xl p-4">
                                     <p className="text-xs text-black/40 font-semibold uppercase mb-2">Client</p>
                                     <p className="font-bold text-[#2c2c2c]">{selectedOrder.customer_name || orderDetail?.shipping_full_name || '—'}</p>
@@ -319,7 +319,7 @@ const AdminCommandes = () => {
                             </div>
 
                             {/* ── Récapitulatif financier ── */}
-                            <div className="bg-[#f9f5f0] rounded-xl p-4 grid grid-cols-3 gap-4 text-center">
+                            <div className="bg-[#f9f5f0] rounded-xl p-3 grid grid-cols-3 gap-2 text-center">
                                 <div>
                                     <p className="text-xs text-black/40 uppercase font-semibold mb-1">Sous-total</p>
                                     <p className="font-bold text-[#2c2c2c]">
@@ -424,7 +424,7 @@ const AdminCommandes = () => {
                             )}
 
                             {/* ── Changer statut ── */}
-                            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 border-t border-gray-100">
                                 <span className="text-sm text-black/50 font-semibold">Changer le statut</span>
                                 <select
                                     value={selectedOrder.status}

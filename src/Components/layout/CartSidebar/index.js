@@ -44,7 +44,7 @@ export default function CartSidebar() {
             <aside
                 className={`fixed bg-white z-50 flex flex-col shadow-2xl transition-transform duration-300 ease-in-out
                     bottom-0 left-0 right-0 max-h-[85vh] rounded-t-2xl
-                    sm:top-0 sm:right-0 sm:left-auto sm:bottom-auto sm:h-full sm:w-[400px] sm:rounded-none sm:max-h-none
+                    sm:top-[104px] sm:right-0 sm:left-auto sm:bottom-auto sm:h-[calc(100vh-104px)] sm:w-[400px] sm:rounded-none sm:max-h-none
                     ${isOpen ? 'translate-y-0 sm:translate-x-0' : 'translate-y-full sm:translate-x-full sm:translate-y-0'}`}
             >
                 {/* Header */}

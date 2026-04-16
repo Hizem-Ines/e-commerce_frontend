@@ -139,13 +139,13 @@ const AdminUtilisateurs = () => {
             </form>
 
             {/* TABLE */}
-            <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-x-auto">
                 {loading ? (
                     <div className="flex items-center justify-center py-20">
                         <div className="text-4xl animate-spin">🌿</div>
                     </div>
                 ) : (
-                    <table className="w-full text-sm">
+                    <table className="w-full text-sm min-w-[600px]">
                         <thead>
                             <tr className="bg-[#f9f5f0] border-b border-gray-100">
                                 <th className="text-left px-5 py-4 font-bold text-[#2c2c2c]">Utilisateur</th>
@@ -256,7 +256,7 @@ const AdminUtilisateurs = () => {
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
                         {/* Header */}
-                        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-[#f9f5f0]">
+                        <div className="flex items-center justify-between px-4 sm:px-6 py-5 border-b border-gray-100 bg-[#f9f5f0]">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-[#2d5a27] font-black overflow-hidden shrink-0">
                                     {editUser.avatar
@@ -275,9 +275,9 @@ const AdminUtilisateurs = () => {
                         </div>
 
                         {/* Body */}
-                        <div className="px-6 py-5 space-y-4 max-h-[65vh] overflow-y-auto">
+                        <div className="px-4 sm:px-6 py-5 space-y-4 max-h-[65vh] overflow-y-auto">
                             {/* Row : Nom + Email */}
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-bold text-black/50 mb-1">Nom</label>
                                     <input
@@ -299,7 +299,7 @@ const AdminUtilisateurs = () => {
                             </div>
 
                             {/* Row : Téléphone + Ville */}
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-bold text-black/50 mb-1">Téléphone</label>
                                     <input
@@ -332,7 +332,7 @@ const AdminUtilisateurs = () => {
                             </div>
 
                             {/* Row : Rôle + Statuts */}
-                            <div className="grid grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <div>
                                     <label className="block text-xs font-bold text-black/50 mb-1">Rôle</label>
                                     <select
@@ -384,7 +384,7 @@ const AdminUtilisateurs = () => {
                         </div>
 
                         {/* Footer */}
-                        <div className="flex gap-3 px-6 py-4 border-t border-gray-100 bg-[#fafafa]">
+                        <div className="flex gap-3 px-4 sm:px-6 py-4 border-t border-gray-100 bg-[#fafafa]">
                             <button
                                 onClick={closeEdit}
                                 className="flex-1 border-2 border-gray-200 text-black/60 font-bold py-3 rounded-xl hover:bg-gray-50 transition text-sm"

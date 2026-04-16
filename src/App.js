@@ -30,14 +30,14 @@ import Recipes    from "./Pages/Recipes";
 import RecipesDetail from "./Pages/RecipesDetail";
 import Unsubscribe from "./Pages/Unsubscribe";
 import CartSidebar from './Components/layout/CartSidebar';
-
+import ScrollToTop from './Components/scrolltotop/ScrollToTop';
 function App() {
     return (
         <BrowserRouter>
+            <ScrollToTop />
             <AuthProvider>
                 <CartProvider>
                     <WishlistProvider>
-                        {/* Sidebar panier globale — disponible sur toutes les pages */}
                         <CartSidebar />
 
                         <Routes>
