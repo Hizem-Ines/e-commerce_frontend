@@ -25,7 +25,7 @@ const Categories = ({ categories, loading }) => {
                             <Link
                                 key={cat.id}
                                 to={`/produits?category_id=${cat.id}`}
-                                className="group bg-[#f9f5f0] rounded-2xl p-8 text-center cursor-pointer transition-all duration-300 hover:bg-[#2d5a27] hover:-translate-y-1 hover:shadow-xl no-underline"
+                                className="group bg-[#f9f5f0] rounded-2xl  p-4 md:p-8 text-center cursor-pointer transition-all duration-300 hover:bg-[#2d5a27] hover:-translate-y-1 hover:shadow-xl no-underline"
                             >
                                 {cat.images?.[0]?.url ? (
                                     <img src={cat.images[0].url} alt={cat.name_fr} className="w-12 h-12 object-cover rounded-xl mx-auto mb-3" />

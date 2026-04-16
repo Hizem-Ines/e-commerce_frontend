@@ -15,7 +15,7 @@ const Logo = () => (
         <img
             src={logo}
             alt="GOFFA logo"
-            className="w-20 h-20 object-contain drop-shadow-md"
+            className="w-12 h-12 sm:w-20 sm:h-20 object-contain drop-shadow-md"
         />
     </Link>
 );
@@ -91,12 +91,12 @@ const Header = () => {
     return (
         <div className="bg-[#2d5a27]">
             <header className="container mx-auto px-4">
-                <div className="flex items-center py-3 gap-4">
+                <div className="flex flex-wrap items-center py-3 gap-2">
 
                     <Logo />
 
                     {/* BARRE DE RECHERCHE */}
-                    <div className="flex-1 relative" ref={searchRef}>
+                    <div className="order-last sm:order-none w-full sm:w-auto sm:flex-1 min-w-0 relative" ref={searchRef}>
                         <form onSubmit={handleSearchSubmit}>
                             <div className="flex items-center bg-white/15 border border-white/30 rounded-full px-4 py-2 gap-2">
                                 <input
@@ -126,44 +126,44 @@ const Header = () => {
                                 </div>
                                 {suggestions.map((produit) => {
     
-    const images = Array.isArray(produit.images)
-        ? produit.images
-        : (() => { try { return JSON.parse(produit.images || '[]'); } catch { return []; } })();
+                                const images = Array.isArray(produit.images)
+                                    ? produit.images
+                                    : (() => { try { return JSON.parse(produit.images || '[]'); } catch { return []; } })();
 
-    return (
-        <button
-            key={produit.id}
-            onClick={() => handleSuggestionClick(produit)}
-            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-emerald-50 transition text-left border-b border-gray-50 last:border-0"
-        >
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0 overflow-hidden">
-                {images[0]?.url ? (
-                    <img
-                        src={images[0].url}
-                        alt={produit.name_fr}
-                        className="w-full h-full object-cover"
-                    />
-                ) : (
-                    <span className="text-lg">🌿</span>
-                )}
-            </div>
-            <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-[#2c2c2c] truncate">
-                    {produit.name_fr}
-                </p>
-                <p className="text-xs text-black/40">
-                    {produit.category_name}
-                    {produit.supplier_name ? ` · ${produit.supplier_name}` : ''}
-                </p>
-            </div>
-            <span className="text-sm font-extrabold text-[#2d5a27] shrink-0">
-                {produit.min_price
-                    ? `${parseFloat(produit.min_price).toFixed(2)} DT`
-                    : 'N/A'}
-            </span>
-        </button>
-    );
-})}
+                                return (
+                                    <button
+                                        key={produit.id}
+                                        onClick={() => handleSuggestionClick(produit)}
+                                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-emerald-50 transition text-left border-b border-gray-50 last:border-0"
+                                    >
+                                        <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0 overflow-hidden">
+                                            {images[0]?.url ? (
+                                                <img
+                                                    src={images[0].url}
+                                                    alt={produit.name_fr}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <span className="text-lg">🌿</span>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-bold text-[#2c2c2c] truncate">
+                                                {produit.name_fr}
+                                            </p>
+                                            <p className="text-xs text-black/40">
+                                                {produit.category_name}
+                                                {produit.supplier_name ? ` · ${produit.supplier_name}` : ''}
+                                            </p>
+                                        </div>
+                                        <span className="text-sm font-extrabold text-[#2d5a27] shrink-0">
+                                            {produit.min_price
+                                                ? `${parseFloat(produit.min_price).toFixed(2)} DT`
+                                                : 'N/A'}
+                                        </span>
+                                    </button>
+                                );
+                            })}
 
                                 {/* VOIR TOUS */}
                                 <button
@@ -185,7 +185,7 @@ const Header = () => {
                         )}
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0 ml-auto sm:ml-0">
 
                         {/* FAVORIS */}
                         <Link to="/favoris" className="relative no-underline">
@@ -263,9 +263,10 @@ const Header = () => {
                             className="flex items-center gap-2 cursor-pointer"
                             onClick={() => navigate('/panier')}
                         >
-                            <span className="text-white font-bold text-sm">
+                            <span className="hidden sm:block text-white font-bold text-sm">
                                 {formatPrice(totalPrix)}
                             </span>
+                            
                             <div className="relative">
                                 <button className="border border-white/30 bg-white/15 rounded-full w-10 h-10 flex items-center justify-center text-white hover:bg-white/20 transition">
                                     <BsFillBasket3Fill size={18} />

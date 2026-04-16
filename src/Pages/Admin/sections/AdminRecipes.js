@@ -226,7 +226,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] flex flex-col overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-7 py-5 border-b border-gray-100 shrink-0">
+        <div className="flex items-center justify-between px-4 sm:px-7 py-5 border-b border-gray-100 shrink-0">
           <div>
             <h2 className="text-xl font-bold font-serif text-[#2c2c2c]">
               {editRecipe ? "✏️ Modifier la recette" : "✨ Nouvelle recette"}
@@ -239,19 +239,19 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
         </div>
 
         {/* Required legend */}
-        <div className="px-7 pt-3 shrink-0">
+        <div className="px-4 sm:px-7 pt-3 shrink-0">
           <p className="text-xs text-black/35"><span className="text-red-400 font-bold">*</span> Champ obligatoire</p>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="mx-7 mt-3 bg-red-50 border border-red-200 text-red-700 font-semibold px-4 py-3 rounded-xl text-sm flex items-center gap-2 shrink-0">
+          <div className="mx-4 sm:mx-7 mt-3 bg-red-50 border border-red-200 text-red-700 font-semibold px-4 py-3 rounded-xl text-sm flex items-center gap-2 shrink-0">
             ❌ {error}
           </div>
         )}
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-100 px-7 shrink-0 overflow-x-auto mt-3">
+        <div className="flex border-b border-gray-100 px-4 sm:px-7 shrink-0 overflow-x-auto mt-3">
           {tabs.map(t => (
             <button key={t.id} onClick={() => setTab(t.id)}
               className={`whitespace-nowrap px-4 py-3.5 text-xs font-bold transition-all border-b-2 -mb-px ${
@@ -270,7 +270,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
         </div>
 
         {/* Body */}
-        <div className="overflow-y-auto flex-1 px-7 py-6">
+        <div className="overflow-y-auto flex-1 px-4 sm:px-7 py-6">
 
           {formLoading && (
             <div className="flex flex-col items-center justify-center py-20 gap-3">
@@ -282,7 +282,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
           {/* ── GÉNÉRAL ── */}
           {!formLoading && tab === "general" && (
             <div className="space-y-5">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Titre (FR)" required>
                   <input className={inputCls} value={form.title_fr}
                     onChange={e => set("title_fr", e.target.value)} placeholder="ex: Brik à l'œuf" />
@@ -347,7 +347,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
                         </button>
                       )}
                     </div>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <Field label="Nom FR *">
                         <input className={inputCls} value={ing.name_fr}
                           onChange={e => updateIngredient(i, "name_fr", e.target.value)}
@@ -388,7 +388,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
               <div className="space-y-3">
                 {steps.map((step, i) => (
                   <div key={i} className="bg-[#f9f5f0] rounded-2xl p-4 space-y-3">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="w-7 h-7 bg-[#2d5a27] text-white rounded-lg flex items-center justify-center text-xs font-bold">{i + 1}</span>
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2">
@@ -479,7 +479,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 px-7 py-5 border-t border-gray-100 bg-[#fdf6ec] shrink-0">
+        <div className="flex gap-3 px-4 sm:px-7 py-5 border-t border-gray-100 bg-[#fdf6ec] shrink-0">
           <button onClick={onClose}
             className="flex-1 border-2 border-gray-200 text-black/60 font-bold py-3 rounded-xl hover:bg-gray-100 transition text-sm">
             Annuler
@@ -568,7 +568,7 @@ export default function AdminRecettes() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
         <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Recettes</h2>
         <button onClick={openNew}
           className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-5 py-2.5 rounded-xl transition text-sm">
@@ -602,7 +602,7 @@ export default function AdminRecettes() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-x-auto">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="text-4xl animate-spin">🌿</div>

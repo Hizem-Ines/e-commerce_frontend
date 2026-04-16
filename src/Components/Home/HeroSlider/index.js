@@ -42,7 +42,7 @@ const HeroSlider = () => {
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
             {/* CONTENU — aligné à gauche */}
-            <div className="relative h-full flex items-center px-16">
+            <div className="relative h-full flex items-center px-6 md:px-16">
                 <div className={`max-w-xl transition-all duration-500 ${animating ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
 
                     {/* BADGE */}
@@ -54,7 +54,7 @@ const HeroSlider = () => {
                     </div>
 
                     {/* TITRE */}
-                    <h1 className="text-white text-6xl font-black font-serif mb-5 leading-tight drop-shadow-lg">
+                    <h1 className="text-white text-3xl md:text-6xl font-black font-serif mb-5 leading-tight drop-shadow-lg">
                         {slide.titre}
                     </h1>
 
@@ -66,7 +66,7 @@ const HeroSlider = () => {
                     </div>
 
                     {/* DESCRIPTION */}
-                    <p className="text-white/80 text-lg mb-8 leading-relaxed">
+                    <p className="text-white/80 text-sm md:text-lg mb-8 leading-relaxed">
                         {slide.description}
                     </p>
 
@@ -87,7 +87,7 @@ const HeroSlider = () => {
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#4a8c42]  via-[#c8872a] to-[#4a8c42]  opacity-60" />
 
             {/* COMPTEUR DE SLIDE — en bas à droite */}
-            <div className="absolute bottom-8 right-16 flex items-center gap-3">
+            <div className="hidden md:flex absolute bottom-8 right-16 items-center gap-3">
                 <span className="text-white font-black text-3xl font-serif">
                     {String(current + 1).padStart(2, '0')}
                 </span>

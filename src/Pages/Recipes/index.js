@@ -134,6 +134,7 @@ export default function RecipesPage() {
   const [searchInput, setSearchInput] = useState("");
   const [category, setCategory]       = useState("");
   const [difficulty, setDifficulty]   = useState("");
+  const [filtresOuverts, setFiltresOuverts] = useState(false);
 
   // Fetch featured (once)
   useEffect(() => {
@@ -185,82 +186,104 @@ export default function RecipesPage() {
       <div className="container mx-auto px-4">
 
         {/* ── TITRE + HERO ── */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
           <div>
-            <h1 className="text-4xl font-bold font-serif text-[#2c2c2c] mb-1">
-              Nos Recettes
-            </h1>
+            <h1 className="text-4xl font-bold font-serif text-[#2c2c2c] mb-1">Nos Recettes</h1>
             <p className="text-black/50">
               {recipes.length} recette{recipes.length > 1 ? "s" : ""} trouvée{recipes.length > 1 ? "s" : ""}
               {search && <span> pour "<strong>{search}</strong>"</span>}
             </p>
           </div>
-          
+          <button
+            onClick={() => setFiltresOuverts(!filtresOuverts)}
+            className="md:hidden flex items-center gap-2 bg-[#2d5a27] text-white font-bold px-4 py-2 rounded-full text-sm"
+          >
+            ⚙️ Filtres
+          </button>
         </div>
 
         {/* ── Hero featured recipe banner ── */}
         {heroRecipe && (
-          <div className="bg-[#2c2c2c] rounded-2xl overflow-hidden mb-8 shadow-lg">
-            <div className="flex flex-col md:flex-row items-center gap-0">
-              {heroRecipe.cover_image && (
-                <div className="w-full md:w-56 h-40 md:h-full shrink-0 overflow-hidden">
-                  <img
-                    src={heroRecipe.cover_image}
-                    alt={heroRecipe.title_fr}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+          <div className="relative rounded-2xl overflow-hidden mb-8 shadow-lg">
+            
+            {/* Image de fond */}
+            <div className="h-52 md:h-56 bg-[#2c2c2c]">
+              {heroRecipe.cover_image ? (
+                <img
+                  src={heroRecipe.cover_image}
+                  alt={heroRecipe.title_fr}
+                  className="w-full h-full object-cover opacity-60"
+                />
+              ) : (
+                <div className="w-full h-full bg-[#2c2c2c]" />
               )}
-              <div className="p-6 flex-1">
-                <span className="inline-flex items-center gap-1.5 bg-amber-400/20 text-amber-400 text-xs font-bold px-3 py-1 rounded-full mb-3">
-                  ✨ Recette mise en avant
-                </span>
-                <h2 className="text-xl font-bold text-white mb-2">{heroRecipe.title_fr}</h2>
-                {heroRecipe.description_fr && (
-                  <p className="text-white/60 text-sm line-clamp-2 mb-4">{heroRecipe.description_fr}</p>
+            </div>
+
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a]/95 via-[#1a1a1a]/40 to-transparent" />
+
+            {/* Contenu superposé */}
+            <div className="absolute inset-0 flex flex-col justify-end p-5 md:p-8">
+              <span className="inline-flex items-center gap-1.5 bg-amber-400/20 text-amber-400 text-xs font-bold px-3 py-1 rounded-full mb-2 w-fit">
+                ✨ Recette mise en avant
+              </span>
+              <h2 className="text-lg md:text-2xl font-bold text-white mb-1 leading-tight">
+                {heroRecipe.title_fr}
+              </h2>
+              {heroRecipe.description_fr && (
+                <p className="text-white/60 text-xs md:text-sm line-clamp-2 mb-3 max-w-lg">
+                  {heroRecipe.description_fr}
+                </p>
+              )}
+              <div className="flex items-center gap-3 text-white/50 text-xs mb-3 flex-wrap">
+                {((heroRecipe.prep_time || 0) + (heroRecipe.cook_time || 0)) > 0 && (
+                  <span className="flex items-center gap-1">
+                    <FiClock size={12} />
+                    {(heroRecipe.prep_time || 0) + (heroRecipe.cook_time || 0)} min
+                  </span>
                 )}
-                <div className="flex items-center gap-4 text-white/50 text-xs mb-4 flex-wrap">
-                  {((heroRecipe.prep_time || 0) + (heroRecipe.cook_time || 0)) > 0 && (
-                    <span className="flex items-center gap-1">
-                      <FiClock size={12} />
-                      {(heroRecipe.prep_time || 0) + (heroRecipe.cook_time || 0)} min
-                    </span>
-                  )}
-                  {heroRecipe.servings && (
-                    <span className="flex items-center gap-1">
-                      <FiUsers size={12} />
-                      {heroRecipe.servings} personnes
-                    </span>
-                  )}
-                  {heroRecipe.difficulty && (
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${difficultyConfig[heroRecipe.difficulty]?.bg} ${difficultyConfig[heroRecipe.difficulty]?.text}`}>
-                      {difficultyConfig[heroRecipe.difficulty]?.label}
-                    </span>
-                  )}
-                </div>
-                <Link
-                  to={`/recettes/${heroRecipe.slug}`}
-                  className="inline-block bg-[#2d5a27] hover:bg-[#4a8c42]  text-white text-sm font-bold px-5 py-2 rounded-xl transition-colors duration-300 no-underline"
-                >
-                  Voir la recette →
-                </Link>
+                {heroRecipe.servings && (
+                  <span className="flex items-center gap-1">
+                    <FiUsers size={12} />
+                    {heroRecipe.servings} personnes
+                  </span>
+                )}
+                {heroRecipe.difficulty && (
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${difficultyConfig[heroRecipe.difficulty]?.bg} ${difficultyConfig[heroRecipe.difficulty]?.text}`}>
+                    {difficultyConfig[heroRecipe.difficulty]?.label}
+                  </span>
+                )}
               </div>
+              <Link
+                to={`/recettes/${heroRecipe.slug}`}
+                className="inline-block bg-[#2d5a27] hover:bg-[#4a8c42] text-white text-sm font-bold px-5 py-2 rounded-xl transition-colors duration-300 no-underline w-fit"
+              >
+                Voir la recette →
+              </Link>
             </div>
           </div>
         )}
 
-        <div className="flex gap-6">
+        <div className="flex flex-col md:flex-row gap-6">
 
           {/* ── SIDEBAR FILTRES ── */}
-          <div className="w-64 shrink-0">
-            <div className="bg-white rounded-2xl p-5 shadow-[0_4px_15px_rgba(0,0,0,0.07)] sticky top-4">
+          <div className={`${filtresOuverts ? 'block' : 'hidden'} md:block w-full md:w-64 shrink-0`}>
+            <div className="bg-white rounded-2xl p-5 shadow-[0_4px_15px_rgba(0,0,0,0.07)] md:sticky md:top-4">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="font-bold text-[#2c2c2c] text-base">Filtres</h3>
-                {hasActiveFilters && (
-                  <button onClick={resetFiltres} className="text-xs text-[#2d5a27] hover:underline font-semibold">
-                    Réinitialiser
+                <div className="flex items-center gap-3">
+                  {hasActiveFilters && (
+                    <button onClick={resetFiltres} className="text-xs text-[#2d5a27] hover:underline font-semibold">
+                      Réinitialiser
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setFiltresOuverts(false)}
+                    className="md:hidden text-black/40 hover:text-black/70 text-lg font-bold leading-none"
+                  >
+                    ✕
                   </button>
-                )}
+                </div>
               </div>
 
               {/* RECHERCHE */}

@@ -58,10 +58,22 @@ const Admin = () => {
     };
 
     return (
-        <div className="flex min-h-screen bg-[#f9f5f0]">
+        <div className="flex min-h-screen bg-[#f9f5f0] relative">
+
+            {/* Backdrop (mobile only) */}
+            {sidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black/40 z-20 lg:hidden"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
 
             {/* SIDEBAR */}
-            <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-emerald-900 text-white transition-all duration-300 shrink-0 flex flex-col`}>
+            <div className={`
+                ${sidebarOpen ? 'w-64 translate-x-0' : 'w-64 -translate-x-full lg:translate-x-0 lg:w-16'}
+                fixed lg:relative z-30 h-full lg:h-auto min-h-screen
+                bg-emerald-900 text-white transition-all duration-300 shrink-0 flex flex-col
+            `}>
 
                 {/* LOGO */}
                 <div className="flex items-center justify-between p-4 border-b border-emerald-700">
@@ -115,7 +127,17 @@ const Admin = () => {
 
             {/* CONTENU */}
             <div className="flex-1 overflow-auto">
-                <div className="p-8">
+                {/* Mobile top bar */}
+                <div className="lg:hidden flex items-center gap-3 p-4 bg-white border-b border-gray-200 sticky top-0 z-10">
+                    <button
+                        onClick={() => setSidebarOpen(true)}
+                        className="p-2 hover:bg-gray-100 rounded-xl transition"
+                    >
+                        <FiMenu size={20} />
+                    </button>
+                    <h1 className="font-black text-lg font-serif text-emerald-900">GOFFA</h1>
+                </div>
+                <div className="p-4 lg:p-8">
                     {renderSection()}
                 </div>
             </div>

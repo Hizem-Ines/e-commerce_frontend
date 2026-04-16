@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 const Banniere = () => (
     <section className="py-16 bg-gradient-to-b from-green-100 to-white">
         <div className="container mx-auto px-4">
-            <div className="bg-gradient-to-r from-[#2d5a27] via-[#3a7a32] to-[#2d5a27] rounded-3xl p-12 flex items-center justify-between text-white shadow-2xl overflow-hidden relative">
+            <div className="bg-gradient-to-r from-[#2d5a27] via-[#3a7a32] to-[#2d5a27] rounded-3xl p-6 md:p-12 flex flex-col md:flex-row items-center justify-between text-white shadow-2xl overflow-hidden relative gap-6">
 
                 {/* MOTIF DE FOND */}
                 <div className="absolute inset-0 opacity-20">
@@ -18,7 +18,7 @@ const Banniere = () => (
                     <div className="inline-block bg-yellow-400 text-green-900 px-4 py-2 rounded-full text-sm font-bold mb-4">
                         🌱 Engagement Bio
                     </div>
-                    <h3 className="text-4xl font-black mb-3">
+                    <h3 className="text-2xl md:text-4xl font-black mb-3">
                         Soutenez nos Producteurs Locaux
                     </h3>
                     <p className="text-xl text-green-50 mb-6 max-w-xl">
@@ -33,7 +33,7 @@ const Banniere = () => (
                 </div>
 
                 {/* ICÔNE */}
-                <div className="text-9xl relative z-10">
+               <div className="hidden md:block text-9xl relative z-10">
                     🚜
                 </div>
 

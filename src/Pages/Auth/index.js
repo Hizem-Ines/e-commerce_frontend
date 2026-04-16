@@ -57,14 +57,14 @@ const Auth = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-6"
+        <div className="min-h-screen flex items-center justify-center p-4 md:p-6"
             style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #fef2f2 50%, #f0fdf4 100%)' }}>
 
-            <div className="max-w-5xl w-full grid grid-cols-2 bg-white rounded-3xl overflow-hidden"
+            <div className="max-w-5xl w-full grid grid-cols-1 md:grid-cols-2 bg-white rounded-3xl overflow-hidden"
                 style={{ boxShadow: '0 25px 60px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04)' }}>
 
                 {/* ===== COLONNE GAUCHE — FORMULAIRE ===== */}
-                <div className="p-10 overflow-y-auto max-h-screen">
+                <div className="p-6 md:p-10 overflow-y-auto max-h-screen">
 
                     {/* LOGO */}
                     <Link to="/" className="flex items-center gap-3 mb-8 no-underline">
@@ -299,6 +299,19 @@ const Auth = () => {
                                         <option value="mahdia">Mahdia</option>
                                         <option value="tozeur">Tozeur</option>
                                         <option value="kasserine">Kasserine</option>
+                                        <option value="béja">Béja</option>
+                                        <option value="ben arous">Ben Arous</option>
+                                        <option value="gafsa">Gafsa</option>
+                                        <option value="jendouba">Jendouba</option>
+                                        <option value="kébili">Kébili</option>
+                                        <option value="kef">Kef</option>
+                                        <option value="manouba">Manouba</option>
+                                        <option value="médenine">Médenine</option>
+                                        <option value="sidi bouzid">Sidi Bouzid</option>
+                                        <option value="siliana">Siliana</option>
+                                        <option value="kasserine">Kasserine</option>
+                                        <option value="tataouine">Tataouine</option>
+                                        <option value="zaghouan">Zaghouan</option>
                                     </select>
                                 </div>
                             </div>
@@ -369,7 +382,7 @@ const Auth = () => {
                 </div>
 
                 {/* ===== COLONNE DROITE — VISUEL ===== */}
-                <div className="p-10 flex flex-col justify-between text-white relative overflow-hidden"
+                <div className="hidden md:flex p-10 flex-col justify-between text-white relative overflow-hidden"
                     style={{ background: 'linear-gradient(160deg, #14532d 0%, #166534 60%, #15803d 100%)' }}>
 
                     {/* MOTIF GÉOMÉTRIQUE */}

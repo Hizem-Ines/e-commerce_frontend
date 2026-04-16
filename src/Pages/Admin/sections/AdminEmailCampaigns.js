@@ -89,9 +89,9 @@ const AdminEmailCampaigns = () => {
         <div className="space-y-6">
 
             {/* HEADER */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                    <h2 className="text-2xl font-black text-gray-800">Campagnes Email</h2>
+                    <h2 className="text-xl sm:text-2xl font-black text-gray-800">Campagnes Email</h2>
                     <p className="text-sm text-gray-500 mt-1">Gérez vos newsletters et promotions</p>
                 </div>
                 <button
@@ -108,7 +108,7 @@ const AdminEmailCampaigns = () => {
             {success && <div className="bg-emerald-50 border border-#b6eac7 text-emerald-700 px-4 py-3 rounded-xl text-sm">{success}</div>}
 
             {/* STATS */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="bg-white rounded-2xl p-5 border border-gray-100 flex items-center gap-4">
                     <div className="bg-emerald-100 p-3 rounded-xl"><FiUsers className="text-[#2d5a27]" size={20} /></div>
                     <div>
@@ -136,7 +136,7 @@ const AdminEmailCampaigns = () => {
             {showForm && (
                 <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
                     <h3 className="font-bold text-gray-800">Nouvelle campagne</h3>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="text-xs font-semibold text-gray-500 mb-1 block">Titre *</label>
                             <input
@@ -205,7 +205,7 @@ const AdminEmailCampaigns = () => {
             )}
 
             {/* PROMO CODE INPUT */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-4">
+            <div className="bg-white rounded-2xl border border-gray-100 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
                 <label className="text-sm font-semibold text-gray-600 whitespace-nowrap">Code promo (optionnel) :</label>
                 <input
                     placeholder="Ex: ETE20"
@@ -229,7 +229,7 @@ const AdminEmailCampaigns = () => {
                 ) : (
                     <div className="divide-y divide-gray-50">
                         {campaigns.map(c => (
-                            <div key={c.id} className="px-6 py-4 flex items-center justify-between gap-4">
+                            <div key={c.id} className="px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1">
                                         <p className="font-semibold text-gray-800 truncate">{c.title}</p>

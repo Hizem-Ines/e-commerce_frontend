@@ -215,12 +215,11 @@ const AdminStats = () => {
         <div className="space-y-6">
 
             {/* ── En-tête ── */}
-            <div className="flex flex-wrap items-center justify-between gap-4">
-                <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Tableau de bord</h2>
-
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <h2 className="text-xl lg:text-2xl font-bold font-serif text-[#2c2c2c]">Tableau de bord</h2>
                 <div className="flex flex-wrap items-center gap-2">
                     {/* Boutons période */}
-                    <div className="flex items-center bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div className="flex items-center bg-white border border-gray-200 rounded-xl overflow-x-auto shadow-sm max-w-full">
                         {PERIOD_OPTIONS.map(opt => (
                             <button
                                 key={opt.value}
@@ -285,7 +284,7 @@ const AdminStats = () => {
 
             {/* ── Boutons export ── */}
             {!loading && data && (
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-2 overflow-x-auto pb-1">
                     <span className="text-xs font-semibold text-black/40 mr-1">
                         <FiDownload size={12} className="inline mr-1" />
                         Exporter :
@@ -401,7 +400,7 @@ const AdminStats = () => {
                     {/* ════════════════════════════════════════════════════════
                         KPI CARDS — LIGNE 1 : indicateurs principaux
                     ════════════════════════════════════════════════════════ */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <KpiCard
                             label="Chiffre d'affaires"
                             value={formatPrice(data?.kpis?.revenue?.current || 0)}
@@ -435,7 +434,7 @@ const AdminStats = () => {
                     {/* ════════════════════════════════════════════════════════
                         KPI CARDS — LIGNE 2 : réclamations
                     ════════════════════════════════════════════════════════ */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <KpiCard
                             label="Réclamations (période)"
                             value={data?.reclamations?.total?.current ?? '—'}
@@ -478,7 +477,8 @@ const AdminStats = () => {
                                 title="Évolution journalière du CA"
                                 sub="Revenus et commandes par jour"
                             />
-                            <ResponsiveContainer width="100%" height={220}>
+                            <div className="h-[180px] sm:h-[220px]">
+                                <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={dailyData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                                     <defs>
                                         <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
@@ -521,6 +521,7 @@ const AdminStats = () => {
                                     />
                                 </AreaChart>
                             </ResponsiveContainer>
+                        </div>
                             <div className="flex gap-6 mt-2 justify-center">
                                 <span className="flex items-center gap-2 text-xs font-semibold text-black/50">
                                     <span className="w-4 h-0.5 bg-emerald-500 rounded inline-block" /> CA (TND)
@@ -542,7 +543,8 @@ const AdminStats = () => {
                                 title="Revenus & commandes mensuels"
                                 sub="Évolution sur la période sélectionnée"
                             />
-                            <ResponsiveContainer width="100%" height={220}>
+                            <div className="h-[180px] sm:h-[220px]">
+                                <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={monthlyData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                                     <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 600 }} axisLine={false} tickLine={false} />
@@ -552,7 +554,8 @@ const AdminStats = () => {
                                     <Line yAxisId="rev" type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={3} dot={{ fill: '#10b981', r: 5, strokeWidth: 0 }} activeDot={{ r: 7, strokeWidth: 0 }} />
                                     <Line yAxisId="ord" type="monotone" dataKey="orders"  stroke="#8b5cf6" strokeWidth={2} strokeDasharray="5 3" dot={{ fill: '#8b5cf6', r: 4, strokeWidth: 0 }} activeDot={{ r: 6, strokeWidth: 0 }} />
                                 </LineChart>
-                            </ResponsiveContainer>
+                                </ResponsiveContainer>
+                            </div>
                         </div>
                     )}
 
@@ -645,7 +648,8 @@ const AdminStats = () => {
                         <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-6">
                             <SectionTitle icon={<FiBarChart2 size={18} />} title="Top produits — unités vendues" />
                             {data?.charts?.topProducts?.length > 0 ? (
-                                <ResponsiveContainer width="100%" height={220}>
+                                <div className="h-[180px] sm:h-[220px]">
+                                    <ResponsiveContainer width="100%" height="100%">
                                     <BarChart
                                         data={data.charts.topProducts.map(p => ({
                                             name: truncate(p.name_fr || 'Supprimé', 13),
@@ -663,7 +667,8 @@ const AdminStats = () => {
                                         />
                                         <Bar dataKey="qty" fill="#10b981" radius={[6, 6, 0, 0]} maxBarSize={44} />
                                     </BarChart>
-                                </ResponsiveContainer>
+                                    </ResponsiveContainer>
+                                </div>
                             ) : (
                                 <p className="text-sm text-black/30 text-center py-10">Aucune vente</p>
                             )}
@@ -673,7 +678,8 @@ const AdminStats = () => {
                         <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-6">
                             <SectionTitle icon={<FiBarChart2 size={18} />} title="CA par catégorie" />
                             {categoryData.length > 0 ? (
-                                <ResponsiveContainer width="100%" height={220}>
+                                <div className="h-[180px] sm:h-[220px]">
+                                    <ResponsiveContainer width="100%" height="100%">
                                     <BarChart
                                         data={categoryData.map(c => ({
                                             name: truncate(c.name, 13),
@@ -695,7 +701,8 @@ const AdminStats = () => {
                                             ))}
                                         </Bar>
                                     </BarChart>
-                                </ResponsiveContainer>
+                                    </ResponsiveContainer>
+                                </div>
                             ) : (
                                 <p className="text-sm text-black/30 text-center py-10">Aucune vente</p>
                             )}

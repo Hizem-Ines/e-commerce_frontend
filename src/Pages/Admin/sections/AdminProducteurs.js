@@ -112,7 +112,7 @@ const AdminProducteurs = () => {
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
                 <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Producteurs</h2>
                 <button
                     onClick={openCreate}
@@ -194,7 +194,7 @@ const AdminProducteurs = () => {
             {/* MODAL CRÉATION / MODIFICATION */}
             {showForm && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl p-8 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+                    <div className="bg-white rounded-2xl p-5 sm:p-8 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-xl font-bold text-[#2c2c2c]">
                                 {editTarget ? `Modifier : ${editTarget.name}` : 'Nouveau producteur'}

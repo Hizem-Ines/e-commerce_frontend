@@ -240,7 +240,7 @@ const Profile = () => {
                 </div>
 
                 {/* CARTE UTILISATEUR */}
-                <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-6 mb-6 flex items-center gap-5">
+                <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-6 mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <div className="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center text-2xl font-black text-[#2d5a27] shrink-0 overflow-hidden">
                         {avatarPreview
                             ? <img src={avatarPreview} alt={user?.name} className="w-full h-full object-cover" />
@@ -253,7 +253,7 @@ const Profile = () => {
                             {user?.role === 'admin' ? '👑 Admin' : '🛍️ Client'}
                         </span>
                     </div>
-                    <div className="flex gap-4 text-center">
+                    <div className="flex gap-4 text-center self-end sm:self-auto">
                         <Link to="/favoris" className="no-underline">
                             <div className="bg-red-50 p-3 rounded-xl">
                                 <FiHeart className="text-red-500 mx-auto mb-1" size={20} />
@@ -281,10 +281,10 @@ const Profile = () => {
                 <div className="flex bg-white rounded-2xl p-1 shadow-[0_4px_15px_rgba(0,0,0,0.07)] mb-6 gap-1">
                     {tabs.map((tab) => (
                         <button key={tab.id} onClick={() => handleTabChange(tab.id)}
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all duration-300 relative ${
+                            className={`flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 relative ${
                                 activeTab === tab.id ? 'bg-[#2d5a27] text-white shadow-lg' : 'text-black/50 hover:text-[#2d5a27]'
                             }`}>
-                            {tab.icon} {tab.label}
+                            {tab.icon} <span className="hidden xs:inline sm:inline">{tab.label}</span>
                             {/* Unsaved dot indicator */}
                             {tab.dirty && (
                                 <span className={`absolute top-2 right-2 w-2 h-2 rounded-full ${
@@ -297,7 +297,7 @@ const Profile = () => {
 
                 {/* ── TAB PROFIL ── */}
                 {activeTab === 'profil' && (
-                    <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-8">
+                    <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-5 sm:p-8">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-xl font-bold text-[#2c2c2c]">Informations personnelles</h3>
                             {isProfileDirty && (
@@ -414,7 +414,7 @@ const Profile = () => {
                                         className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-hidden">
 
                                         {/* EN-TÊTE COMMANDE */}
-                                        <div className="p-5 flex items-center gap-4">
+                                        <div className="p-4 sm:p-5 flex items-center gap-3 flex-wrap">
                                             <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
                                                 style={{ background: statusInfo.bg }}>
                                                 <FiPackage size={20} style={{ color: statusInfo.color }} />
@@ -464,7 +464,7 @@ const Profile = () => {
                                                         <p className="text-xs font-bold text-black/40 uppercase tracking-wide">Articles commandés</p>
                                                         {order.items.map((item, idx) => (
                                                             <div key={idx} className="flex items-center gap-3 bg-white rounded-xl p-3 shadow-sm">
-                                                                <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-gray-100 border border-gray-200">
+                                                                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden shrink-0 bg-gray-100 border border-gray-200">
                                                                     {item.product_image
                                                                         ? <img src={item.product_image} alt={item.product_name} className="w-full h-full object-cover" onError={(e) => { e.target.style.display='none'; }} />
                                                                         : <div className="w-full h-full flex items-center justify-center text-2xl">🌿</div>
@@ -482,7 +482,7 @@ const Profile = () => {
                                                     </div>
                                                 )}
                                                 {/* LIVRAISON */}
-                                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                                                     <div>
                                                         <p className="text-xs text-black/40 mb-1">Adresse de livraison</p>
                                                         <p className="font-semibold text-[#2c2c2c]">
@@ -538,7 +538,7 @@ const Profile = () => {
 
                 {/* ── TAB SÉCURITÉ ── */}
                 {activeTab === 'securite' && (
-                    <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-8">
+                    <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-5 sm:p-8">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-xl font-bold text-[#2c2c2c]">Changer le mot de passe</h3>
                             {isPasswordDirty && (

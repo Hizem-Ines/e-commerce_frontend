@@ -117,9 +117,6 @@ const ProductDetail = () => {
     const [imageActive, setImageActive]       = useState(0);
     const [ongletActif, setOngletActif]       = useState('description');
 
-    useEffect(() => {
-        window.scrollTo(0, 0);
-    }, [id]);
     
     // ── Fetch product ──────────────────────────────────────
     useEffect(() => {
@@ -221,7 +218,7 @@ const ProductDetail = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2">
 
                         {/* IMAGES */}
-                        <div className="bg-[#ecfdf5] flex flex-col items-center justify-center p-8 gap-4 min-h-[400px]">
+                        <div className="bg-[#ecfdf5] flex flex-col items-center justify-center p-4 md:p-8 gap-4 min-h-[400px]">
                             <div className="w-full aspect-square max-w-sm mx-auto">
                                 {images[imageActive]?.url ? (
                                     <img
@@ -253,7 +250,7 @@ const ProductDetail = () => {
                         </div>
 
                         {/* INFOS */}
-                        <div className="p-10 flex flex-col justify-center">
+                        <div className="p-5 md:p-10 flex flex-col justify-center">
 
                             {/* BADGES + COEUR */}
                             <div className="flex items-center justify-between mb-4">
@@ -418,7 +415,8 @@ const ProductDetail = () => {
                     </div>
 
                     {/* CONTENU ONGLETS */}
-                    <div className="p-8">
+                    <div className="p-4 md:p-8">
+
 
                         {/* ── Description ───────────────────────────────── */}
                         {ongletActif === 'description' && (
@@ -674,7 +672,7 @@ const ProductDetail = () => {
 
                 {/* ── FOURNISSEUR ───────────────────────────────────── */}
                 {produit.supplier_name && (
-                    <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-6 mb-8 flex items-center justify-between gap-4 flex-wrap">
+                    <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-5 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div>
                             <p className="text-xs text-black/40 font-semibold uppercase tracking-wider mb-1">Producteur</p>
                             <h3 className="font-bold text-[#2c2c2c]">

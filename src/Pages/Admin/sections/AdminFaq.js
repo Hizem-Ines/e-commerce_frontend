@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { FiEdit, FiTrash2 } from "react-icons/fi";
+
 import {
   adminGetAllFaqs,
   adminCreateFaq,
@@ -88,7 +90,7 @@ const FaqModal = ({ faq, onClose, onSaved }) => {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
                 Catégorie
@@ -355,7 +357,7 @@ const AdminFaq = () => {
   return (
     <div className="p-6 max-w-5xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">FAQ</h1>
           <p className="text-gray-400 text-sm mt-0.5">
@@ -463,22 +465,13 @@ const AdminFaq = () => {
                           </button>
 
                           {/* Edit */}
-                          <button
-                            onClick={() => setFaqModal(faq)}
-                            className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                            title="Modifier"
-                          >
-                            ✏️
+                          <button onClick={() => setFaqModal(faq)} className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors" title="Modifier">
+                            <FiEdit size={15} />
                           </button>
 
                           {/* Delete */}
-                          <button
-                            onClick={() => handleDeleteFaq(faq.id)}
-                            disabled={deletingId === faq.id}
-                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40"
-                            title="Supprimer"
-                          >
-                            🗑️
+                          <button onClick={() => handleDeleteFaq(faq.id)} disabled={deletingId === faq.id} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40" title="Supprimer">
+                            <FiTrash2 size={15} />
                           </button>
                         </div>
                       </div>
@@ -534,7 +527,7 @@ const AdminFaq = () => {
                     key={q.id}
                     className="bg-white border border-gray-100 rounded-2xl px-5 py-4 hover:border-green-200 transition-colors"
                   >
-                    <div className="flex items-start justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         {/* Meta */}
                         <div className="flex items-center gap-2 mb-1.5 flex-wrap">
@@ -579,14 +572,10 @@ const AdminFaq = () => {
                             ✉️ Répondre
                           </button>
                         )}
-                        <button
-                          onClick={() => handleDeleteQuestion(q.id)}
-                          disabled={deletingId === q.id}
-                          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40"
-                          title="Supprimer"
-                        >
-                          🗑️
+                        <button onClick={() => handleDeleteQuestion(q.id)} disabled={deletingId === q.id} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40" title="Supprimer">
+                          <FiTrash2 size={15} />
                         </button>
+
                       </div>
                     </div>
                   </div>

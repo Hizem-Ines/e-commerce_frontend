@@ -19,9 +19,7 @@ import {
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
 const VILLES = [
-    'Tunis', 'Sfax', 'Sousse', 'Bizerte', 'Gabès',
-    'Ariana', 'Kairouan', 'Nabeul', 'Monastir', 'Mahdia',
-    'Tozeur', 'Kasserine', 'Gafsa', 'Médenine', 'Beja',
+    'tunis' , 'ariana' , 'ben arous' , 'manouba' , 'nabeul' , 'zaghouan' , 'bizerte' , 'beja' , 'jendouba' , 'kef' , 'siliana' , 'sousse' , 'monastir' , 'mahdia' , 'sfax' , 'kairouan' , 'kasserine' , 'sidi bouzid' , 'gabes' , 'medenine' , 'tataouine' , 'gafsa' , 'tozeur' , 'kebili' , 'kasserine'
 ];
 
 // ── Apparence Stripe personnalisée aux couleurs GOFFA ────────────────────────
