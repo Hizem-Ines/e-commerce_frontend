@@ -25,8 +25,8 @@ const FaqItem = ({ faq, defaultOpen = false }) => {
     <div
       className={`border rounded-2xl overflow-hidden transition-all duration-200 ${
         open
-          ? "border-green-800/30 shadow-md shadow-green-900/5"
-          : "border-gray-100 hover:border-green-800/20"
+          ? "border-green-900/30 shadow-md shadow-green-900/5"
+          : "border-gray-100 hover:border-green-900/20"
       }`}
     >
       <button
@@ -38,7 +38,7 @@ const FaqItem = ({ faq, defaultOpen = false }) => {
         </span>
         <span
           className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-white transition-all duration-300 ${open ? "rotate-45" : ""}`}
-          style={{ backgroundColor: open ? "#1a3d2b" : "#d1d5db" }}
+          style={{ backgroundColor: open ? "#2d5a27" : "#d1d5db" }}
         >
           <FiPlus size={14} />
         </span>
@@ -80,16 +80,16 @@ const AskForm = () => {
 
   if (success) {
     return (
-      <div className="rounded-2xl p-8 text-center" style={{ backgroundColor: "#f0f7f3", border: "1px solid #a8d5b5" }}>
-        <FiMail className="mx-auto mb-3" size={36} style={{ color: "#1a3d2b" }} />
-        <h3 className="font-bold text-lg mb-1" style={{ color: "#1a3d2b" }}>Question envoyée !</h3>
-        <p className="text-sm mb-4" style={{ color: "#2d6a47" }}>
+      <div className="rounded-2xl p-8 text-center" style={{ backgroundColor: "#f0fdf4", border: "1px solid #4a8f3f" }}>
+        <FiMail className="mx-auto mb-3" size={36} style={{ color: "#2d5a27" }} />
+        <h3 className="font-bold text-lg mb-1" style={{ color: "#2d5a27" }}>Question envoyée !</h3>
+        <p className="text-sm mb-4" style={{ color: "#3a7232" }}>
           Nous vous répondrons par email dans les plus brefs délais.
         </p>
         <button
           onClick={() => setSuccess(false)}
           className="text-sm underline underline-offset-2 hover:opacity-80"
-          style={{ color: "#1a3d2b" }}
+          style={{ color: "#2d5a27" }}
         >
           Poser une autre question
         </button>
@@ -108,7 +108,7 @@ const AskForm = () => {
           <div className="relative">
             <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
             <input type="text" name="user_name" required value={form.user_name} onChange={handleChange}
-              placeholder="Leila Trabelsi" className={`${inputCls} pl-9`} />
+              placeholder="Votre nom" className={`${inputCls} pl-9`} />
           </div>
         </div>
         <div>
@@ -116,7 +116,7 @@ const AskForm = () => {
           <div className="relative">
             <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
             <input type="email" name="user_email" required value={form.user_email} onChange={handleChange}
-              placeholder="leila@example.com" className={`${inputCls} pl-9`} />
+              placeholder="votre@email.com" className={`${inputCls} pl-9`} />
           </div>
         </div>
       </div>
@@ -128,7 +128,7 @@ const AskForm = () => {
       <button
         type="submit" disabled={loading}
         className="w-full text-white font-semibold py-3 rounded-xl text-sm transition-opacity disabled:opacity-60"
-        style={{ background: "linear-gradient(135deg, #1a3d2b 0%, #2d6a47 100%)" }}
+        style={{ background: "linear-gradient(135deg, #2d5a27 0%, #3a7232 100%)" }}
       >
         {loading ? "Envoi en cours…" : "Envoyer ma question →"}
       </button>
@@ -184,13 +184,13 @@ const Faq = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero */}
-      <div style={{ background: "linear-gradient(135deg, #1a3d2b 0%, #2d6a47 100%)" }} className="text-white">
+      <div style={{ background: "linear-gradient(135deg, #2d5a27 0%, #3a7232 100%)" }} className="text-white">
         <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-          <p style={{ color: "#a8d5b5" }} className="text-sm font-semibold uppercase tracking-widest mb-3">
+          <p style={{ color: "#4a8f3f" }} className="text-sm font-semibold uppercase tracking-widest mb-3">
             Centre d'aide
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold mb-4">Questions fréquentes</h1>
-          <p style={{ color: "#c8e6d0" }} className="max-w-lg mx-auto text-sm leading-relaxed mb-8">
+          <p style={{ color: "#86efac" }} className="max-w-lg mx-auto text-sm leading-relaxed mb-8">
             Tout ce que vous devez savoir sur nos produits artisanaux tunisiens,
             la livraison et votre commande.
           </p>
@@ -202,7 +202,7 @@ const Faq = () => {
               className="w-full pl-11 pr-4 py-3 rounded-2xl text-gray-800 text-sm focus:outline-none shadow-lg"
             />
             {searching && (
-              <span style={{ color: "#2d6a47" }} className="absolute right-4 top-1/2 -translate-y-1/2 text-xs animate-pulse">…</span>
+              <span style={{ color: "#3a7232" }} className="absolute right-4 top-1/2 -translate-y-1/2 text-xs animate-pulse">…</span>
             )}
           </div>
         </div>
@@ -220,9 +220,9 @@ const Faq = () => {
                     key={key}
                     onClick={() => handleCategory(key)}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-all border flex items-center gap-1.5 ${
-                      isActive ? "text-white border-transparent shadow-sm" : "bg-white text-gray-600 border-gray-200 hover:text-green-800"
+                      isActive ? "text-white border-transparent shadow-sm" : "bg-white text-gray-600 border-gray-200 hover:text-green-900"
                     }`}
-                    style={isActive ? { backgroundColor: "#1a3d2b", borderColor: "#1a3d2b" } : {}}
+                    style={isActive ? { backgroundColor: "#2d5a27", borderColor: "#2d5a27" } : {}}
                   >
                     {Icon && <Icon size={13} />}
                     {label || key}
@@ -257,7 +257,7 @@ const Faq = () => {
               return (
                 <section key={cat}>
                   <div className="flex items-center gap-2 mb-4">
-                    {Icon && <Icon size={18} style={{ color: "#2d6a47" }} />}
+                    {Icon && <Icon size={18} style={{ color: "#3a7232" }} />}
                     <h2 className="font-bold text-gray-700 text-base">{label || cat}</h2>
                     <span className="text-xs text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">{faqs.length}</span>
                   </div>
@@ -273,8 +273,8 @@ const Faq = () => {
         {/* Ask section */}
         <div className="mt-20 bg-white rounded-3xl border border-gray-100 shadow-sm p-8 sm:p-10">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-4" style={{ backgroundColor: "#f0f7f3" }}>
-              <FiMail size={22} style={{ color: "#1a3d2b" }} />
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-4" style={{ backgroundColor: "#f0fdf4" }}>
+              <FiMail size={22} style={{ color: "#2d5a27" }} />
             </div>
             <h2 className="text-xl font-bold text-gray-800 mb-2">Vous n'avez pas trouvé votre réponse ?</h2>
             <p className="text-gray-500 text-sm">Posez-nous directement votre question. Nous vous répondrons par email.</p>
@@ -284,11 +284,11 @@ const Faq = () => {
           <p className="text-center text-sm text-gray-400 mt-6">
             Vous avez une réclamation ?{" "}
             <Link
-              to="/contact"
+              to="/reclamations"
               className="font-semibold underline underline-offset-2 hover:opacity-75 inline-flex items-center gap-1"
-              style={{ color: "#1a3d2b" }}
+              style={{ color: "#2d5a27" }}
             >
-              Accéder au formulaire de contact <FiArrowRight size={13} />
+              Accéder au formulaire de reclamations <FiArrowRight size={13} />
             </Link>
           </p>
         </div>
