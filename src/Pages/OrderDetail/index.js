@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getSingleOrder, cancelOrder } from '../../services/orderService';
-import { FiArrowLeft, FiPackage, FiMapPin, FiCreditCard, FiTruck, FiX } from 'react-icons/fi';
+import { getSingleOrder } from '../../services/orderService';
+import { FiArrowLeft, FiPackage, FiMapPin, FiCreditCard, FiTruck } from 'react-icons/fi';
 
 const STATUS_LABELS = {
     pending:   { label: 'En attente',  color: '#f59e0b', bg: '#fef3c7' },
@@ -24,8 +24,6 @@ const OrderDetail = () => {
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [cancelling, setCancelling] = useState(false);
-    const [successMsg, setSuccessMsg] = useState('');
 
     useEffect(() => {
         getSingleOrder(orderId)
@@ -34,21 +32,6 @@ const OrderDetail = () => {
             .finally(() => setLoading(false));
     }, [orderId]);
 
-    const handleCancel = async () => {
-        if (!window.confirm('Êtes-vous sûr de vouloir annuler cette commande ?')) return;
-        setCancelling(true);
-        try {
-            await cancelOrder(orderId);
-            setOrder(prev => ({ ...prev, status: 'cancelled' }));
-            setSuccessMsg('Commande annulée avec succès.');
-            setTimeout(() => setSuccessMsg(''), 3000);
-        } catch (err) {
-            setError(err.response?.data?.message || 'Impossible d\'annuler cette commande.');
-            setTimeout(() => setError(''), 3000);
-        } finally {
-            setCancelling(false);
-        }
-    };
 
     // ── Calcule l'étape de livraison active ──────────────
     const getDeliveryStep = () => {
@@ -80,7 +63,6 @@ const OrderDetail = () => {
     }
 
     const statusInfo = STATUS_LABELS[order.status] || STATUS_LABELS.pending;
-    const canCancel = ['pending', 'confirmed'].includes(order.status);
 
     return (
         <div className="bg-[#fdf6ec] min-h-screen py-12">
@@ -109,11 +91,7 @@ const OrderDetail = () => {
                 </div>
 
                 {/* ALERTES */}
-                {successMsg && (
-                    <div className="mb-6 px-5 py-3 rounded-xl text-sm font-semibold bg-emerald-50 border border-#b6eac7 text-emerald-700">
-                        ✅ {successMsg}
-                    </div>
-                )}
+                
                 {error && (
                     <div className="mb-6 px-5 py-3 rounded-xl text-sm font-semibold bg-red-50 border border-red-200 text-red-700">
                         ❌ {error}
@@ -244,10 +222,7 @@ const OrderDetail = () => {
                                 <span>Total</span>
                                 <span style={{ color: '#166534' }}>{parseFloat(order.total_price).toFixed(2)} DT</span>
                             </div>
-                            <div className="flex justify-between text-xs text-black/40 pt-1">
-                                <span>Méthode de paiement</span>
-                                <span>{order.payment_method === 'cod' ? '💵 Paiement à la livraison' : order.payment_method === 'stripe' ? '💳 Carte bancaire' : order.payment_method}</span>
-                            </div>
+                            
                         </div>
                     </div>
 
@@ -262,22 +237,6 @@ const OrderDetail = () => {
                             <p className="text-xs text-black/40 mt-2 italic">Note : {order.notes}</p>
                         )}
                     </div>
-
-                    {/* ── ANNULER ── */}
-                    {canCancel && (
-                        <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-6">
-                            <h2 className="text-lg font-bold text-[#2c2c2c] mb-2">Annuler la commande</h2>
-                            <p className="text-sm text-black/50 mb-4">
-                                Vous pouvez annuler cette commande tant qu'elle n'est pas encore expédiée.
-                            </p>
-                            <button onClick={handleCancel} disabled={cancelling}
-                                className="flex items-center gap-2 text-sm font-bold text-white px-6 py-3 rounded-xl transition disabled:opacity-50"
-                                style={{ background: '#dc2626' }}>
-                                <FiX size={14} />
-                                {cancelling ? 'Annulation...' : 'Annuler cette commande'}
-                            </button>
-                        </div>
-                    )}
                 </div>
             </div>
         </div>

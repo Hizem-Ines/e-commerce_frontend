@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/authContext';
 import { updateProfile, updatePassword } from '../../services/authService';
-import { getMyOrders, cancelOrder } from '../../services/orderService';
-import { FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiSave, FiShoppingBag, FiHeart, FiPackage, FiChevronDown, FiChevronUp, FiX, FiExternalLink, FiAlertCircle } from 'react-icons/fi';
+import { getMyOrders } from '../../services/orderService';
+import { FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiSave, FiShoppingBag, FiHeart, FiPackage, FiChevronDown, FiChevronUp, FiExternalLink, FiAlertCircle } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 
 // ── Helpers ──────────────────────────────────────────────
@@ -11,14 +11,9 @@ const STATUS_LABELS = {
     confirmed: { label: 'Confirmée',   color: '#3b82f6', bg: '#dbeafe' },
     shipped:   { label: 'Expédiée',    color: '#8b5cf6', bg: '#ede9fe' },
     delivered: { label: 'Livrée',      color: '#166534', bg: '#dcfce7' },
-    cancelled: { label: 'Annulée',     color: '#dc2626', bg: '#fee2e2' },
 };
 
-const PAYMENT_LABELS = {
-    cod:    '💵 Paiement à la livraison',
-    stripe: '💳 Carte bancaire',
-    paypal: '🅿️ PayPal',
-};
+
 
 const Profile = () => {
     const { user } = useAuth();
@@ -47,7 +42,6 @@ const Profile = () => {
     const [orders, setOrders] = useState([]);
     const [ordersLoading, setOrdersLoading] = useState(false);
     const [expandedOrder, setExpandedOrder] = useState(null);
-    const [cancellingId, setCancellingId] = useState(null);
 
     const fileInputRef = useRef(null);
 
@@ -202,24 +196,6 @@ const Profile = () => {
             showError(err.response?.data?.message || 'Erreur lors du changement de mot de passe');
         } finally {
             setLoadingPassword(false);
-        }
-    };
-
-    const handleCancelOrder = async (orderId) => {
-        if (!window.confirm('Êtes-vous sûr de vouloir annuler cette commande ?')) return;
-        setCancellingId(orderId);
-        try {
-            await cancelOrder(orderId);
-            setOrders(prev => prev.map(o => o.id === orderId
-                ? { ...o, status: 'cancelled', delivery_status: 'cancelled' }
-                : o
-            ));
-            setExpandedOrder(null);
-            showSuccess('Commande annulée avec succès.');
-        } catch (err) {
-            showError(err.response?.data?.message || 'Impossible d\'annuler cette commande.');
-        } finally {
-            setCancellingId(null);
         }
     };
 
@@ -407,7 +383,6 @@ const Profile = () => {
                             orders.map(order => {
                                 const statusInfo = STATUS_LABELS[order.status] || STATUS_LABELS.pending;
                                 const isExpanded = expandedOrder === order.id;
-                                const canCancel = ['pending', 'confirmed'].includes(order.status);
 
                                 return (
                                     <div key={order.id}
@@ -433,24 +408,31 @@ const Profile = () => {
                                                 <p className="text-xs text-black/40">
                                                     {new Date(order.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                                                     {' · '}{order.item_count} article{order.item_count > 1 ? 's' : ''}
-                                                    {' · '}{PAYMENT_LABELS[order.payment_method] || order.payment_method}
+                                                
                                                 </p>
                                             </div>
 
-                                            <div className="flex items-center gap-3 shrink-0">
+                                            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 shrink-0">
                                                 <span className="text-lg font-black" style={{ color: '#166534' }}>
                                                     {parseFloat(order.total_price).toFixed(2)} DT
                                                 </span>
-                                                <Link to={`/commandes/${order.id}`}
-                                                    className="p-2 rounded-xl hover:bg-emerald-50 transition no-underline"
-                                                    title="Voir les détails"
-                                                    style={{ color: '#166534' }}>
-                                                    <FiExternalLink size={16} />
-                                                </Link>
-                                                <button onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
-                                                    className="p-2 rounded-xl hover:bg-gray-100 transition text-black/40">
-                                                    {isExpanded ? <FiChevronUp size={18} /> : <FiChevronDown size={18} />}
-                                                </button>
+                                                <div className="flex items-center gap-2">
+                                                    <Link to={`/commandes/${order.id}`}
+                                                        className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl no-underline transition-all"
+                                                        style={{ background: '#ecfdf5', color: '#166534', border: '1.5px solid #bbf7d0' }}>
+                                                        <FiExternalLink size={13} />
+                                                        <span>Détails</span>
+                                                    </Link>
+                                                    <button
+                                                        onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
+                                                        className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl transition-all"
+                                                        style={isExpanded
+                                                            ? { background: '#2d5a27', color: 'white', border: '1.5px solid #2d5a27' }
+                                                            : { background: '#f3f4f6', color: '#6b7280', border: '1.5px solid #e5e7eb' }}>
+                                                        {isExpanded ? <FiChevronUp size={13} /> : <FiChevronDown size={13} />}
+                                                        <span>{isExpanded ? 'Réduire' : 'Aperçu'}</span>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -515,18 +497,6 @@ const Profile = () => {
                                                     )}
                                                 </div>
 
-                                                {/* ACTIONS */}
-                                                {canCancel && (
-                                                    <div className="pt-3 border-t border-gray-200">
-                                                        <button
-                                                            onClick={() => handleCancelOrder(order.id)}
-                                                            disabled={cancellingId === order.id}
-                                                            className="flex items-center gap-2 text-sm font-bold text-red-500 hover:text-red-700 transition disabled:opacity-50">
-                                                            <FiX size={14} />
-                                                            {cancellingId === order.id ? 'Annulation...' : 'Annuler cette commande'}
-                                                        </button>
-                                                    </div>
-                                                )}
                                             </div>
                                         )}
                                     </div>
