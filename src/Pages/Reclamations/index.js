@@ -26,7 +26,7 @@ const Field = ({ label, children }) => (
   </div>
 );
 
-const Contact = () => {
+const Reclamations = () => {
   const [form, setForm] = useState({
     user_name: "", user_email: "", user_phone: "",
     order_number: "", reclamation_type: "", message: "",
@@ -55,13 +55,13 @@ const Contact = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero */}
-      <div style={{ background: "linear-gradient(135deg, #1a3d2b 0%, #2d6a47 100%)" }} className="text-white">
+      <div style={{ background: "linear-gradient(135deg, #2d5a27 0%, #3a7232 100%)" }} className="text-white">
         <div className="max-w-3xl mx-auto px-4 py-14 text-center">
-          <p style={{ color: "#a8d5b5" }} className="text-sm font-semibold uppercase tracking-widest mb-3">
+          <p style={{ color: "#4a8f3f" }} className="text-sm font-semibold uppercase tracking-widest mb-3">
             Support client
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">Réclamations</h1>
-          <p style={{ color: "#c8e6d0" }} className="text-sm max-w-md mx-auto">
+          <p style={{ color: "#86efac" }} className="text-sm max-w-md mx-auto">
             Un problème avec votre commande ou un produit ? Signalez-le ici.
             Notre équipe vous contactera dans les plus brefs délais.
           </p>
@@ -73,7 +73,7 @@ const Contact = () => {
         <div className="flex justify-center mb-6">
           <div
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold"
-            style={{ backgroundColor: "#f0f7f3", color: "#1a3d2b" }}
+            style={{ backgroundColor: "#f0fdf4", color: "#2d5a27" }}
           >
             <FiAlertCircle size={16} />
             Formulaire de réclamation
@@ -84,7 +84,7 @@ const Contact = () => {
         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8">
           {success ? (
             <div className="py-10 text-center">
-              <FiCheckCircle className="mx-auto mb-4" size={48} style={{ color: "#2d6a47" }} />
+              <FiCheckCircle className="mx-auto mb-4" size={48} style={{ color: "#3a7232" }} />
               <h3 className="font-bold text-gray-800 text-lg mb-1">Réclamation envoyée !</h3>
               <p className="text-gray-500 text-sm mb-6">
                 Votre réclamation a été enregistrée. Nous vous contacterons dans les plus brefs délais.
@@ -92,7 +92,7 @@ const Contact = () => {
               <button
                 onClick={() => setSuccess(false)}
                 className="text-sm underline underline-offset-2 hover:opacity-80 font-medium"
-                style={{ color: "#1a3d2b" }}
+                style={{ color: "#2d5a27" }}
               >
                 Soumettre une autre réclamation
               </button>
@@ -108,14 +108,14 @@ const Contact = () => {
                   <div className="relative">
                     <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
                     <input type="text" name="user_name" required value={form.user_name} onChange={handleChange}
-                      placeholder="Leila Trabelsi" className={`${inputCls} pl-9`} />
+                      placeholder="Votre nom" className={`${inputCls} pl-9`} />
                   </div>
                 </Field>
                 <Field label="Votre email">
                   <div className="relative">
                     <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
                     <input type="email" name="user_email" required value={form.user_email} onChange={handleChange}
-                      placeholder="leila@example.com" className={`${inputCls} pl-9`} />
+                      placeholder="votre@email.com" className={`${inputCls} pl-9`} />
                   </div>
                 </Field>
               </div>
@@ -125,7 +125,7 @@ const Contact = () => {
                   <div className="relative">
                     <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
                     <input type="tel" name="user_phone" value={form.user_phone} onChange={handleChange}
-                      placeholder="+216 XX XXX XXX" className={`${inputCls} pl-9`} />
+                      placeholder="+41 79 XXX XX XX" className={`${inputCls} pl-9`} />
                   </div>
                 </Field>
                 <Field label="N° de commande (si applicable)">
@@ -154,7 +154,7 @@ const Contact = () => {
               <button
                 type="submit" disabled={loading}
                 className="w-full flex items-center justify-center gap-2 text-white font-semibold py-3 rounded-xl text-sm transition-opacity disabled:opacity-60"
-                style={{ background: "linear-gradient(135deg, #1a3d2b 0%, #2d6a47 100%)" }}
+                style={{ background: "linear-gradient(135deg, #2d5a27 0%, #3a7232 100%)" }}
               >
                 {loading ? "Envoi en cours…" : (<><FiSend size={15} /> Soumettre la réclamation</>)}
               </button>
@@ -165,14 +165,14 @@ const Contact = () => {
         {/* Info */}
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-center text-sm text-gray-500">
           <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <FiMail className="mx-auto mb-2" size={20} style={{ color: "#2d6a47" }} />
+            <FiMail className="mx-auto mb-2" size={20} style={{ color: "#3a7232" }} />
             <p className="font-semibold text-gray-700 text-xs uppercase tracking-wide mb-1">Email</p>
-            <p>support@goffa.tn</p>
+            <p>support@goffa.ch</p>
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <FiPhone className="mx-auto mb-2" size={20} style={{ color: "#2d6a47" }} />
+            <FiPhone className="mx-auto mb-2" size={20} style={{ color: "#3a7232" }} />
             <p className="font-semibold text-gray-700 text-xs uppercase tracking-wide mb-1">Téléphone</p>
-            <p>+216 XX XXX XXX</p>
+            <p>+41 79 XXX XX XX</p>
           </div>
         </div>
       </div>
@@ -180,4 +180,4 @@ const Contact = () => {
   );
 };
 
-export default Contact;
+export default Reclamations;
