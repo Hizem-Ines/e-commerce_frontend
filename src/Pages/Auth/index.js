@@ -13,6 +13,7 @@ const SWISS_CITIES = [
 ];
 
 const Auth = () => {
+   const [isSubmitting, setIsSubmitting] = useState(false); 
     const [isLogin, setIsLogin] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
@@ -35,12 +36,14 @@ const Auth = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (isSubmitting) return;
 
         if (!isLogin && formData.password !== formData.confirmPassword) {
             alert('Les mots de passe ne correspondent pas !');
             return;
         }
 
+        setIsSubmitting(true);
         try {
             if (isLogin) {
                 await login({ email: formData.email, password: formData.password });
@@ -59,6 +62,8 @@ const Auth = () => {
             }
         } catch (err) {
             alert(err.response?.data?.message || 'Une erreur est survenue');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -339,7 +344,8 @@ const Auth = () => {
                         {/* SUBMIT */}
                         <button
                             type="submit"
-                            className="w-full text-white py-4 rounded-xl font-bold text-base transition-all duration-300 hover:scale-105"
+                            disabled={isSubmitting}
+                            className="w-full text-white py-4 rounded-xl font-bold text-base transition-all duration-300 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
                             style={{
                                 background: `linear-gradient(135deg, ${GREEN_DARK}, ${GREEN_MID})`,
                                 boxShadow: `0 4px 20px rgba(45, 90, 39, 0.4)`
@@ -347,7 +353,7 @@ const Auth = () => {
                             onMouseEnter={e => (e.currentTarget.style.boxShadow = `0 8px 30px rgba(45, 90, 39, 0.6)`)}
                             onMouseLeave={e => (e.currentTarget.style.boxShadow = `0 4px 20px rgba(45, 90, 39, 0.4)`)}
                         >
-                            {isLogin ? 'Se connecter →' : 'Créer mon compte →'}
+                             {isSubmitting ? 'Chargement...' : (isLogin ? 'Se connecter →' : 'Créer mon compte →')}
                         </button>
                     </form>
 
@@ -360,7 +366,7 @@ const Auth = () => {
 
                     {/* SOCIAL LOGIN */}
                     <button
-                        onClick={() => (window.location.href = 'http://localhost:5000/api/auth/google')}
+                        onClick={() => (window.location.href = `${process.env.REACT_APP_API_URL}/api/auth/google`)}
                         className="w-full py-3 rounded-xl font-semibold text-gray-700 hover:bg-gray-50 transition flex items-center justify-center gap-3 text-sm"
                         style={{ border: '2px solid #e5e7eb' }}
                     >

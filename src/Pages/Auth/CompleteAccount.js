@@ -7,7 +7,7 @@ import { FiLock, FiEye, FiEyeOff, FiCheck } from 'react-icons/fi';
 const CompleteAccount = () => {
     const { token }    = useParams();
     const navigate     = useNavigate();
-    const { setUser }  = useAuth(); // pour connecter l'utilisateur après
+    const { loginSuccess } = useAuth();
 
     const [password,        setPassword]        = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -31,20 +31,15 @@ const CompleteAccount = () => {
         setError('');
 
         try {
-            const res = await api.post(`/auth/complete-account/${token}`, {
+            await api.post(`/auth/complete-account/${token}`, {
                 password,
                 confirmPassword,
             });
 
-            // Le backend appelle sendToken → le cookie JWT est posé automatiquement
-            // On met à jour le contexte auth si possible
-            if (res.data?.user && setUser) {
-                setUser(res.data.user);
-            }
+        
+            await loginSuccess();
 
             setSuccess(true);
-
-            // Redirection vers home après 2 secondes
             setTimeout(() => navigate('/'), 2000);
 
         } catch (err) {

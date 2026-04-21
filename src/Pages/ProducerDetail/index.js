@@ -90,9 +90,7 @@ const ProducerDetail = () => {
                         <div className="flex items-start justify-between flex-wrap gap-6">
                             <div className="flex-1 min-w-0">
                                 <h1 className="text-3xl font-bold font-serif text-[#2c2c2c] mb-1">{producteur.name}</h1>
-                                {producteur.name_ar && (
-                                    <p className="text-lg text-black/40 mb-2" dir="rtl">{producteur.name_ar}</p>
-                                )}
+                                
                                 <div className="flex flex-wrap gap-3 text-sm text-black/50 mb-4">
                                     {producteur.region  && <span>📍 {producteur.region}</span>}
                                     {producteur.address && <span>🏠 {producteur.address}</span>}

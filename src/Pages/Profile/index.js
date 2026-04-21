@@ -11,6 +11,7 @@ const STATUS_LABELS = {
     confirmed: { label: 'Confirmée',   color: '#3b82f6', bg: '#dbeafe' },
     shipped:   { label: 'Expédiée',    color: '#8b5cf6', bg: '#ede9fe' },
     delivered: { label: 'Livrée',      color: '#166534', bg: '#dcfce7' },
+    cancelled: { label: 'Annulée',     color: '#dc2626', bg: '#fee2e2' },
 };
 
 

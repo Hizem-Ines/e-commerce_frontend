@@ -13,12 +13,12 @@ const DIFFICULTIES = ["facile", "moyen", "difficile"];
 const CATEGORIES   = ["entrée", "plat", "dessert", "boisson", "snack"];
 
 const emptyForm = {
-  title_fr: "", title_ar: "", description_fr: "", description_ar: "",
+  title_fr: "",  description_fr: "", 
   prep_time: "", cook_time: "", servings: 4, difficulty: "facile",
   category: "", is_published: false, is_featured: false,
 };
-const emptyIngredient = { name_fr: "", name_ar: "", quantity: "", is_bio: false };
-const emptyStep       = { instruction_fr: "", instruction_ar: "", duration: "" };
+const emptyIngredient = { name_fr: "",  quantity: "", is_bio: false };
+const emptyStep       = { instruction_fr: "",  duration: "" };
 
 // ─── Field component ──────────────────────────────────────
 const Field = ({ label, required, children }) => (
@@ -103,9 +103,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
           if (!r) return;
           setForm({
             title_fr:       r.title_fr       || "",
-            title_ar:       r.title_ar       || "",
             description_fr: r.description_fr || "",
-            description_ar: r.description_ar || "",
             prep_time:      r.prep_time      || "",
             cook_time:      r.cook_time      || "",
             servings:       r.servings       || 4,
@@ -118,7 +116,6 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
           if (r.ingredients?.length) {
             setIngredients(r.ingredients.map(i => ({
               name_fr:  i.name_fr  || "",
-              name_ar:  i.name_ar  || "",
               quantity: i.quantity || "",
               is_bio:   i.is_bio   || false,
             })));
@@ -129,7 +126,6 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
             const sorted = [...r.steps].sort((a, b) => (a.step_number || 0) - (b.step_number || 0));
             setSteps(sorted.map(s => ({
               instruction_fr: s.instruction_fr || "",
-              instruction_ar: s.instruction_ar || "",
               duration:       s.duration       || "",
             })));
           } else {
@@ -139,9 +135,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
         .catch(() => {
           setForm({
             title_fr:       editRecipe.title_fr       || "",
-            title_ar:       editRecipe.title_ar       || "",
             description_fr: editRecipe.description_fr || "",
-            description_ar: editRecipe.description_ar || "",
             prep_time:      editRecipe.prep_time      || "",
             cook_time:      editRecipe.cook_time      || "",
             servings:       editRecipe.servings       || 4,
@@ -287,21 +281,14 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
                   <input className={inputCls} value={form.title_fr}
                     onChange={e => set("title_fr", e.target.value)} placeholder="ex: Brik à l'œuf" />
                 </Field>
-                <Field label="Titre (AR)">
-                  <input className={inputCls} dir="rtl" value={form.title_ar}
-                    onChange={e => set("title_ar", e.target.value)} placeholder="بريك بالبيض" />
-                </Field>
+                
               </div>
               <Field label="Description (FR)" required>
                 <textarea className={textareaCls} rows={3} value={form.description_fr}
                   onChange={e => set("description_fr", e.target.value)}
                   placeholder="Décrivez la recette en français..." />
               </Field>
-              <Field label="Description (AR)">
-                <textarea className={textareaCls} rows={3} dir="rtl" value={form.description_ar}
-                  onChange={e => set("description_ar", e.target.value)}
-                  placeholder="وصف الوصفة بالعربية..." />
-              </Field>
+              
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <Field label="Prép. (min)">
                   <input type="number" min="0" className={inputCls} value={form.prep_time}
@@ -353,11 +340,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
                           onChange={e => updateIngredient(i, "name_fr", e.target.value)}
                           placeholder="ex: Farine" />
                       </Field>
-                      <Field label="الاسم AR">
-                        <input className={inputCls} dir="rtl" value={ing.name_ar}
-                          onChange={e => updateIngredient(i, "name_ar", e.target.value)}
-                          placeholder="دقيق" />
-                      </Field>
+                      
                       <Field label="Quantité">
                         <input className={inputCls} value={ing.quantity}
                           onChange={e => updateIngredient(i, "quantity", e.target.value)}
@@ -410,11 +393,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
                         onChange={e => updateStep(i, "instruction_fr", e.target.value)}
                         placeholder="Décrivez cette étape en français..." />
                     </Field>
-                    <Field label="Instruction (AR)">
-                      <textarea className={textareaCls} rows={2} dir="rtl" value={step.instruction_ar}
-                        onChange={e => updateStep(i, "instruction_ar", e.target.value)}
-                        placeholder="التعليمات بالعربية..." />
-                    </Field>
+                    
                   </div>
                 ))}
               </div>

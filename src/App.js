@@ -14,6 +14,7 @@ import Auth from './Pages/Auth';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { AuthProvider } from './context/authContext';
+import { SiteSettingsProvider } from './context/SiteSettingsContext';
 import Profile from './Pages/Profile';
 import VerifyEmail from './Pages/Auth/VerifyEmail'
 import ForgotPassword from './Pages/Auth/Forgotpassword';
@@ -36,41 +37,43 @@ function App() {
         <BrowserRouter>
             <ScrollToTop />
             <AuthProvider>
-                <CartProvider>
-                    <WishlistProvider>
-                        <CartSidebar />
+                <SiteSettingsProvider>
+                    <CartProvider>
+                        <WishlistProvider>
+                            <CartSidebar />
 
-                        <Routes>
-                            <Route path="/admin" element={<Admin />} />
-                            <Route path="/connexion" element={<Auth />} />
-                            <Route path="/verify-email/:token" element={<VerifyEmail />} />
-                            <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} />
-                            <Route path="/reset-password/:token" element={<ResetPassword />} />
-                            <Route path="/login/success" element={<LoginSuccess />} />
-                            <Route path="/checkout" element={<Checkout />} />
-                            <Route path="/commande-confirmee/:orderId" element={<OrderConfirmation />} />
-                            <Route path="/complete-account/:token" element={<CompleteAccount />} />
-                            <Route element={<Layout />}>
-                                <Route path="/" element={<Home />} />
-                                <Route path="/faq" element={<Faq />} />
-                                <Route path="/produits" element={<Products />} />
-                                <Route path="/produits/:id" element={<ProductDetail />} />
-                                <Route path="/panier" element={<Cart />} />
-                                <Route path="/favoris" element={<Wishlist />} />
-                                <Route path="/reclamations" element={<Reclamations />} />
-                                <Route path="/producteurs" element={<Producers />} />
-                                <Route path="/producteurs/:nom" element={<ProducerDetail />} />
-                                <Route path="/profil" element={<Profile />} />
-                                <Route path="/commandes/:orderId" element={<OrderDetail />} />
-                                <Route path="/offres" element={<Offres />} />
-                                <Route path="/recettes"       element={<Recipes />} />
-                                <Route path="/recettes/:slug" element={<RecipesDetail />} />
-                                <Route path="/unsubscribe" element={<Unsubscribe />} />
-                                <Route path="*" element={<NotFound />} />
-                            </Route>
-                        </Routes>
-                    </WishlistProvider>
-                </CartProvider>
+                            <Routes>
+                                <Route path="/admin" element={<Admin />} />
+                                <Route path="/connexion" element={<Auth />} />
+                                <Route path="/verify-email/:token" element={<VerifyEmail />} />
+                                <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} />
+                                <Route path="/reset-password/:token" element={<ResetPassword />} />
+                                <Route path="/login/success" element={<LoginSuccess />} />
+                                <Route path="/checkout" element={<Checkout />} />
+                                <Route path="/commande-confirmee/:orderId" element={<OrderConfirmation />} />
+                                <Route path="/complete-account/:token" element={<CompleteAccount />} />
+                                <Route element={<Layout />}>
+                                    <Route path="/" element={<Home />} />
+                                    <Route path="/faq" element={<Faq />} />
+                                    <Route path="/produits" element={<Products />} />
+                                    <Route path="/produits/:id" element={<ProductDetail />} />
+                                    <Route path="/panier" element={<Cart />} />
+                                    <Route path="/favoris" element={<Wishlist />} />
+                                    <Route path="/reclamations" element={<Reclamations />} />
+                                    <Route path="/producteurs" element={<Producers />} />
+                                    <Route path="/producteurs/:nom" element={<ProducerDetail />} />
+                                    <Route path="/profil" element={<Profile />} />
+                                    <Route path="/commandes/:orderId" element={<OrderDetail />} />
+                                    <Route path="/offres" element={<Offres />} />
+                                    <Route path="/recettes"       element={<Recipes />} />
+                                    <Route path="/recettes/:slug" element={<RecipesDetail />} />
+                                    <Route path="/unsubscribe" element={<Unsubscribe />} />
+                                    <Route path="*" element={<NotFound />} />
+                                </Route>
+                            </Routes>
+                        </WishlistProvider>
+                    </CartProvider>
+                </SiteSettingsProvider>
             </AuthProvider>
         </BrowserRouter>
     );

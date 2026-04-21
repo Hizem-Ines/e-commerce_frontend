@@ -13,7 +13,6 @@ export const WishlistProvider = ({ children }) => {
     const { user } = useAuth();
     const [favoris, setFavoris] = useState([]);
 
-    // Charger la wishlist depuis le backend si connecté
     useEffect(() => {
         if (user) {
             getWishlist()
@@ -26,9 +25,10 @@ export const WishlistProvider = ({ children }) => {
 
     const ajouterFavori = async (produit) => {
         if (!user) return;
+        const productId = produit.product_id || produit.id;
         try {
-            await addToWishlist(produit.id);
-            setFavoris(prev => [...prev, { ...produit, product_id: produit.id }]);
+            await addToWishlist(productId);
+            setFavoris(prev => [...prev, { ...produit, product_id: productId }]);
         } catch (err) {
             console.error(err);
         }
@@ -44,10 +44,25 @@ export const WishlistProvider = ({ children }) => {
         }
     };
 
+    const viderFavoris = async () => {
+        if (!user) return;
+        try {
+            await clearWishlist();
+            setFavoris([]);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+
     const toggleFavori = (produit) => {
-        const existe = favoris.find(p => (p.product_id || p.id) === produit.id);
+        const productId = produit.product_id || produit.id;
+        console.log('toggleFavori called with productId:', productId);
+    console.log('favoris IDs:', favoris.map(p => p.product_id || p.id));
+        const existe = favoris.find(p => (p.product_id || p.id) === productId);
+        console.log('existe:', existe);
         if (existe) {
-            retirerFavori(produit.id);
+            retirerFavori(productId);
         } else {
             ajouterFavori(produit);
         }
@@ -64,6 +79,7 @@ export const WishlistProvider = ({ children }) => {
             retirerFavori,
             estFavori,
             totalFavoris,
+            viderFavoris,
         }}>
             {children}
         </WishlistContext.Provider>
