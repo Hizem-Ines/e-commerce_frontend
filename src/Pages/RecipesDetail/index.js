@@ -131,11 +131,7 @@ export default function RecipeDetailPage() {
             <h1 className="text-2xl md:text-4xl font-bold font-serif text-white leading-tight mb-1">
               {recipe.title_fr}
             </h1>
-            {recipe.title_ar && (
-              <p className="text-white/60 text-base mt-1 text-right" dir="rtl">
-                {recipe.title_ar}
-              </p>
-            )}
+           
           </div>
         </div>
 
@@ -199,11 +195,7 @@ export default function RecipeDetailPage() {
         {recipe.description_fr && (
           <div className="bg-white rounded-2xl p-6 shadow-[0_4px_15px_rgba(0,0,0,0.07)] mb-8 border-l-4 border-[#4a8c42] ">
             <p className="text-black/70 leading-relaxed">{recipe.description_fr}</p>
-            {recipe.description_ar && (
-              <p className="text-black/40 leading-relaxed mt-3 text-right border-t border-gray-100 pt-3" dir="rtl">
-                {recipe.description_ar}
-              </p>
-            )}
+            
           </div>
         )}
 
@@ -269,9 +261,7 @@ export default function RecipeDetailPage() {
                             </span>
                           )}
                         </div>
-                        {ing.name_ar && (
-                          <p className="text-xs text-black/30 text-right" dir="rtl">{ing.name_ar}</p>
-                        )}
+                        
                         <div className="flex items-center gap-2 mt-1 flex-wrap">
                           {ing.is_bio && (
                             <span className="text-xs text-[#2d5a27] bg-emerald-50 font-bold px-2 py-0.5 rounded-full">
@@ -367,11 +357,7 @@ export default function RecipeDetailPage() {
                         }`}>
                           {step.instruction_fr}
                         </p>
-                        {step.instruction_ar && activeStep === i && (
-                          <p className="text-black/30 text-xs mt-2 text-right border-t border-gray-50 pt-2" dir="rtl">
-                            {step.instruction_ar}
-                          </p>
-                        )}
+                        
                         {step.duration && (
                           <div className="mt-2 inline-flex items-center gap-1 text-xs text-[#2d5a27] bg-emerald-50 font-bold px-2.5 py-1 rounded-full">
                             <FiClock size={11} /> {step.duration} min

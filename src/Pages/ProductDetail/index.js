@@ -288,9 +288,7 @@ const ProductDetail = () => {
 
                             {/* NOM */}
                             <h1 className="text-3xl font-bold font-serif text-[#2c2c2c] mb-1">{produit.name_fr}</h1>
-                            {produit.name_ar && (
-                                <p className="text-lg text-black/40 mb-4 font-arabic" dir="rtl">{produit.name_ar}</p>
-                            )}
+                            
 
                             {/* NOTE */}
                             <div className="flex items-center gap-2 mb-4">
@@ -422,15 +420,6 @@ const ProductDetail = () => {
                         {ongletActif === 'description' && (
                             <div className="space-y-6">
 
-                                <div>
-                                    <h3 className="text-base font-bold text-[#2c2c2c] mb-3">À propos du produit</h3>
-                                    <p className="text-sm text-black/70 leading-relaxed whitespace-pre-line">{produit.description_fr}</p>
-                                    {produit.description_ar && (
-                                        <p className="text-sm text-black/50 mt-3 leading-relaxed text-right" dir="rtl">
-                                            {produit.description_ar}
-                                        </p>
-                                    )}
-                                </div>
 
                                 {produit.ethical_info_fr && (
                                     <div className="bg-emerald-50 border-l-4 border-[#4a8c42]  rounded-r-xl p-4">

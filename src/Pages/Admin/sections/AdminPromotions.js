@@ -10,7 +10,7 @@ const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 const api = axios.create({ baseURL: API_BASE, withCredentials: true });
 
 const EMPTY_FORM = {
-  code: "", description_fr: "", description_ar: "",
+  code: "", description_fr: "",
   discount_type: "percent", discount_value: "",
   min_order_amount: "", starts_at: "", expires_at: "",
   max_uses: "", is_active: true,
@@ -95,7 +95,6 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
       const payload = {
         code:             form.code.toUpperCase().trim(),
         description_fr:   form.description_fr  || null,
-        description_ar:   form.description_ar  || null,
         discount_type:    form.discount_type,
         discount_value:   Number(form.discount_value),
         min_order_amount: form.min_order_amount ? Number(form.min_order_amount) : null,
@@ -218,12 +217,7 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
                 rows={2} placeholder="Description en français..."
                 className={`${inputCls} resize-none`} />
             </div>
-            <div>
-              <label className="block text-xs font-bold text-black/50 mb-1.5">Description (AR)</label>
-              <textarea name="description_ar" value={form.description_ar} onChange={handle}
-                rows={2} placeholder="وصف بالعربية..." dir="rtl"
-                className={`${inputCls} resize-none`} />
-            </div>
+            
           </div>
         </div>
 

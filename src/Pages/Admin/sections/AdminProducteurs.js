@@ -3,7 +3,7 @@ import { getAllSuppliers, deleteSupplier } from '../../../services/adminService'
 import { FiTrash2, FiPlus, FiSearch, FiEdit } from 'react-icons/fi';
 import { MdVerified } from 'react-icons/md';
 
-const EMPTY_FORM = { name: '', name_ar: '', description_fr: '', description_ar: '', region: '', address: '', contact: '', email: '', website: '', is_certified_bio: false };
+const EMPTY_FORM = { name: '', description_fr: '',  region: '', address: '', contact: '', email: '', website: '', is_certified_bio: false };
 
 const AdminProducteurs = () => {
     const [producteurs, setProducteurs] = useState([]);
@@ -46,9 +46,7 @@ const AdminProducteurs = () => {
         setEditTarget(p);
         setFormData({
             name: p.name || '',
-            name_ar: p.name_ar || '',
             description_fr: p.description_fr || '',
-            description_ar: p.description_ar || '',
             region: p.region || '',
             address: p.address || '',
             contact: p.contact || '',
@@ -102,11 +100,10 @@ const AdminProducteurs = () => {
 
     const fields = [
         { label: 'Nom (FR) *', key: 'name', placeholder: 'Nom du producteur', required: true },
-        { label: 'Nom (AR)', key: 'name_ar', placeholder: 'اسم المنتج' },
         { label: 'Région', key: 'region', placeholder: 'Ex: Sfax, Tunis...' },
         { label: 'Adresse', key: 'address', placeholder: 'Ville, Tunisie' },
         { label: 'Contact', key: 'contact', placeholder: '+216 XX XXX XXX' },
-        { label: 'Email', key: 'email', placeholder: 'contact@exemple.tn' },
+        { label: 'Email', key: 'email', placeholder: 'contact@exemple.ch' },
         { label: 'Site web', key: 'website', placeholder: 'https://...' },
     ];
 
@@ -225,17 +222,7 @@ const AdminProducteurs = () => {
                                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition resize-none"
                                 />
                             </div>
-                            <div>
-                                <label className="block text-xs font-bold text-gray-600 mb-1.5">Description (AR)</label>
-                                <textarea
-                                    value={formData.description_ar}
-                                    onChange={(e) => setFormData({ ...formData, description_ar: e.target.value })}
-                                    placeholder="وصف المنتج..."
-                                    rows={3}
-                                    dir="rtl"
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition resize-none"
-                                />
-                            </div>
+                            
                             <div className="flex items-center gap-2">
                                 <input
                                     type="checkbox"

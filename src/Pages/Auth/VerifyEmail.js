@@ -17,7 +17,7 @@ const VerifyEmail = () => {
 
         const verify = async () => {
             try {
-                await verifyEmail(decodeURIComponent(token));
+                await verifyEmail(token);
                 await loginSuccess(); // ✅ met à jour l'user dans le context → connecté automatiquement
                 setStatus('success');
                 setTimeout(() => navigate('/'), 3000);

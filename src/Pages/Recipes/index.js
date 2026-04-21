@@ -70,9 +70,7 @@ function RecipeCard({ recipe }) {
               {recipe.title_fr}
             </h3>
           </Link>
-          {recipe.title_ar && (
-            <p className="text-xs text-gray-400 text-right mt-0.5" dir="rtl">{recipe.title_ar}</p>
-          )}
+          
         </div>
 
         {recipe.description_fr && (

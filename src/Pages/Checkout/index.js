@@ -19,9 +19,11 @@ import {
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
 const VILLES = [
-    'tunis' , 'ariana' , 'ben arous' , 'manouba' , 'nabeul' , 'zaghouan' , 'bizerte' , 'beja' , 'jendouba' , 'kef' , 'siliana' , 'sousse' , 'monastir' , 'mahdia' , 'sfax' , 'kairouan' , 'kasserine' , 'sidi bouzid' , 'gabes' , 'medenine' , 'tataouine' , 'gafsa' , 'tozeur' , 'kebili' , 'kasserine'
+  'Zurich', 'Genève', 'Bâle', 'Lausanne', 'Berne', 'Winterthur',
+  'Lucerne', 'St-Gall', 'Lugano', 'Biel/Bienne', 'Thoune', 'Köniz',
+  'La Chaux-de-Fonds', 'Fribourg', 'Schaffhouse', 'Chur', 'Vernier',
+  'Neuchâtel', 'Uster', 'Sion', 'Emmen', 'Kriens', 'Arlesheim',
 ];
-
 // ── Apparence Stripe personnalisée aux couleurs GOFFA ────────────────────────
 const stripeAppearance = {
     theme: 'stripe',
@@ -60,6 +62,15 @@ const MastercardLogo = () => (
         <circle cx="60.2" cy="54" r="30" fill="#EB001B" />
         <circle cx="92.2" cy="54" r="30" fill="#F79E1B" />
         <path d="M76.2 32.3c7 5.3 11.5 13.6 11.5 22.7s-4.5 17.4-11.5 22.7c-7-5.3-11.5-13.6-11.5-22.7s4.5-17.4 11.5-22.7z" fill="#FF5F00" />
+    </svg>
+);
+
+const TwintLogo = () => (
+    <svg height="20" viewBox="0 0 100 40" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100" height="40" rx="6" fill="#000"/>
+        <text x="50" y="28" textAnchor="middle"
+              fontSize="18" fontWeight="bold" fill="white"
+              fontFamily="Arial, sans-serif">twint</text>
     </svg>
 );
 
@@ -195,6 +206,7 @@ const StripePaymentStep = ({ order, promoResult, onBack }) => {
                 <div className="flex items-center justify-center gap-3 mt-5 opacity-60">
                     <VisaLogo />
                     <MastercardLogo />
+                    <TwintLogo />
                     <span className="text-xs text-black/40 font-semibold">3D Secure</span>
                 </div>
             </div>
@@ -213,7 +225,7 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
 
     const [loading,       setLoading]       = useState(false);
     const [error,         setError]         = useState('');
-    const [paymentMethod, setPaymentMethod] = useState('cod');
+    const [paymentMethod, setPaymentMethod] = useState('stripe');
 
     const [formData, setFormData] = useState({
         name:             user?.name    || '',
@@ -296,7 +308,7 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
             shipping_city:      formData.shipping_city,
             shipping_governorate: formData.shipping_governorate || undefined,
             shipping_postal_code: formData.shipping_postal_code || undefined, 
-            shipping_country:   'TN',
+            shipping_country:   'CH',
             notes:              formData.notes      || undefined,
             promo_code:         promoResult?.promoCode || undefined,
         };
@@ -369,7 +381,7 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
                         {/* ── COLONNE GAUCHE ─────────────────────────────── */}
-                        <div className="lg:col-span-2 space-y-6">
+                        <div className="lg:col-span-2 space-y-6 order-last lg:order-first">
 
                             {/* INFOS GUEST */}
                             {!user && (
@@ -395,7 +407,7 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                                     onFocus={onFocus} onBlur={onBlur} />
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
                                                 <label className="block text-xs font-bold text-gray-600 mb-1.5">Email *</label>
                                                 <div className="relative">
@@ -440,7 +452,7 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                             <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                             <input type="tel" name="phone" value={formData.phone}
                                                 onChange={handleChange}
-                                                placeholder="+216 XX XXX XXX"
+                                                placeholder="+41 XX XXX XX XX"
                                                 className={`${inputClass} pl-10`}
                                                 style={{ border: '2px solid #e5e7eb' }}
                                                 onFocus={onFocus} onBlur={onBlur} />
@@ -475,28 +487,28 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                             ))}
                                         </select>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
-    <div>
-        <label className="block text-xs font-bold text-gray-600 mb-1.5">Gouvernorat</label>
-        <input type="text" name="shipping_governorate"
-            value={formData.shipping_governorate}
-            onChange={handleChange}
-            placeholder="Ex: Tunis, Sfax..."
-            className={inputClass}
-            style={{ border: '2px solid #e5e7eb' }}
-            onFocus={onFocus} onBlur={onBlur} />
-    </div>
-    <div>
-        <label className="block text-xs font-bold text-gray-600 mb-1.5">Code postal</label>
-        <input type="text" name="shipping_postal_code"
-            value={formData.shipping_postal_code}
-            onChange={handleChange}
-            placeholder="Ex: 1000"
-            className={inputClass}
-            style={{ border: '2px solid #e5e7eb' }}
-            onFocus={onFocus} onBlur={onBlur} />
-    </div>
-</div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-600 mb-1.5">Canton</label>
+                                            <input type="text" name="shipping_governorate"
+                                                value={formData.shipping_governorate}
+                                                onChange={handleChange}
+                                                placeholder="Ex: Zurich, Vaud..."
+                                                className={inputClass}
+                                                style={{ border: '2px solid #e5e7eb' }}
+                                                onFocus={onFocus} onBlur={onBlur} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-600 mb-1.5">Code postal</label>
+                                            <input type="text" name="shipping_postal_code"
+                                                value={formData.shipping_postal_code}
+                                                onChange={handleChange}
+                                                placeholder="Ex: 8001"
+                                                className={inputClass}
+                                                style={{ border: '2px solid #e5e7eb' }}
+                                                onFocus={onFocus} onBlur={onBlur} />
+                                        </div>
+                                    </div>
                                     <div>
                                         <label className="block text-xs font-bold text-gray-600 mb-1.5">Notes (optionnel)</label>
                                         <textarea name="notes" value={formData.notes}
@@ -515,31 +527,6 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                     <FiCreditCard style={{ color: '#e63946' }} /> Méthode de paiement
                                 </h2>
                                 <div className="space-y-3">
-
-                                    {/* COD */}
-                                    <label className="flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all duration-200"
-                                        style={{
-                                            border:     paymentMethod === 'cod' ? '2px solid #166534' : '2px solid #e5e7eb',
-                                            background: paymentMethod === 'cod' ? '#f0fdf4' : 'white',
-                                        }}>
-                                        <input type="radio" name="payment" value="cod"
-                                            checked={paymentMethod === 'cod'}
-                                            onChange={() => setPaymentMethod('cod')}
-                                            className="hidden" />
-                                        <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0"
-                                            style={{ borderColor: paymentMethod === 'cod' ? '#166534' : '#d1d5db' }}>
-                                            {paymentMethod === 'cod' && (
-                                                <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#166534' }} />
-                                            )}
-                                        </div>
-                                        <FiTruck size={20} style={{ color: '#166534' }} />
-                                        <div className="flex-1">
-                                            <p className="font-bold text-sm text-[#2c2c2c]">Paiement à la livraison</p>
-                                            <p className="text-xs text-black/40">Payez en espèces à la réception</p>
-                                        </div>
-                                        <span className="text-xs font-bold px-3 py-1 rounded-full"
-                                            style={{ background: '#dcfce7', color: '#166534' }}>Gratuit</span>
-                                    </label>
 
                                     {/* STRIPE */}
                                     <label className="flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all duration-200"
@@ -560,24 +547,16 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                         <FiCreditCard size={20} style={{ color: '#6366f1' }} />
                                         <div className="flex-1">
                                             <p className="font-bold text-sm text-[#2c2c2c]">Carte bancaire</p>
-                                            <p className="text-xs text-black/40">Visa, Mastercard — paiement sécurisé</p>
+                                            <p className="text-xs text-black/40">Visa, Mastercard , Twint — paiement sécurisé</p>
                                         </div>
-                                        <div className="flex gap-2 items-center">
+                                        <div className="hidden sm:flex gap-2 items-center">
                                             <VisaLogo />
                                             <MastercardLogo />
+                                            <TwintLogo />
                                         </div>
                                     </label>
 
-                                    {paymentMethod === 'stripe' && (
-                                        <div className="rounded-xl p-3 flex items-start gap-2"
-                                            style={{ background: '#eff6ff', border: '1px solid #bfdbfe' }}>
-                                            <span className="text-base">ℹ️</span>
-                                            <p className="text-xs text-blue-700">
-                                                Vous serez redirigé vers un formulaire de paiement sécurisé Stripe
-                                                après validation de votre commande.
-                                            </p>
-                                        </div>
-                                    )}
+                                
                                 </div>
                             </div>
 
@@ -654,8 +633,8 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                         </div>
 
                         {/* ── COLONNE DROITE — RÉSUMÉ ─────────────────── */}
-                        <div className="lg:col-span-1">
-                            <div className="bg-white rounded-2xl p-6 shadow-[0_4px_15px_rgba(0,0,0,0.07)] sticky top-4">
+                        <div className="lg:col-span-1 order-first lg:order-last">
+                            <div className="bg-white rounded-2xl p-6 shadow-[0_4px_15px_rgba(0,0,0,0.07)] lg:sticky lg:top-4">
                                 <h2 className="text-lg font-bold text-[#2c2c2c] mb-5">Récapitulatif</h2>
 
                                 {/* Items */}

@@ -11,7 +11,7 @@ const AdminCategories = () => {
     const [errorMsg, setErrorMsg] = useState('');
     const [showForm, setShowForm] = useState(false);
     const [editItem, setEditItem] = useState(null);
-    const [formData, setFormData] = useState({ name_fr: '', name_ar: '', parent_id: '' });
+    const [formData, setFormData] = useState({ name_fr: '', parent_id: '' });
     const [formLoading, setFormLoading] = useState(false);
 
     const fetchCategories = async () => {
@@ -102,7 +102,7 @@ setCategories(flat);
             }
             setShowForm(false);
             setEditItem(null);
-            setFormData({ name_fr: '', name_ar: '', parent_id: '' });
+            setFormData({ name_fr: '', parent_id: '' });
             fetchCategories();
             setTimeout(() => setSuccessMsg(''), 3000);
         } catch (err) {
@@ -115,7 +115,7 @@ setCategories(flat);
 
     const handleEdit = (cat) => {
         setEditItem(cat);
-        setFormData({ name_fr: cat.name_fr, name_ar: cat.name_ar || '', parent_id: cat.parent_id || '' });
+        setFormData({ name_fr: cat.name_fr, parent_id: cat.parent_id || '' });
         setShowForm(true);
     };
 
@@ -124,7 +124,7 @@ setCategories(flat);
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
                 <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Catégories</h2>
                 <button
-                    onClick={() => { setShowForm(true); setEditItem(null); setFormData({ name_fr: '', name_ar: '', parent_id: '' }); }}
+                    onClick={() => { setShowForm(true); setEditItem(null); setFormData({ name_fr: '', parent_id: '' }); }}
                     className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
                 >
                     <FiPlus size={16} /> Nouvelle catégorie
@@ -269,17 +269,7 @@ setCategories(flat);
                                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition"
                                 />
                             </div>
-                            <div>
-                                <label className="block text-xs font-bold text-gray-600 mb-1.5">Nom en arabe</label>
-                                <input
-                                    type="text"
-                                    value={formData.name_ar}
-                                    onChange={(e) => setFormData({ ...formData, name_ar: e.target.value })}
-                                    placeholder="الزيوت والزيتون"
-                                    dir="rtl"
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition"
-                                />
-                            </div>
+                            
                             <div>
                                 <label className="block text-xs font-bold text-gray-600 mb-1.5">Catégorie parente</label>
                                 <select

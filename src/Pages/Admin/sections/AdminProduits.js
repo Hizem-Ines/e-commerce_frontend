@@ -1,31 +1,24 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getAllProducts, deleteProduct, createProduct, updateProduct, getAllCategories, getAllSuppliers } from '../../../services/adminService';
-import { FiEdit, FiTrash2, FiPlus, FiSearch, FiX, FiUpload, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { FiEdit, FiTrash2, FiPlus, FiSearch, FiX, FiUpload } from 'react-icons/fi';
 import formatPrice from '../../../utils/formatPrice';
+import { useSiteSettings } from '../../../context/SiteSettingsContext';
 import api from '../../../services/api';
 
-// ─── Blank form state ────────────────────────────────────────────────────────
 const BLANK_FORM = {
-    name_fr: '', name_ar: '',
-    description_fr: '', description_ar: '',
-    ethical_info_fr: '', ethical_info_ar: '',
-    origin: '',
-    usage_fr: '', usage_ar: '',
-    ingredients_fr: '', ingredients_ar: '',
-    precautions_fr: '', precautions_ar: '',
-    certifications: '',
-    supplier_id: '', category_id: '',
-    slug: '',
-    is_active: true, is_featured: false,
+    name_fr: '', description_fr: '', ethical_info_fr: '', origin: '',
+    usage_fr: '', ingredients_fr: '', precautions_fr: '', certifications: '',
+    supplier_id: '', category_id: '', slug: '',
+    is_active: true, is_featured: false, is_new: false,
+    low_stock_threshold: 5,
 };
 
 const BLANK_VARIANT = {
     price: '', compare_price: '', cost_price: '',
     stock: '0', sku: '', weight_grams: '',
-    attributes: [{ type_fr: '', value_fr: '', type_ar: '', value_ar: '' }],
+    attributes: [{ type_fr: '', value_fr: '' }],
 };
 
-// ─── Field component ─────────────────────────────────────────────────────────
 const Field = ({ label, required, children }) => (
     <div>
         <label className="block text-xs font-bold text-black/50 uppercase tracking-wider mb-1.5">
@@ -35,13 +28,13 @@ const Field = ({ label, required, children }) => (
     </div>
 );
 
-const inputCls = "w-full bg-[#f9f5f0] border-2 border-transparent focus:border-[#4a8c42]  focus:bg-white rounded-xl px-4 py-2.5 text-sm text-[#2c2c2c] outline-none transition placeholder-black/25";
+const inputCls = "w-full bg-[#f9f5f0] border-2 border-transparent focus:border-[#4a8c42] focus:bg-white rounded-xl px-4 py-2.5 text-sm text-[#2c2c2c] outline-none transition placeholder-black/25";
 const textareaCls = inputCls + " resize-none";
 
-// ─── Variant Edit Row (for edit mode) ────────────────────────────────────────
+// ─── VariantEditRow — inchangé ────────────────────────────────────────────────
 const VariantEditRow = ({ variant, productId, onUpdated, onDeleted }) => {
     const [editing, setEditing] = useState(false);
-    const [vals, setVals]       = useState({
+    const [vals, setVals] = useState({
         price:         variant.price         ?? '',
         compare_price: variant.compare_price ?? '',
         cost_price:    variant.cost_price    ?? '',
@@ -50,9 +43,9 @@ const VariantEditRow = ({ variant, productId, onUpdated, onDeleted }) => {
         weight_grams:  variant.weight_grams  ?? '',
         is_active:     variant.is_active     ?? true,
     });
-    const [saving,   setSaving]   = useState(false);
+    const [saving, setSaving]   = useState(false);
     const [deleting, setDeleting] = useState(false);
-    const [err,      setErr]      = useState('');
+    const [err, setErr]         = useState('');
 
     const set = (k, v) => setVals(p => ({ ...p, [k]: v }));
 
@@ -112,13 +105,13 @@ const VariantEditRow = ({ variant, productId, onUpdated, onDeleted }) => {
                             <button onClick={() => setEditing(true)} className="p-2 hover:bg-blue-50 text-blue-500 rounded-xl transition text-xs font-bold flex items-center gap-1">
                                 <FiEdit size={13}/> Modifier
                             </button>
-                            <button onClick={del} disabled={deleting} className="p-2 hover:bg-red-50 text-red-400 rounded-xl transition text-xs font-bold flex items-center gap-1">
+                            <button onClick={del} disabled={deleting} className="p-2 hover:bg-red-50 text-red-500 rounded-xl transition text-xs font-bold flex items-center gap-1">
                                 <FiTrash2 size={13}/> {deleting ? '...' : 'Supprimer'}
                             </button>
                         </>
                     ) : (
                         <>
-                            <button onClick={save} disabled={saving} className="px-3 py-1.5 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white rounded-xl text-xs font-bold transition disabled:opacity-50">
+                            <button onClick={save} disabled={saving} className="px-3 py-1.5 bg-[#2d5a27] hover:bg-[#4a8c42] text-white rounded-xl text-xs font-bold transition disabled:opacity-50">
                                 {saving ? '⏳' : '💾 Sauver'}
                             </button>
                             <button onClick={() => { setEditing(false); setErr(''); }} className="px-3 py-1.5 border border-gray-200 text-black/50 rounded-xl text-xs font-bold hover:bg-gray-50 transition">
@@ -148,7 +141,6 @@ const VariantEditRow = ({ variant, productId, onUpdated, onDeleted }) => {
                         </Field>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-
                         <Field label="SKU">
                             <input className={inputCls} value={vals.sku} onChange={e => set('sku', e.target.value)} placeholder="ex: ARG-500ML" />
                         </Field>
@@ -159,7 +151,7 @@ const VariantEditRow = ({ variant, productId, onUpdated, onDeleted }) => {
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => set('is_active', !vals.is_active)}
-                            className={`w-10 h-5 rounded-full transition-colors duration-200 relative shrink-0 ${vals.is_active ? 'bg-[#4a8c42] ' : 'bg-gray-300'}`}
+                            className={`w-10 h-5 rounded-full transition-colors duration-200 relative shrink-0 ${vals.is_active ? 'bg-[#4a8c42]' : 'bg-gray-300'}`}
                         >
                             <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200 ${vals.is_active ? 'left-5' : 'left-0.5'}`}/>
                         </button>
@@ -171,15 +163,15 @@ const VariantEditRow = ({ variant, productId, onUpdated, onDeleted }) => {
     );
 };
 
-// ─── Add Variant Form (for edit mode) ────────────────────────────────────────
+// ─── AddVariantForm — inchangé ────────────────────────────────────────────────
 const AddVariantForm = ({ productId, onAdded, onCancel }) => {
-    const [v, setV]     = useState({ ...BLANK_VARIANT, attributes: [{ type_fr: '', value_fr: '', type_ar: '', value_ar: '' }] });
+    const [v, setV]       = useState({ ...BLANK_VARIANT, attributes: [{ type_fr: '', value_fr: '' }] });
     const [saving, setSaving] = useState(false);
-    const [err,    setErr]    = useState('');
+    const [err, setErr]   = useState('');
 
     const set     = (k, val) => setV(p => ({ ...p, [k]: val }));
     const setAttr = (ai, k, val) => setV(p => ({ ...p, attributes: p.attributes.map((a, j) => j === ai ? { ...a, [k]: val } : a) }));
-    const addAttr = () => setV(p => ({ ...p, attributes: [...p.attributes, { type_fr: '', value_fr: '', type_ar: '', value_ar: '' }] }));
+    const addAttr = () => setV(p => ({ ...p, attributes: [...p.attributes, { type_fr: '', value_fr: '' }] }));
     const remAttr = (ai) => setV(p => ({ ...p, attributes: p.attributes.filter((_, j) => j !== ai) }));
 
     const save = async () => {
@@ -187,15 +179,14 @@ const AddVariantForm = ({ productId, onAdded, onCancel }) => {
         setSaving(true); setErr('');
         try {
             const fd = new FormData();
-            fd.append('price',         v.price);
+            fd.append('price', v.price);
             if (v.compare_price) fd.append('compare_price', v.compare_price);
-            if (v.cost_price)    fd.append('cost_price',    v.cost_price);
-            fd.append('stock',         v.stock || '0');
-            if (v.sku)           fd.append('sku',           v.sku);
-            if (v.weight_grams)  fd.append('weight_grams',  v.weight_grams);
+            if (v.cost_price)    fd.append('cost_price', v.cost_price);
+            fd.append('stock', v.stock || '0');
+            if (v.sku)          fd.append('sku', v.sku);
+            if (v.weight_grams) fd.append('weight_grams', v.weight_grams);
             const cleanAttrs = v.attributes.filter(a => a.type_fr && a.value_fr);
             if (cleanAttrs.length) fd.append('attributes', JSON.stringify(cleanAttrs));
-
             const res = await api.post(`/products/${productId}/variants`, fd, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
@@ -211,7 +202,6 @@ const AddVariantForm = ({ productId, onAdded, onCancel }) => {
         <div className="border-2 border-dashed border-emerald-300 rounded-2xl p-5 space-y-4 bg-emerald-50/30">
             <p className="font-bold text-sm text-emerald-700">➕ Nouvelle variante</p>
             {err && <p className="text-red-500 text-xs font-semibold">❌ {err}</p>}
-
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <Field label="Prix *">
                     <input type="number" min="0" step="0.01" className={inputCls} value={v.price} onChange={e => set('price', e.target.value)} placeholder="0.00" />
@@ -227,7 +217,6 @@ const AddVariantForm = ({ productId, onAdded, onCancel }) => {
                 </Field>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-
                 <Field label="SKU">
                     <input className={inputCls} value={v.sku} onChange={e => set('sku', e.target.value)} placeholder="ex: ARG-500ML" />
                 </Field>
@@ -235,7 +224,6 @@ const AddVariantForm = ({ productId, onAdded, onCancel }) => {
                     <input type="number" min="0" className={inputCls} value={v.weight_grams} onChange={e => set('weight_grams', e.target.value)} placeholder="500" />
                 </Field>
             </div>
-
             <div>
                 <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-2">Attributs</p>
                 <div className="space-y-2">
@@ -251,10 +239,9 @@ const AddVariantForm = ({ productId, onAdded, onCancel }) => {
                 </div>
                 <button onClick={addAttr} className="mt-2 text-xs font-bold text-[#2d5a27] hover:text-emerald-700 transition">+ Ajouter attribut</button>
             </div>
-
             <div className="flex gap-3 pt-2">
                 <button onClick={onCancel} className="flex-1 border border-gray-200 text-black/50 font-bold py-2 rounded-xl text-xs hover:bg-gray-50 transition">Annuler</button>
-                <button onClick={save} disabled={saving} className="flex-[2] bg-[#2d5a27] hover:bg-[#4a8c42]  disabled:opacity-50 text-white font-bold py-2 rounded-xl text-xs transition">
+                <button onClick={save} disabled={saving} className="flex-[2] bg-[#2d5a27] hover:bg-[#4a8c42] disabled:opacity-50 text-white font-bold py-2 rounded-xl text-xs transition">
                     {saving ? '⏳ Ajout...' : '✅ Ajouter la variante'}
                 </button>
             </div>
@@ -262,51 +249,57 @@ const AddVariantForm = ({ productId, onAdded, onCancel }) => {
     );
 };
 
-// ─── Product Form Modal ───────────────────────────────────────────────────────
+// ─── ToggleRow helper ─────────────────────────────────────────────────────────
+const ToggleRow = ({ label, sub, value, onChange, color = 'bg-[#4a8c42]' }) => (
+    <div className="flex items-center justify-between bg-[#f9f5f0] rounded-xl px-5 py-4">
+        <div>
+            <p className="font-bold text-sm text-[#2c2c2c]">{label}</p>
+            {sub && <p className="text-xs text-black/40">{sub}</p>}
+        </div>
+        <button
+            onClick={() => onChange(!value)}
+            className={`w-12 h-6 rounded-full transition-colors duration-200 relative ${value ? color : 'bg-gray-300'}`}
+        >
+            <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 ${value ? 'left-6' : 'left-0.5'}`}/>
+        </button>
+    </div>
+);
+
+// ─── ProductFormModal ─────────────────────────────────────────────────────────
 const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) => {
     const isEdit = !!product;
+
     const [form, setForm] = useState(isEdit ? {
-        name_fr: product.name_fr || '',
-        name_ar: product.name_ar || '',
-        description_fr: product.description_fr || '',
-        description_ar: product.description_ar || '',
+        name_fr:         product.name_fr        || '',
+        description_fr:  product.description_fr || '',
         ethical_info_fr: product.ethical_info_fr || '',
-        ethical_info_ar: product.ethical_info_ar || '',
-        origin: product.origin || '',
-        usage_fr: product.usage_fr || '',
-        usage_ar: product.usage_ar || '',
-        ingredients_fr: product.ingredients_fr || '',
-        ingredients_ar: product.ingredients_ar || '',
-        precautions_fr: product.precautions_fr || '',
-        precautions_ar: product.precautions_ar || '',
-        certifications: Array.isArray(product.certifications)
+        origin:          product.origin          || '',
+        usage_fr:        product.usage_fr        || '',
+        ingredients_fr:  product.ingredients_fr  || '',
+        precautions_fr:  product.precautions_fr  || '',
+        certifications:  Array.isArray(product.certifications)
             ? product.certifications.join(', ')
             : (product.certifications || ''),
-        supplier_id: product.supplier_id || '',
-        category_id: product.category_id || '',
-        slug: product.slug || '',
-        is_active: product.is_active ?? true,
-        is_featured: product.is_featured ?? false,
+        supplier_id:         product.supplier_id  || '',
+        category_id:         product.category_id  || '',
+        slug:                product.slug          || '',
+        is_active:           product.is_active     ?? true,
+        is_featured:         product.is_featured   ?? false,
+        is_new:              product.is_new        ?? false,
+        low_stock_threshold: product.low_stock_threshold ?? 5,
     } : { ...BLANK_FORM });
 
-    const [variants, setVariants] = useState(
-        [{ ...BLANK_VARIANT, attributes: [{ type_fr: '', value_fr: '', type_ar: '', value_ar: '' }] }]
-    );
-
+    const [variants, setVariants]         = useState([{ ...BLANK_VARIANT, attributes: [{ type_fr: '', value_fr: '' }] }]);
     const [editVariants, setEditVariants] = useState(product?.variants || []);
     const [showAddVariant, setShowAddVariant] = useState(false);
-
     const [images, setImages]     = useState([]);
     const [previews, setPreviews] = useState([]);
     const [loading, setLoading]   = useState(false);
     const [error, setError]       = useState('');
     const [tab, setTab]           = useState('general');
-    const [showAr, setShowAr]     = useState(false);
     const fileRef = useRef();
-
     const [formLoading, setFormLoading] = useState(isEdit);
 
-    // FIX 3c: fetch full product data with ?admin=true so inactive products load correctly
     useEffect(() => {
         if (!isEdit || !product.id) return;
         setFormLoading(true);
@@ -314,28 +307,28 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
             .then(res => {
                 const p = res.data.product;
                 if (!p) return;
+                // Derive threshold from first variant if not on product level
+                const threshold = p.low_stock_threshold
+                    ?? p.variants?.[0]?.low_stock_threshold
+                    ?? 5;
                 setForm({
-                    name_fr:        p.name_fr        || '',
-                    name_ar:        p.name_ar        || '',
-                    description_fr: p.description_fr || '',
-                    description_ar: p.description_ar || '',
+                    name_fr:         p.name_fr        || '',
+                    description_fr:  p.description_fr || '',
                     ethical_info_fr: p.ethical_info_fr || '',
-                    ethical_info_ar: p.ethical_info_ar || '',
-                    origin:         p.origin         || '',
-                    usage_fr:       p.usage_fr       || '',
-                    usage_ar:       p.usage_ar       || '',
-                    ingredients_fr: p.ingredients_fr || '',
-                    ingredients_ar: p.ingredients_ar || '',
-                    precautions_fr: p.precautions_fr || '',
-                    precautions_ar: p.precautions_ar || '',
-                    certifications: Array.isArray(p.certifications)
+                    origin:          p.origin          || '',
+                    usage_fr:        p.usage_fr        || '',
+                    ingredients_fr:  p.ingredients_fr  || '',
+                    precautions_fr:  p.precautions_fr  || '',
+                    certifications:  Array.isArray(p.certifications)
                         ? p.certifications.join(', ')
                         : (p.certifications || ''),
-                    supplier_id: p.supplier_id || '',
-                    category_id: p.category_id || '',
-                    slug:        p.slug        || '',
-                    is_active:   p.is_active   ?? true,
-                    is_featured: p.is_featured ?? false,
+                    supplier_id:         p.supplier_id  || '',
+                    category_id:         p.category_id  || '',
+                    slug:                p.slug          || '',
+                    is_active:           p.is_active     ?? true,
+                    is_featured:         p.is_featured   ?? false,
+                    is_new:              p.is_new        ?? false,
+                    low_stock_threshold: threshold,
                 });
                 setEditVariants(p.variants || []);
             })
@@ -356,20 +349,19 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
         ...vt, attributes: vt.attributes.map((a, j) => j === ai ? { ...a, [k]: v } : a),
     }));
     const addAttr    = (vi) => setVariants(vs => vs.map((vt, i) => i !== vi ? vt : {
-        ...vt, attributes: [...vt.attributes, { type_fr: '', value_fr: '', type_ar: '', value_ar: '' }],
+        ...vt, attributes: [...vt.attributes, { type_fr: '', value_fr: '' }],
     }));
     const removeAttr = (vi, ai) => setVariants(vs => vs.map((vt, i) => i !== vi ? vt : {
         ...vt, attributes: vt.attributes.filter((_, j) => j !== ai),
     }));
-    const addVariant    = () => setVariants(vs => [...vs, { ...BLANK_VARIANT, attributes: [{ type_fr: '', value_fr: '', type_ar: '', value_ar: '' }] }]);
+    const addVariant    = () => setVariants(vs => [...vs, { ...BLANK_VARIANT, attributes: [{ type_fr: '', value_fr: '' }] }]);
     const removeVariant = (vi) => setVariants(vs => vs.filter((_, i) => i !== vi));
 
     const handleSubmit = async () => {
         setError('');
         if (!form.name_fr.trim())        { setError('Le nom (FR) est obligatoire.');         setTab('general');  return; }
         if (!form.description_fr.trim()) { setError('La description (FR) est obligatoire.'); setTab('general');  return; }
-        if (!form.category_id)           { setError('La catégorie est obligatoire.');        setTab('general');  return; }
-        if (!isEdit && variants.length === 0) { setError('Au moins une variante est requise.'); setTab('variants'); return; }
+        if (!form.category_id)           { setError('La catégorie est obligatoire.');         setTab('general');  return; }
         if (!isEdit && variants.some(v => !v.price || parseFloat(v.price) < 0)) {
             setError('Chaque variante doit avoir un prix valide.'); setTab('variants'); return;
         }
@@ -377,13 +369,14 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
         setLoading(true);
         try {
             const fd = new FormData();
-
             Object.entries(form).forEach(([k, v]) => {
                 if (k === 'certifications') {
                     const arr = v ? v.split(',').map(s => s.trim()).filter(Boolean) : [];
                     if (arr.length) fd.append('certifications', JSON.stringify(arr));
-                } else if (k === 'is_active' || k === 'is_featured') {
+                } else if (['is_active', 'is_featured', 'is_new'].includes(k)) {
                     fd.append(k, String(v));
+                } else if (k === 'low_stock_threshold') {
+                    fd.append(k, String(parseInt(v) || 5));
                 } else if (v !== '' && v !== null && v !== undefined) {
                     fd.append(k, v);
                 }
@@ -400,16 +393,12 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                     sku:           v.sku           || null,
                     weight_grams:  v.weight_grams  ? parseInt(v.weight_grams)   : null,
                     attributes:    v.attributes.filter(a => a.type_fr && a.value_fr),
+                    low_stock_threshold: parseInt(form.low_stock_threshold) || 5,
                 }));
                 fd.append('variants', JSON.stringify(cleanVariants));
             }
 
-            if (isEdit) {
-                await updateProduct(product.id, fd);
-            } else {
-                await createProduct(fd);
-            }
-
+            isEdit ? await updateProduct(product.id, fd) : await createProduct(fd);
             onSaved();
         } catch (err) {
             setError(err.response?.data?.message || 'Une erreur est survenue.');
@@ -443,12 +432,10 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                     </button>
                 </div>
 
-                {/* Required fields legend */}
                 <div className="px-4 sm:px-7 pt-3 shrink-0">
                     <p className="text-xs text-black/35"><span className="text-red-400 font-bold">*</span> Champ obligatoire</p>
                 </div>
 
-                {/* Error */}
                 {error && (
                     <div className="mx-4 sm:mx-7 mt-3 bg-red-50 border border-red-200 text-red-700 font-semibold px-4 py-3 rounded-xl text-sm flex items-center gap-2 shrink-0">
                         ❌ {error}
@@ -462,9 +449,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                             key={t.id}
                             onClick={() => setTab(t.id)}
                             className={`whitespace-nowrap px-4 py-3.5 text-xs font-bold transition-all border-b-2 -mb-px ${
-                                tab === t.id
-                                    ? 'border-[#2d5a27] text-[#2d5a27]'
-                                    : 'border-transparent text-black/40 hover:text-black/70'
+                                tab === t.id ? 'border-[#2d5a27] text-[#2d5a27]' : 'border-transparent text-black/40 hover:text-black/70'
                             }`}
                         >
                             {t.label}
@@ -480,18 +465,17 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                 {/* Body */}
                 <div className="overflow-y-auto flex-1 px-4 sm:px-7 py-6">
 
-                    {formLoading ? (
+                    {formLoading && (
                         <div className="flex flex-col items-center justify-center py-20 gap-3">
                             <div className="text-3xl animate-spin">🌿</div>
                             <p className="text-sm text-black/40 font-medium">Chargement des données...</p>
                         </div>
-                    ) : null}
+                    )}
 
-                    {/* ── GÉNÉRAL ──────────────────────────────────── */}
+                    {/* GÉNÉRAL */}
                     {!formLoading && tab === 'general' && (
                         <div className="space-y-5">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
                                 <Field label="Nom (FR)" required>
                                     <input className={inputCls} value={form.name_fr} onChange={e => set('name_fr', e.target.value)} placeholder="ex: Huile d'argan bio" />
                                 </Field>
@@ -509,11 +493,9 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                     </select>
                                 </Field>
                             </div>
-
                             <Field label="Description (FR)" required>
                                 <textarea className={textareaCls} rows={4} value={form.description_fr} onChange={e => set('description_fr', e.target.value)} placeholder="Décrivez le produit en détail..." />
                             </Field>
-
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <Field label="Fournisseur">
                                     <select className={inputCls} value={form.supplier_id} onChange={e => set('supplier_id', e.target.value)}>
@@ -525,36 +507,13 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                     <input className={inputCls} value={form.origin} onChange={e => set('origin', e.target.value)} placeholder="ex: Maroc, Tunisie..." />
                                 </Field>
                             </div>
-
                             <Field label="Info éthique (FR)">
                                 <textarea className={textareaCls} rows={2} value={form.ethical_info_fr} onChange={e => set('ethical_info_fr', e.target.value)} placeholder="Engagements éthiques, labels..." />
                             </Field>
-
-                            <button
-                                onClick={() => setShowAr(a => !a)}
-                                className="flex items-center gap-2 text-xs font-bold text-black/40 hover:text-[#2d5a27] transition"
-                            >
-                                {showAr ? <FiChevronUp size={14}/> : <FiChevronDown size={14}/>}
-                                Champs arabes (عربي)
-                            </button>
-
-                            {showAr && (
-                                <div className="space-y-4 border-l-4 border-emerald-100 pl-4" dir="rtl">
-                                    <Field label="الاسم (AR)">
-                                        <input className={inputCls} value={form.name_ar} onChange={e => set('name_ar', e.target.value)} placeholder="اسم المنتج" />
-                                    </Field>
-                                    <Field label="الوصف (AR)">
-                                        <textarea className={textareaCls} rows={3} value={form.description_ar} onChange={e => set('description_ar', e.target.value)} placeholder="وصف المنتج بالعربية" />
-                                    </Field>
-                                    <Field label="المعلومات الأخلاقية (AR)">
-                                        <textarea className={textareaCls} rows={2} value={form.ethical_info_ar} onChange={e => set('ethical_info_ar', e.target.value)} />
-                                    </Field>
-                                </div>
-                            )}
                         </div>
                     )}
 
-                    {/* ── DÉTAILS ───────────────────────────────────── */}
+                    {/* DÉTAILS */}
                     {!formLoading && tab === 'details' && (
                         <div className="space-y-5">
                             <Field label="Mode d'emploi (FR)">
@@ -575,7 +534,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                         </div>
                     )}
 
-                    {/* ── VARIANTES ────────────────────────────────── */}
+                    {/* VARIANTES */}
                     {!formLoading && tab === 'variants' && (
                         <div className="space-y-4">
                             {isEdit ? (
@@ -589,11 +548,10 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                                 variant={v}
                                                 productId={product.id}
                                                 onUpdated={updated => setEditVariants(prev => prev.map(x => x.id === updated.id ? updated : x))}
-                                                onDeleted={vid    => setEditVariants(prev => prev.filter(x => x.id !== vid))}
+                                                onDeleted={vid => setEditVariants(prev => prev.filter(x => x.id !== vid))}
                                             />
                                         ))
                                     )}
-
                                     {showAddVariant ? (
                                         <AddVariantForm
                                             productId={product.id}
@@ -603,7 +561,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                     ) : (
                                         <button
                                             onClick={() => setShowAddVariant(true)}
-                                            className="w-full border-2 border-dashed border-emerald-300 hover:border-[#4a8c42]  text-[#2d5a27] font-bold py-3 rounded-xl text-sm transition hover:bg-emerald-50"
+                                            className="w-full border-2 border-dashed border-emerald-300 hover:border-[#4a8c42] text-[#2d5a27] font-bold py-3 rounded-xl text-sm transition hover:bg-emerald-50"
                                         >
                                             + Ajouter une variante
                                         </button>
@@ -616,12 +574,9 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                             <div className="flex items-center justify-between mb-1">
                                                 <p className="font-bold text-sm text-[#2c2c2c]">Variante {vi + 1}</p>
                                                 {variants.length > 1 && (
-                                                    <button onClick={() => removeVariant(vi)} className="text-red-400 hover:text-red-600 transition p-1">
-                                                        <FiX size={14}/>
-                                                    </button>
+                                                    <button onClick={() => removeVariant(vi)} className="text-red-400 hover:text-red-600 transition p-1"><FiX size={14}/></button>
                                                 )}
                                             </div>
-
                                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                                 <Field label="Prix" required>
                                                     <input type="number" min="0" step="0.01" className={inputCls} value={v.price} onChange={e => setVariant(vi, 'price', e.target.value)} placeholder="0.00" />
@@ -636,9 +591,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                                     <input type="number" min="0" className={inputCls} value={v.stock} onChange={e => setVariant(vi, 'stock', e.target.value)} placeholder="0" />
                                                 </Field>
                                             </div>
-
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-
                                                 <Field label="SKU">
                                                     <input className={inputCls} value={v.sku} onChange={e => setVariant(vi, 'sku', e.target.value)} placeholder="ex: ARG-500ML" />
                                                 </Field>
@@ -646,7 +599,6 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                                     <input type="number" min="0" className={inputCls} value={v.weight_grams} onChange={e => setVariant(vi, 'weight_grams', e.target.value)} placeholder="500" />
                                                 </Field>
                                             </div>
-
                                             <div>
                                                 <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-2">Attributs</p>
                                                 <div className="space-y-2">
@@ -655,22 +607,18 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                                             <input className={inputCls + " flex-1"} value={a.type_fr} onChange={e => setAttr(vi, ai, 'type_fr', e.target.value)} placeholder="Type (ex: Poids)" />
                                                             <input className={inputCls + " flex-1"} value={a.value_fr} onChange={e => setAttr(vi, ai, 'value_fr', e.target.value)} placeholder="Valeur (ex: 500ml)" />
                                                             {v.attributes.length > 1 && (
-                                                                <button onClick={() => removeAttr(vi, ai)} className="text-red-400 hover:text-red-600 p-1 shrink-0">
-                                                                    <FiX size={12}/>
-                                                                </button>
+                                                                <button onClick={() => removeAttr(vi, ai)} className="text-red-400 hover:text-red-600 p-1 shrink-0"><FiX size={12}/></button>
                                                             )}
                                                         </div>
                                                     ))}
                                                 </div>
-                                                <button onClick={() => addAttr(vi)} className="mt-2 text-xs font-bold text-[#2d5a27] hover:text-emerald-700 transition">
-                                                    + Ajouter attribut
-                                                </button>
+                                                <button onClick={() => addAttr(vi)} className="mt-2 text-xs font-bold text-[#2d5a27] hover:text-emerald-700 transition">+ Ajouter attribut</button>
                                             </div>
                                         </div>
                                     ))}
                                     <button
                                         onClick={addVariant}
-                                        className="w-full border-2 border-dashed border-emerald-300 hover:border-[#4a8c42]  text-[#2d5a27] font-bold py-3 rounded-xl text-sm transition hover:bg-emerald-50"
+                                        className="w-full border-2 border-dashed border-emerald-300 hover:border-[#4a8c42] text-[#2d5a27] font-bold py-3 rounded-xl text-sm transition hover:bg-emerald-50"
                                     >
                                         + Ajouter une variante
                                     </button>
@@ -679,19 +627,18 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                         </div>
                     )}
 
-                    {/* ── IMAGES ───────────────────────────────────── */}
+                    {/* IMAGES */}
                     {!formLoading && tab === 'images' && (
                         <div className="space-y-5">
                             <button
                                 onClick={() => fileRef.current?.click()}
-                                className="w-full border-2 border-dashed border-emerald-300 hover:border-[#4a8c42]  rounded-2xl py-10 flex flex-col items-center gap-3 text-[#2d5a27] hover:bg-emerald-50 transition"
+                                className="w-full border-2 border-dashed border-emerald-300 hover:border-[#4a8c42] rounded-2xl py-10 flex flex-col items-center gap-3 text-[#2d5a27] hover:bg-emerald-50 transition"
                             >
                                 <FiUpload size={28} />
                                 <p className="font-bold text-sm">Cliquer pour uploader des images</p>
                                 <p className="text-xs text-black/30">JPG, PNG, WEBP — Plusieurs fichiers acceptés</p>
                             </button>
                             <input ref={fileRef} type="file" multiple accept="image/*" className="hidden" onChange={handleImages} />
-
                             {previews.length > 0 && (
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                     {previews.map((src, i) => (
@@ -710,7 +657,6 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                     ))}
                                 </div>
                             )}
-
                             {isEdit && product.images?.length > 0 && previews.length === 0 && (
                                 <div>
                                     <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-3">Images actuelles</p>
@@ -727,32 +673,62 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                         </div>
                     )}
 
-                    {/* ── PARAMÈTRES ───────────────────────────────── */}
+                    {/* ── PARAMÈTRES ── avec is_new, is_featured, low_stock_threshold */}
                     {!formLoading && tab === 'settings' && (
                         <div className="space-y-4">
-                            <div className="flex items-center justify-between bg-[#f9f5f0] rounded-xl px-5 py-4">
-                                <div>
-                                    <p className="font-bold text-sm text-[#2c2c2c]">Produit actif</p>
-                                    <p className="text-xs text-black/40">Visible sur le site si activé</p>
+
+                            <ToggleRow
+                                label="Produit actif"
+                                sub="Visible sur le site si activé"
+                                value={form.is_active}
+                                onChange={v => set('is_active', v)}
+                            />
+
+                            <ToggleRow
+                                label="Coup de cœur ✨"
+                                sub="Mis en avant sur la page d'accueil"
+                                value={form.is_featured}
+                                onChange={v => set('is_featured', v)}
+                                color="bg-amber-400"
+                            />
+
+                            <ToggleRow
+                                label="Nouveau 🆕"
+                                sub="Affiche le badge « Nouveau » sur le produit"
+                                value={form.is_new}
+                                onChange={v => set('is_new', v)}
+                                color="bg-blue-400"
+                            />
+
+                            {/* Seuil stock faible */}
+                            <div className="bg-[#f9f5f0] rounded-xl px-5 py-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div>
+                                        <p className="font-bold text-sm text-[#2c2c2c]">Seuil stock faible</p>
+                                        <p className="text-xs text-black/40">Alerte quand le stock passe sous ce niveau</p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => set('low_stock_threshold', Math.max(1, (parseInt(form.low_stock_threshold) || 5) - 1))}
+                                            className="w-8 h-8 rounded-lg bg-white border border-gray-200 font-bold text-black/50 hover:bg-gray-100 transition flex items-center justify-center text-lg"
+                                        >−</button>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            max="999"
+                                            value={form.low_stock_threshold}
+                                            onChange={e => set('low_stock_threshold', Math.max(1, parseInt(e.target.value) || 1))}
+                                            className="w-16 text-center bg-white border-2 border-gray-200 focus:border-[#4a8c42] rounded-xl px-2 py-1.5 text-sm font-bold text-[#2c2c2c] outline-none transition"
+                                        />
+                                        <button
+                                            onClick={() => set('low_stock_threshold', (parseInt(form.low_stock_threshold) || 5) + 1)}
+                                            className="w-8 h-8 rounded-lg bg-white border border-gray-200 font-bold text-black/50 hover:bg-gray-100 transition flex items-center justify-center text-lg"
+                                        >+</button>
+                                    </div>
                                 </div>
-                                <button
-                                    onClick={() => set('is_active', !form.is_active)}
-                                    className={`w-12 h-6 rounded-full transition-colors duration-200 relative ${form.is_active ? 'bg-[#4a8c42] ' : 'bg-gray-300'}`}
-                                >
-                                    <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 ${form.is_active ? 'left-6' : 'left-0.5'}`}/>
-                                </button>
-                            </div>
-                            <div className="flex items-center justify-between bg-[#f9f5f0] rounded-xl px-5 py-4">
-                                <div>
-                                    <p className="font-bold text-sm text-[#2c2c2c]">Coup de cœur ✨</p>
-                                    <p className="text-xs text-black/40">Mis en avant sur la page d'accueil</p>
-                                </div>
-                                <button
-                                    onClick={() => set('is_featured', !form.is_featured)}
-                                    className={`w-12 h-6 rounded-full transition-colors duration-200 relative ${form.is_featured ? 'bg-amber-400' : 'bg-gray-300'}`}
-                                >
-                                    <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 ${form.is_featured ? 'left-6' : 'left-0.5'}`}/>
-                                </button>
+                                <p className="text-xs text-black/30">
+                                    S'applique à toutes les variantes de ce produit.
+                                </p>
                             </div>
                         </div>
                     )}
@@ -766,12 +742,9 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                     <button
                         onClick={handleSubmit}
                         disabled={loading}
-                        className="flex-2 flex-[2] bg-[#2d5a27] hover:bg-[#4a8c42]  disabled:opacity-50 text-white font-bold py-3 rounded-xl transition text-sm"
+                        className="flex-[2] bg-[#2d5a27] hover:bg-[#4a8c42] disabled:opacity-50 text-white font-bold py-3 rounded-xl transition text-sm"
                     >
-                        {loading
-                            ? '⏳ Enregistrement...'
-                            : isEdit ? '💾 Enregistrer les modifications' : '✅ Créer le produit'
-                        }
+                        {loading ? '⏳ Enregistrement...' : isEdit ? '💾 Enregistrer les modifications' : '✅ Créer le produit'}
                     </button>
                 </div>
             </div>
@@ -781,27 +754,27 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
 
 // ─── Main AdminProduits ───────────────────────────────────────────────────────
 const AdminProduits = () => {
-    const [produits, setProduits]           = useState([]);
-    const [loading, setLoading]             = useState(true);
-    const [search, setSearch]               = useState('');
-    // FIX 1a: separate committed search from live input value
+    const { showChf, toggleChf } = useSiteSettings();
+
+    const [produits, setProduits]               = useState([]);
+    const [loading, setLoading]                 = useState(true);
+    const [search, setSearch]                   = useState('');
     const [committedSearch, setCommittedSearch] = useState('');
-    const [page, setPage]                   = useState(1);
-    const [totalPages, setTotalPages]       = useState(1);
-    const [deleteConfirm, setDeleteConfirm] = useState(null);
-    const [successMsg, setSuccessMsg]       = useState('');
-    const [errorMsg, setErrorMsg]           = useState('');
-    const [showModal, setShowModal]         = useState(false);
-    const [editProduct, setEditProduct]     = useState(null);
-    const [categories, setCategories]       = useState([]);
-    const [suppliers, setSuppliers]         = useState([]);
+    const [page, setPage]                       = useState(1);
+    const [totalPages, setTotalPages]           = useState(1);
+    const [deleteConfirm, setDeleteConfirm]     = useState(null);
+    const [successMsg, setSuccessMsg]           = useState('');
+    const [errorMsg, setErrorMsg]               = useState('');
+    const [showModal, setShowModal]             = useState(false);
+    const [editProduct, setEditProduct]         = useState(null);
+    const [categories, setCategories]           = useState([]);
+    const [suppliers, setSuppliers]             = useState([]);
 
     useEffect(() => {
         getAllCategories().then(r => setCategories(r.data.categories || [])).catch(console.error);
         getAllSuppliers?.()?.then(r => setSuppliers(r.data.suppliers || [])).catch(() => {});
     }, []);
 
-    // FIX 1b: depend on committedSearch, not search — so typing doesn't trigger a fetch
     const fetchProduits = useCallback(async () => {
         setLoading(true);
         try {
@@ -817,9 +790,6 @@ const AdminProduits = () => {
 
     useEffect(() => { fetchProduits(); }, [fetchProduits]);
 
-    // FIX 1c: commit the search value on submit instead of calling fetchProduits() directly.
-    // Setting committedSearch will update the useCallback dep, which recreates fetchProduits,
-    // which triggers the useEffect — one clean fetch, correct page, no race condition.
     const handleSearch = (e) => {
         e.preventDefault();
         setPage(1);
@@ -854,108 +824,108 @@ const AdminProduits = () => {
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-8">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
                 <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Produits</h2>
-                <button
-                    onClick={openCreate}
-                    className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
-                >
-                    <FiPlus size={16} /> Nouveau produit
-                </button>
+
+                <div className="flex items-center gap-3 flex-wrap">
+                    {/* ── CHF toggle ── */}
+                    <label className="flex items-center gap-2.5 bg-white border-2 border-gray-200 hover:border-[#4a8c42] transition rounded-xl px-4 py-2.5 cursor-pointer select-none">
+                        <div
+                            onClick={() => toggleChf(!showChf)}
+                            className={`w-9 h-5 rounded-full transition-colors duration-200 relative shrink-0 ${showChf ? 'bg-[#4a8c42]' : 'bg-gray-300'}`}
+                        >
+                            <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200 ${showChf ? 'left-4' : 'left-0.5'}`}/>
+                        </div>
+                        <span className="text-xs font-bold text-black/60">
+                            Afficher prix en <span className={showChf ? 'text-[#2d5a27]' : 'text-black/30'}>CHF</span>
+                        </span>
+                    </label>
+
+                    <button
+                        onClick={openCreate}
+                        className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42] text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
+                    >
+                        <FiPlus size={16} /> Nouveau produit
+                    </button>
+                </div>
             </div>
 
-            {successMsg && <div className="bg-emerald-50 border border-#b6eac7 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">✅ {successMsg}</div>}
+            {successMsg && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">✅ {successMsg}</div>}
             {errorMsg   && <div className="bg-red-50 border border-red-200 text-red-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">❌ {errorMsg}</div>}
 
-            {/* RECHERCHE */}
+            {/* Recherche */}
             <form onSubmit={handleSearch} className="flex gap-3 mb-6">
                 <div className="relative flex-1">
                     <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                     <input
-                        type="text" value={search} onChange={(e) => setSearch(e.target.value)}
+                        type="text" value={search} onChange={e => setSearch(e.target.value)}
                         placeholder="Rechercher un produit..."
-                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition"
+                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42] focus:outline-none text-sm transition"
                     />
                 </div>
-                <button type="submit" className="bg-[#2d5a27] text-white font-bold px-5 py-3 rounded-xl hover:bg-[#4a8c42]  transition text-sm">
+                <button type="submit" className="bg-[#2d5a27] text-white font-bold px-5 py-3 rounded-xl hover:bg-[#4a8c42] transition text-sm">
                     Rechercher
                 </button>
             </form>
 
-            {/* TABLE */}
+            {/* Table — stock column removed */}
             <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-x-auto">
                 {loading ? (
                     <div className="flex items-center justify-center py-20">
                         <div className="text-4xl animate-spin">🌿</div>
                     </div>
                 ) : (
-                    <table className="w-full text-sm min-w-[650px]">
+                    <table className="w-full text-sm min-w-[580px]">
                         <thead>
                             <tr className="bg-[#f9f5f0] border-b border-gray-100">
                                 <th className="text-left px-5 py-4 font-bold text-[#2c2c2c]">Produit</th>
                                 <th className="text-left px-5 py-4 font-bold text-[#2c2c2c]">Catégorie</th>
                                 <th className="text-left px-5 py-4 font-bold text-[#2c2c2c]">Producteur</th>
                                 <th className="text-right px-5 py-4 font-bold text-[#2c2c2c]">Prix</th>
-                                <th className="text-center px-5 py-4 font-bold text-[#2c2c2c]">Stock</th>
                                 <th className="text-center px-5 py-4 font-bold text-[#2c2c2c]">Statut</th>
                                 <th className="text-center px-5 py-4 font-bold text-[#2c2c2c]">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {produits.length === 0 ? (
-                                <tr><td colSpan={7} className="text-center py-10 text-black/40">Aucun produit trouvé</td></tr>
-                            ) : produits.map((produit) => (
+                                <tr><td colSpan={6} className="text-center py-10 text-black/40">Aucun produit trouvé</td></tr>
+                            ) : produits.map(produit => (
                                 <tr key={produit.id} className="border-b border-gray-50 hover:bg-[#fdf6ec] transition">
                                     <td className="px-5 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center overflow-hidden shrink-0">
-                                                {produit.images?.[0]?.url ? (
-                                                    <img src={produit.images[0].url} alt={produit.name_fr} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <span className="text-lg">🌿</span>
-                                                )}
+                                                {produit.images?.[0]?.url
+                                                    ? <img src={produit.images[0].url} alt={produit.name_fr} className="w-full h-full object-cover" />
+                                                    : <span className="text-lg">🌿</span>
+                                                }
                                             </div>
                                             <div>
                                                 <p className="font-bold text-[#2c2c2c] line-clamp-1">{produit.name_fr}</p>
-                                                <p className="text-xs text-black/40">#{produit.id.slice(0, 8)}</p>
+                                                <div className="flex items-center gap-1.5 mt-0.5">
+                                                    <p className="text-xs text-black/40">#{produit.id.slice(0, 8)}</p>
+                                                    {produit.is_new     && <span className="text-xs bg-blue-100 text-blue-600 font-bold px-1.5 py-0.5 rounded-full">Nouveau</span>}
+                                                    {produit.is_featured && <span className="text-xs bg-amber-100 text-amber-600 font-bold px-1.5 py-0.5 rounded-full">✨ Vedette</span>}
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-5 py-4 text-black/60">{produit.category_name || '—'}</td>
                                     <td className="px-5 py-4 text-black/60">{produit.supplier_name || '—'}</td>
                                     <td className="px-5 py-4 text-right font-bold text-[#2d5a27]">
-                                        {produit.min_price ? formatPrice(parseFloat(produit.min_price)) : '—'}
+                                        {produit.min_price ? formatPrice(parseFloat(produit.min_price), showChf) : '—'}
                                     </td>
                                     <td className="px-5 py-4 text-center">
-                                        <span className={`text-xs font-bold px-2 py-1 rounded-full ${
-                                            parseInt(produit.total_stock) > 10 ? 'bg-emerald-100 text-emerald-700'
-                                            : parseInt(produit.total_stock) > 0 ? 'bg-yellow-100 text-yellow-700'
-                                            : 'bg-red-100 text-red-700'
-                                        }`}>
-                                            {produit.total_stock || 0}
-                                        </span>
-                                    </td>
-                                    <td className="px-5 py-4 text-center">
-                                        <span className={`text-xs font-bold px-2 py-1 rounded-full ${
-                                            produit.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'
-                                        }`}>
+                                        <span className={`text-xs font-bold px-2 py-1 rounded-full ${produit.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
                                             {produit.is_active ? 'Actif' : 'Inactif'}
                                         </span>
                                     </td>
                                     <td className="px-5 py-4">
                                         <div className="flex items-center justify-center gap-2">
-                                            <button
-                                                onClick={() => openEdit(produit)}
-                                                className="p-2 hover:bg-blue-50 text-blue-500 rounded-xl transition"
-                                                title="Modifier"
-                                            >
+                                            <button onClick={() => openEdit(produit)} className="p-2 hover:bg-blue-50 text-blue-500 rounded-xl transition" title="Modifier">
                                                 <FiEdit size={15} />
                                             </button>
-                                            <button
-                                                onClick={() => setDeleteConfirm(produit.id)}
-                                                className="p-2 hover:bg-red-50 text-red-500 rounded-xl transition"
-                                                title="Supprimer"
-                                            >
+                                            <button onClick={() => setDeleteConfirm(produit.id)} className="p-2 hover:bg-red-50 text-red-500 rounded-xl transition" title="Supprimer">
                                                 <FiTrash2 size={15} />
                                             </button>
                                         </div>
@@ -967,16 +937,14 @@ const AdminProduits = () => {
                 )}
             </div>
 
-            {/* PAGINATION */}
+            {/* Pagination */}
             {totalPages > 1 && (
                 <div className="flex justify-center gap-2 mt-6">
                     {[...Array(totalPages)].map((_, i) => (
                         <button
                             key={i}
                             onClick={() => setPage(i + 1)}
-                            className={`w-10 h-10 rounded-full font-bold text-sm transition ${
-                                page === i + 1 ? 'bg-[#2d5a27] text-white' : 'bg-white text-black/50 hover:bg-emerald-100'
-                            }`}
+                            className={`w-10 h-10 rounded-full font-bold text-sm transition ${page === i + 1 ? 'bg-[#2d5a27] text-white' : 'bg-white text-black/50 hover:bg-emerald-100'}`}
                         >
                             {i + 1}
                         </button>
@@ -984,28 +952,25 @@ const AdminProduits = () => {
                 </div>
             )}
 
-            {/* DELETE CONFIRM MODAL */}
+            {/* Delete confirm */}
             {deleteConfirm && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-2xl">
-                        <div className="text-center">
-                            <div className="text-5xl mb-4">⚠️</div>
-                            <h3 className="text-xl font-bold text-[#2c2c2c] mb-2">Supprimer ce produit ?</h3>
-                            <p className="text-black/50 text-sm mb-6">Cette action est irréversible. Toutes les variantes seront supprimées.</p>
-                            <div className="flex gap-3">
-                                <button onClick={() => setDeleteConfirm(null)} className="flex-1 border-2 border-gray-200 text-black/60 font-bold py-3 rounded-xl hover:bg-gray-50 transition">
-                                    Annuler
-                                </button>
-                                <button onClick={() => handleDelete(deleteConfirm)} className="flex-1 bg-red-500 hover:bg-red-400 text-white font-bold py-3 rounded-xl transition">
-                                    Supprimer
-                                </button>
-                            </div>
+                    <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-2xl text-center">
+                        <div className="text-5xl mb-4">⚠️</div>
+                        <h3 className="text-xl font-bold text-[#2c2c2c] mb-2">Supprimer ce produit ?</h3>
+                        <p className="text-black/50 text-sm mb-6">Cette action est irréversible. Toutes les variantes seront supprimées.</p>
+                        <div className="flex gap-3">
+                            <button onClick={() => setDeleteConfirm(null)} className="flex-1 border-2 border-gray-200 text-black/60 font-bold py-3 rounded-xl hover:bg-gray-50 transition">
+                                Annuler
+                            </button>
+                            <button onClick={() => handleDelete(deleteConfirm)} className="flex-1 bg-red-500 hover:bg-red-400 text-white font-bold py-3 rounded-xl transition">
+                                Supprimer
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* CREATE / EDIT MODAL */}
             {showModal && (
                 <ProductFormModal
                     product={editProduct}
