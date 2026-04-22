@@ -474,19 +474,10 @@ const ProductDetail = () => {
                                     </div>
                                 </div>
 
-                                {/* Version arabe */}
-                                {produit.usage_ar && (
-                                    <div className="flex gap-4 items-start bg-[#f9f5f0] rounded-xl p-5" dir="rtl">
-                                        <span className="text-xl shrink-0">📋</span>
-                                        <div>
-                                            <p className="font-bold text-[#2c2c2c] text-sm mb-2">طريقة الاستخدام</p>
-                                            <p className="text-sm text-black/60 leading-relaxed whitespace-pre-line">{produit.usage_ar}</p>
-                                        </div>
-                                    </div>
-                                )}
+                        
 
                                 {/* Précautions — depuis precautions_fr */}
-                                {(produit.precautions_fr || produit.precautions_ar) && (
+                                {(produit.precautions_fr) && (
                                     <div className="border-t border-gray-100 pt-5">
                                         <p className="text-sm font-bold text-[#2c2c2c] mb-3">⚠️ Précautions</p>
                                         {produit.precautions_fr && (
@@ -494,11 +485,7 @@ const ProductDetail = () => {
                                                 {produit.precautions_fr}
                                             </p>
                                         )}
-                                        {produit.precautions_ar && (
-                                            <p className="text-sm text-black/50 leading-relaxed whitespace-pre-line mt-3 text-right" dir="rtl">
-                                                {produit.precautions_ar}
-                                            </p>
-                                        )}
+                                        
                                     </div>
                                 )}
 
@@ -510,17 +497,13 @@ const ProductDetail = () => {
                             <div className="space-y-6">
 
                                 {/* Ingrédients — depuis ingredients_fr */}
-                                {(produit.ingredients_fr || produit.ingredients_ar) && (
+                                {produit.ingredients_fr && (
                                     <div>
                                         <h3 className="text-base font-bold text-[#2c2c2c] mb-3">Ingrédients</h3>
                                         {produit.ingredients_fr && (
                                             <p className="text-sm text-black/70 leading-relaxed">{produit.ingredients_fr}</p>
                                         )}
-                                        {produit.ingredients_ar && (
-                                            <p className="text-sm text-black/50 leading-relaxed mt-3 text-right" dir="rtl">
-                                                {produit.ingredients_ar}
-                                            </p>
-                                        )}
+                                    
                                     </div>
                                 )}
 
@@ -565,7 +548,7 @@ const ProductDetail = () => {
                                     </div>
                                 )}
 
-                                {!produit.ingredients_fr && !produit.ingredients_ar && produit.variants?.length === 0 && (
+                                {!produit.ingredients_fr  && produit.variants?.length === 0 && (
                                     <p className="text-black/40 text-sm">Aucune information de composition disponible.</p>
                                 )}
 

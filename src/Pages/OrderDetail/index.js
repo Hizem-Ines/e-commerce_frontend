@@ -225,7 +225,7 @@ const OrderDetail = () => {
                             </div>
                             <div className="flex justify-between font-black text-lg text-[#2c2c2c] pt-3 border-t border-gray-100">
                                 <span>Total</span>
-                                <span style={{ color: '#166534' }}>{parseFloat(order.total_price).toFixed(2)} DT</span>
+                                <span style={{ color: '#166534' }}>{formatPrice(parseFloat(order.total_price), currency)}</span>
                             </div>
                             
                         </div>

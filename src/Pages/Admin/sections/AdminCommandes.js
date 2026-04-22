@@ -3,6 +3,7 @@ import { getAllOrders, updateOrderStatus } from '../../../services/adminService'
 import api from '../../../services/api'; // ← ton instance axios GOFFA
 import { FiEye, FiLoader } from 'react-icons/fi';
 import formatPrice from '../../../utils/formatPrice';
+import { useSiteSettings } from '../../../context/SiteSettingsContext';
 
 const STATUS_LABELS = {
     pending:    { label: 'En attente',   color: 'bg-yellow-100 text-yellow-700' },
@@ -11,13 +12,11 @@ const STATUS_LABELS = {
     shipped:    { label: 'Expédiée',     color: 'bg-purple-100 text-purple-700' },
     delivered:  { label: 'Livrée',       color: 'bg-emerald-100 text-emerald-700' },
     cancelled:  { label: 'Annulée',      color: 'bg-red-100 text-red-700' },
-    refunded:   { label: 'Remboursée',   color: 'bg-gray-100 text-gray-600' },
 };
 
 const STATUS_OPTIONS = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
 
 const PAYMENT_LABELS = {
-    cod:    '💵 À la livraison',
     stripe: '💳 Carte / Twint',
 };
 
@@ -43,6 +42,7 @@ const AdminCommandes = () => {
     const [detailLoading, setDetailLoading]       = useState(false);
     const [successMsg, setSuccessMsg]     = useState('');
     const [errorMsg, setErrorMsg]         = useState('');
+    const { currency } = useSiteSettings();
 
     // ── Fetch liste ───────────────────────────────────────
     useEffect(() => {
@@ -188,7 +188,7 @@ const AdminCommandes = () => {
                                         {new Date(commande.created_at).toLocaleDateString('fr-FR')}
                                     </td>
                                     <td className="px-5 py-4 text-right font-bold text-[#2d5a27]">
-                                        {formatPrice(parseFloat(commande.total_price))}
+                                        {formatPrice(parseFloat(commande.total_price), currency)}
                                     </td>
                                     <td className="px-5 py-4 text-center">
                                         <select
@@ -323,21 +323,21 @@ const AdminCommandes = () => {
                                 <div>
                                     <p className="text-xs text-black/40 uppercase font-semibold mb-1">Sous-total</p>
                                     <p className="font-bold text-[#2c2c2c]">
-                                        {formatPrice(parseFloat(orderDetail?.subtotal || selectedOrder.total_price))}
+                                        {formatPrice(parseFloat(orderDetail?.subtotal || selectedOrder.total_price), currency)}
                                     </p>
                                 </div>
                                 <div>
                                     <p className="text-xs text-black/40 uppercase font-semibold mb-1">Réduction</p>
                                     <p className="font-bold text-red-500">
                                         {orderDetail?.discount_amount > 0
-                                            ? `-${formatPrice(parseFloat(orderDetail.discount_amount))}`
+                                            ? `-${formatPrice(parseFloat(orderDetail.discount_amount), currency)}`
                                             : '—'}
                                     </p>
                                 </div>
                                 <div>
                                     <p className="text-xs text-black/40 uppercase font-semibold mb-1">Total</p>
                                     <p className="font-bold text-[#2d5a27] text-lg">
-                                        {formatPrice(parseFloat(selectedOrder.total_price))}
+                                        {formatPrice(parseFloat(selectedOrder.total_price), currency)}
                                     </p>
                                 </div>
                             </div>
@@ -397,11 +397,11 @@ const AdminCommandes = () => {
                                                     </div>
                                                     <div className="text-right flex-shrink-0">
                                                         <p className="font-bold text-[#2d5a27] text-sm">
-                                                            {formatPrice(parseFloat(item.price_at_order))}
+                                                            {formatPrice(parseFloat(item.price_at_order), currency)}
                                                         </p>
                                                         <p className="text-xs text-black/40">× {item.quantity}</p>
                                                         <p className="text-xs font-bold text-[#2c2c2c] mt-1">
-                                                            = {formatPrice(parseFloat(item.price_at_order) * item.quantity)}
+                                                            = {formatPrice(parseFloat(item.price_at_order) * item.quantity, currency)}
                                                         </p>
                                                     </div>
                                                 </div>

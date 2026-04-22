@@ -526,7 +526,7 @@ const AdminStats = () => {
                         </div>
                             <div className="flex gap-6 mt-2 justify-center">
                                 <span className="flex items-center gap-2 text-xs font-semibold text-black/50">
-                                    <span className="w-4 h-0.5 bg-emerald-500 rounded inline-block" /> CA (TND)
+                                    <span className="w-4 h-0.5 bg-emerald-500 rounded inline-block" /> CA 
                                 </span>
                                 <span className="flex items-center gap-2 text-xs font-semibold text-black/50">
                                     <span className="w-4 inline-block" style={{ borderTop: '2px dashed #8b5cf6' }} /> Commandes
