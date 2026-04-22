@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/authContext';
+import formatPrice from '../../utils/formatPrice';
+import { useSiteSettings } from '../../context/SiteSettingsContext';
 import { createOrder, createGuestOrder, validatePromo } from '../../services/orderService';
 import {
     FiUser, FiMail, FiPhone, FiMapPin, FiCreditCard,
@@ -85,6 +87,9 @@ const StripePaymentStep = ({ order, promoResult, onBack }) => {
     const navigate  = useNavigate();
     const { viderPanier } = useCart();
 
+    const { currency } = useSiteSettings();
+    const fmt = (n) => formatPrice(parseFloat(n), currency);
+
     const [loading, setLoading] = useState(false);
     const [error,   setError]   = useState('');
 
@@ -136,7 +141,7 @@ const StripePaymentStep = ({ order, promoResult, onBack }) => {
                 <div className="bg-white rounded-2xl p-5 mb-6 shadow-[0_4px_15px_rgba(0,0,0,0.06)]">
                     <div className="flex justify-between items-center text-sm text-black/60 mb-2">
                         <span>Sous-total</span>
-                        <span>{parseFloat(order.subtotal).toFixed(2)} DT</span>
+                        <span>{fmt(order.subtotal)}</span>
                     </div>
 
                     {order.discount_amount > 0 && (
@@ -152,7 +157,7 @@ const StripePaymentStep = ({ order, promoResult, onBack }) => {
                                 )}
                             </span>
                             <span className="text-[#2d5a27] font-bold">
-                                -{parseFloat(order.discount_amount).toFixed(2)} DT
+                                -{fmt(order.discount_amount)}
                             </span>
                         </div>
                     )}
@@ -165,7 +170,7 @@ const StripePaymentStep = ({ order, promoResult, onBack }) => {
                     <div className="flex justify-between items-center pt-3 border-t border-gray-100">
                         <span className="font-extrabold text-[#2c2c2c]">Total</span>
                         <span className="text-xl font-black" style={{ color: '#166534' }}>
-                            {parseFloat(order.total_price).toFixed(2)} DT
+                            {fmt(order.total_price)}
                         </span>
                     </div>
                 </div>
@@ -194,7 +199,7 @@ const StripePaymentStep = ({ order, promoResult, onBack }) => {
                         }}>
                         {loading
                             ? '⏳ Traitement en cours...'
-                            : `💳 Payer ${parseFloat(order.total_price).toFixed(2)} DT`}
+                            : `💳 Payer ${fmt(order.total_price)}`}
                     </button>
 
                     <p className="text-xs text-center text-black/30 mt-3 flex items-center justify-center gap-1">
@@ -222,6 +227,9 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
     const { panier, totalPrix, viderPanier } = useCart();
     const { user } = useAuth();
     const navigate  = useNavigate();
+
+    const { currency } = useSiteSettings();
+    const fmt = (n) => formatPrice(parseFloat(n), currency);
 
     const [loading,       setLoading]       = useState(false);
     const [error,         setError]         = useState('');
@@ -652,7 +660,7 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                                 <p className="text-xs text-black/40">× {item.quantity}</p>
                                             </div>
                                             <span className="text-xs font-bold shrink-0" style={{ color: '#166534' }}>
-                                                {(parseFloat(item.price) * item.quantity).toFixed(2)} DT
+                                                {fmt(parseFloat(item.price) * item.quantity)}
                                             </span>
                                         </div>
                                     ))}
@@ -663,7 +671,7 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                     <div className="flex justify-between text-sm text-black/60">
                                         <span>Sous-total</span>
                                         <span className={discountAmount > 0 ? 'line-through text-black/35' : ''}>
-                                            {totalPrix.toFixed(2)} DT
+                                            {fmt(totalPrix)}
                                         </span>
                                     </div>
 
@@ -681,13 +689,13 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                                     </span>
                                                 </span>
                                                 <span className="font-bold" style={{ color: '#166534' }}>
-                                                    -{discountAmount.toFixed(2)} DT
+                                                    -{fmt(discountAmount)}
                                                 </span>
                                             </div>
                                             <div className="flex justify-between text-sm text-black/60">
                                                 <span>Après réduction</span>
                                                 <span className="font-semibold text-[#2c2c2c]">
-                                                    {(totalPrix - discountAmount).toFixed(2)} DT
+                                                    {fmt(totalPrix - discountAmount)}
                                                 </span>
                                             </div>
                                         </>
@@ -703,10 +711,10 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                         <div className="text-right">
                                             {discountAmount > 0 && (
                                                 <p className="text-xs line-through text-black/30 font-normal">
-                                                    {totalPrix.toFixed(2)} DT
+                                                    {fmt(totalPrix)}
                                                 </p>
                                             )}
-                                            <span style={{ color: '#166534' }}>{finalTotal.toFixed(2)} DT</span>
+                                            <span style={{ color: '#166534' }}>{fmt(finalTotal)}</span>
                                         </div>
                                     </div>
 
@@ -714,7 +722,7 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                     {discountAmount > 0 && (
                                         <div className="flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold"
                                             style={{ background: '#dcfce7', color: '#166534' }}>
-                                            🎉 Vous économisez {discountAmount.toFixed(2)} DT sur cette commande !
+                                            🎉 Vous économisez {fmt(discountAmount)} sur cette commande !
                                         </div>
                                     )}
                                 </div>

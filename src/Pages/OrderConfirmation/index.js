@@ -2,11 +2,15 @@ import { useEffect, useState } from 'react';
 import { useLocation, useParams, useSearchParams, Link } from 'react-router-dom';
 import { FiPackage, FiMapPin, FiCreditCard, FiHome, FiLoader } from 'react-icons/fi';
 import { getSingleOrder } from '../../services/orderService';
+import { useSiteSettings } from '../../context/SiteSettingsContext';
+import formatPrice from '../../utils/formatPrice';
 
 const OrderConfirmation = () => {
     const { orderId }         = useParams();
     const { state }           = useLocation();
     const [searchParams]      = useSearchParams();
+    const { currency } = useSiteSettings();
+    const fmt = (n) => formatPrice(parseFloat(n), currency);
 
     // Détection d'un retour depuis Stripe (3D Secure redirect)
     const redirectStatus      = searchParams.get('redirect_status');    // 'succeeded' | 'failed'
@@ -169,7 +173,7 @@ const OrderConfirmation = () => {
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="text-xs text-black/50">Sous-total</span>
                                     <span className="text-xs line-through text-black/30">
-                                        {parseFloat(order.subtotal).toFixed(2)} DT
+                                        {fmt(order.subtotal)}
                                     </span>
                                 </div>
                             )}
@@ -179,14 +183,14 @@ const OrderConfirmation = () => {
                                         Réduction (code promo)
                                     </span>
                                     <span className="text-xs font-bold" style={{ color: '#166634' }}>
-                                        -{parseFloat(order.discount_amount).toFixed(2)} DT
+                                        -{fmt(order.discount_amount)}
                                     </span>
                                 </div>
                             )}
                             <div className="flex justify-between items-center">
                                 <span className="font-bold text-[#2c2c2c]">Total payé</span>
                                 <span className="text-xl font-black" style={{ color: '#166534' }}>
-                                    {parseFloat(order.total_price).toFixed(2)} DT
+                                    {fmt(order.total_price)}
                                 </span>
                             </div>
                         </div>

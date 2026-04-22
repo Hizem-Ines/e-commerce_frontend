@@ -4,12 +4,14 @@ import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { getOffresData } from '../../services/offresService';
 import formatPrice from '../../utils/formatPrice';
+import { useSiteSettings } from '../../context/SiteSettingsContext';
 import { FiHeart, FiTag, FiCopy, FiCheck } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
 
 const Offres = () => {
     const { ajouterAuPanier } = useCart();
     const { toggleFavori, estFavori } = useWishlist();
+    const { currency } = useSiteSettings();
 
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -81,11 +83,11 @@ const Offres = () => {
                 <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                     <div>
                         <span className="text-lg font-extrabold text-[#2d5a27]">
-                            {produit.price ? formatPrice(parseFloat(produit.price)) : 'Prix N/A'}
+                            {produit.price ? formatPrice(parseFloat(produit.price), currency) : 'Prix N/A'}
                         </span>
                         {produit.compare_price && parseFloat(produit.compare_price) > parseFloat(produit.price) && (
                             <span className="ml-2 text-xs text-black/30 line-through">
-                                {formatPrice(parseFloat(produit.compare_price))}
+                                {formatPrice(parseFloat(produit.compare_price), currency)}
                             </span>
                         )}
                     </div>
@@ -167,7 +169,7 @@ const Offres = () => {
                                     )}
                                     {promo.min_order_amount && (
                                         <p className="text-xs text-black/40">
-                                            Commande min. : {formatPrice(parseFloat(promo.min_order_amount))}
+                                            Commande min. : {formatPrice(parseFloat(promo.min_order_amount), currency)}
                                         </p>
                                     )}
                                     {promo.expires_at && (

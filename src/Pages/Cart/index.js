@@ -1,11 +1,15 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/authContext';
+import { useSiteSettings } from '../../context/SiteSettingsContext';
+import formatPrice from '../../utils/formatPrice';
 
 const Cart = () => {
     const { panier, retirerDuPanier, changerQuantite, viderPanier, totalArticles, totalPrix } = useCart();
     const { user } = useAuth();
     const navigate = useNavigate();
+    const { currency } = useSiteSettings();
+    const fmt = (n) => formatPrice(parseFloat(n), currency);
 
     if (panier.length === 0) {
         return (
@@ -86,7 +90,7 @@ const Cart = () => {
                                 {/* PRIX + SUPPRIMER */}
                                 <div className="flex flex-col items-end gap-3 shrink-0">
                                     <span className="text-xl font-extrabold" style={{ color: '#166534' }}>
-                                        {(parseFloat(item.price) * item.quantity).toFixed(2)} DT
+                                        {fmt(parseFloat(item.price) * item.quantity)}
                                     </span>
                                     <button
                                         onClick={() => retirerDuPanier(item.variant_id)}
@@ -114,7 +118,7 @@ const Cart = () => {
                             <div className="space-y-3 mb-6">
                                 <div className="flex justify-between text-sm text-black/60">
                                     <span>Sous-total ({totalArticles} articles)</span>
-                                    <span>{totalPrix.toFixed(2)} DT</span>
+                                    <span>{fmt(totalPrix)}</span>
                                 </div>
                                 <div className="flex justify-between text-sm text-black/60">
                                     <span>Livraison</span>
@@ -122,7 +126,7 @@ const Cart = () => {
                                 </div>
                                 <div className="border-t border-gray-100 pt-3 flex justify-between font-extrabold text-lg text-[#2c2c2c]">
                                     <span>Total</span>
-                                    <span style={{ color: '#166534' }}>{totalPrix.toFixed(2)} DT</span>
+                                    <span style={{ color: '#166534' }}>{fmt(totalPrix)}</span>
                                 </div>
                             </div>
 

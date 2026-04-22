@@ -11,7 +11,7 @@ import { useLocation } from 'react-router-dom';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 
 const Products = () => {
-    const { showChf } = useSiteSettings();
+    const { currency } = useSiteSettings();
     const navigate = useNavigate();
     const location = useLocation();
     const { toggleFavori, estFavori } = useWishlist();
@@ -353,7 +353,7 @@ const Products = () => {
                                                     {/* ✅ Fixed: uses min_price */}
                                                     <span className="text-lg font-extrabold text-[#2d5a27]">
                                                         {produit.min_price
-                                                            ? formatPrice(parseFloat(produit.min_price), showChf)
+                                                            ? formatPrice(parseFloat(produit.min_price), currency)
                                                             : 'Prix N/A'}
                                                     </span>
                                                     <button

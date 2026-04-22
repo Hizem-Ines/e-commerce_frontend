@@ -2,12 +2,14 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../../../context/CartContext';
 import { useWishlist } from '../../../context/WishlistContext';
 import formatPrice from '../../../utils/formatPrice';
+import { useSiteSettings } from '../../../context/SiteSettingsContext';
 import { FiHeart } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
 
 const NewProducts = ({ produits, loading }) => {
     const { ajouterAuPanier } = useCart();
     const { toggleFavori, estFavori } = useWishlist();
+    const { currency } = useSiteSettings();
 
     return (
         <section className="bg-[#f9f5f0] py-16">
@@ -100,11 +102,11 @@ const NewProducts = ({ produits, loading }) => {
                                     <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                                         <div>
                                             <span className="text-xl font-extrabold text-[#2d5a27]">
-                                                {produit.price ? formatPrice(parseFloat(produit.price)) : 'Prix N/A'}
+                                                {produit.price ? formatPrice(parseFloat(produit.price), currency) : 'Prix N/A'}
                                             </span>
                                             {produit.compare_price && parseFloat(produit.compare_price) > parseFloat(produit.price) && (
                                                 <span className="ml-2 text-xs text-black/30 line-through">
-                                                    {formatPrice(parseFloat(produit.compare_price))}
+                                                    {formatPrice(parseFloat(produit.compare_price), currency)}
                                                 </span>
                                             )}
                                         </div>
