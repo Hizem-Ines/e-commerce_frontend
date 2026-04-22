@@ -2,6 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import { FiX, FiTrash2, FiMinus, FiPlus } from 'react-icons/fi';
 import { BsFillBasket3Fill, BsBoxSeam } from 'react-icons/bs';
 import { useCart } from '../../../context/CartContext';
+import { useSiteSettings } from '../../../context/SiteSettingsContext';
+import formatPrice from '../../../utils/formatPrice';
 
 export default function CartSidebar() {
     const {
@@ -16,6 +18,8 @@ export default function CartSidebar() {
         changerQuantite,
         viderPanier,
     } = useCart();
+    const { currency } = useSiteSettings();
+    const fmt = (n) => formatPrice(parseFloat(n), currency);
 
     const navigate = useNavigate();
 
@@ -114,7 +118,7 @@ export default function CartSidebar() {
                                         </p>
                                     )}
                                     <p className="text-sm font-bold text-amber-600 mt-1">
-                                        {(parseFloat(item.price) * item.quantity).toFixed(2)} TND
+                                        {fmt(parseFloat(item.price) * item.quantity)}
                                     </p>
 
                                     {/* Quantité */}
@@ -156,7 +160,7 @@ export default function CartSidebar() {
                         <div className="flex items-center justify-between">
                             <span className="text-sm text-stone-500">Sous-total</span>
                             <span className="text-base font-bold text-stone-800">
-                                {totalPrix.toFixed(2)} TND
+                                {fmt(totalPrix)}
                             </span>
                         </div>
                         <button

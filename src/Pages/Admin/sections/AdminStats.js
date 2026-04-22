@@ -7,6 +7,7 @@ import {
     FiAward, FiBarChart2, FiPieChart, FiRefreshCw,
 } from 'react-icons/fi';
 import formatPrice from '../../../utils/formatPrice';
+import { useSiteSettings } from '../../../context/SiteSettingsContext';
 import {
     LineChart, Line, BarChart, Bar, AreaChart, Area,
     XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -78,12 +79,12 @@ const initials = (name) => {
 
 // ─── Tooltips custom ──────────────────────────────────────────────────────────
 
-const RevenueTooltip = ({ active, payload, label }) => {
+const RevenueTooltip = ({ active, payload, label, currency }) => {
     if (!active || !payload?.length) return null;
     return (
         <div className="bg-white border border-gray-100 rounded-xl shadow-lg p-3 text-xs">
             <p className="font-bold text-black/40 mb-1">{label}</p>
-            <p className="font-black text-[#2d5a27]">{formatPrice(payload[0]?.value || 0)}</p>
+            <p className="font-black text-[#2d5a27]">{formatPrice(payload[0]?.value || 0, currency)}</p>
             {payload[1] && (
                 <p className="text-purple-500 font-semibold mt-0.5">{payload[1].value} commandes</p>
             )}
@@ -145,6 +146,7 @@ const AdminStats = () => {
     const [period,       setPeriod]      = useState('30days');
     const [customMonth,  setCustomMonth] = useState(new Date().getMonth() + 1);
     const [customYear,   setCustomYear]  = useState(currentYear);
+    const { currency } = useSiteSettings();
 
     const fetchStats = () => {
         setLoading(true);
@@ -403,7 +405,7 @@ const AdminStats = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <KpiCard
                             label="Chiffre d'affaires"
-                            value={formatPrice(data?.kpis?.revenue?.current || 0)}
+                            value={formatPrice(data?.kpis?.revenue?.current || 0, currency)}
                             icon={<FiDollarSign size={20} />}
                             color="bg-orange-50 text-orange-600"
                             growth={data?.kpis?.revenue?.growth}
@@ -507,7 +509,7 @@ const AdminStats = () => {
                                         axisLine={false} tickLine={false}
                                         width={28}
                                     />
-                                    <Tooltip content={<RevenueTooltip />} />
+                                    <Tooltip content={<RevenueTooltip currency={currency} />} />
                                     <Area
                                         yAxisId="rev" type="monotone" dataKey="revenue"
                                         stroke="#10b981" strokeWidth={2.5}
@@ -524,7 +526,7 @@ const AdminStats = () => {
                         </div>
                             <div className="flex gap-6 mt-2 justify-center">
                                 <span className="flex items-center gap-2 text-xs font-semibold text-black/50">
-                                    <span className="w-4 h-0.5 bg-emerald-500 rounded inline-block" /> CA (TND)
+                                    <span className="w-4 h-0.5 bg-emerald-500 rounded inline-block" /> CA 
                                 </span>
                                 <span className="flex items-center gap-2 text-xs font-semibold text-black/50">
                                     <span className="w-4 inline-block" style={{ borderTop: '2px dashed #8b5cf6' }} /> Commandes
@@ -550,7 +552,7 @@ const AdminStats = () => {
                                     <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 600 }} axisLine={false} tickLine={false} />
                                     <YAxis yAxisId="rev" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => `${(v / 1000).toFixed(0)}k`} width={38} />
                                     <YAxis yAxisId="ord" orientation="right" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={28} />
-                                    <Tooltip content={<RevenueTooltip />} />
+                                    <Tooltip content={<RevenueTooltip currency={currency} />} />
                                     <Line yAxisId="rev" type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={3} dot={{ fill: '#10b981', r: 5, strokeWidth: 0 }} activeDot={{ r: 7, strokeWidth: 0 }} />
                                     <Line yAxisId="ord" type="monotone" dataKey="orders"  stroke="#8b5cf6" strokeWidth={2} strokeDasharray="5 3" dot={{ fill: '#8b5cf6', r: 4, strokeWidth: 0 }} activeDot={{ r: 6, strokeWidth: 0 }} />
                                 </LineChart>
@@ -619,7 +621,7 @@ const AdminStats = () => {
                                                 ))}
                                             </Pie>
                                             <Tooltip
-                                                formatter={(v, n) => [formatPrice(v), n]}
+                                                formatter={(v, n) => [formatPrice(v, currency), n]}
                                                 contentStyle={{ borderRadius: 12, border: '1px solid #f0f0f0', fontSize: 12 }}
                                             />
                                         </PieChart>
@@ -662,7 +664,7 @@ const AdminStats = () => {
                                         <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 600 }} axisLine={false} tickLine={false} />
                                         <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                                         <Tooltip
-                                            formatter={(v, n) => [n === 'qty' ? v + ' unités' : formatPrice(v), n === 'qty' ? 'Quantité' : 'Revenus']}
+                                            formatter={(v, n) => [n === 'qty' ? v + ' unités' : formatPrice(v, currency), n === 'qty' ? 'Quantité' : 'Revenus']}
                                             contentStyle={{ borderRadius: 12, border: '1px solid #f0f0f0', fontSize: 12 }}
                                         />
                                         <Bar dataKey="qty" fill="#10b981" radius={[6, 6, 0, 0]} maxBarSize={44} />
@@ -692,7 +694,7 @@ const AdminStats = () => {
                                         <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 600 }} axisLine={false} tickLine={false} />
                                         <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => `${(v / 1000).toFixed(0)}k`} width={36} />
                                         <Tooltip
-                                            formatter={v => [formatPrice(v), 'Revenus']}
+                                            formatter={v => [formatPrice(v, currency), 'Revenus']}
                                             contentStyle={{ borderRadius: 12, border: '1px solid #f0f0f0', fontSize: 12 }}
                                         />
                                         <Bar dataKey="revenue" radius={[6, 6, 0, 0]} maxBarSize={44}>
@@ -815,7 +817,7 @@ const AdminStats = () => {
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-sm font-bold text-[#2d5a27]">{formatPrice(parseFloat(order.total_price))}</p>
+                                            <p className="text-sm font-bold text-[#2d5a27]">{formatPrice(parseFloat(order.total_price), currency)}</p>
                                             <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${STATUS_LABELS[order.status]?.color || 'bg-gray-100 text-gray-600'}`}>
                                                 {STATUS_LABELS[order.status]?.label || order.status}
                                             </span>
@@ -853,7 +855,7 @@ const AdminStats = () => {
                                         </div>
                                         {/* Stats */}
                                         <div className="text-right shrink-0">
-                                            <p className="text-sm font-black text-[#2d5a27]">{formatPrice(parseFloat(c.total_spent))}</p>
+                                            <p className="text-sm font-black text-[#2d5a27]">{formatPrice(parseFloat(c.total_spent), currency)}</p>
                                             <p className="text-xs text-black/30">{c.total_orders} commande{c.total_orders > 1 ? 's' : ''}</p>
                                         </div>
                                     </div>

@@ -4,6 +4,8 @@ import { updateProfile, updatePassword } from '../../services/authService';
 import { getMyOrders } from '../../services/orderService';
 import { FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiSave, FiShoppingBag, FiHeart, FiPackage, FiChevronDown, FiChevronUp, FiExternalLink, FiAlertCircle } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
+import { useSiteSettings } from '../../context/SiteSettingsContext';
+import formatPrice from '../../utils/formatPrice';
 
 // ── Helpers ──────────────────────────────────────────────
 const STATUS_LABELS = {
@@ -18,6 +20,7 @@ const STATUS_LABELS = {
 
 const Profile = () => {
     const { user } = useAuth();
+    const { currency } = useSiteSettings();
 
     const [activeTab, setActiveTab] = useState('profil');
     const [showPassword, setShowPassword] = useState(false);
@@ -415,7 +418,7 @@ const Profile = () => {
 
                                             <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 shrink-0">
                                                 <span className="text-lg font-black" style={{ color: '#166534' }}>
-                                                    {parseFloat(order.total_price).toFixed(2)} DT
+                                                    {formatPrice(parseFloat(order.total_price), currency)}
                                                 </span>
                                                 <div className="flex items-center gap-2">
                                                     <Link to={`/commandes/${order.id}`}
@@ -458,7 +461,7 @@ const Profile = () => {
                                                                     <p className="text-xs text-black/40">Qté : {item.quantity}</p>
                                                                 </div>
                                                                 <span className="font-black text-sm shrink-0" style={{ color: '#166534' }}>
-                                                                    {(parseFloat(item.unit_price) * item.quantity).toFixed(2)} DT
+                                                                    {formatPrice(parseFloat(item.unit_price) * item.quantity, currency)}
                                                                 </span>
                                                             </div>
                                                         ))}

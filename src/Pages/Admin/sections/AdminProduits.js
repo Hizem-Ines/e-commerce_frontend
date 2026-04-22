@@ -754,7 +754,8 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
 
 // ─── Main AdminProduits ───────────────────────────────────────────────────────
 const AdminProduits = () => {
-    const { showChf, toggleChf } = useSiteSettings();
+    const { currency, updateCurrency } = useSiteSettings();
+    const [currencyInput, setCurrencyInput] = useState(currency);
 
     const [produits, setProduits]               = useState([]);
     const [loading, setLoading]                 = useState(true);
@@ -829,18 +830,23 @@ const AdminProduits = () => {
                 <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Produits</h2>
 
                 <div className="flex items-center gap-3 flex-wrap">
-                    {/* ── CHF toggle ── */}
-                    <label className="flex items-center gap-2.5 bg-white border-2 border-gray-200 hover:border-[#4a8c42] transition rounded-xl px-4 py-2.5 cursor-pointer select-none">
-                        <div
-                            onClick={() => toggleChf(!showChf)}
-                            className={`w-9 h-5 rounded-full transition-colors duration-200 relative shrink-0 ${showChf ? 'bg-[#4a8c42]' : 'bg-gray-300'}`}
-                        >
-                            <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200 ${showChf ? 'left-4' : 'left-0.5'}`}/>
-                        </div>
-                        <span className="text-xs font-bold text-black/60">
-                            Afficher prix en <span className={showChf ? 'text-[#2d5a27]' : 'text-black/30'}>CHF</span>
+                    {/* ── Currency ── */}
+                    <div className="flex items-center gap-2 bg-white border-2 border-gray-200 hover:border-[#4a8c42] transition rounded-xl px-3 py-2">
+                        <span className="text-xs font-bold text-black/40 whitespace-nowrap hidden sm:block">
+                            Devise :
                         </span>
-                    </label>
+                        <input
+                            type="text"
+                            value={currencyInput}
+                            onChange={e => setCurrencyInput(e.target.value)}
+                            onBlur={() => updateCurrency(currencyInput)}
+                            onKeyDown={e => e.key === 'Enter' && updateCurrency(currencyInput)}
+                            placeholder="CHF"
+                            className="w-14 text-center text-sm font-black text-[#2d5a27] outline-none bg-transparent placeholder-black/25"
+                            maxLength={6}
+                        />
+                        <span className="text-xs text-black/25 hidden sm:block">↵</span>
+                    </div>
 
                     <button
                         onClick={openCreate}
@@ -913,7 +919,7 @@ const AdminProduits = () => {
                                     <td className="px-5 py-4 text-black/60">{produit.category_name || '—'}</td>
                                     <td className="px-5 py-4 text-black/60">{produit.supplier_name || '—'}</td>
                                     <td className="px-5 py-4 text-right font-bold text-[#2d5a27]">
-                                        {produit.min_price ? formatPrice(parseFloat(produit.min_price), showChf) : '—'}
+                                        {produit.min_price ? formatPrice(parseFloat(produit.min_price), currency) : '—'}
                                     </td>
                                     <td className="px-5 py-4 text-center">
                                         <span className={`text-xs font-bold px-2 py-1 rounded-full ${produit.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>

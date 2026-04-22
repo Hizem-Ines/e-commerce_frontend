@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getSingleOrder } from '../../services/orderService';
 import { FiArrowLeft, FiPackage, FiMapPin, FiCreditCard, FiTruck } from 'react-icons/fi';
+import { useSiteSettings } from '../../context/SiteSettingsContext';
+import formatPrice from '../../utils/formatPrice';
 
 const STATUS_LABELS = {
     pending:   { label: 'En attente',  color: '#f59e0b', bg: '#fef3c7' },
@@ -24,6 +26,9 @@ const OrderDetail = () => {
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    const { currency } = useSiteSettings();
+    const fmt = (n) => formatPrice(parseFloat(n), currency);
 
     useEffect(() => {
         getSingleOrder(orderId)
@@ -190,7 +195,7 @@ const OrderDetail = () => {
                                             <p className="text-xs text-black/40 mt-0.5">Quantité : {item.quantity}</p>
                                         </div>
                                         <span className="font-bold text-sm shrink-0" style={{ color: '#166534' }}>
-                                            {(parseFloat(item.price_at_order) * item.quantity).toFixed(2)} DT
+                                            {fmt(parseFloat(item.price_at_order) * item.quantity)}
                                         </span>
                                     </div>
                                 );
@@ -206,12 +211,12 @@ const OrderDetail = () => {
                         <div className="space-y-2 text-sm">
                             <div className="flex justify-between text-black/60">
                                 <span>Sous-total</span>
-                                <span>{(parseFloat(order.total_price) + parseFloat(order.discount_amount || 0)).toFixed(2)} DT</span>
+                                <span>{fmt(parseFloat(order.total_price) + parseFloat(order.discount_amount || 0))}</span>
                             </div>
                             {parseFloat(order.discount_amount) > 0 && (
                                 <div className="flex justify-between text-[#2d5a27] font-semibold">
                                     <span>Réduction {order.promo_code && `(${order.promo_code})`}</span>
-                                    <span>- {parseFloat(order.discount_amount).toFixed(2)} DT</span>
+                                    <span>- {fmt(order.discount_amount)}</span>
                                 </div>
                             )}
                             <div className="flex justify-between text-black/60">
@@ -220,7 +225,7 @@ const OrderDetail = () => {
                             </div>
                             <div className="flex justify-between font-black text-lg text-[#2c2c2c] pt-3 border-t border-gray-100">
                                 <span>Total</span>
-                                <span style={{ color: '#166534' }}>{parseFloat(order.total_price).toFixed(2)} DT</span>
+                                <span style={{ color: '#166534' }}>{formatPrice(parseFloat(order.total_price), currency)}</span>
                             </div>
                             
                         </div>

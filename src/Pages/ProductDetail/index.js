@@ -8,6 +8,7 @@ import { FiHeart } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
 import { useAuth } from '../../context/authContext';
 import { createReview } from '../../services/reviewService';
+import { useSiteSettings } from '../../context/SiteSettingsContext';
 
 const FormAvis = ({ productId, onSuccess }) => {
     const [rating, setRating] = useState(0);
@@ -116,6 +117,8 @@ const ProductDetail = () => {
     const [varianteActive, setVarianteActive] = useState(null);
     const [imageActive, setImageActive]       = useState(0);
     const [ongletActif, setOngletActif]       = useState('description');
+    const { currency } = useSiteSettings();
+    const fmt = (n) => formatPrice(parseFloat(n), currency);
 
     
     // ── Fetch product ──────────────────────────────────────
@@ -336,11 +339,11 @@ const ProductDetail = () => {
                             {/* PRIX */}
                             <div className="flex items-baseline gap-3 mb-4">
                                 <div className="text-4xl font-black text-[#2d5a27]">
-                                    {formatPrice(parseFloat(prix))}
+                                    {fmt(prix)}
                                 </div>
                                 {comparePrice && parseFloat(comparePrice) > parseFloat(prix) && (
                                     <div className="text-lg text-black/30 line-through">
-                                        {formatPrice(parseFloat(comparePrice))}
+                                        {fmt(comparePrice)}
                                     </div>
                                 )}
                             </div>
@@ -471,19 +474,10 @@ const ProductDetail = () => {
                                     </div>
                                 </div>
 
-                                {/* Version arabe */}
-                                {produit.usage_ar && (
-                                    <div className="flex gap-4 items-start bg-[#f9f5f0] rounded-xl p-5" dir="rtl">
-                                        <span className="text-xl shrink-0">📋</span>
-                                        <div>
-                                            <p className="font-bold text-[#2c2c2c] text-sm mb-2">طريقة الاستخدام</p>
-                                            <p className="text-sm text-black/60 leading-relaxed whitespace-pre-line">{produit.usage_ar}</p>
-                                        </div>
-                                    </div>
-                                )}
+                        
 
                                 {/* Précautions — depuis precautions_fr */}
-                                {(produit.precautions_fr || produit.precautions_ar) && (
+                                {(produit.precautions_fr) && (
                                     <div className="border-t border-gray-100 pt-5">
                                         <p className="text-sm font-bold text-[#2c2c2c] mb-3">⚠️ Précautions</p>
                                         {produit.precautions_fr && (
@@ -491,11 +485,7 @@ const ProductDetail = () => {
                                                 {produit.precautions_fr}
                                             </p>
                                         )}
-                                        {produit.precautions_ar && (
-                                            <p className="text-sm text-black/50 leading-relaxed whitespace-pre-line mt-3 text-right" dir="rtl">
-                                                {produit.precautions_ar}
-                                            </p>
-                                        )}
+                                        
                                     </div>
                                 )}
 
@@ -507,17 +497,13 @@ const ProductDetail = () => {
                             <div className="space-y-6">
 
                                 {/* Ingrédients — depuis ingredients_fr */}
-                                {(produit.ingredients_fr || produit.ingredients_ar) && (
+                                {produit.ingredients_fr && (
                                     <div>
                                         <h3 className="text-base font-bold text-[#2c2c2c] mb-3">Ingrédients</h3>
                                         {produit.ingredients_fr && (
                                             <p className="text-sm text-black/70 leading-relaxed">{produit.ingredients_fr}</p>
                                         )}
-                                        {produit.ingredients_ar && (
-                                            <p className="text-sm text-black/50 leading-relaxed mt-3 text-right" dir="rtl">
-                                                {produit.ingredients_ar}
-                                            </p>
-                                        )}
+                                    
                                     </div>
                                 )}
 
@@ -545,10 +531,10 @@ const ProductDetail = () => {
                                                                 {v.attributes?.map(a => `${a.value_fr}${a.unit ? ' ' + a.unit : ''}`).join(' · ') || '—'}
                                                             </td>
                                                             <td className="px-4 py-3 text-black/40 font-mono text-xs">{v.sku || '—'}</td>
-                                                            <td className="px-4 py-3 text-right font-bold text-[#2d5a27]">{formatPrice(parseFloat(v.price))}</td>
+                                                            <td className="px-4 py-3 text-right font-bold text-[#2d5a27]">{fmt(v.price)}</td>
                                                             {produit.variants.some(vv => vv.compare_price) && (
                                                                 <td className="px-4 py-3 text-right text-black/30 line-through text-xs">
-                                                                    {v.compare_price ? formatPrice(parseFloat(v.compare_price)) : '—'}
+                                                                    {v.compare_price ? fmt(v.compare_price) : '—'}
                                                                 </td>
                                                             )}
                                                             <td className="px-4 py-3 text-right text-black/40 text-xs">
@@ -562,7 +548,7 @@ const ProductDetail = () => {
                                     </div>
                                 )}
 
-                                {!produit.ingredients_fr && !produit.ingredients_ar && produit.variants?.length === 0 && (
+                                {!produit.ingredients_fr  && produit.variants?.length === 0 && (
                                     <p className="text-black/40 text-sm">Aucune information de composition disponible.</p>
                                 )}
 
@@ -705,7 +691,7 @@ const ProductDetail = () => {
                                     <div className="p-3">
                                         <h3 className="text-xs font-bold text-[#2c2c2c] mb-2 line-clamp-2">{p.name_fr}</h3>
                                         <span className="text-sm font-extrabold text-[#2d5a27]">
-                                            {p.min_price ? formatPrice(parseFloat(p.min_price)) : 'Prix N/A'}
+                                            {p.min_price ? fmt(p.min_price) : 'Prix N/A'}
                                         </span>
                                     </div>
                                 </Link>

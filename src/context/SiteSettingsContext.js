@@ -3,17 +3,19 @@ import { createContext, useContext, useState } from 'react';
 const SiteSettingsContext = createContext();
 
 export const SiteSettingsProvider = ({ children }) => {
-    const [showChf, setShowChf] = useState(
-        () => localStorage.getItem('goffa_show_chf') === 'true'
+    const [currency, setCurrency] = useState(
+        () => localStorage.getItem('goffa_currency') || 'CHF'
     );
 
-    const toggleChf = (val) => {
-        setShowChf(val);
-        localStorage.setItem('goffa_show_chf', String(val));
+    const updateCurrency = (val) => {
+        const clean = val.trim();
+        if (!clean) return;
+        setCurrency(clean);
+        localStorage.setItem('goffa_currency', clean);
     };
 
     return (
-        <SiteSettingsContext.Provider value={{ showChf, toggleChf }}>
+        <SiteSettingsContext.Provider value={{ currency, updateCurrency }}>
             {children}
         </SiteSettingsContext.Provider>
     );
