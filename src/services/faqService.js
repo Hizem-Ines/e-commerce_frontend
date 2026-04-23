@@ -48,19 +48,30 @@ export const adminDeleteFaq = async (id) => {
 
 // ── ADMIN — Questions utilisateurs ───────────────────────
 
-export const adminGetQuestions = async ({ status, page = 1 } = {}) => {
+export const adminGetQuestions = async ({ status, matched, page = 1 } = {}) => {
   const { data } = await api.get("/faqs/admin/questions", {
-    params: { status, page },
+    params: { status, matched, page },
   });
   return data;
 };
 
-export const adminAnswerQuestion = async (id, answer) => {
-  const { data } = await api.patch(`/faqs/admin/questions/${id}/answer`, { answer });
+export const adminAnswerQuestion = async (id, body) => {
+  // body: { answer, create_faq?, faq_category? }
+  const { data } = await api.patch(`/faqs/admin/questions/${id}/answer`, body);
   return data;
 };
 
 export const adminDeleteQuestion = async (id) => {
   const { data } = await api.delete(`/faqs/admin/questions/${id}`);
+  return data;
+};
+
+export const adminLinkQuestionToFaq = async (id, faqId) => {
+  const { data } = await api.patch(`/faqs/admin/questions/${id}/link`, { faq_id: faqId });
+  return data;
+};
+
+export const adminFaqStats = async () => {
+  const { data } = await api.get("/faqs/admin/stats");
   return data;
 };

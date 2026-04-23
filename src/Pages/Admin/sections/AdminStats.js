@@ -4,7 +4,7 @@ import {
     FiDownload, FiUsers, FiPackage, FiShoppingBag, FiDollarSign,
     FiTrendingUp, FiClock, FiCalendar, FiChevronDown, FiAlertTriangle,
     FiAlertCircle, FiCheckCircle, FiMessageSquare, FiActivity,
-    FiAward, FiBarChart2, FiPieChart, FiRefreshCw,
+    FiAward, FiBarChart2, FiPieChart, FiRefreshCw,FiZap,
 } from 'react-icons/fi';
 import formatPrice from '../../../utils/formatPrice';
 import { useSiteSettings } from '../../../context/SiteSettingsContext';
@@ -14,6 +14,7 @@ import {
     PieChart, Pie, Cell, Legend, RadarChart, Radar, PolarGrid,
     PolarAngleAxis, PolarRadiusAxis,
 } from 'recharts';
+import { adminFaqStats } from '../../../services/faqService';
 
 // ─── Constantes ────────────────────────────────────────────────────────────────
 
@@ -147,15 +148,20 @@ const AdminStats = () => {
     const [customMonth,  setCustomMonth] = useState(new Date().getMonth() + 1);
     const [customYear,   setCustomYear]  = useState(currentYear);
     const { currency } = useSiteSettings();
+    const [faqStats, setFaqStats] = useState(null);
 
     const fetchStats = () => {
         setLoading(true);
         const params = period === 'custom'
             ? { month: customMonth, year: customYear }
             : { period };
-        getStats(params)
-            .then(res => setData(res.data))
-            .catch(err => console.error(err))
+        Promise.all([
+            getStats(params),
+            adminFaqStats().catch(() => null),
+            ]).then(([statsRes, faqRes]) => {
+            setData(statsRes.data);
+            if (faqRes) setFaqStats(faqRes.stats);
+            }).catch(err => console.error(err))
             .finally(() => setLoading(false));
     };
 
@@ -468,6 +474,40 @@ const AdminStats = () => {
                             color="bg-sky-50 text-sky-600"
                         />
                     </div>
+                    
+
+                    {/* ════════════════════════════════════════════════════════
+                             FAQ — KPIs
+                    ════════════════════════════════════════════════════════ */}
+
+                    {faqStats && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <KpiCard
+                            label="Questions reçues"
+                            value={faqStats.questions.total ?? '—'}
+                            icon={<FiMessageSquare size={20} />}
+                            color="bg-teal-50 text-teal-600"
+                            />
+                            <KpiCard
+                            label="En attente de réponse"
+                            value={faqStats.questions.pending ?? '—'}
+                            icon={<FiClock size={20} />}
+                            color="bg-yellow-50 text-yellow-600"
+                            />
+                            <KpiCard
+                            label="Auto-répondues"
+                            value={faqStats.questions.auto_answered ?? '—'}
+                            icon={<FiZap size={20} />}
+                            color="bg-purple-50 text-purple-600"
+                            />
+                            <KpiCard
+                            label="Répondues manuellement"
+                            value={faqStats.questions.manually_answered ?? '—'}
+                            icon={<FiCheckCircle size={20} />}
+                            color="bg-emerald-50 text-emerald-600"
+                            />
+                        </div>
+                        )}
 
                     {/* ════════════════════════════════════════════════════════
                         GRAPHIQUE CA JOURNALIER (Area Chart)
