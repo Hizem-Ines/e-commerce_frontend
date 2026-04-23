@@ -107,22 +107,18 @@ const TrendingProducts = ({ produits, loading }) => {
                                     <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                                         <div>
                                             <span className="text-xl font-extrabold text-[#c8872a]">
-                                                {produit.price ? formatPrice(parseFloat(produit.price), currency) : 'Prix N/A'}
+                                                {produit.min_price ? formatPrice(parseFloat(produit.min_price), currency) : 'Prix N/A'}
                                             </span>
-                                            {produit.compare_price && parseFloat(produit.compare_price) > parseFloat(produit.price) && (
-                                                <span className="ml-2 text-xs text-black/30 line-through">
-                                                    {formatPrice(parseFloat(produit.compare_price), currency)}
-                                                </span>
-                                            )}
+                                            
                                         </div>
                                         <button
                                             onClick={() => ajouterAuPanier({
-                                                variant_id:   produit.variant_id,  
+                                                variant_id:   produit.cheapest_variant_id,
                                                 product_name: produit.name_fr,
-                                                price:        produit.price,
+                                                price:        produit.min_price,
                                                 image:        produit.images?.[0]?.url || null,
                                                 attributes:   [],
-                                                stock:        99,
+                                                stock:        produit.total_stock ?? 99,
                                             })}
                                             className="bg-[#c8872a] hover:bg-[#a86e1f] text-white text-sm font-bold px-5 py-2 rounded-xl transition-colors duration-300"
                                         >

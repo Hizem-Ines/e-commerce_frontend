@@ -1,13 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
-import axios from "axios";
+import api from "../../../services/api";
+import { useSiteSettings } from '../../../context/SiteSettingsContext';
+import formatPrice from '../../../utils/formatPrice';
 import {
   FiPlus, FiSearch, FiEdit, FiTrash2,
   FiTag, FiCheckCircle, FiClock, FiBarChart2, FiX
 } from "react-icons/fi";
 
-// ─── CONFIG ───────────────────────────────────────────────
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
-const api = axios.create({ baseURL: API_BASE, withCredentials: true });
 
 const EMPTY_FORM = {
   code: "", description_fr: "",
@@ -72,6 +71,7 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
   );
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState("");
+  const { currency } = useSiteSettings();
 
   const handle = (e) => {
     const { name, value, type, checked } = e.target;
@@ -168,12 +168,12 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
               <label className="block text-xs font-bold text-black/50 mb-1.5">Type de réduction *</label>
               <select name="discount_type" value={form.discount_type} onChange={handle} className={inputCls}>
                 <option value="percent">Pourcentage (%)</option>
-                <option value="fixed">Montant fixe (TND)</option>
+                <option value="fixed">Montant fixe {currency ? `(${currency})` : ''}</option>
               </select>
             </div>
             <div>
               <label className="block text-xs font-bold text-black/50 mb-1.5">
-                Valeur * {form.discount_type === "percent" ? "(1–100%)" : "(TND)"}
+                Valeur * {form.discount_type === "percent" ? "(1–100%)" : currency ? `(${currency})` : ''}
               </label>
               <input type="number" name="discount_value" value={form.discount_value} onChange={handle}
                 min="0" max={form.discount_type === "percent" ? 100 : undefined}
@@ -198,7 +198,7 @@ const PromotionModal = ({ mode, initial, onClose, onSaved }) => {
           {/* Min commande + Max utilisations */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-black/50 mb-1.5">Montant minimum (TND)</label>
+              <label className="block text-xs font-bold text-black/50 mb-1.5">Montant minimum {currency ? `(${currency})` : ''}</label>
               <input type="number" name="min_order_amount" value={form.min_order_amount} onChange={handle}
                 min="0" step="0.5" placeholder="Aucun minimum" className={inputCls} />
             </div>
@@ -283,6 +283,7 @@ const AdminPromotions = () => {
   const [search, setSearch]             = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [modal, setModal]               = useState(null);
+  const { currency } = useSiteSettings();
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -437,10 +438,10 @@ const AdminPromotions = () => {
                     <span className="font-bold text-[#2d5a27] text-sm">
                       {promo.discount_type === "percent"
                         ? `${promo.discount_value}%`
-                        : `${Number(promo.discount_value).toFixed(3)} TND`}
+                        : formatPrice(promo.discount_value, currency)}
                     </span>
                     {promo.min_order_amount && (
-                      <p className="text-xs text-black/40">min. {Number(promo.min_order_amount).toFixed(3)} TND</p>
+                      <p className="text-xs text-black/40">min. {formatPrice(promo.min_order_amount, currency)}</p>
                     )}
                   </td>
 
@@ -513,10 +514,10 @@ const AdminPromotions = () => {
 
       {/* Modals */}
       {modal?.type === "create" && (
-        <PromotionModal mode="create" onClose={() => setModal(null)} onSaved={onSaved} />
+        <PromotionModal mode="create" currency={currency} onClose={() => setModal(null)} onSaved={onSaved} />
       )}
       {modal?.type === "edit" && (
-        <PromotionModal mode="edit" initial={modal.data} onClose={() => setModal(null)} onSaved={onSaved} />
+        <PromotionModal mode="edit" initial={modal.data} currency={currency} onClose={() => setModal(null)} onSaved={onSaved} />
       )}
       {modal?.type === "delete" && (
         <DeleteModal promotion={modal.data} onClose={() => setModal(null)} onDeleted={onDeleted} />

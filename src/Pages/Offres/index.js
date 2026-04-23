@@ -83,22 +83,18 @@ const Offres = () => {
                 <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                     <div>
                         <span className="text-lg font-extrabold text-[#2d5a27]">
-                            {produit.price ? formatPrice(parseFloat(produit.price), currency) : 'Prix N/A'}
+                            {produit.min_price ? formatPrice(parseFloat(produit.min_price), currency) : 'Prix N/A'}
                         </span>
-                        {produit.compare_price && parseFloat(produit.compare_price) > parseFloat(produit.price) && (
-                            <span className="ml-2 text-xs text-black/30 line-through">
-                                {formatPrice(parseFloat(produit.compare_price), currency)}
-                            </span>
-                        )}
+                        
                     </div>
                     <button
                         onClick={() => ajouterAuPanier({
-                            variant_id:   produit.variant_id,  
+                            variant_id:   produit.cheapest_variant_id,
                             product_name: produit.name_fr,
-                            price:        produit.price,
+                            price:        produit.min_price,
                             image:        produit.images?.[0]?.url || null,
                             attributes:   [],
-                            stock:        99,
+                            stock:        produit.total_stock ?? 99,
                         })}
                         className="bg-[#2d5a27] hover:bg-[#4a8c42]  text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300"
                     >
@@ -205,7 +201,12 @@ const Offres = () => {
                                 <ProductCard
                                     key={p.id}
                                     produit={p}
-                                    badge={{ label: `⚡ -${p.discount_percent}%`, color: '#ef4444' }}
+                                    badge={{
+                                        label: p.discount_type === 'percent'
+                                            ? `⚡ -${parseFloat(p.discount_value)}%`
+                                            : `⚡ -${formatPrice(parseFloat(p.discount_value), currency)}`,
+                                        color: '#ef4444'
+                                    }}
                                 />
                             ))}
                         </div>

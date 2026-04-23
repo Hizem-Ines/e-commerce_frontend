@@ -157,7 +157,7 @@ const ProductDetail = () => {
         ajouterAuPanier({
             variant_id:   varianteActive.id,
             product_name: produit.name_fr,
-            price:        varianteActive.price,
+            price:        promoPrice ?? varianteActive.price,
             image:        produit.images?.[0]?.url || null,
             attributes:   varianteActive.attributes || [],
             stock:        varianteActive.stock,
@@ -188,8 +188,16 @@ const ProductDetail = () => {
     }
 
     const images       = produit.images || [];
-    const prix         = varianteActive?.price || produit.variants?.[0]?.price || 0;
-    const comparePrice = varianteActive?.compare_price;
+    const prix = varianteActive?.price || produit.variants?.[0]?.price || 0;
+
+    const getPromoPrice = (variant) => {
+        if (!variant?.promo_value) return null;
+        if (variant.promo_type === 'percent') {
+            return parseFloat(variant.price) * (1 - parseFloat(variant.promo_value) / 100);
+        }
+        return Math.max(0, parseFloat(variant.price) - parseFloat(variant.promo_value));
+    };
+    const promoPrice = getPromoPrice(varianteActive);
 
     return (
         <div className="bg-[#fdf6ec] min-h-screen py-12">
@@ -277,6 +285,11 @@ const ProductDetail = () => {
                                             📍 {produit.origin}
                                         </span>
                                     )}
+                                    {produit.is_new && (
+                                        <span className="bg-[#2d5a27] text-white text-xs font-bold px-3 py-1 rounded-full">
+                                            ✨ Nouveau
+                                        </span>
+                                    )}
                                 </div>
                                 <button
                                     onClick={() => toggleFavori(produit)}
@@ -337,14 +350,19 @@ const ProductDetail = () => {
                             )}
 
                             {/* PRIX */}
-                            <div className="flex items-baseline gap-3 mb-4">
+                            <div className="flex items-baseline gap-3 mb-4 flex-wrap">
                                 <div className="text-4xl font-black text-[#2d5a27]">
-                                    {fmt(prix)}
+                                    {fmt(promoPrice ?? prix)}
                                 </div>
-                                {comparePrice && parseFloat(comparePrice) > parseFloat(prix) && (
+                                {promoPrice && (
                                     <div className="text-lg text-black/30 line-through">
-                                        {fmt(comparePrice)}
+                                        {fmt(prix)}
                                     </div>
+                                )}
+                                {varianteActive?.promo_expires_at && (
+                                    <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded-full self-center">
+                                        Promo jusqu'au {new Date(varianteActive.promo_expires_at).toLocaleDateString('fr-FR')}
+                                    </span>
                                 )}
                             </div>
 
@@ -518,8 +536,8 @@ const ProductDetail = () => {
                                                         <th className="text-left px-4 py-3 font-bold text-[#2c2c2c]">Format</th>
                                                         <th className="text-left px-4 py-3 font-bold text-[#2c2c2c]">SKU</th>
                                                         <th className="text-right px-4 py-3 font-bold text-[#2c2c2c]">Prix</th>
-                                                        {produit.variants.some(v => v.compare_price) && (
-                                                            <th className="text-right px-4 py-3 font-bold text-[#2c2c2c]">Prix barré</th>
+                                                        {produit.variants.some(v => v.promo_value) && (
+                                                            <th className="text-right px-4 py-3 font-bold text-[#2c2c2c]">Promo</th>
                                                         )}
                                                         <th className="text-right px-4 py-3 font-bold text-[#2c2c2c]">Poids</th>
                                                     </tr>
@@ -532,9 +550,15 @@ const ProductDetail = () => {
                                                             </td>
                                                             <td className="px-4 py-3 text-black/40 font-mono text-xs">{v.sku || '—'}</td>
                                                             <td className="px-4 py-3 text-right font-bold text-[#2d5a27]">{fmt(v.price)}</td>
-                                                            {produit.variants.some(vv => vv.compare_price) && (
-                                                                <td className="px-4 py-3 text-right text-black/30 line-through text-xs">
-                                                                    {v.compare_price ? fmt(v.compare_price) : '—'}
+                                                            {produit.variants.some(vv => vv.promo_value) && (
+                                                                <td className="px-4 py-3 text-right text-xs">
+                                                                    {v.promo_value ? (
+                                                                        <span className="text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded-full">
+                                                                            -{v.promo_type === 'percent'
+                                                                                ? `${parseFloat(v.promo_value)}%`
+                                                                                : fmt(v.promo_value)}
+                                                                        </span>
+                                                                    ) : '—'}
                                                                 </td>
                                                             )}
                                                             <td className="px-4 py-3 text-right text-black/40 text-xs">

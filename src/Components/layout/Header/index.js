@@ -6,6 +6,7 @@ import { BsFillBasket3Fill } from "react-icons/bs";
 import { useCart } from '../../../context/CartContext';
 import { useWishlist } from '../../../context/WishlistContext';
 import formatPrice from '../../../utils/formatPrice';
+import { useSiteSettings } from '../../../context/SiteSettingsContext';
 import { useAuth } from '../../../context/authContext';
 import { getAllProducts } from '../../../services/productService';
 import logo from '../../../assets/images/goffa-logo.png';
@@ -25,6 +26,7 @@ const Header = () => {
     const { totalFavoris } = useWishlist();
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const { currency } = useSiteSettings();
 
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
@@ -158,7 +160,7 @@ const Header = () => {
                                         </div>
                                         <span className="text-sm font-extrabold text-[#2d5a27] shrink-0">
                                             {produit.min_price
-                                                ? `${parseFloat(produit.min_price).toFixed(2)} DT`
+                                                ? formatPrice(parseFloat(produit.min_price), currency)
                                                 : 'N/A'}
                                         </span>
                                     </button>
@@ -264,7 +266,7 @@ const Header = () => {
                             onClick={() => navigate('/panier')}
                         >
                             <span className="hidden sm:block text-white font-bold text-sm">
-                                {formatPrice(totalPrix)}
+                                {formatPrice(totalPrix, currency)}
                             </span>
                             
                             <div className="relative">
