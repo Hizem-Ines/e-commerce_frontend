@@ -4,14 +4,12 @@ const SiteSettingsContext = createContext();
 
 export const SiteSettingsProvider = ({ children }) => {
     const [currency, setCurrency] = useState(
-        () => localStorage.getItem('goffa_currency') || 'CHF'
+        () => localStorage.getItem('goffa_currency') || ''
     );
 
     const updateCurrency = (val) => {
-        const clean = val.trim();
-        if (!clean) return;
-        setCurrency(clean);
-        localStorage.setItem('goffa_currency', clean);
+        setCurrency(val);
+        localStorage.setItem('goffa_currency', val);
     };
 
     return (

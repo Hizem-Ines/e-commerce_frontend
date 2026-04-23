@@ -4,6 +4,7 @@ import { FiEdit, FiTrash2, FiPlus, FiSearch, FiX, FiUpload } from 'react-icons/f
 import formatPrice from '../../../utils/formatPrice';
 import { useSiteSettings } from '../../../context/SiteSettingsContext';
 import api from '../../../services/api';
+import { FiTag } from "react-icons/fi";
 
 const BLANK_FORM = {
     name_fr: '', description_fr: '', ethical_info_fr: '', origin: '',
@@ -14,7 +15,7 @@ const BLANK_FORM = {
 };
 
 const BLANK_VARIANT = {
-    price: '', compare_price: '', cost_price: '',
+    price: '', cost_price: '',
     stock: '0', sku: '', weight_grams: '',
     attributes: [{ type_fr: '', value_fr: '' }],
 };
@@ -32,135 +33,313 @@ const inputCls = "w-full bg-[#f9f5f0] border-2 border-transparent focus:border-[
 const textareaCls = inputCls + " resize-none";
 
 // ─── VariantEditRow — inchangé ────────────────────────────────────────────────
-const VariantEditRow = ({ variant, productId, onUpdated, onDeleted }) => {
-    const [editing, setEditing] = useState(false);
-    const [vals, setVals] = useState({
-        price:         variant.price         ?? '',
-        compare_price: variant.compare_price ?? '',
-        cost_price:    variant.cost_price    ?? '',
-        stock:         variant.stock         ?? 0,
-        sku:           variant.sku           ?? '',
-        weight_grams:  variant.weight_grams  ?? '',
-        is_active:     variant.is_active     ?? true,
-    });
-    const [saving, setSaving]   = useState(false);
-    const [deleting, setDeleting] = useState(false);
-    const [err, setErr]         = useState('');
+const VariantPromotions = ({ variantId, productId }) => {
+  const [promos, setPromos]       = useState([]);
+  const [loading, setLoading]     = useState(true);
+  const [showForm, setShowForm]   = useState(false);
+  const [saving, setSaving]       = useState(false);
+  const [err, setErr]             = useState('');
+  const [form, setForm] = useState({
+    discount_type: 'percent', discount_value: '',
+    starts_at: new Date().toISOString().slice(0, 10),
+    expires_at: '',
+  });
 
-    const set = (k, v) => setVals(p => ({ ...p, [k]: v }));
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await api.get(`/products/${productId}/variants/${variantId}/promotions`);
+      setPromos(res.data.promotions || []);
+    } catch { /* silent */ }
+    finally { setLoading(false); }
+  }, [productId, variantId]);
 
-    const save = async () => {
-        if (!vals.price || parseFloat(vals.price) < 0) { setErr('Prix invalide'); return; }
-        setSaving(true); setErr('');
-        try {
-            const fd = new FormData();
-            Object.entries(vals).forEach(([k, v]) => fd.append(k, String(v)));
-            const res = await api.put(`/products/${productId}/variants/${variant.id}`, fd, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
-            onUpdated(res.data.variant);
-            setEditing(false);
-        } catch (e) {
-            setErr(e.response?.data?.message || 'Erreur');
-        } finally {
-            setSaving(false);
-        }
-    };
+  useEffect(() => { load(); }, [load]);
 
-    const del = async () => {
-        if (!window.confirm('Supprimer cette variante ?')) return;
-        setDeleting(true);
-        try {
-            await api.delete(`/products/${productId}/variants/${variant.id}`);
-            onDeleted(variant.id);
-        } catch (e) {
-            setErr(e.response?.data?.message || 'Erreur suppression');
-            setDeleting(false);
-        }
-    };
+  const isActivePromo = (p) =>
+    p.is_active &&
+    new Date(p.starts_at) <= new Date() &&
+    new Date(p.expires_at) > new Date();
 
-    const attrLabel = variant.attributes?.length
-        ? variant.attributes.map(a => `${a.type_fr}: ${a.value_fr}`).join(' · ')
-        : 'Variante sans attribut';
+  const handleCreate = async () => {
+    if (!form.discount_value || !form.expires_at) {
+      setErr('Valeur et date d\'expiration requis.'); return;
+    }
+    setSaving(true); setErr('');
+    try {
+      await api.post(`/products/${productId}/variants/${variantId}/promotions`, form);
+      setShowForm(false);
+      setForm({ discount_type: 'percent', discount_value: '', starts_at: new Date().toISOString().slice(0,10), expires_at: '' });
+      load();
+    } catch (e) { setErr(e.response?.data?.message || 'Erreur'); }
+    finally { setSaving(false); }
+  };
 
-    return (
-        <div className="bg-[#f9f5f0] rounded-2xl p-4 space-y-3">
-            <div className="flex items-center justify-between">
-                <div>
-                    <p className="font-bold text-sm text-[#2c2c2c]">{attrLabel}</p>
-                    {!editing && (
-                        <p className="text-xs text-black/40 mt-0.5">
-                            Prix: <span className="font-bold text-[#2d5a27]">{formatPrice(parseFloat(variant.price))}</span>
-                            {' · '}Stock: <span className="font-bold">{variant.stock}</span>
-                            {variant.sku && ` · SKU: ${variant.sku}`}
-                            <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${vals.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-500'}`}>
-                                {vals.is_active ? 'Actif' : 'Inactif'}
-                            </span>
-                        </p>
-                    )}
-                </div>
-                <div className="flex gap-2">
-                    {!editing ? (
-                        <>
-                            <button onClick={() => setEditing(true)} className="p-2 hover:bg-blue-50 text-blue-500 rounded-xl transition text-xs font-bold flex items-center gap-1">
-                                <FiEdit size={13}/> Modifier
-                            </button>
-                            <button onClick={del} disabled={deleting} className="p-2 hover:bg-red-50 text-red-500 rounded-xl transition text-xs font-bold flex items-center gap-1">
-                                <FiTrash2 size={13}/> {deleting ? '...' : 'Supprimer'}
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <button onClick={save} disabled={saving} className="px-3 py-1.5 bg-[#2d5a27] hover:bg-[#4a8c42] text-white rounded-xl text-xs font-bold transition disabled:opacity-50">
-                                {saving ? '⏳' : '💾 Sauver'}
-                            </button>
-                            <button onClick={() => { setEditing(false); setErr(''); }} className="px-3 py-1.5 border border-gray-200 text-black/50 rounded-xl text-xs font-bold hover:bg-gray-50 transition">
-                                Annuler
-                            </button>
-                        </>
-                    )}
-                </div>
+  const handleToggle = async (promo) => {
+    try {
+      await api.put(`/products/${productId}/variants/${variantId}/promotions/${promo.id}`, {
+        is_active: !promo.is_active
+      });
+      load();
+    } catch { /* silent */ }
+  };
+
+  const handleDelete = async (promoId) => {
+    if (!window.confirm('Supprimer cette promotion ?')) return;
+    try {
+      await api.delete(`/products/${productId}/variants/${variantId}/promotions/${promoId}`);
+      load();
+    } catch { /* silent */ }
+  };
+
+  return (
+    <div className="mt-3 pt-3 border-t border-black/5 space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-bold text-black/40 uppercase tracking-wider">🏷️ Promotions variante</p>
+        <button
+          onClick={() => setShowForm(s => !s)}
+          className="text-xs font-bold text-[#2d5a27] hover:text-emerald-700 flex items-center gap-1"
+        >
+          <FiPlus size={12}/> Ajouter
+        </button>
+      </div>
+
+      {err && <p className="text-red-500 text-xs font-semibold">❌ {err}</p>}
+
+      {showForm && (
+        <div className="bg-emerald-50/50 border border-emerald-200 rounded-xl p-3 space-y-3">
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs font-bold text-black/40 mb-1">Type</label>
+              <select
+                className={inputCls}
+                value={form.discount_type}
+                onChange={e => setForm(f => ({ ...f, discount_type: e.target.value }))}
+              >
+                <option value="percent">Pourcentage (%)</option>
+                <option value="fixed">Montant fixe</option>
+              </select>
             </div>
-
-            {err && <p className="text-red-500 text-xs font-semibold">❌ {err}</p>}
-
-            {editing && (
-                <div className="space-y-3 pt-2 border-t border-black/5">
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <Field label="Prix *">
-                            <input type="number" min="0" step="0.01" className={inputCls} value={vals.price} onChange={e => set('price', e.target.value)} />
-                        </Field>
-                        <Field label="Prix barré">
-                            <input type="number" min="0" step="0.01" className={inputCls} value={vals.compare_price} onChange={e => set('compare_price', e.target.value)} />
-                        </Field>
-                        <Field label="Coût">
-                            <input type="number" min="0" step="0.01" className={inputCls} value={vals.cost_price} onChange={e => set('cost_price', e.target.value)} />
-                        </Field>
-                        <Field label="Stock">
-                            <input type="number" min="0" className={inputCls} value={vals.stock} onChange={e => set('stock', e.target.value)} />
-                        </Field>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <Field label="SKU">
-                            <input className={inputCls} value={vals.sku} onChange={e => set('sku', e.target.value)} placeholder="ex: ARG-500ML" />
-                        </Field>
-                        <Field label="Poids (g)">
-                            <input type="number" min="0" className={inputCls} value={vals.weight_grams} onChange={e => set('weight_grams', e.target.value)} />
-                        </Field>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => set('is_active', !vals.is_active)}
-                            className={`w-10 h-5 rounded-full transition-colors duration-200 relative shrink-0 ${vals.is_active ? 'bg-[#4a8c42]' : 'bg-gray-300'}`}
-                        >
-                            <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200 ${vals.is_active ? 'left-5' : 'left-0.5'}`}/>
-                        </button>
-                        <span className="text-xs font-bold text-black/50">{vals.is_active ? 'Variante active' : 'Variante inactive'}</span>
-                    </div>
-                </div>
-            )}
+            <div>
+              <label className="block text-xs font-bold text-black/40 mb-1">
+                Valeur {form.discount_type === 'percent' ? '(1-100%)' : ''}
+              </label>
+              <input
+                type="number" min="0"
+                max={form.discount_type === 'percent' ? 100 : undefined}
+                step={form.discount_type === 'percent' ? 1 : 0.5}
+                className={inputCls}
+                value={form.discount_value}
+                onChange={e => setForm(f => ({ ...f, discount_value: e.target.value }))}
+                placeholder={form.discount_type === 'percent' ? '20' : '5.000'}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs font-bold text-black/40 mb-1">Début</label>
+              <input type="date" className={inputCls}
+                value={form.starts_at}
+                onChange={e => setForm(f => ({ ...f, starts_at: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-black/40 mb-1">Expiration *</label>
+              <input type="date" className={inputCls}
+                value={form.expires_at}
+                onChange={e => setForm(f => ({ ...f, expires_at: e.target.value }))}
+              />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => { setShowForm(false); setErr(''); }}
+              className="flex-1 border border-gray-200 text-black/40 text-xs font-bold py-2 rounded-xl hover:bg-gray-50">
+              Annuler
+            </button>
+            <button onClick={handleCreate} disabled={saving}
+              className="flex-[2] bg-[#2d5a27] hover:bg-[#4a8c42] text-white text-xs font-bold py-2 rounded-xl disabled:opacity-50">
+              {saving ? '⏳' : '✅ Créer la promo'}
+            </button>
+          </div>
         </div>
-    );
+      )}
+
+      {loading ? (
+        <p className="text-xs text-black/30 text-center py-2">Chargement...</p>
+      ) : promos.length === 0 ? (
+        <p className="text-xs text-black/25 text-center py-1">Aucune promotion</p>
+      ) : (
+        <div className="space-y-2">
+          {promos.map(p => {
+            const active = isActivePromo(p);
+            const expired = new Date(p.expires_at) <= new Date();
+            return (
+              <div key={p.id} className="flex items-center justify-between bg-white rounded-xl px-3 py-2 border border-gray-100">
+                <div className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${active ? 'bg-emerald-500 animate-pulse' : expired ? 'bg-red-400' : 'bg-gray-300'}`} />
+                  <div>
+                    <span className="text-xs font-bold text-[#2c2c2c]">
+                      {p.discount_type === 'percent' ? `−${p.discount_value}%` : `−${parseFloat(p.discount_value).toFixed(3)} DT`}
+                    </span>
+                    <p className="text-xs text-black/35">
+                      {new Date(p.starts_at).toLocaleDateString('fr-FR')} → {new Date(p.expires_at).toLocaleDateString('fr-FR')}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => handleToggle(p)}
+                    className={`w-8 h-4 rounded-full transition-colors relative ${p.is_active ? 'bg-[#4a8c42]' : 'bg-gray-300'}`}
+                    title={p.is_active ? 'Désactiver' : 'Activer'}
+                  >
+                    <span className={`absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-all ${p.is_active ? 'left-4' : 'left-0.5'}`} />
+                  </button>
+                  <button onClick={() => handleDelete(p.id)}
+                    className="p-1 text-red-400 hover:text-red-600 transition">
+                    <FiTrash2 size={12} />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const VariantEditRow = ({ variant, productId, onUpdated, onDeleted }) => {
+  const [editing, setEditing]     = useState(false);
+  const [showPromos, setShowPromos] = useState(false);  // ← nouveau
+  const [vals, setVals] = useState({
+    price:        variant.price        ?? '',
+    cost_price:   variant.cost_price   ?? '',
+    stock:        variant.stock        ?? 0,
+    sku:          variant.sku          ?? '',
+    weight_grams: variant.weight_grams ?? '',
+    is_active:    variant.is_active    ?? true,
+  });
+  const [saving, setSaving]     = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [err, setErr]           = useState('');
+
+  const set = (k, v) => setVals(p => ({ ...p, [k]: v }));
+
+  const save = async () => {
+    if (!vals.price || parseFloat(vals.price) < 0) { setErr('Prix invalide'); return; }
+    setSaving(true); setErr('');
+    try {
+      const fd = new FormData();
+      Object.entries(vals).forEach(([k, v]) => fd.append(k, String(v)));
+      const res = await api.put(`/products/${productId}/variants/${variant.id}`, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      onUpdated(res.data.variant);
+      setEditing(false);
+    } catch (e) { setErr(e.response?.data?.message || 'Erreur'); }
+    finally { setSaving(false); }
+  };
+
+  const del = async () => {
+    if (!window.confirm('Supprimer cette variante ?')) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/products/${productId}/variants/${variant.id}`);
+      onDeleted(variant.id);
+    } catch (e) { setErr(e.response?.data?.message || 'Erreur suppression'); setDeleting(false); }
+  };
+
+  const attrLabel = variant.attributes?.length
+    ? variant.attributes.map(a => `${a.type_fr}: ${a.value_fr}`).join(' · ')
+    : 'Variante sans attribut';
+
+  return (
+    <div className="bg-[#f9f5f0] rounded-2xl p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="font-bold text-sm text-[#2c2c2c]">{attrLabel}</p>
+          {!editing && (
+            <p className="text-xs text-black/40 mt-0.5">
+              Prix: <span className="font-bold text-[#2d5a27]">{formatPrice(parseFloat(variant.price))}</span>
+              {' · '}Stock: <span className="font-bold">{variant.stock}</span>
+              {variant.sku && ` · SKU: ${variant.sku}`}
+              <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${vals.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-500'}`}>
+                {vals.is_active ? 'Actif' : 'Inactif'}
+              </span>
+            </p>
+          )}
+        </div>
+        <div className="flex gap-1 flex-wrap justify-end">
+          <button
+            onClick={() => setShowPromos(s => !s)}
+            className="p-2 hover:bg-amber-50 text-amber-500 rounded-xl transition text-xs font-bold flex items-center gap-1"
+            title="Promotions"
+          >
+            <FiTag size={13}/> Promos
+          </button>
+          {!editing ? (
+            <>
+              <button onClick={() => setEditing(true)} className="p-2 hover:bg-blue-50 text-blue-500 rounded-xl transition text-xs font-bold flex items-center gap-1">
+                <FiEdit size={13}/> Modifier
+              </button>
+              <button onClick={del} disabled={deleting} className="p-2 hover:bg-red-50 text-red-500 rounded-xl transition text-xs font-bold flex items-center gap-1">
+                <FiTrash2 size={13}/> {deleting ? '...' : 'Supprimer'}
+              </button>
+            </>
+          ) : (
+            <>
+              <button onClick={save} disabled={saving} className="px-3 py-1.5 bg-[#2d5a27] hover:bg-[#4a8c42] text-white rounded-xl text-xs font-bold transition disabled:opacity-50">
+                {saving ? '⏳' : '💾 Sauver'}
+              </button>
+              <button onClick={() => { setEditing(false); setErr(''); }} className="px-3 py-1.5 border border-gray-200 text-black/50 rounded-xl text-xs font-bold hover:bg-gray-50 transition">
+                Annuler
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {err && <p className="text-red-500 text-xs font-semibold">❌ {err}</p>}
+
+      {editing && (
+        <div className="space-y-3 pt-2 border-t border-black/5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <Field label="Prix *">
+              <input type="number" min="0" step="0.01" className={inputCls} value={vals.price} onChange={e => set('price', e.target.value)} />
+            </Field>
+            <Field label="Coût">
+              <input type="number" min="0" step="0.01" className={inputCls} value={vals.cost_price} onChange={e => set('cost_price', e.target.value)} />
+            </Field>
+            <Field label="Stock">
+              <input type="number" min="0" className={inputCls} value={vals.stock} onChange={e => set('stock', e.target.value)} />
+            </Field>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Field label="SKU">
+              <input className={inputCls} value={vals.sku} onChange={e => set('sku', e.target.value)} placeholder="ex: ARG-500ML" />
+            </Field>
+            <Field label="Poids (g)">
+              <input type="number" min="0" className={inputCls} value={vals.weight_grams} onChange={e => set('weight_grams', e.target.value)} />
+            </Field>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => set('is_active', !vals.is_active)}
+              className={`w-10 h-5 rounded-full transition-colors duration-200 relative shrink-0 ${vals.is_active ? 'bg-[#4a8c42]' : 'bg-gray-300'}`}
+            >
+              <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200 ${vals.is_active ? 'left-5' : 'left-0.5'}`}/>
+            </button>
+            <span className="text-xs font-bold text-black/50">{vals.is_active ? 'Variante active' : 'Variante inactive'}</span>
+          </div>
+        </div>
+      )}
+
+      {/* ── Promotions section ── */}
+      {showPromos && (
+        <VariantPromotions variantId={variant.id} productId={productId} />
+      )}
+    </div>
+  );
 };
 
 // ─── AddVariantForm — inchangé ────────────────────────────────────────────────
@@ -180,7 +359,6 @@ const AddVariantForm = ({ productId, onAdded, onCancel }) => {
         try {
             const fd = new FormData();
             fd.append('price', v.price);
-            if (v.compare_price) fd.append('compare_price', v.compare_price);
             if (v.cost_price)    fd.append('cost_price', v.cost_price);
             fd.append('stock', v.stock || '0');
             if (v.sku)          fd.append('sku', v.sku);
@@ -202,12 +380,9 @@ const AddVariantForm = ({ productId, onAdded, onCancel }) => {
         <div className="border-2 border-dashed border-emerald-300 rounded-2xl p-5 space-y-4 bg-emerald-50/30">
             <p className="font-bold text-sm text-emerald-700">➕ Nouvelle variante</p>
             {err && <p className="text-red-500 text-xs font-semibold">❌ {err}</p>}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <Field label="Prix *">
                     <input type="number" min="0" step="0.01" className={inputCls} value={v.price} onChange={e => set('price', e.target.value)} placeholder="0.00" />
-                </Field>
-                <Field label="Prix barré">
-                    <input type="number" min="0" step="0.01" className={inputCls} value={v.compare_price} onChange={e => set('compare_price', e.target.value)} placeholder="0.00" />
                 </Field>
                 <Field label="Coût">
                     <input type="number" min="0" step="0.01" className={inputCls} value={v.cost_price} onChange={e => set('cost_price', e.target.value)} placeholder="0.00" />
@@ -387,7 +562,6 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
             if (!isEdit) {
                 const cleanVariants = variants.map(v => ({
                     price:         parseFloat(v.price),
-                    compare_price: v.compare_price ? parseFloat(v.compare_price) : null,
                     cost_price:    v.cost_price    ? parseFloat(v.cost_price)    : null,
                     stock:         parseInt(v.stock) || 0,
                     sku:           v.sku           || null,
@@ -577,12 +751,9 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                                     <button onClick={() => removeVariant(vi)} className="text-red-400 hover:text-red-600 transition p-1"><FiX size={14}/></button>
                                                 )}
                                             </div>
-                                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                                 <Field label="Prix" required>
                                                     <input type="number" min="0" step="0.01" className={inputCls} value={v.price} onChange={e => setVariant(vi, 'price', e.target.value)} placeholder="0.00" />
-                                                </Field>
-                                                <Field label="Prix barré">
-                                                    <input type="number" min="0" step="0.01" className={inputCls} value={v.compare_price} onChange={e => setVariant(vi, 'compare_price', e.target.value)} placeholder="0.00" />
                                                 </Field>
                                                 <Field label="Coût">
                                                     <input type="number" min="0" step="0.01" className={inputCls} value={v.cost_price} onChange={e => setVariant(vi, 'cost_price', e.target.value)} placeholder="0.00" />
@@ -841,7 +1012,6 @@ const AdminProduits = () => {
                             onChange={e => setCurrencyInput(e.target.value)}
                             onBlur={() => updateCurrency(currencyInput)}
                             onKeyDown={e => e.key === 'Enter' && updateCurrency(currencyInput)}
-                            placeholder="CHF"
                             className="w-14 text-center text-sm font-black text-[#2d5a27] outline-none bg-transparent placeholder-black/25"
                             maxLength={6}
                         />
@@ -888,14 +1058,13 @@ const AdminProduits = () => {
                                 <th className="text-left px-5 py-4 font-bold text-[#2c2c2c]">Produit</th>
                                 <th className="text-left px-5 py-4 font-bold text-[#2c2c2c]">Catégorie</th>
                                 <th className="text-left px-5 py-4 font-bold text-[#2c2c2c]">Producteur</th>
-                                <th className="text-right px-5 py-4 font-bold text-[#2c2c2c]">Prix</th>
                                 <th className="text-center px-5 py-4 font-bold text-[#2c2c2c]">Statut</th>
                                 <th className="text-center px-5 py-4 font-bold text-[#2c2c2c]">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {produits.length === 0 ? (
-                                <tr><td colSpan={6} className="text-center py-10 text-black/40">Aucun produit trouvé</td></tr>
+                                <tr><td colSpan={5} className="text-center py-10 text-black/40">Aucun produit trouvé</td></tr>
                             ) : produits.map(produit => (
                                 <tr key={produit.id} className="border-b border-gray-50 hover:bg-[#fdf6ec] transition">
                                     <td className="px-5 py-4">
@@ -908,8 +1077,13 @@ const AdminProduits = () => {
                                             </div>
                                             <div>
                                                 <p className="font-bold text-[#2c2c2c] line-clamp-1">{produit.name_fr}</p>
-                                                <div className="flex items-center gap-1.5 mt-0.5">
+                                                <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                                                     <p className="text-xs text-black/40">#{produit.id.slice(0, 8)}</p>
+                                                    {produit.min_price && (
+                                                        <p className="text-xs font-bold text-[#2d5a27]">
+                                                            dès {formatPrice(parseFloat(produit.min_price), currency)}
+                                                        </p>
+                                                    )}
                                                     {produit.is_new     && <span className="text-xs bg-blue-100 text-blue-600 font-bold px-1.5 py-0.5 rounded-full">Nouveau</span>}
                                                     {produit.is_featured && <span className="text-xs bg-amber-100 text-amber-600 font-bold px-1.5 py-0.5 rounded-full">✨ Vedette</span>}
                                                 </div>
@@ -918,9 +1092,6 @@ const AdminProduits = () => {
                                     </td>
                                     <td className="px-5 py-4 text-black/60">{produit.category_name || '—'}</td>
                                     <td className="px-5 py-4 text-black/60">{produit.supplier_name || '—'}</td>
-                                    <td className="px-5 py-4 text-right font-bold text-[#2d5a27]">
-                                        {produit.min_price ? formatPrice(parseFloat(produit.min_price), currency) : '—'}
-                                    </td>
                                     <td className="px-5 py-4 text-center">
                                         <span className={`text-xs font-bold px-2 py-1 rounded-full ${produit.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
                                             {produit.is_active ? 'Actif' : 'Inactif'}

@@ -310,6 +310,11 @@ const Products = () => {
                                                             ✨ Coup de cœur
                                                         </span>
                                                     )}
+                                                    {produit.is_new && !produit.is_featured && (
+                                                        <span className="absolute top-3 left-3 bg-[#2d5a27] text-white text-xs font-bold px-2 py-1 rounded-full">
+                                                            ✨ Nouveau
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </Link>
 
