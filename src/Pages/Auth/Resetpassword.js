@@ -63,7 +63,7 @@ const ResetPassword = () => {
                             Nouveau mot de passe
                         </h2>
                         <p className="text-gray-500 text-sm mb-8">
-                            Choisissez un mot de passe sécurisé d'au moins 6 caractères.
+                            Choisissez un mot de passe sécurisé d'au moins 8 caractères, avec majuscule, chiffre et caractère spécial.
                         </p>
 
                         {error && (

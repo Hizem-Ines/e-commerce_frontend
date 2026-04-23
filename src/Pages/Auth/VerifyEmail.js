@@ -18,9 +18,8 @@ const VerifyEmail = () => {
         const verify = async () => {
             try {
                 await verifyEmail(token);
-                await loginSuccess(); // ✅ met à jour l'user dans le context → connecté automatiquement
                 setStatus('success');
-                setTimeout(() => navigate('/'), 3000);
+                setTimeout(() => navigate('/connexion'), 3000);
             } catch (err) {
                 const msg = err.response?.data?.message || '';
 
@@ -75,7 +74,7 @@ const VerifyEmail = () => {
                             Email vérifié !
                         </h2>
                         <p className="text-black/50 text-sm mb-6">
-                            Votre compte est activé. Vous êtes maintenant connecté(e) !
+                            Votre compte est activé. Connectez-vous pour accéder à votre compte.
                         </p>
                         <div className="w-full bg-gray-100 rounded-full h-2 mb-6">
                             <div className="bg-[#2d5a27] h-2 rounded-full animate-pulse" style={{ width: '100%' }}></div>

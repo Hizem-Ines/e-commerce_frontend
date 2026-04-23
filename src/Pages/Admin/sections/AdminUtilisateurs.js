@@ -310,7 +310,7 @@ const AdminUtilisateurs = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-black/50 mb-1">Ville</label>
+                                    <label className="block text-xs font-bold text-black/50 mb-1">Canton</label>
                                     <input
                                         type="text"
                                         value={editForm.city}

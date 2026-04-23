@@ -100,9 +100,9 @@ const AdminProducteurs = () => {
 
     const fields = [
         { label: 'Nom (FR) *', key: 'name', placeholder: 'Nom du producteur', required: true },
-        { label: 'Région', key: 'region', placeholder: 'Ex: Sfax, Tunis...' },
-        { label: 'Adresse', key: 'address', placeholder: 'Ville, Tunisie' },
-        { label: 'Contact', key: 'contact', placeholder: '+216 XX XXX XXX' },
+        { label: 'Région', key: 'region', placeholder: 'Canton' },
+        { label: 'Adresse', key: 'address', placeholder: '' },
+        { label: 'Contact', key: 'contact', placeholder: '+41 xx xxx xx xx' },
         { label: 'Email', key: 'email', placeholder: 'contact@exemple.ch' },
         { label: 'Site web', key: 'website', placeholder: 'https://...' },
     ];
