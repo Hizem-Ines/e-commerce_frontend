@@ -483,13 +483,13 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Ville *</label>
+                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Canton *</label>
                                         <select name="shipping_city" value={formData.shipping_city}
                                             onChange={handleChange} required
                                             className={inputClass}
                                             style={{ border: '2px solid #e5e7eb' }}
                                             onFocus={onFocus} onBlur={onBlur}>
-                                            <option value="">Choisir une ville</option>
+                                            <option value="">Choisir un canton</option>
                                             {VILLES.map(v => (
                                                 <option key={v} value={v.toLowerCase()}>{v}</option>
                                             ))}

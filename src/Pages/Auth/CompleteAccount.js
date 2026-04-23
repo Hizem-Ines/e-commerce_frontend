@@ -18,8 +18,12 @@ const CompleteAccount = () => {
 
     // ── Validation mot de passe en temps réel ─────────────
     const rules = [
-        { label: 'Au moins 6 caractères',         ok: password.length >= 6 },
-        { label: 'Les deux mots de passe identiques', ok: password === confirmPassword && confirmPassword.length > 0 },
+        { label: 'Au moins 8 caractères',                ok: password.length >= 8 },
+        { label: 'Une lettre majuscule',                  ok: /[A-Z]/.test(password) },
+        { label: 'Une lettre minuscule',                  ok: /[a-z]/.test(password) },
+        { label: 'Un chiffre',                            ok: /[0-9]/.test(password) },
+        { label: 'Un caractère spécial (!@#$%...)',       ok: /[!@#$%^&*()\-_=+\[\]{};':",.<>/?`~\\|]/.test(password) },
+        { label: 'Les deux mots de passe identiques',     ok: password === confirmPassword && confirmPassword.length > 0 },
     ];
     const isValid = rules.every(r => r.ok);
 
@@ -132,7 +136,7 @@ const CompleteAccount = () => {
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
                                 required
-                                placeholder="Minimum 6 caractères"
+                                placeholder="Minimum 8 caractères"
                                 className="w-full pl-10 pr-12 py-3 rounded-xl text-sm focus:outline-none transition"
                                 style={inputStyle(false)}
                                 onFocus={e  => (e.target.style.borderColor = '#166534')}

@@ -28,6 +28,7 @@ const Auth = () => {
     });
 
     const { login, register } = useAuth();
+    const { user, loading } = useAuth();
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -294,7 +295,7 @@ const Auth = () => {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Ville</label>
+                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Canton</label>
                                     <select
                                         name="ville"
                                         value={formData.ville}
@@ -305,7 +306,7 @@ const Auth = () => {
                                         onBlur={blurBorder}
                                         required={!isLogin}
                                     >
-                                        <option value="">Ville</option>
+                                        <option value="">Canton</option>
                                         {SWISS_CITIES.map((city) => (
                                             <option key={city} value={city.toLowerCase()}>{city}</option>
                                         ))}
@@ -326,19 +327,6 @@ const Auth = () => {
                                     Mot de passe oublié ?
                                 </button>
                             </div>
-                        )}
-
-                        {/* CGV */}
-                        {!isLogin && (
-                            <label className="flex items-start gap-2 cursor-pointer">
-                                <input type="checkbox" className="w-4 h-4 mt-0.5" style={{ accentColor: GREEN_DARK }} required />
-                                <span className="text-xs text-gray-600">
-                                    J'accepte les{' '}
-                                    <button type="button" className="font-semibold hover:underline" style={{ color: RED_ACCENT }}>CGV</button>
-                                    {' '}et la{' '}
-                                    <button type="button" className="font-semibold hover:underline" style={{ color: RED_ACCENT }}>Politique de Confidentialité</button>
-                                </span>
-                            </label>
                         )}
 
                         {/* SUBMIT */}

@@ -12,20 +12,25 @@ api.interceptors.response.use(
   (error) => {
     const status = error.response?.status;
 
-    // Token expiré → redirige vers login
     if (status === 401) {
-      // Évite une boucle infinie si on est déjà sur /auth
-      if (!window.location.pathname.startsWith('/auth')) {
-        window.location.href = '/auth';
+      const publicPaths = [
+        '/connexion',
+        '/reset-password',
+        '/verify-email',
+        '/mot-de-passe-oublie',
+        '/complete-account',
+        '/login/success',
+      ];
+      const isPublic = publicPaths.some(path => window.location.pathname.startsWith(path));
+      if (!isPublic) {
+        window.location.href = '/connexion';
       }
     }
 
-    // authentifié mais pas autorisé (ex: un client qui accède à une route admin
     if (status === 403) {
       window.location.href = '/';
     }
 
-    // Erreur serveur → log discret
     if (status >= 500) {
       console.error('[API] Erreur serveur :', error.response?.data?.message || error.message);
     }
