@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import {
   FiSearch, FiTruck, FiCreditCard, FiShoppingBag,
   FiRotateCcw, FiMessageCircle, FiPlus, FiArrowRight,
-  FiMail, FiUser,
+  FiMail, FiUser, FiCheckCircle,
 } from "react-icons/fi";
 import { getAllFaqs, searchFaqs, askQuestion } from "../../services/faqService";
 
@@ -58,7 +58,7 @@ const FaqItem = ({ faq, defaultOpen = false }) => {
 const AskForm = () => {
   const [form, setForm]       = useState({ user_name: "", user_email: "", question: "" });
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [result, setResult]   = useState(null); // { auto_answered, matched_faq, message }
   const [error, setError]     = useState("");
 
   const handleChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -68,8 +68,9 @@ const AskForm = () => {
     setError("");
     setLoading(true);
     try {
-      await askQuestion(form);
-      setSuccess(true);
+      const res = await askQuestion(form);
+      // res = { success, message, auto_answered, matched_faq, question }
+      setResult(res);
       setForm({ user_name: "", user_email: "", question: "" });
     } catch (err) {
       setError(err.response?.data?.message || "Une erreur est survenue.");
@@ -78,7 +79,48 @@ const AskForm = () => {
     }
   };
 
-  if (success) {
+  // ── Cas 1 : réponse automatique trouvée ──────────────────
+  if (result?.auto_answered) {
+    return (
+      <div className="rounded-2xl p-8 text-center" style={{ backgroundColor: "#f0fdf4", border: "1px solid #4a8f3f" }}>
+        <FiCheckCircle className="mx-auto mb-3" size={36} style={{ color: "#2d5a27" }} />
+        <h3 className="font-bold text-lg mb-1" style={{ color: "#2d5a27" }}>
+          Bonne nouvelle !
+        </h3>
+        <p className="text-sm mb-4" style={{ color: "#3a7232" }}>
+          Nous avons trouvé une réponse à votre question. Consultez votre email.
+        </p>
+
+        {/* FAQ correspondante */}
+        {result.matched_faq && (
+          <div className="bg-white rounded-xl p-4 text-left border border-green-200 mb-4">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
+              FAQ correspondante
+            </p>
+            <p className="text-sm text-gray-700 font-medium">
+              {result.matched_faq.question_fr}
+            </p>
+            {result.matched_faq.category && (
+              <span className="inline-block mt-1.5 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                {CATEGORY_LABELS[result.matched_faq.category]?.label || result.matched_faq.category}
+              </span>
+            )}
+          </div>
+        )}
+
+        <button
+          onClick={() => setResult(null)}
+          className="text-sm underline underline-offset-2 hover:opacity-80"
+          style={{ color: "#2d5a27" }}
+        >
+          Poser une autre question
+        </button>
+      </div>
+    );
+  }
+
+  // ── Cas 2 : question transmise à l'admin ─────────────────
+  if (result && !result.auto_answered) {
     return (
       <div className="rounded-2xl p-8 text-center" style={{ backgroundColor: "#f0fdf4", border: "1px solid #4a8f3f" }}>
         <FiMail className="mx-auto mb-3" size={36} style={{ color: "#2d5a27" }} />
@@ -87,7 +129,7 @@ const AskForm = () => {
           Nous vous répondrons par email dans les plus brefs délais.
         </p>
         <button
-          onClick={() => setSuccess(false)}
+          onClick={() => setResult(null)}
           className="text-sm underline underline-offset-2 hover:opacity-80"
           style={{ color: "#2d5a27" }}
         >
