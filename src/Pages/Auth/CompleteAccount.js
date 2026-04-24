@@ -95,7 +95,7 @@ const CompleteAccount = () => {
                             GOF<span style={{ color: '#e63946' }}>FA</span>
                         </h1>
                         <p className="text-xs font-semibold tracking-wider" style={{ color: '#4ade80' }}>
-                            artisanat tunisien
+                            artisanat
                         </p>
                     </div>
                 </Link>

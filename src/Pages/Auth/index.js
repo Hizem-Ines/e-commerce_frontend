@@ -4,14 +4,6 @@ import { FiMail, FiLock, FiUser, FiPhone, FiMapPin, FiEye, FiEyeOff, FiGift, FiS
 import { useAuth } from '../../context/authContext';
 import logo from '../../assets/images/goffa-logo.png';
 
-const SWISS_CITIES = [
-    'Zürich', 'Genève', 'Bâle', 'Lausanne', 'Berne',
-    'Winterthur', 'Lucerne', 'Saint-Gall', 'Lugano', 'Biel/Bienne',
-    'Thoune', 'Köniz', 'La Chaux-de-Fonds', 'Fribourg', 'Schaffhouse',
-    'Coire', 'Vernier', 'Neuchâtel', 'Uster', 'Sion',
-    'Emmen', 'Kriens', 'Arlesheim', 'Zuchwil', 'Bellinzone',
-];
-
 const Auth = () => {
    const [isSubmitting, setIsSubmitting] = useState(false); 
     const [isLogin, setIsLogin] = useState(true);
@@ -115,7 +107,7 @@ const Auth = () => {
                                 GOFFA
                             </h1>
                             <p className="text-xs font-semibold tracking-wider" style={{ color: GREEN_LIGHT }}>
-                                artisanat tunisien · livré en Suisse
+                                artisanat · livré en Suisse
                             </p>
                         </div>
                     </Link>
@@ -147,7 +139,7 @@ const Auth = () => {
                         <p className="text-gray-500 text-sm">
                             {isLogin
                                 ? 'Connectez-vous pour accéder à votre compte'
-                                : 'Créez votre compte et découvrez l\'artisanat tunisien'}
+                                : 'Créez votre compte et découvrez l\'artisanat '}
                         </p>
                     </div>
 
@@ -286,7 +278,7 @@ const Auth = () => {
                                             name="adresse"
                                             value={formData.adresse}
                                             onChange={handleChange}
-                                            placeholder="Rue, numéro…"
+                                            placeholder="Rue du Marché 12"
                                             className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
                                             style={inputStyle}
                                             onFocus={focusBorder}
@@ -295,22 +287,22 @@ const Auth = () => {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Canton</label>
-                                    <select
-                                        name="ville"
-                                        value={formData.ville}
-                                        onChange={handleChange}
-                                        className="w-full px-4 py-3 rounded-xl text-sm transition focus:outline-none"
-                                        style={inputStyle}
-                                        onFocus={focusBorder}
-                                        onBlur={blurBorder}
-                                        required={!isLogin}
-                                    >
-                                        <option value="">Canton</option>
-                                        {SWISS_CITIES.map((city) => (
-                                            <option key={city} value={city.toLowerCase()}>{city}</option>
-                                        ))}
-                                    </select>
+                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Localité</label>
+                                    <div className="relative">
+                                        <FiMapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
+                                        <input
+                                            type="text"
+                                            name="ville"
+                                            value={formData.ville}
+                                            onChange={handleChange}
+                                            placeholder="Zurich"
+                                            className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
+                                            style={inputStyle}
+                                            onFocus={focusBorder}
+                                            onBlur={blurBorder}
+                                            required={!isLogin}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -423,13 +415,13 @@ const Auth = () => {
                         <p className="text-base opacity-75 text-center mb-10 leading-relaxed">
                             {isLogin
                                 ? 'Retrouvez vos favoris, suivez vos commandes et découvrez de nouvelles créations venues de Tunisie.'
-                                : 'Des pièces artisanales authentiques, façonnées en Tunisie et livrées directement chez vous en Suisse.'}
+                                : 'Des pièces artisanales authentiques, livrées directement chez vous en Suisse.'}
                         </p>
 
                         {/* VALEURS — icônes uniquement, pas de chiffres */}
                         <div className="grid grid-cols-2 gap-4">
                             {[
-                                { icon: <FiGift     className="w-5 h-5" />, titre: 'Fait main en Tunisie', desc: 'Savoir-faire ancestral' },
+                                { icon: <FiGift     className="w-5 h-5" />, titre: 'Fait main ',             desc: 'Savoir-faire ancestral' },
                                 { icon: <FiStar     className="w-5 h-5" />, titre: 'Sélection curatée',      desc: 'Qualité certifiée'     },
                                 { icon: <FiPackage  className="w-5 h-5" />, titre: 'Livraison en Suisse',    desc: 'Partout en Suisse'     },
                                 { icon: <FiShield   className="w-5 h-5" />, titre: 'Paiement sécurisé',      desc: 'Données protégées'     },
@@ -462,11 +454,9 @@ const Auth = () => {
                         className="relative z-10 pt-6 text-center"
                         style={{ borderTop: '1px solid rgba(255,255,255,0.2)' }}
                     >
-                        <p className="text-sm font-semibold opacity-70 italic tracking-wide">
-                            « De Tunisie à votre porte, avec amour »
-                        </p>
+                    
                         <p className="text-xs opacity-50 mt-1 tracking-widest uppercase">
-                            GOFFA · Artisanat Tunisien · Suisse
+                            GOFFA · Artisanat · Suisse
                         </p>
                     </div>
                 </div>

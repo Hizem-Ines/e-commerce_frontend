@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/authContext';
 import formatPrice from '../../utils/formatPrice';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
-import { createOrder, createGuestOrder, validatePromo } from '../../services/orderService';
+import { createOrder, createGuestOrder, validatePromo, getShippingCost } from '../../services/orderService';
 import {
     FiUser, FiMail, FiPhone, FiMapPin, FiCreditCard,
-    FiTruck, FiChevronRight, FiLock, FiTag, FiX, FiCheck,
+    FiChevronRight, FiLock, FiTag, FiX, FiCheck,
     FiArrowLeft,
 } from 'react-icons/fi';
 import { loadStripe } from '@stripe/stripe-js';
@@ -21,35 +21,32 @@ import {
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
 const VILLES = [
-  'Zurich', 'Genève', 'Bâle', 'Lausanne', 'Berne', 'Winterthur',
-  'Lucerne', 'St-Gall', 'Lugano', 'Biel/Bienne', 'Thoune', 'Köniz',
-  'La Chaux-de-Fonds', 'Fribourg', 'Schaffhouse', 'Chur', 'Vernier',
-  'Neuchâtel', 'Uster', 'Sion', 'Emmen', 'Kriens', 'Arlesheim',
+    'Zurich', 'Genève', 'Bâle', 'Lausanne', 'Berne', 'Winterthur',
+    'Lucerne', 'St-Gall', 'Lugano', 'Biel/Bienne', 'Thoune', 'Köniz',
+    'La Chaux-de-Fonds', 'Fribourg', 'Schaffhouse', 'Chur', 'Vernier',
+    'Neuchâtel', 'Uster', 'Sion', 'Emmen', 'Kriens', 'Arlesheim',
 ];
-// ── Apparence Stripe personnalisée aux couleurs GOFFA ────────────────────────
+
+// ── Apparence Stripe personnalisée aux couleurs GOFFA ──────────────────────
 const stripeAppearance = {
     theme: 'stripe',
     variables: {
-        colorPrimary:      '#166534',
-        colorBackground:   '#ffffff',
-        colorText:         '#2c2c2c',
-        colorDanger:       '#dc2626',
-        fontFamily:        'system-ui, -apple-system, sans-serif',
-        borderRadius:      '10px',
-        spacingUnit:       '4px',
+        colorPrimary:    '#166534',
+        colorBackground: '#ffffff',
+        colorText:       '#2c2c2c',
+        colorDanger:     '#dc2626',
+        fontFamily:      'system-ui, -apple-system, sans-serif',
+        borderRadius:    '10px',
+        spacingUnit:     '4px',
     },
     rules: {
-        '.Input': {
-            border:    '2px solid #e5e7eb',
-            boxShadow: 'none',
-            padding:   '10px 14px',
-        },
-        '.Input:focus': { border: '2px solid #166534', boxShadow: 'none' },
-        '.Label':       { fontWeight: '600', fontSize: '12px', color: '#4b5563' },
+        '.Input':        { border: '2px solid #e5e7eb', boxShadow: 'none', padding: '10px 14px' },
+        '.Input:focus':  { border: '2px solid #166534', boxShadow: 'none' },
+        '.Label':        { fontWeight: '600', fontSize: '12px', color: '#4b5563' },
     },
 };
 
-// ── Logos SVG ─────────────────────────────────────────────────────────────────
+// ── Logos SVG ──────────────────────────────────────────────────────────────
 const VisaLogo = () => (
     <svg height="20" viewBox="0 0 780 500" xmlns="http://www.w3.org/2000/svg">
         <rect width="780" height="500" rx="40" fill="#1A1F71" />
@@ -69,24 +66,20 @@ const MastercardLogo = () => (
 
 const TwintLogo = () => (
     <svg height="20" viewBox="0 0 100 40" xmlns="http://www.w3.org/2000/svg">
-        <rect width="100" height="40" rx="6" fill="#000"/>
-        <text x="50" y="28" textAnchor="middle"
-              fontSize="18" fontWeight="bold" fill="white"
-              fontFamily="Arial, sans-serif">twint</text>
+        <rect width="100" height="40" rx="6" fill="#000" />
+        <text x="50" y="28" textAnchor="middle" fontSize="18" fontWeight="bold" fill="white"
+            fontFamily="Arial, sans-serif">twint</text>
     </svg>
 );
 
-
 // ════════════════════════════════════════════════════════════
 // ÉTAPE 2 — Formulaire de paiement Stripe (PaymentElement)
-// Rendu dans <Elements clientSecret={...}>
 // ════════════════════════════════════════════════════════════
 const StripePaymentStep = ({ order, promoResult, onBack }) => {
-    const stripe    = useStripe();
-    const elements  = useElements();
-    const navigate  = useNavigate();
+    const stripe   = useStripe();
+    const elements = useElements();
+    const navigate = useNavigate();
     const { viderPanier } = useCart();
-
     const { currency } = useSiteSettings();
     const fmt = (n) => formatPrice(parseFloat(n), currency);
 
@@ -101,10 +94,9 @@ const StripePaymentStep = ({ order, promoResult, onBack }) => {
         const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
             elements,
             confirmParams: {
-                // URL de retour si 3D Secure est requis
                 return_url: `${window.location.origin}/commande-confirmee/${order.id}`,
             },
-            redirect: 'if_required', // ✅ Pas de redirect si pas de 3DS
+            redirect: 'if_required',
         });
 
         if (stripeError) {
@@ -113,7 +105,6 @@ const StripePaymentStep = ({ order, promoResult, onBack }) => {
             return;
         }
 
-        // Paiement réussi sans redirect (pas de 3DS nécessaire)
         if (paymentIntent?.status === 'succeeded') {
             viderPanier();
             navigate(`/commande-confirmee/${order.id}`, {
@@ -123,17 +114,17 @@ const StripePaymentStep = ({ order, promoResult, onBack }) => {
     };
 
     return (
-        <div className="bg-[#fdf6ec] min-h-screen py-12">
+        <div className="bg-[#fdf6ec] min-h-screen py-8 sm:py-12">
             <div className="container mx-auto px-4 max-w-lg">
 
                 {/* En-tête */}
-                <div className="mb-8">
+                <div className="mb-6 sm:mb-8">
                     <button onClick={onBack}
                         className="flex items-center gap-2 text-sm font-semibold mb-4 hover:text-[#166534] transition-colors"
                         style={{ color: '#6b7280' }}>
                         <FiArrowLeft size={16} /> Retour à la commande
                     </button>
-                    <h1 className="text-3xl font-bold font-serif text-[#2c2c2c]">Paiement sécurisé</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold font-serif text-[#2c2c2c]">Paiement sécurisé</h1>
                     <p className="text-sm text-black/40 mt-1">Commande #{order.order_number}</p>
                 </div>
 
@@ -144,7 +135,7 @@ const StripePaymentStep = ({ order, promoResult, onBack }) => {
                         <span>{fmt(order.subtotal)}</span>
                     </div>
 
-                    {order.discount_amount > 0 && (
+                    {parseFloat(order.discount_amount) > 0 && (
                         <div className="flex justify-between items-center text-sm mb-2">
                             <span className="text-[#2d5a27] font-semibold flex items-center gap-1">
                                 <FiTag size={13} />
@@ -164,7 +155,11 @@ const StripePaymentStep = ({ order, promoResult, onBack }) => {
 
                     <div className="flex justify-between items-center text-sm text-black/60 mb-3">
                         <span>Livraison</span>
-                        <span className="font-semibold" style={{ color: '#166534' }}>Gratuite</span>
+                        <span className="font-semibold" style={{ color: '#166534' }}>
+                            {parseFloat(order.shipping_cost) === 0
+                                ? 'Gratuite'
+                                : fmt(order.shipping_cost)}
+                        </span>
                     </div>
 
                     <div className="flex justify-between items-center pt-3 border-t border-gray-100">
@@ -176,7 +171,7 @@ const StripePaymentStep = ({ order, promoResult, onBack }) => {
                 </div>
 
                 {/* Formulaire Stripe */}
-                <div className="bg-white rounded-2xl p-6 shadow-[0_4px_15px_rgba(0,0,0,0.06)]">
+                <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_4px_15px_rgba(0,0,0,0.06)]">
                     <div className="flex items-center gap-2 mb-5">
                         <FiCreditCard size={18} style={{ color: '#166534' }} />
                         <h2 className="text-base font-bold text-[#2c2c2c]">Informations de paiement</h2>
@@ -194,12 +189,10 @@ const StripePaymentStep = ({ order, promoResult, onBack }) => {
                     <button onClick={handlePay} disabled={loading || !stripe}
                         className="w-full text-white font-bold py-4 rounded-xl mt-5 transition-all duration-300 disabled:opacity-50 hover:scale-[1.02] text-base"
                         style={{
-                            background:  'linear-gradient(135deg, #166534, #15803d)',
-                            boxShadow:   '0 4px 20px rgba(22,101,52,0.4)',
+                            background: 'linear-gradient(135deg, #166534, #15803d)',
+                            boxShadow:  '0 4px 20px rgba(22,101,52,0.4)',
                         }}>
-                        {loading
-                            ? '⏳ Traitement en cours...'
-                            : `💳 Payer ${fmt(order.total_price)}`}
+                        {loading ? '⏳ Traitement en cours...' : `💳 Payer ${fmt(order.total_price)}`}
                     </button>
 
                     <p className="text-xs text-center text-black/30 mt-3 flex items-center justify-center gap-1">
@@ -208,7 +201,7 @@ const StripePaymentStep = ({ order, promoResult, onBack }) => {
                 </div>
 
                 {/* Logos cartes */}
-                <div className="flex items-center justify-center gap-3 mt-5 opacity-60">
+                <div className="flex items-center justify-center gap-3 mt-5 opacity-60 flex-wrap">
                     <VisaLogo />
                     <MastercardLogo />
                     <TwintLogo />
@@ -219,6 +212,24 @@ const StripePaymentStep = ({ order, promoResult, onBack }) => {
     );
 };
 
+const getCantonFromNPA = (npa) => {
+    const code = parseInt(npa);
+    if (code >= 1000 && code <= 1299) return 'VD/GE';
+    if (code >= 1300 && code <= 1699) return 'VD';
+    if (code >= 1700 && code <= 1799) return 'FR';
+    if (code >= 1800 && code <= 1999) return 'VD';
+    if (code >= 2000 && code <= 2099) return 'NE';
+    if (code >= 2300 && code <= 2999) return 'BE';
+    if (code >= 3000 && code <= 3999) return 'BE';
+    if (code >= 4000 && code <= 4999) return 'BS';
+    if (code >= 5000 && code <= 5999) return 'AG';
+    if (code >= 6000 && code <= 6999) return 'LU';
+    if (code >= 7000 && code <= 7999) return 'GR';
+    if (code >= 8000 && code <= 8999) return 'ZH';
+    if (code >= 9000 && code <= 9999) return 'SG';
+    return null;
+};
+
 
 // ════════════════════════════════════════════════════════════
 // ÉTAPE 1 — Formulaire principal
@@ -226,39 +237,68 @@ const StripePaymentStep = ({ order, promoResult, onBack }) => {
 const CheckoutForm = ({ onStripeOrderCreated }) => {
     const { panier, totalPrix, viderPanier } = useCart();
     const { user } = useAuth();
-    const navigate  = useNavigate();
-
+    const navigate = useNavigate();
     const { currency } = useSiteSettings();
     const fmt = (n) => formatPrice(parseFloat(n), currency);
 
     const [loading,       setLoading]       = useState(false);
     const [error,         setError]         = useState('');
-    const [paymentMethod, setPaymentMethod] = useState('stripe');
+    // ✅ 'card' est la seule valeur acceptée par le backend (card | twint)
+    const [paymentMethod, setPaymentMethod] = useState('card');
 
     const [formData, setFormData] = useState({
-        name:             user?.name    || '',
-        email:            user?.email   || '',
-        phone:            user?.phone   || '',
-        shipping_address: user?.address || '',
-        shipping_city:    user?.city    || '',
-        shipping_governorate: '',
-        shipping_postal_code: '',
-        notes:            '',
+        name:                    user?.name  || '',
+        email:                   user?.email || '',
+        phone:                   user?.phone || '',
+        shipping_street:         '',
+        shipping_street_number:  '',
+        shipping_address2:       '',
+        shipping_city:           user?.city  || '',
+        shipping_postal_code:    '',
+        notes:                   '',
     });
 
-    // ── Promo code ────────────────────────────────────────
+    // ── Promo code ──────────────────────────────────────
     const [promoInput,  setPromoInput]  = useState('');
-    const [promoStatus, setPromoStatus] = useState(null); // null | 'loading' | 'valid' | 'error'
-    const [promoResult, setPromoResult] = useState(null); // { discountAmount, label, promoCode, ... }
+    const [promoStatus, setPromoStatus] = useState(null);
+    const [promoResult, setPromoResult] = useState(null);
     const [promoError,  setPromoError]  = useState('');
 
     const discountAmount = promoResult?.discountAmount || 0;
-    const finalTotal     = totalPrix - discountAmount;
+    const subtotalAfterPromo = totalPrix - discountAmount;
+
+    // ── Frais de livraison dynamiques ───────────────────
+    // Utilise shippingCost retourné par validatePromo si promo appliquée,
+    // sinon fetch depuis l'API /orders/shipping-cost
+    const [shippingInfo, setShippingInfo] = useState(null);
+
+    useEffect(() => {
+        // Si promo valide : on utilise la valeur retournée par validatePromo
+        if (promoResult) {
+            setShippingInfo({
+                shipping_cost: promoResult.shippingCost,
+                is_free:       promoResult.shippingCost === 0,
+                free_shipping_threshold: promoResult.freeShippingThreshold,
+                remaining_for_free: promoResult.shippingCost === 0
+                    ? 0
+                    : Math.max(0, promoResult.freeShippingThreshold - subtotalAfterPromo),
+            });
+            return;
+        }
+        // Sinon fetch depuis l'API
+        if (totalPrix <= 0) return;
+        getShippingCost(totalPrix)
+            .then(res => setShippingInfo(res.data))
+            .catch(() => setShippingInfo(null));
+    }, [totalPrix, promoResult, subtotalAfterPromo]);
+
+    const shippingCost = shippingInfo?.shipping_cost ?? 0;
+    const finalTotal   = subtotalAfterPromo + shippingCost;
 
     const handleChange = (e) =>
         setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
-    // ── Valider le code promo ─────────────────────────────
+    // ── Valider le code promo ───────────────────────────
     const handleApplyPromo = async () => {
         if (!promoInput.trim()) return;
         setPromoStatus('loading');
@@ -281,7 +321,7 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
         setPromoError('');
     };
 
-    // ── Panier vide ───────────────────────────────────────
+    // ── Panier vide ─────────────────────────────────────
     if (panier.length === 0) {
         return (
             <div className="min-h-[60vh] flex flex-col items-center justify-center bg-[#fdf6ec] px-4">
@@ -296,7 +336,7 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
         );
     }
 
-    // ── Soumission ────────────────────────────────────────
+    // ── Soumission ──────────────────────────────────────
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -307,18 +347,40 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
             quantity:   item.quantity,
         }));
 
+        const shippingAddressLine = [
+            formData.shipping_street,
+            formData.shipping_street_number,
+        ].filter(Boolean).join(' ');
+
+        const shippingAddressFull = formData.shipping_address2
+            ? `${shippingAddressLine}, ${formData.shipping_address2}`
+            : shippingAddressLine;
+
+        const canton = getCantonFromNPA(formData.shipping_postal_code) || undefined;
+        const fullName = user ? user.name : formData.name;
+
         const orderData = {
             items,
-            payment_method:     paymentMethod,
-            shipping_full_name: user ? user.name : formData.name,
-            shipping_phone:     user ? user.phone : formData.phone,
-            shipping_address:   formData.shipping_address,
-            shipping_city:      formData.shipping_city,
-            shipping_governorate: formData.shipping_governorate || undefined,
-            shipping_postal_code: formData.shipping_postal_code || undefined, 
-            shipping_country:   'CH',
-            notes:              formData.notes      || undefined,
-            promo_code:         promoResult?.promoCode || undefined,
+            payment_method:       paymentMethod,
+
+            shipping_full_name:   fullName,
+            shipping_phone:       formData.phone,
+            shipping_address:     shippingAddressFull,
+            shipping_city:        formData.shipping_city,
+            shipping_governorate: canton,
+            shipping_postal_code: formData.shipping_postal_code || undefined,
+            shipping_country:     'CH',
+
+            billing_full_name:    fullName,
+            billing_phone:        formData.phone,
+            billing_address:      shippingAddressFull,
+            billing_city:         formData.shipping_city,
+            billing_governorate:  canton,
+            billing_postal_code:  formData.shipping_postal_code || undefined,
+            billing_country:      'CH',
+
+            notes:      formData.notes || undefined,
+            promo_code: promoResult?.promoCode || undefined,
         };
 
         try {
@@ -336,13 +398,12 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
 
             const { order, payment } = res.data;
 
-            if (payment.method === 'stripe') {
-                // ✅ Passer à l'étape 2 avec le clientSecret
+            // ✅ Le backend renvoie payment.method === 'card' ou 'twint'
+            if (payment.client_secret) {
                 onStripeOrderCreated(order, payment.client_secret, promoResult);
                 return;
             }
 
-            // COD — confirmation directe
             viderPanier();
             navigate(`/commande-confirmee/${order.id}`, {
                 state: { order, payment: { method: 'cod' } },
@@ -355,27 +416,25 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
         }
     };
 
-    // ── Input style helper ────────────────────────────────
+    // ── Input style helper ───────────────────────────────
     const inputClass = "w-full px-4 py-3 rounded-xl text-sm focus:outline-none transition";
-    const inputStyle = {
-        border: '2px solid #e5e7eb',
-        onFocus: '#166534',
-    };
     const onFocus = e => (e.target.style.borderColor = '#166534');
     const onBlur  = e => (e.target.style.borderColor = '#e5e7eb');
 
     return (
-        <div className="bg-[#fdf6ec] min-h-screen py-12">
+        <div className="bg-[#fdf6ec] min-h-screen py-8 sm:py-12">
             <div className="container mx-auto px-4 max-w-5xl">
 
                 {/* TITRE */}
-                <div className="mb-8">
+                <div className="mb-6 sm:mb-8">
                     <div className="flex items-center gap-2 text-sm text-black/50 mb-3">
                         <Link to="/panier" className="hover:text-[#166534] no-underline">Panier</Link>
                         <FiChevronRight size={14} />
                         <span className="text-[#166534] font-bold">Commande</span>
                     </div>
-                    <h1 className="text-4xl font-bold font-serif text-[#2c2c2c]">Finaliser la commande</h1>
+                    <h1 className="text-3xl sm:text-4xl font-bold font-serif text-[#2c2c2c]">
+                        Finaliser la commande
+                    </h1>
                 </div>
 
                 {error && (
@@ -386,15 +445,15 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
 
-                        {/* ── COLONNE GAUCHE ─────────────────────────────── */}
-                        <div className="lg:col-span-2 space-y-6 order-last lg:order-first">
+                        {/* ── COLONNE GAUCHE ────────────────────────────── */}
+                        <div className="lg:col-span-2 space-y-5 sm:space-y-6 order-last lg:order-first">
 
                             {/* INFOS GUEST */}
                             {!user && (
-                                <div className="bg-white rounded-2xl p-6 shadow-[0_4px_15px_rgba(0,0,0,0.07)]">
-                                    <h2 className="text-lg font-bold text-[#2c2c2c] mb-1">Vos informations</h2>
+                                <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_4px_15px_rgba(0,0,0,0.07)]">
+                                    <h2 className="text-base sm:text-lg font-bold text-[#2c2c2c] mb-1">Vos informations</h2>
                                     <p className="text-xs text-black/40 mb-5">
                                         Si vous avez déjà un compte, la commande sera rattachée automatiquement.{' '}
                                         <Link to="/connexion" className="font-bold no-underline" style={{ color: '#166534' }}>
@@ -447,12 +506,11 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                             )}
 
                             {/* ADRESSE DE LIVRAISON */}
-                            <div className="bg-white rounded-2xl p-6 shadow-[0_4px_15px_rgba(0,0,0,0.07)]">
-                                <h2 className="text-lg font-bold text-[#2c2c2c] mb-5 flex items-center gap-2">
+                            <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_4px_15px_rgba(0,0,0,0.07)]">
+                                <h2 className="text-base sm:text-lg font-bold text-[#2c2c2c] mb-5 flex items-center gap-2">
                                     <FiMapPin style={{ color: '#e63946' }} /> Adresse de livraison
                                 </h2>
 
-                                {/* Téléphone pour user connecté */}
                                 {user && (
                                     <div className="mb-4">
                                         <label className="block text-xs font-bold text-gray-600 mb-1.5">Téléphone</label>
@@ -469,54 +527,72 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                 )}
 
                                 <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Adresse *</label>
-                                        <div className="relative">
-                                            <FiMapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                            <input type="text" name="shipping_address"
-                                                value={formData.shipping_address}
+
+                                    {/* Rue + numéro */}
+                                    <div className="grid grid-cols-3 gap-3">
+                                        <div className="col-span-2">
+                                            <label className="block text-xs font-bold text-gray-600 mb-1.5">Rue *</label>
+                                            <input type="text" name="shipping_street"
+                                                value={formData.shipping_street}
                                                 onChange={handleChange} required
-                                                placeholder="Rue, numéro, quartier..."
-                                                className={`${inputClass} pl-10`}
+                                                placeholder="Rue du Marché"
+                                                className={inputClass}
+                                                style={{ border: '2px solid #e5e7eb' }}
+                                                onFocus={onFocus} onBlur={onBlur} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-600 mb-1.5">N°</label>
+                                            <input type="text" name="shipping_street_number"
+                                                value={formData.shipping_street_number}
+                                                onChange={handleChange}
+                                                placeholder="12"
+                                                className={inputClass}
                                                 style={{ border: '2px solid #e5e7eb' }}
                                                 onFocus={onFocus} onBlur={onBlur} />
                                         </div>
                                     </div>
+
+                                    {/* Complément */}
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Canton *</label>
-                                        <select name="shipping_city" value={formData.shipping_city}
-                                            onChange={handleChange} required
+                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">
+                                            Complément{' '}
+                                            <span className="font-normal text-black/30">(appartement, c/o, case postale...)</span>
+                                        </label>
+                                        <input type="text" name="shipping_address2"
+                                            value={formData.shipping_address2}
+                                            onChange={handleChange}
+                                            placeholder="App. 3B / Case postale 456"
                                             className={inputClass}
                                             style={{ border: '2px solid #e5e7eb' }}
-                                            onFocus={onFocus} onBlur={onBlur}>
-                                            <option value="">Choisir un canton</option>
-                                            {VILLES.map(v => (
-                                                <option key={v} value={v.toLowerCase()}>{v}</option>
-                                            ))}
-                                        </select>
+                                            onFocus={onFocus} onBlur={onBlur} />
                                     </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                                    {/* NPA + Localité */}
+                                    <div className="grid grid-cols-3 gap-3">
                                         <div>
-                                            <label className="block text-xs font-bold text-gray-600 mb-1.5">Canton</label>
-                                            <input type="text" name="shipping_governorate"
-                                                value={formData.shipping_governorate}
-                                                onChange={handleChange}
-                                                placeholder="Ex: Zurich, Vaud..."
-                                                className={inputClass}
-                                                style={{ border: '2px solid #e5e7eb' }}
-                                                onFocus={onFocus} onBlur={onBlur} />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-600 mb-1.5">Code postal</label>
+                                            <label className="block text-xs font-bold text-gray-600 mb-1.5">NPA *</label>
                                             <input type="text" name="shipping_postal_code"
                                                 value={formData.shipping_postal_code}
-                                                onChange={handleChange}
-                                                placeholder="Ex: 8001"
+                                                onChange={handleChange} required
+                                                placeholder="8001"
+                                                maxLength={4}
+                                                className={inputClass}
+                                                style={{ border: '2px solid #e5e7eb' }}
+                                                onFocus={onFocus} onBlur={onBlur} />
+                                        </div>
+                                        <div className="col-span-2">
+                                            <label className="block text-xs font-bold text-gray-600 mb-1.5">Localité *</label>
+                                            <input type="text" name="shipping_city"
+                                                value={formData.shipping_city}
+                                                onChange={handleChange} required
+                                                placeholder="Zurich"
                                                 className={inputClass}
                                                 style={{ border: '2px solid #e5e7eb' }}
                                                 onFocus={onFocus} onBlur={onBlur} />
                                         </div>
                                     </div>
+
+                                    {/* Notes */}
                                     <div>
                                         <label className="block text-xs font-bold text-gray-600 mb-1.5">Notes (optionnel)</label>
                                         <textarea name="notes" value={formData.notes}
@@ -526,81 +602,94 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                             style={{ border: '2px solid #e5e7eb' }}
                                             onFocus={onFocus} onBlur={onBlur} />
                                     </div>
+
                                 </div>
                             </div>
 
                             {/* MÉTHODE DE PAIEMENT */}
-                            <div className="bg-white rounded-2xl p-6 shadow-[0_4px_15px_rgba(0,0,0,0.07)]">
-                                <h2 className="text-lg font-bold text-[#2c2c2c] mb-5 flex items-center gap-2">
-                                    <FiCreditCard style={{ color: '#e63946' }} /> Méthode de paiement
-                                </h2>
-                                <div className="space-y-3">
+                            {/* Carte bancaire */}
+                                <label className="flex items-center gap-3 sm:gap-4 p-4 rounded-xl cursor-pointer transition-all duration-200"
+                                    style={{
+                                        border:     paymentMethod === 'card' ? '2px solid #166534' : '2px solid #e5e7eb',
+                                        background: paymentMethod === 'card' ? '#f0fdf4' : 'white',
+                                    }}>
+                                    <input type="radio" name="payment" value="card"
+                                        checked={paymentMethod === 'card'}
+                                        onChange={() => setPaymentMethod('card')}
+                                        className="hidden" />
+                                    <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0"
+                                        style={{ borderColor: paymentMethod === 'card' ? '#166534' : '#d1d5db' }}>
+                                        {paymentMethod === 'card' && (
+                                            <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#166534' }} />
+                                        )}
+                                    </div>
+                                    <FiCreditCard size={20} style={{ color: '#6366f1' }} />
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-bold text-sm text-[#2c2c2c]">Carte bancaire</p>
+                                        <p className="text-xs text-black/40">Visa, Mastercard — paiement sécurisé</p>
+                                    </div>
+                                    <div className="hidden sm:flex gap-2 items-center shrink-0">
+                                        <VisaLogo />
+                                        <MastercardLogo />
+                                    </div>
+                                </label>
 
-                                    {/* STRIPE */}
-                                    <label className="flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all duration-200"
-                                        style={{
-                                            border:     paymentMethod === 'stripe' ? '2px solid #166534' : '2px solid #e5e7eb',
-                                            background: paymentMethod === 'stripe' ? '#f0fdf4' : 'white',
-                                        }}>
-                                        <input type="radio" name="payment" value="stripe"
-                                            checked={paymentMethod === 'stripe'}
-                                            onChange={() => setPaymentMethod('stripe')}
-                                            className="hidden" />
-                                        <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0"
-                                            style={{ borderColor: paymentMethod === 'stripe' ? '#166534' : '#d1d5db' }}>
-                                            {paymentMethod === 'stripe' && (
-                                                <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#166534' }} />
-                                            )}
-                                        </div>
-                                        <FiCreditCard size={20} style={{ color: '#6366f1' }} />
-                                        <div className="flex-1">
-                                            <p className="font-bold text-sm text-[#2c2c2c]">Carte bancaire</p>
-                                            <p className="text-xs text-black/40">Visa, Mastercard , Twint — paiement sécurisé</p>
-                                        </div>
-                                        <div className="hidden sm:flex gap-2 items-center">
-                                            <VisaLogo />
-                                            <MastercardLogo />
-                                            <TwintLogo />
-                                        </div>
-                                    </label>
+                                {/* Twint */}
+                                <label className="flex items-center gap-3 sm:gap-4 p-4 rounded-xl cursor-pointer transition-all duration-200"
+                                    style={{
+                                        border:     paymentMethod === 'twint' ? '2px solid #166534' : '2px solid #e5e7eb',
+                                        background: paymentMethod === 'twint' ? '#f0fdf4' : 'white',
+                                    }}>
+                                    <input type="radio" name="payment" value="twint"
+                                        checked={paymentMethod === 'twint'}
+                                        onChange={() => setPaymentMethod('twint')}
+                                        className="hidden" />
+                                    <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0"
+                                        style={{ borderColor: paymentMethod === 'twint' ? '#166534' : '#d1d5db' }}>
+                                        {paymentMethod === 'twint' && (
+                                            <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#166534' }} />
+                                        )}
+                                    </div>
+                                    <span style={{ fontSize: 20 }}>📱</span>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-bold text-sm text-[#2c2c2c]">Twint</p>
+                                        <p className="text-xs text-black/40">Paiement mobile Twint</p>
+                                    </div>
+                                    <div className="hidden sm:flex items-center shrink-0">
+                                        <TwintLogo />
+                                    </div>
+                                </label>
 
-                                
-                                </div>
-                            </div>
-
-                            {/* ── CODE PROMO ────────────────────────────── */}
-                            <div className="bg-white rounded-2xl p-6 shadow-[0_4px_15px_rgba(0,0,0,0.07)]">
-                                <h2 className="text-lg font-bold text-[#2c2c2c] mb-4 flex items-center gap-2">
+                            {/* CODE PROMO */}
+                            <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_4px_15px_rgba(0,0,0,0.07)]">
+                                <h2 className="text-base sm:text-lg font-bold text-[#2c2c2c] mb-4 flex items-center gap-2">
                                     <FiTag style={{ color: '#e63946' }} /> Code promo
                                 </h2>
 
-                                {/* Code promo valide — affichage récapitulatif */}
                                 {promoStatus === 'valid' && promoResult ? (
-                                    <div className="rounded-xl p-4 flex items-center justify-between"
+                                    <div className="rounded-xl p-4 flex items-center justify-between gap-3"
                                         style={{ background: '#f0fdf4', border: '2px solid #86efac' }}>
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-9 h-9 rounded-full flex items-center justify-center"
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
                                                 style={{ background: '#dcfce7' }}>
                                                 <FiCheck size={18} style={{ color: '#166534' }} />
                                             </div>
-                                            <div>
+                                            <div className="min-w-0">
                                                 <p className="font-bold text-sm text-[#166534]">
                                                     Code {promoResult.promoCode} appliqué ✅
                                                 </p>
                                                 <p className="text-xs text-black/50">
                                                     Réduction de{' '}
+                                                    <strong style={{ color: '#166534' }}>{promoResult.label}</strong>
+                                                    {' '}— économies de{' '}
                                                     <strong style={{ color: '#166534' }}>
-                                                        {promoResult.label}
-                                                    </strong>
-                                                    {' '}— vous économisez{' '}
-                                                    <strong style={{ color: '#166534' }}>
-                                                        {promoResult.discountAmount.toFixed(2)} DT
+                                                        {fmt(promoResult.discountAmount)}
                                                     </strong>
                                                 </p>
                                             </div>
                                         </div>
                                         <button type="button" onClick={handleRemovePromo}
-                                            className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-100 transition-colors"
+                                            className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-100 transition-colors shrink-0"
                                             style={{ color: '#dc2626' }}>
                                             <FiX size={15} />
                                         </button>
@@ -608,7 +697,7 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                 ) : (
                                     <>
                                         <div className="flex gap-3">
-                                            <div className="relative flex-1">
+                                            <div className="relative flex-1 min-w-0">
                                                 <FiTag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                                 <input
                                                     type="text"
@@ -624,7 +713,7 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                             </div>
                                             <button type="button" onClick={handleApplyPromo}
                                                 disabled={promoStatus === 'loading' || !promoInput.trim()}
-                                                className="px-5 py-3 rounded-xl font-bold text-sm text-white transition-all disabled:opacity-50"
+                                                className="px-4 sm:px-5 py-3 rounded-xl font-bold text-sm text-white transition-all disabled:opacity-50 shrink-0"
                                                 style={{ background: '#166534' }}>
                                                 {promoStatus === 'loading' ? '...' : 'Appliquer'}
                                             </button>
@@ -640,13 +729,13 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                             </div>
                         </div>
 
-                        {/* ── COLONNE DROITE — RÉSUMÉ ─────────────────── */}
+                        {/* ── COLONNE DROITE — RÉSUMÉ ───────────────────── */}
                         <div className="lg:col-span-1 order-first lg:order-last">
-                            <div className="bg-white rounded-2xl p-6 shadow-[0_4px_15px_rgba(0,0,0,0.07)] lg:sticky lg:top-4">
-                                <h2 className="text-lg font-bold text-[#2c2c2c] mb-5">Récapitulatif</h2>
+                            <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_4px_15px_rgba(0,0,0,0.07)] lg:sticky lg:top-4">
+                                <h2 className="text-base sm:text-lg font-bold text-[#2c2c2c] mb-5">Récapitulatif</h2>
 
                                 {/* Items */}
-                                <div className="space-y-3 mb-5 max-h-56 overflow-y-auto pr-1">
+                                <div className="space-y-3 mb-5 max-h-48 sm:max-h-56 overflow-y-auto pr-1">
                                     {panier.map(item => (
                                         <div key={item.variant_id} className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 flex items-center justify-center"
@@ -675,7 +764,6 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                         </span>
                                     </div>
 
-                                    {/* ✅ Réduction visible */}
                                     {discountAmount > 0 && promoResult && (
                                         <>
                                             <div className="flex justify-between items-center text-sm">
@@ -695,49 +783,59 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                             <div className="flex justify-between text-sm text-black/60">
                                                 <span>Après réduction</span>
                                                 <span className="font-semibold text-[#2c2c2c]">
-                                                    {fmt(totalPrix - discountAmount)}
+                                                    {fmt(subtotalAfterPromo)}
                                                 </span>
                                             </div>
                                         </>
                                     )}
 
+                                    {/* ✅ Frais de livraison via API — plus de référence à order */}
                                     <div className="flex justify-between text-sm text-black/60">
                                         <span>Livraison</span>
-                                        <span className="font-semibold" style={{ color: '#166534' }}>Gratuite</span>
+                                        {shippingInfo ? (
+                                            <span className="font-semibold" style={{ color: '#166534' }}>
+                                                {shippingInfo.is_free ? 'Gratuite' : fmt(shippingInfo.shipping_cost)}
+                                            </span>
+                                        ) : (
+                                            <span className="text-black/40 text-xs italic">Calcul en cours…</span>
+                                        )}
                                     </div>
 
-                                    <div className="flex justify-between font-extrabold text-lg text-[#2c2c2c] pt-2 border-t border-gray-100">
+                                    {/* Barre progression livraison gratuite */}
+                                    {shippingInfo && !shippingInfo.is_free && shippingInfo.remaining_for_free > 0 && (
+                                        <div className="rounded-lg px-2 py-1.5 text-xs"
+                                            style={{ background: '#f0fdf4', color: '#166534' }}>
+                                            🚚 Plus que <strong>{fmt(shippingInfo.remaining_for_free)}</strong> pour la livraison gratuite
+                                        </div>
+                                    )}
+
+                                    <div className="flex justify-between font-extrabold text-base sm:text-lg text-[#2c2c2c] pt-2 border-t border-gray-100">
                                         <span>Total</span>
                                         <div className="text-right">
                                             {discountAmount > 0 && (
                                                 <p className="text-xs line-through text-black/30 font-normal">
-                                                    {fmt(totalPrix)}
+                                                    {fmt(totalPrix + shippingCost)}
                                                 </p>
                                             )}
                                             <span style={{ color: '#166534' }}>{fmt(finalTotal)}</span>
                                         </div>
                                     </div>
 
-                                    {/* Badge économies */}
                                     {discountAmount > 0 && (
                                         <div className="flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold"
                                             style={{ background: '#dcfce7', color: '#166534' }}>
-                                            🎉 Vous économisez {fmt(discountAmount)} sur cette commande !
+                                            🎉 Vous économisez {fmt(discountAmount)} !
                                         </div>
                                     )}
                                 </div>
 
                                 <button type="submit" disabled={loading}
-                                    className="w-full text-white font-bold py-4 rounded-xl transition-all duration-300 text-base disabled:opacity-50 hover:scale-105"
+                                    className="w-full text-white font-bold py-4 rounded-xl transition-all duration-300 text-sm sm:text-base disabled:opacity-50 hover:scale-105"
                                     style={{
-                                        background:  'linear-gradient(135deg, #166534, #15803d)',
-                                        boxShadow:   '0 4px 20px rgba(22,101,52,0.4)',
+                                        background: 'linear-gradient(135deg, #166534, #15803d)',
+                                        boxShadow:  '0 4px 20px rgba(22,101,52,0.4)',
                                     }}>
-                                    {loading
-                                        ? '⏳ Traitement...'
-                                        : paymentMethod === 'stripe'
-                                            ? '💳 Continuer vers le paiement →'
-                                            : '✅ Confirmer la commande →'}
+                                    {loading ? '⏳ Traitement...' : '💳 Continuer vers le paiement →'}
                                 </button>
 
                                 <p className="text-xs text-center text-black/30 mt-3 flex items-center justify-center gap-1">
@@ -756,8 +854,6 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
 
 // ════════════════════════════════════════════════════════════
 // WRAPPER — Gère les deux phases
-// Phase 'form'    → CheckoutForm
-// Phase 'payment' → Elements(clientSecret) + StripePaymentStep
 // ════════════════════════════════════════════════════════════
 const Checkout = () => {
     const [phase,        setPhase]        = useState('form');
@@ -775,7 +871,6 @@ const Checkout = () => {
     const handleBack = () => {
         setPhase('form');
         setClientSecret(null);
-        // On garde l'ordre créé en mémoire — pas de doublon car on n'a pas encore payé
     };
 
     if (phase === 'payment' && clientSecret) {
@@ -793,9 +888,7 @@ const Checkout = () => {
         );
     }
 
-    return (
-        <CheckoutForm onStripeOrderCreated={handleStripeOrderCreated} />
-    );
+    return <CheckoutForm onStripeOrderCreated={handleStripeOrderCreated} />;
 };
 
 export default Checkout;

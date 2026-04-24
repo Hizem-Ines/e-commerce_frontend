@@ -14,6 +14,7 @@ const STATUS_LABELS = {
     shipped:   { label: 'Expédiée',    color: '#8b5cf6', bg: '#ede9fe' },
     delivered: { label: 'Livrée',      color: '#166534', bg: '#dcfce7' },
     cancelled: { label: 'Annulée',     color: '#dc2626', bg: '#fee2e2' },
+    processing: { label: 'En cours',   color: '#f97316', bg: '#ffedd5' },
 };
 
 

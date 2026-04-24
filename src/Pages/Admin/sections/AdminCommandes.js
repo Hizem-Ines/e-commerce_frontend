@@ -12,12 +12,14 @@ const STATUS_LABELS = {
     shipped:    { label: 'Expédiée',     color: 'bg-purple-100 text-purple-700' },
     delivered:  { label: 'Livrée',       color: 'bg-emerald-100 text-emerald-700' },
     cancelled:  { label: 'Annulée',      color: 'bg-red-100 text-red-700' },
+    refunded: { label: 'Remboursée',     color: 'bg-gray-100 text-gray-600' },
 };
 
-const STATUS_OPTIONS = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
+const STATUS_OPTIONS = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled' , 'refunded'];
 
 const PAYMENT_LABELS = {
-    stripe: '💳 Carte / Twint',
+    card:  ' Carte bancaire',
+    twint: ' Twint',
 };
 
 // ─── Helper : adresse sans virgule orpheline ───────────────
@@ -84,7 +86,7 @@ const AdminCommandes = () => {
     // ── Changement de statut ──────────────────────────────
     const handleStatusChange = async (orderId, newStatus) => {
         try {
-            await updateOrderStatus(orderId, { status: newStatus });
+            await updateOrderStatus(orderId, newStatus);
             setCommandes(prev =>
                 prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o)
             );
