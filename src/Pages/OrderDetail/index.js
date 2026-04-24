@@ -211,7 +211,7 @@ const OrderDetail = () => {
                         <div className="space-y-2 text-sm">
                             <div className="flex justify-between text-black/60">
                                 <span>Sous-total</span>
-                                <span>{fmt(parseFloat(order.total_price) + parseFloat(order.discount_amount || 0))}</span>
+                                <span>{fmt(order.subtotal)}</span>
                             </div>
                             {parseFloat(order.discount_amount) > 0 && (
                                 <div className="flex justify-between text-[#2d5a27] font-semibold">
@@ -221,7 +221,9 @@ const OrderDetail = () => {
                             )}
                             <div className="flex justify-between text-black/60">
                                 <span>Livraison</span>
-                                <span className="font-semibold text-[#2d5a27]">Gratuite</span>
+                                <span className="font-semibold text-[#2d5a27]">
+                                    {parseFloat(order.shipping_cost) === 0 ? 'Gratuite' : fmt(order.shipping_cost)}
+                                </span>
                             </div>
                             <div className="flex justify-between font-black text-lg text-[#2c2c2c] pt-3 border-t border-gray-100">
                                 <span>Total</span>

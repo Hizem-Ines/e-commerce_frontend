@@ -4,13 +4,19 @@ import { FiPackage, FiMapPin, FiCreditCard, FiHome, FiLoader } from 'react-icons
 import { getSingleOrder } from '../../services/orderService';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 import formatPrice from '../../utils/formatPrice';
+import { useCart } from '../../context/CartContext';
 
 const OrderConfirmation = () => {
+    const { viderPanier } = useCart();
     const { orderId }         = useParams();
     const { state }           = useLocation();
     const [searchParams]      = useSearchParams();
     const { currency } = useSiteSettings();
     const fmt = (n) => formatPrice(parseFloat(n), currency);
+
+     useEffect(() => {
+        viderPanier();
+    }, []);
 
     // Détection d'un retour depuis Stripe (3D Secure redirect)
     const redirectStatus      = searchParams.get('redirect_status');    // 'succeeded' | 'failed'

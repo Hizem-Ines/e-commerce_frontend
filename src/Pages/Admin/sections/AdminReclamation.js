@@ -18,27 +18,28 @@ const TYPE_ICONS = {
   "Autre":              "💬",
 };
 
-// ─── Status badge ──────────────────────────────────────────
-function StatusBadge({ status }) {
+// ─── Status Selector (Dropdown) ─────────────────────────────
+function StatusSelector({ status, onChange }) {
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.en_attente;
+
   return (
-    <span className={`text-xs font-bold px-2 py-1 rounded-full ${cfg.color}`}>
-      {cfg.label}
-    </span>
+    <select
+      value={status}
+      onChange={(e) => onChange(e.target.value)}
+      className={`text-xs font-bold px-4 py-2 rounded-full border-2 bg-white cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-[#4a8c42] hover:shadow-sm ${cfg.color.replace("bg-", "border-").replace("text-", "")}`}
+    >
+      {Object.entries(STATUS_CONFIG).map(([key, config]) => (
+        <option key={key} value={key}>
+          {config.label}
+        </option>
+      ))}
+    </select>
   );
 }
 
-// ─── Detail modal ──────────────────────────────────────────
-function DetailModal({ open, reclamation, onClose, onStatusChange }) {
-  const [loading, setLoading] = useState(false);
-
+// ─── Detail Modal (Clean version - only view) ─────────────────
+function DetailModal({ open, reclamation, onClose }) {
   if (!open || !reclamation) return null;
-
-  const handleStatus = async (status) => {
-    setLoading(true);
-    await onStatusChange(reclamation.id, status);
-    setLoading(false);
-  };
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -48,9 +49,14 @@ function DetailModal({ open, reclamation, onClose, onStatusChange }) {
         <div className="flex items-center justify-between px-7 py-5 border-b border-gray-100">
           <div>
             <h2 className="text-xl font-bold font-serif text-[#2c2c2c]">Détail de la réclamation</h2>
-            <p className="text-xs text-black/40 mt-0.5">#{reclamation.id} — {new Date(reclamation.created_at).toLocaleDateString("fr-FR")}</p>
+            <p className="text-xs text-black/40 mt-0.5">
+              #{reclamation.id} — {new Date(reclamation.created_at).toLocaleDateString("fr-FR")}
+            </p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl transition text-black/40 hover:text-black/70">
+          <button 
+            onClick={onClose} 
+            className="p-2 hover:bg-gray-100 rounded-xl transition text-black/40 hover:text-black/70"
+          >
             <FiX size={20} />
           </button>
         </div>
@@ -66,8 +72,9 @@ function DetailModal({ open, reclamation, onClose, onStatusChange }) {
             </div>
             <div className="flex items-center gap-2 text-sm">
               <span className="text-black/40">Email :</span>
-              <a href={`mailto:${reclamation.user_email}`}
-                className="font-semibold text-[#2d5a27] hover:underline">{reclamation.user_email}</a>
+              <a href={`mailto:${reclamation.user_email}`} className="font-semibold text-[#2d5a27] hover:underline">
+                {reclamation.user_email}
+              </a>
             </div>
             {reclamation.user_phone && (
               <div className="flex items-center gap-2 text-sm">
@@ -77,7 +84,7 @@ function DetailModal({ open, reclamation, onClose, onStatusChange }) {
             )}
           </div>
 
-          {/* Réclamation info */}
+          {/* Réclamation Info */}
           <div className="bg-[#f9f5f0] rounded-2xl p-4 space-y-2">
             <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-3">Réclamation</p>
             <div className="flex items-center gap-2 text-sm">
@@ -92,40 +99,29 @@ function DetailModal({ open, reclamation, onClose, onStatusChange }) {
                 <span className="font-semibold text-[#2c2c2c]">{reclamation.order_number}</span>
               </div>
             )}
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-black/40">Statut actuel :</span>
+              <span className={`text-xs font-bold px-3 py-1 rounded-full ${STATUS_CONFIG[reclamation.status]?.color || ""}`}>
+                {STATUS_CONFIG[reclamation.status]?.label || "En attente"}
+              </span>
+            </div>
           </div>
 
           {/* Message */}
           <div className="bg-[#f9f5f0] rounded-2xl p-4">
             <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-3">Message</p>
-            <p className="text-sm text-[#2c2c2c] leading-relaxed whitespace-pre-wrap">{reclamation.message}</p>
-          </div>
-
-          {/* Change status */}
-          <div>
-            <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-3">Changer le statut</p>
-            <div className="flex gap-2 flex-wrap">
-              {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
-                <button
-                  key={key}
-                  disabled={loading || reclamation.status === key}
-                  onClick={() => handleStatus(key)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold border-2 transition disabled:opacity-40 ${
-                    reclamation.status === key
-                      ? `${cfg.color} border-transparent`
-                      : "bg-white border-gray-200 text-black/50 hover:border-[#4a8c42] hover:text-[#2d5a27]"
-                  }`}
-                >
-                  {cfg.label}
-                </button>
-              ))}
-            </div>
+            <p className="text-sm text-[#2c2c2c] leading-relaxed whitespace-pre-wrap">
+              {reclamation.message}
+            </p>
           </div>
         </div>
 
         {/* Footer */}
         <div className="px-7 py-5 border-t border-gray-100 bg-[#fdf6ec] shrink-0">
-          <button onClick={onClose}
-            className="w-full border-2 border-gray-200 text-black/60 font-bold py-3 rounded-xl hover:bg-gray-100 transition text-sm">
+          <button 
+            onClick={onClose}
+            className="w-full border-2 border-gray-200 text-black/60 font-bold py-3 rounded-xl hover:bg-gray-100 transition text-sm"
+          >
             Fermer
           </button>
         </div>
@@ -134,44 +130,59 @@ function DetailModal({ open, reclamation, onClose, onStatusChange }) {
   );
 }
 
-// ─── Main AdminReclamations ────────────────────────────────
+// ─── Main Component ─────────────────────────────────────────────
 export default function AdminReclamations() {
   const [reclamations, setReclamations] = useState([]);
-  const [loading, setLoading]           = useState(true);
-  const [search, setSearch]             = useState("");
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [selected, setSelected]         = useState(null);
-  const [successMsg, setSuccessMsg]     = useState("");
-  const [errorMsg, setErrorMsg]         = useState("");
+  const [selected, setSelected] = useState(null);
+  const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const showSuccess = (msg) => { setSuccessMsg(msg); setTimeout(() => setSuccessMsg(""), 3000); };
-  const showError   = (msg) => { setErrorMsg(msg);   setTimeout(() => setErrorMsg(""), 3000); };
+  const showSuccess = (msg) => {
+    setSuccessMsg(msg);
+    setTimeout(() => setSuccessMsg(""), 3000);
+  };
+
+  const showError = (msg) => {
+    setErrorMsg(msg);
+    setTimeout(() => setErrorMsg(""), 3000);
+  };
 
   const loadReclamations = async () => {
     setLoading(true);
     try {
       const data = await getAllReclamations();
       setReclamations(data.reclamations || []);
-    } catch {
+    } catch (err) {
       showError("Erreur lors du chargement des réclamations.");
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { loadReclamations(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    loadReclamations();
+  }, []);
 
-  const handleStatusChange = async (id, status) => {
+  const handleStatusChange = async (id, newStatus) => {
     try {
-      await updateReclamationStatus(id, status);
+      await updateReclamationStatus(id, newStatus);
+
+      // Update local state
       setReclamations((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, status } : r))
+        prev.map((r) => (r.id === id ? { ...r, status: newStatus } : r))
       );
-      // update the open modal too
-      setSelected((prev) => (prev?.id === id ? { ...prev, status } : prev));
-      showSuccess("Statut mis à jour.");
-    } catch {
-      showError("Erreur lors de la mise à jour.");
+
+      // Update modal if open
+      setSelected((prev) => (prev?.id === id ? { ...prev, status: newStatus } : prev));
+
+      showSuccess("Statut mis à jour avec succès.");
+    } catch (err) {
+      showError("Erreur lors de la mise à jour du statut.");
+      console.error(err);
     }
   };
 
@@ -181,11 +192,13 @@ export default function AdminReclamations() {
       r.user_email.toLowerCase().includes(search.toLowerCase()) ||
       (r.order_number || "").toLowerCase().includes(search.toLowerCase()) ||
       r.reclamation_type.toLowerCase().includes(search.toLowerCase());
+
     const matchStatus = filterStatus === "all" || r.status === filterStatus;
+
     return matchSearch && matchStatus;
   });
 
-  // stats
+  // Stats for cards
   const counts = reclamations.reduce((acc, r) => {
     acc[r.status] = (acc[r.status] || 0) + 1;
     return acc;
@@ -195,12 +208,11 @@ export default function AdminReclamations() {
     <div>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
-
         <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Réclamations</h2>
         <span className="text-sm text-black/40 font-medium">{reclamations.length} au total</span>
       </div>
 
-      {/* Feedback */}
+      {/* Feedback Messages */}
       {successMsg && (
         <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm flex items-center gap-2">
           <FiCheckCircle size={16} /> {successMsg}
@@ -212,7 +224,7 @@ export default function AdminReclamations() {
         </div>
       )}
 
-      {/* Stat cards */}
+      {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-7">
         {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
           <button
@@ -235,7 +247,8 @@ export default function AdminReclamations() {
         <div className="relative flex-1">
           <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input
-            type="text" value={search}
+            type="text"
+            value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher par nom, email, commande, type…"
             className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42] focus:outline-none text-sm transition"
@@ -267,15 +280,15 @@ export default function AdminReclamations() {
             </p>
           </div>
         ) : (
-          <table className="w-full text-sm min-w-[380px]">
+          <table className="w-full text-sm min-w-[600px]">
             <thead>
               <tr className="bg-[#f9f5f0] border-b border-gray-100">
                 <th className="text-left px-5 py-4 font-bold text-[#2c2c2c]">Client</th>
                 <th className="text-left px-5 py-4 font-bold text-[#2c2c2c] hidden sm:table-cell">Type</th>
                 <th className="text-left px-5 py-4 font-bold text-[#2c2c2c] hidden md:table-cell">Commande</th>
-                <th className="text-center px-5 py-4 font-bold text-[#2c2c2c]">Statut</th>
+                <th className="text-center px-4 py-4 font-bold text-[#2c2c2c] w-40">Statut</th>
                 <th className="text-left px-5 py-4 font-bold text-[#2c2c2c] hidden lg:table-cell">Date</th>
-                <th className="text-center px-5 py-4 font-bold text-[#2c2c2c]">Actions</th>
+                <th className="text-center px-5 py-4 font-bold text-[#2c2c2c] w-16">Détail</th>
               </tr>
             </thead>
             <tbody>
@@ -298,13 +311,19 @@ export default function AdminReclamations() {
                     </span>
                   </td>
                   <td className="px-5 py-4 hidden md:table-cell">
-                    {r.order_number
-                      ? <span className="font-mono text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-lg">{r.order_number}</span>
-                      : <span className="text-black/30">—</span>
-                    }
+                    {r.order_number ? (
+                      <span className="font-mono text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-lg">
+                        {r.order_number}
+                      </span>
+                    ) : (
+                      <span className="text-black/30">—</span>
+                    )}
                   </td>
-                  <td className="px-5 py-4 text-center">
-                    <StatusBadge status={r.status} />
+                  <td className="px-4 py-4 text-center">
+                    <StatusSelector
+                      status={r.status}
+                      onChange={(newStatus) => handleStatusChange(r.id, newStatus)}
+                    />
                   </td>
                   <td className="px-5 py-4 hidden lg:table-cell">
                     <div className="flex items-center gap-1.5 text-xs text-black/40">
@@ -335,7 +354,6 @@ export default function AdminReclamations() {
         open={!!selected}
         reclamation={selected}
         onClose={() => setSelected(null)}
-        onStatusChange={handleStatusChange}
       />
     </div>
   );
