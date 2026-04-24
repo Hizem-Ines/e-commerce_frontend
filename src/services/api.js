@@ -20,6 +20,7 @@ api.interceptors.response.use(
         '/mot-de-passe-oublie',
         '/complete-account',
         '/login/success',
+        '/',
       ];
       const isPublic = publicPaths.some(path => window.location.pathname.startsWith(path));
       if (!isPublic) {

@@ -416,7 +416,6 @@ const ProductDetail = () => {
                             { id: 'description',     label: '📖 Description'     },
                             { id: 'utilisation',     label: '💡 Utilisation'     },
                             { id: 'composition',     label: '🧪 Composition'     },
-                            { id: 'recommandations', label: '✅ Recommandations' },
                             { id: 'avis', label: `⭐ Avis (${produit.reviews?.length || 0})` },
                         ].map(tab => (
                             <button
@@ -579,95 +578,73 @@ const ProductDetail = () => {
                             </div>
                         )}
 
-                        {/* ── Recommandations ───────────────────────────── */}
-                        {ongletActif === 'recommandations' && (
-                            <div className="space-y-5">
-                                <h3 className="text-base font-bold text-[#2c2c2c]">Conseils & recommandations</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {[
-                                        { icon: '☀️', title: 'Conservation',  text: "Conserver dans un endroit sec, frais et à l'abri de la lumière directe du soleil." },
-                                        { icon: '👶', title: 'Enfants',        text: 'Tenir hors de portée des enfants. Vérifier les recommandations spécifiques au produit.' },
-                                        { icon: '⚖️', title: 'Dosage',         text: 'Ne pas dépasser la dose journalière recommandée. Suivre les indications du producteur.' },
-                                        { icon: '🌿', title: 'Naturel 100%',   text: "Produit issu de l'agriculture biologique. Sans additifs ni conservateurs artificiels." },
-                                    ].map((item, i) => (
-                                        <div key={i} className="flex gap-3 items-start bg-[#f9f5f0] rounded-xl p-5">
-                                            <span className="text-base shrink-0 mt-0.5">{item.icon}</span>
-                                            <div>
-                                                <p className="font-bold text-[#2c2c2c] text-sm mb-1">{item.title}</p>
-                                                <p className="text-xs text-black/60 leading-relaxed">{item.text}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
 
                         {/* ── Avis ──────────────────────────────────────── */}
                         {ongletActif === 'avis' && (
-    <div className="space-y-6">
+                            <div className="space-y-6">
 
-        {/* FORMULAIRE AJOUTER UN AVIS */}
-        {user ? (
-            <FormAvis productId={id} onSuccess={() => {
-                getProductById(id).then(res => setProduit(res.data.product));
-            }} />
-        ) : (
-            <div className="bg-emerald-50 border border-#b6eac7 rounded-xl p-4 text-center">
-                <p className="text-emerald-700 font-semibold text-sm mb-2">
-                    Connectez-vous pour laisser un avis
-                </p>
-                <Link to="/connexion" className="bg-[#2d5a27] text-white font-bold px-5 py-2 rounded-xl no-underline hover:bg-[#4a8c42]  transition text-sm inline-block">
-                    Se connecter
-                </Link>
-            </div>
-        )}
-
-        {/* LISTE DES AVIS */}
-        {produit.reviews?.length > 0 ? (
-            produit.reviews.map((avis, i) => (
-                <div key={avis.review_id || i} className="bg-[#f9f5f0] rounded-xl p-5">
-                    <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                            {avis.reviewer?.avatar ? (
-                                <img src={avis.reviewer.avatar} alt={avis.reviewer.name} className="w-10 h-10 rounded-full object-cover" />
-                            ) : (
-                                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-[#2d5a27] font-bold text-sm">
-                                    {avis.reviewer?.name?.[0]}
-                                </div>
-                            )}
-                            <div>
-                                <p className="font-bold text-sm text-[#2c2c2c]">{avis.reviewer?.name}</p>
-                                {avis.is_verified && (
-                                    <span className="text-xs text-[#2d5a27] font-semibold">✓ Achat vérifié</span>
+                                {/* FORMULAIRE AJOUTER UN AVIS */}
+                                {user ? (
+                                    <FormAvis productId={id} onSuccess={() => {
+                                        getProductById(id).then(res => setProduit(res.data.product));
+                                    }} />
+                                ) : (
+                                    <div className="bg-emerald-50 border border-#b6eac7 rounded-xl p-4 text-center">
+                                        <p className="text-emerald-700 font-semibold text-sm mb-2">
+                                            Connectez-vous pour laisser un avis
+                                        </p>
+                                        <Link to="/connexion" className="bg-[#2d5a27] text-white font-bold px-5 py-2 rounded-xl no-underline hover:bg-[#4a8c42]  transition text-sm inline-block">
+                                            Se connecter
+                                        </Link>
+                                    </div>
                                 )}
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <div className="flex gap-0.5 mb-1 justify-end">
-                                {[...Array(5)].map((_, j) => (
-                                    <span key={j} className={j < avis.rating ? 'text-yellow-400' : 'text-gray-200'}>★</span>
-                                ))}
-                            </div>
-                            <span className="text-xs text-black/40">
-                                {new Date(avis.created_at).toLocaleDateString('fr-FR')}
-                            </span>
-                        </div>
-                    </div>
-                    <p className="text-sm text-black/60 leading-relaxed">{avis.comment}</p>
-                </div>
-            ))
-        ) : (
-            <div className="text-center py-10">
-                <p className="text-4xl mb-3">💬</p>
-                <p className="font-bold text-[#2c2c2c] mb-1">Aucun avis pour le moment</p>
-                <p className="text-sm text-black/40">Soyez le premier à donner votre avis !</p>
-            </div>
-        )}
-    </div>
-)}
 
-                    </div>
-                </div>
+                                {/* LISTE DES AVIS */}
+                                {produit.reviews?.length > 0 ? (
+                                            produit.reviews.map((avis, i) => (
+                                                <div key={avis.review_id || i} className="bg-[#f9f5f0] rounded-xl p-5">
+                                                    <div className="flex items-center justify-between mb-3">
+                                                        <div className="flex items-center gap-3">
+                                                            {avis.reviewer?.avatar ? (
+                                                                <img src={avis.reviewer.avatar} alt={avis.reviewer.name} className="w-10 h-10 rounded-full object-cover" />
+                                                            ) : (
+                                                                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-[#2d5a27] font-bold text-sm">
+                                                                    {avis.reviewer?.name?.[0]}
+                                                                </div>
+                                                            )}
+                                                            <div>
+                                                                <p className="font-bold text-sm text-[#2c2c2c]">{avis.reviewer?.name}</p>
+                                                                {avis.is_verified && (
+                                                                    <span className="text-xs text-[#2d5a27] font-semibold">✓ Achat vérifié</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <div className="flex gap-0.5 mb-1 justify-end">
+                                                                {[...Array(5)].map((_, j) => (
+                                                                    <span key={j} className={j < avis.rating ? 'text-yellow-400' : 'text-gray-200'}>★</span>
+                                                                ))}
+                                                            </div>
+                                                            <span className="text-xs text-black/40">
+                                                                {new Date(avis.created_at).toLocaleDateString('fr-FR')}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-sm text-black/60 leading-relaxed">{avis.comment}</p>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="text-center py-10">
+                                                <p className="text-4xl mb-3">💬</p>
+                                                <p className="font-bold text-[#2c2c2c] mb-1">Aucun avis pour le moment</p>
+                                                <p className="text-sm text-black/40">Soyez le premier à donner votre avis !</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                            </div>
+                        </div>
 
                 {/* ── FOURNISSEUR ───────────────────────────────────── */}
                 {produit.supplier_name && (
