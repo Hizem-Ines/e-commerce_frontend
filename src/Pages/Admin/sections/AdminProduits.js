@@ -469,6 +469,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
     const [showAddVariant, setShowAddVariant] = useState(false);
     const [images, setImages]     = useState([]);
     const [previews, setPreviews] = useState([]);
+    const [existingImages, setExistingImages] = useState([]);   
     const [loading, setLoading]   = useState(false);
     const [error, setError]       = useState('');
     const [tab, setTab]           = useState('general');
@@ -480,8 +481,9 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
         setFormLoading(true);
         api.get(`/products/${product.id}?admin=true`)
             .then(res => {
-                const p = res.data.product;
+                const p = res.data.product || res.data;
                 if (!p) return;
+                console.log("Produit chargé :", p);
                 // Derive threshold from first variant if not on product level
                 const threshold = p.low_stock_threshold
                     ?? p.variants?.[0]?.low_stock_threshold
@@ -506,6 +508,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                     low_stock_threshold: threshold,
                 });
                 setEditVariants(p.variants || []);
+                setExistingImages(p.images || []);
             })
             .catch(() => {})
             .finally(() => setFormLoading(false));
@@ -798,48 +801,72 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                         </div>
                     )}
 
-                    {/* IMAGES */}
+                 {/* IMAGES - avec suppression possible */}
                     {!formLoading && tab === 'images' && (
-                        <div className="space-y-5">
+                        <div className="space-y-6">
                             <button
                                 onClick={() => fileRef.current?.click()}
                                 className="w-full border-2 border-dashed border-emerald-300 hover:border-[#4a8c42] rounded-2xl py-10 flex flex-col items-center gap-3 text-[#2d5a27] hover:bg-emerald-50 transition"
                             >
                                 <FiUpload size={28} />
-                                <p className="font-bold text-sm">Cliquer pour uploader des images</p>
+                                <p className="font-bold text-sm">Ajouter de nouvelles photos</p>
                                 <p className="text-xs text-black/30">JPG, PNG, WEBP — Plusieurs fichiers acceptés</p>
                             </button>
                             <input ref={fileRef} type="file" multiple accept="image/*" className="hidden" onChange={handleImages} />
-                            {previews.length > 0 && (
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                    {previews.map((src, i) => (
-                                        <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-[#ecfdf5]">
-                                            <img src={src} alt="" className="w-full h-full object-cover" />
-                                            <button
-                                                onClick={() => {
-                                                    setImages(imgs => imgs.filter((_, j) => j !== i));
-                                                    setPreviews(ps => ps.filter((_, j) => j !== i));
-                                                }}
-                                                className="absolute top-1.5 right-1.5 bg-white/90 text-red-500 rounded-full p-0.5 hover:bg-red-500 hover:text-white transition"
-                                            >
-                                                <FiX size={12}/>
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                            {isEdit && product.images?.length > 0 && previews.length === 0 && (
+
+                            {/* Images existantes avec bouton supprimer */}
+                            {isEdit && existingImages.length > 0 && (
                                 <div>
-                                    <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-3">Images actuelles</p>
-                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                        {product.images.map((img, i) => (
-                                            <div key={i} className="aspect-square rounded-xl overflow-hidden bg-[#ecfdf5]">
-                                                <img src={img.url} alt="" className="w-full h-full object-cover" />
+                                    <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-3">📸 Images actuelles</p>
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                        {existingImages.map((img, i) => (
+                                            <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-[#ecfdf5] group">
+                                                <img 
+                                                    src={img.url} 
+                                                    alt="" 
+                                                    className="w-full h-full object-cover" 
+                                                />
+                                                <button
+                                                    onClick={() => {
+                                                        if (!window.confirm('Supprimer cette image ?')) return;
+                                                        setExistingImages(prev => prev.filter((_, index) => index !== i));
+                                                    }}
+                                                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition hover:bg-red-600"
+                                                    title="Supprimer cette image"
+                                                >
+                                                    <FiTrash2 size={16} />
+                                                </button>
                                             </div>
                                         ))}
                                     </div>
-                                    <p className="text-xs text-black/30 mt-2">Uploader de nouvelles images pour remplacer celles-ci.</p>
                                 </div>
+                            )}
+
+                            {/* Nouvelles images en preview */}
+                            {previews.length > 0 && (
+                                <div>
+                                    <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-3">➕ Nouvelles images à ajouter</p>
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                        {previews.map((src, i) => (
+                                            <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-[#ecfdf5]">
+                                                <img src={src} alt="" className="w-full h-full object-cover" />
+                                                <button
+                                                    onClick={() => {
+                                                        setImages(imgs => imgs.filter((_, j) => j !== i));
+                                                        setPreviews(ps => ps.filter((_, j) => j !== i));
+                                                    }}
+                                                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600"
+                                                >
+                                                    <FiX size={16} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {!isEdit && previews.length === 0 && (
+                                <p className="text-xs text-black/30 text-center py-8">Aucune image sélectionnée pour le nouveau produit</p>
                             )}
                         </div>
                     )}

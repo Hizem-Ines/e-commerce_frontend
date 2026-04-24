@@ -435,7 +435,7 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                                     <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                                     <input type="tel" name="phone" value={formData.phone}
                                                         onChange={handleChange} required
-                                                        placeholder="+216 XX XXX XXX"
+                                                        placeholder="+41 XX XXX XXX"
                                                         className={`${inputClass} pl-10`}
                                                         style={{ border: '2px solid #e5e7eb' }}
                                                         onFocus={onFocus} onBlur={onBlur} />
@@ -460,7 +460,7 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                             <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                             <input type="tel" name="phone" value={formData.phone}
                                                 onChange={handleChange}
-                                                placeholder="+41 XX XXX XX XX"
+                                                placeholder="+41 79 XXX XX XX"
                                                 className={`${inputClass} pl-10`}
                                                 style={{ border: '2px solid #e5e7eb' }}
                                                 onFocus={onFocus} onBlur={onBlur} />
