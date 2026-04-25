@@ -479,7 +479,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
     useEffect(() => {
         if (!isEdit || !product.id) return;
         setFormLoading(true);
-        api.get(`/products/${product.id}?admin=true`)
+        api.get(`/products/admin/${product.id}?admin=true`)
             .then(res => {
                 const p = res.data.product || res.data;
                 if (!p) return;
