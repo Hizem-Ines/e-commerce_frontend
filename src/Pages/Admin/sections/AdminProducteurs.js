@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getAllSuppliers, deleteSupplier } from '../../../services/adminService';
-import { FiTrash2, FiPlus, FiSearch, FiEdit } from 'react-icons/fi';
+import { FiTrash2, FiPlus, FiSearch, FiEdit, FiUploadCloud, FiX } from 'react-icons/fi';
 import { MdVerified } from 'react-icons/md';
 
-const EMPTY_FORM = { name: '', description_fr: '',  region: '', address: '', contact: '', email: '', website: '', is_certified_bio: false };
+const EMPTY_FORM = { name: '', description_fr: '', region: '', address: '', contact: '', email: '', website: '', is_certified_bio: false };
 
 const AdminProducteurs = () => {
     const [producteurs, setProducteurs] = useState([]);
@@ -13,9 +13,12 @@ const AdminProducteurs = () => {
     const [successMsg, setSuccessMsg] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
     const [showForm, setShowForm] = useState(false);
-    const [editTarget, setEditTarget] = useState(null); // null = création, objet = édition
+    const [editTarget, setEditTarget] = useState(null);
     const [formData, setFormData] = useState(EMPTY_FORM);
     const [formLoading, setFormLoading] = useState(false);
+    const [imageFile, setImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+    const fileInputRef = useRef();
 
     const fetchProducteurs = async () => {
         setLoading(true);
@@ -39,6 +42,8 @@ const AdminProducteurs = () => {
     const openCreate = () => {
         setEditTarget(null);
         setFormData(EMPTY_FORM);
+        setImageFile(null);
+        setImagePreview(null);
         setShowForm(true);
     };
 
@@ -54,7 +59,24 @@ const AdminProducteurs = () => {
             website: p.website || '',
             is_certified_bio: p.is_certified_bio || false,
         });
+        setImageFile(null);
+        setImagePreview(p.logo_url || null);
         setShowForm(true);
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setImageFile(file);
+        const reader = new FileReader();
+        reader.onload = (ev) => setImagePreview(ev.target.result);
+        reader.readAsDataURL(file);
+    };
+
+    const removeImage = () => {
+        setImageFile(null);
+        setImagePreview(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
     const handleDelete = async (id) => {
@@ -76,18 +98,27 @@ const AdminProducteurs = () => {
         setFormLoading(true);
         try {
             const { default: api } = await import('../../../services/api');
+
+            const fd = new FormData();
+            Object.entries(formData).forEach(([k, v]) => fd.append(k, v));
+            if (imageFile) fd.append('images', imageFile);
+
             if (editTarget) {
-                // MODIFICATION
-                await api.put(`/suppliers/${editTarget.id}`, formData);
+                await api.put(`/suppliers/${editTarget.id}`, fd, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                });
                 setSuccessMsg('Producteur modifié avec succès.');
             } else {
-                // CRÉATION
-                await api.post('/suppliers', formData);
+                await api.post('/suppliers', fd, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                });
                 setSuccessMsg('Producteur créé avec succès.');
             }
             setShowForm(false);
             setFormData(EMPTY_FORM);
             setEditTarget(null);
+            setImageFile(null);
+            setImagePreview(null);
             fetchProducteurs();
             setTimeout(() => setSuccessMsg(''), 3000);
         } catch (err) {
@@ -113,13 +144,13 @@ const AdminProducteurs = () => {
                 <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Producteurs</h2>
                 <button
                     onClick={openCreate}
-                    className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
+                    className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42] text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
                 >
                     <FiPlus size={16} /> Nouveau producteur
                 </button>
             </div>
 
-            {successMsg && <div className="bg-emerald-50 border border-#b6eac7 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">✅ {successMsg}</div>}
+            {successMsg && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">✅ {successMsg}</div>}
             {errorMsg && <div className="bg-red-50 border border-red-200 text-red-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">❌ {errorMsg}</div>}
 
             <div className="relative mb-6">
@@ -129,7 +160,7 @@ const AdminProducteurs = () => {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Rechercher un producteur..."
-                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition"
+                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42] focus:outline-none text-sm transition"
                 />
             </div>
 
@@ -159,17 +190,10 @@ const AdminProducteurs = () => {
                                     </div>
                                 </div>
                                 <div className="flex gap-1">
-                                    {/* ✅ onClick ajouté ici */}
-                                    <button
-                                        onClick={() => openEdit(p)}
-                                        className="p-1.5 hover:bg-blue-50 text-blue-500 rounded-xl transition"
-                                    >
+                                    <button onClick={() => openEdit(p)} className="p-1.5 hover:bg-blue-50 text-blue-500 rounded-xl transition">
                                         <FiEdit size={14} />
                                     </button>
-                                    <button
-                                        onClick={() => setDeleteConfirm(p.id)}
-                                        className="p-1.5 hover:bg-red-50 text-red-500 rounded-xl transition"
-                                    >
+                                    <button onClick={() => setDeleteConfirm(p.id)} className="p-1.5 hover:bg-red-50 text-red-500 rounded-xl transition">
                                         <FiTrash2 size={14} />
                                     </button>
                                 </div>
@@ -199,16 +223,60 @@ const AdminProducteurs = () => {
                             <button onClick={() => { setShowForm(false); setEditTarget(null); }} className="text-black/40 hover:text-black text-2xl font-bold">×</button>
                         </div>
                         <form onSubmit={handleSubmit} className="space-y-4">
-                            {fields.map(field => (
-                                <div key={field.key}>
-                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">{field.label}</label>
+
+                            {/* PHOTO */}
+                            <div>
+                                <label className="block text-xs font-bold text-gray-600 mb-1.5">Logo / Photo</label>
+                                {imagePreview ? (
+                                    <div className="flex items-center gap-4">
+                                        <div className="relative w-20 h-20 rounded-xl overflow-hidden border-2 border-emerald-200 shrink-0">
+                                            <img src={imagePreview} alt="preview" className="w-full h-full object-cover" />
+                                            <button
+                                                type="button"
+                                                onClick={removeImage}
+                                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-400 transition"
+                                            >
+                                                <FiX size={11} />
+                                            </button>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className="text-xs text-emerald-600 font-semibold hover:underline"
+                                        >
+                                            Changer la photo
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="w-full border-2 border-dashed border-gray-300 hover:border-[#4a8c42] rounded-xl py-5 flex flex-col items-center gap-2 text-black/40 hover:text-[#2d5a27] transition"
+                                    >
+                                        <FiUploadCloud size={24} />
+                                        <span className="text-xs font-semibold">Cliquer pour ajouter une photo</span>
+                                        <span className="text-xs">JPG, PNG · max 5 MB</span>
+                                    </button>
+                                )}
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageChange}
+                                    className="hidden"
+                                />
+                            </div>
+
+                            {fields.map(f => (
+                                <div key={f.key}>
+                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">{f.label}</label>
                                     <input
                                         type="text"
-                                        value={formData[field.key]}
-                                        onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
-                                        placeholder={field.placeholder}
-                                        required={field.required}
-                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition"
+                                        value={formData[f.key]}
+                                        onChange={(e) => setFormData({ ...formData, [f.key]: e.target.value })}
+                                        placeholder={f.placeholder}
+                                        required={f.required}
+                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42] focus:outline-none text-sm transition"
                                     />
                                 </div>
                             ))}
@@ -219,10 +287,9 @@ const AdminProducteurs = () => {
                                     onChange={(e) => setFormData({ ...formData, description_fr: e.target.value })}
                                     placeholder="Description du producteur..."
                                     rows={3}
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42]  focus:outline-none text-sm transition resize-none"
+                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42] focus:outline-none text-sm transition resize-none"
                                 />
                             </div>
-                            
                             <div className="flex items-center gap-2">
                                 <input
                                     type="checkbox"
@@ -244,7 +311,7 @@ const AdminProducteurs = () => {
                                 <button
                                     type="submit"
                                     disabled={formLoading}
-                                    className="flex-1 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold py-3 rounded-xl transition disabled:opacity-50"
+                                    className="flex-1 bg-[#2d5a27] hover:bg-[#4a8c42] text-white font-bold py-3 rounded-xl transition disabled:opacity-50"
                                 >
                                     {formLoading ? '...' : editTarget ? 'Enregistrer' : 'Créer'}
                                 </button>
