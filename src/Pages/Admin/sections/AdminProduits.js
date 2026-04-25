@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getAllProducts, deleteProduct, createProduct, updateProduct, getAllCategories, getAllSuppliers } from '../../../services/adminService';
-import { FiEdit, FiTrash2, FiPlus, FiSearch, FiX, FiUpload } from 'react-icons/fi';
+import { FiEdit,  FiCheck ,FiTrash2, FiPlus, FiSearch, FiX, FiUpload } from 'react-icons/fi';
 import formatPrice from '../../../utils/formatPrice';
 import { useSiteSettings } from '../../../context/SiteSettingsContext';
 import api from '../../../services/api';
@@ -208,9 +208,8 @@ const VariantPromotions = ({ variantId, productId }) => {
   );
 };
 
-const VariantEditRow = ({ variant, productId, onUpdated, onDeleted }) => {
-  const [editing, setEditing]     = useState(false);
-  const [showPromos, setShowPromos] = useState(false);  // ← nouveau
+const VariantEditRow = ({ variant, productId, onDeleted, onChange }) => {
+  const [showPromos, setShowPromos] = useState(false);
   const [vals, setVals] = useState({
     price:        variant.price        ?? '',
     cost_price:   variant.cost_price   ?? '',
@@ -218,26 +217,36 @@ const VariantEditRow = ({ variant, productId, onUpdated, onDeleted }) => {
     sku:          variant.sku          ?? '',
     weight_grams: variant.weight_grams ?? '',
     is_active:    variant.is_active    ?? true,
+    attributes:   variant.attributes?.map(a => ({ type_fr: a.type_fr, value_fr: a.value_fr })) ?? [],
   });
-  const [saving, setSaving]     = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [err, setErr]           = useState('');
+  const [err, setErr] = useState('');
 
-  const set = (k, v) => setVals(p => ({ ...p, [k]: v }));
+  const set = (k, v) => {
+    const next = { ...vals, [k]: v };
+    setVals(next);
+    onChange(variant.id, next);
+  };
 
-  const save = async () => {
-    if (!vals.price || parseFloat(vals.price) < 0) { setErr('Prix invalide'); return; }
-    setSaving(true); setErr('');
-    try {
-      const fd = new FormData();
-      Object.entries(vals).forEach(([k, v]) => fd.append(k, String(v)));
-      const res = await api.put(`/products/${productId}/variants/${variant.id}`, fd, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      onUpdated(res.data.variant);
-      setEditing(false);
-    } catch (e) { setErr(e.response?.data?.message || 'Erreur'); }
-    finally { setSaving(false); }
+  const setAttrField = (ai, k, v) => {
+    const next = {
+      ...vals,
+      attributes: vals.attributes.map((a, j) => j === ai ? { ...a, [k]: v } : a),
+    };
+    setVals(next);
+    onChange(variant.id, next);
+  };
+
+  const addAttr = () => {
+    const next = { ...vals, attributes: [...vals.attributes, { type_fr: '', value_fr: '' }] };
+    setVals(next);
+    onChange(variant.id, next);
+  };
+
+  const removeAttr = (ai) => {
+    const next = { ...vals, attributes: vals.attributes.filter((_, j) => j !== ai) };
+    setVals(next);
+    onChange(variant.id, next);
   };
 
   const del = async () => {
@@ -249,95 +258,88 @@ const VariantEditRow = ({ variant, productId, onUpdated, onDeleted }) => {
     } catch (e) { setErr(e.response?.data?.message || 'Erreur suppression'); setDeleting(false); }
   };
 
-  const attrLabel = variant.attributes?.length
-    ? variant.attributes.map(a => `${a.type_fr}: ${a.value_fr}`).join(' · ')
+  const attrLabel = vals.attributes.filter(a => a.type_fr && a.value_fr).length
+    ? vals.attributes.filter(a => a.type_fr && a.value_fr).map(a => `${a.type_fr}: ${a.value_fr}`).join(' · ')
     : 'Variante sans attribut';
 
   return (
     <div className="bg-[#f9f5f0] rounded-2xl p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <div>
-          <p className="font-bold text-sm text-[#2c2c2c]">{attrLabel}</p>
-          {!editing && (
-            <p className="text-xs text-black/40 mt-0.5">
-              Prix: <span className="font-bold text-[#2d5a27]">{formatPrice(parseFloat(variant.price))}</span>
-              {' · '}Stock: <span className="font-bold">{variant.stock}</span>
-              {variant.sku && ` · SKU: ${variant.sku}`}
-              <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${vals.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-500'}`}>
-                {vals.is_active ? 'Actif' : 'Inactif'}
-              </span>
-            </p>
-          )}
-        </div>
-        <div className="flex gap-1 flex-wrap justify-end">
+        <p className="font-bold text-sm text-[#2c2c2c]">{attrLabel}</p>
+        <div className="flex gap-1">
           <button
             onClick={() => setShowPromos(s => !s)}
             className="p-2 hover:bg-amber-50 text-amber-500 rounded-xl transition text-xs font-bold flex items-center gap-1"
-            title="Promotions"
           >
             <FiTag size={13}/> Promos
           </button>
-          {!editing ? (
-            <>
-              <button onClick={() => setEditing(true)} className="p-2 hover:bg-blue-50 text-blue-500 rounded-xl transition text-xs font-bold flex items-center gap-1">
-                <FiEdit size={13}/> Modifier
-              </button>
-              <button onClick={del} disabled={deleting} className="p-2 hover:bg-red-50 text-red-500 rounded-xl transition text-xs font-bold flex items-center gap-1">
-                <FiTrash2 size={13}/> {deleting ? '...' : 'Supprimer'}
-              </button>
-            </>
-          ) : (
-            <>
-              <button onClick={save} disabled={saving} className="px-3 py-1.5 bg-[#2d5a27] hover:bg-[#4a8c42] text-white rounded-xl text-xs font-bold transition disabled:opacity-50">
-                {saving ? '⏳' : '💾 Sauver'}
-              </button>
-              <button onClick={() => { setEditing(false); setErr(''); }} className="px-3 py-1.5 border border-gray-200 text-black/50 rounded-xl text-xs font-bold hover:bg-gray-50 transition">
-                Annuler
-              </button>
-            </>
-          )}
+          <button onClick={del} disabled={deleting} className="p-2 hover:bg-red-50 text-red-500 rounded-xl transition text-xs font-bold flex items-center gap-1">
+            <FiTrash2 size={13}/> {deleting ? '...' : 'Supprimer'}
+          </button>
         </div>
       </div>
 
       {err && <p className="text-red-500 text-xs font-semibold">❌ {err}</p>}
 
-      {editing && (
-        <div className="space-y-3 pt-2 border-t border-black/5">
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <Field label="Prix *">
-              <input type="number" min="0" step="0.01" className={inputCls} value={vals.price} onChange={e => set('price', e.target.value)} />
-            </Field>
-            <Field label="Coût">
-              <input type="number" min="0" step="0.01" className={inputCls} value={vals.cost_price} onChange={e => set('cost_price', e.target.value)} />
-            </Field>
-            <Field label="Stock">
-              <input type="number" min="0" className={inputCls} value={vals.stock} onChange={e => set('stock', e.target.value)} />
-            </Field>
+      <div className="space-y-3 pt-2 border-t border-black/5">
+        {/* Attributs */}
+        <div>
+          <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-2">Attributs</p>
+          <div className="space-y-2">
+            {vals.attributes.map((a, ai) => (
+              <div key={ai} className="flex gap-2 items-center">
+                <input
+                  className={inputCls + " flex-1"}
+                  value={a.type_fr}
+                  onChange={e => setAttrField(ai, 'type_fr', e.target.value)}
+                  placeholder="Type (ex: Poids)"
+                />
+                <input
+                  className={inputCls + " flex-1"}
+                  value={a.value_fr}
+                  onChange={e => setAttrField(ai, 'value_fr', e.target.value)}
+                  placeholder="Valeur (ex: 500ml)"
+                />
+                {vals.attributes.length > 1 && (
+                  <button onClick={() => removeAttr(ai)} className="text-red-400 hover:text-red-600 p-1 shrink-0"><FiX size={12}/></button>
+                )}
+              </div>
+            ))}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Field label="SKU">
-              <input className={inputCls} value={vals.sku} onChange={e => set('sku', e.target.value)} placeholder="ex: ARG-500ML" />
-            </Field>
-            <Field label="Poids (g)">
-              <input type="number" min="0" className={inputCls} value={vals.weight_grams} onChange={e => set('weight_grams', e.target.value)} />
-            </Field>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => set('is_active', !vals.is_active)}
-              className={`w-10 h-5 rounded-full transition-colors duration-200 relative shrink-0 ${vals.is_active ? 'bg-[#4a8c42]' : 'bg-gray-300'}`}
-            >
-              <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200 ${vals.is_active ? 'left-5' : 'left-0.5'}`}/>
-            </button>
-            <span className="text-xs font-bold text-black/50">{vals.is_active ? 'Variante active' : 'Variante inactive'}</span>
-          </div>
+          <button onClick={addAttr} className="mt-2 text-xs font-bold text-[#2d5a27] hover:text-emerald-700 transition">+ Ajouter attribut</button>
         </div>
-      )}
 
-      {/* ── Promotions section ── */}
-      {showPromos && (
-        <VariantPromotions variantId={variant.id} productId={productId} />
-      )}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <Field label="Prix *">
+            <input type="number" min="0" step="0.01" className={inputCls} value={vals.price} onChange={e => set('price', e.target.value)} />
+          </Field>
+          <Field label="Coût">
+            <input type="number" min="0" step="0.01" className={inputCls} value={vals.cost_price} onChange={e => set('cost_price', e.target.value)} />
+          </Field>
+          <Field label="Stock">
+            <input type="number" min="0" className={inputCls} value={vals.stock} onChange={e => set('stock', e.target.value)} />
+          </Field>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Field label="SKU">
+            <input className={inputCls} value={vals.sku} onChange={e => set('sku', e.target.value)} placeholder="ex: ARG-500ML" />
+          </Field>
+          <Field label="Poids (g)">
+            <input type="number" min="0" className={inputCls} value={vals.weight_grams} onChange={e => set('weight_grams', e.target.value)} />
+          </Field>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => set('is_active', !vals.is_active)}
+            className={`w-10 h-5 rounded-full transition-colors duration-200 relative shrink-0 ${vals.is_active ? 'bg-[#4a8c42]' : 'bg-gray-300'}`}
+          >
+            <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200 ${vals.is_active ? 'left-5' : 'left-0.5'}`}/>
+          </button>
+          <span className="text-xs font-bold text-black/50">{vals.is_active ? 'Variante active' : 'Variante inactive'}</span>
+        </div>
+      </div>
+
+      {showPromos && <VariantPromotions variantId={variant.id} productId={productId} />}
     </div>
   );
 };
@@ -467,6 +469,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
     const [variants, setVariants]         = useState([{ ...BLANK_VARIANT, attributes: [{ type_fr: '', value_fr: '' }] }]);
     const [editVariants, setEditVariants] = useState(product?.variants || []);
     const [showAddVariant, setShowAddVariant] = useState(false);
+    const [variantEdits, setVariantEdits] = useState({}); 
     const [images, setImages]     = useState([]);
     const [previews, setPreviews] = useState([]);
     const [existingImages, setExistingImages] = useState([]);   
@@ -561,6 +564,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
             });
 
             images.forEach(img => fd.append('images', img));
+            fd.append('existingImages', JSON.stringify(existingImages)); 
 
             if (!isEdit) {
                 const cleanVariants = variants.map(v => ({
@@ -576,6 +580,25 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
             }
 
             isEdit ? await updateProduct(product.id, fd) : await createProduct(fd);
+            // Sauvegarde les variantes modifiées
+            if (isEdit && Object.keys(variantEdits).length > 0) {
+            await Promise.all(
+                Object.entries(variantEdits).map(([variantId, vals]) => {
+                const fd2 = new FormData();
+                fd2.append('price',        String(vals.price));
+                fd2.append('cost_price',   String(vals.cost_price));
+                fd2.append('stock',        String(vals.stock));
+                fd2.append('sku',          String(vals.sku));
+                fd2.append('weight_grams', String(vals.weight_grams));
+                fd2.append('is_active',    String(vals.is_active));
+                const cleanAttrs = vals.attributes.filter(a => a.type_fr && a.value_fr);
+                if (cleanAttrs.length) fd2.append('attributes', JSON.stringify(cleanAttrs));
+                return api.put(`/products/${product.id}/variants/${variantId}`, fd2, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                });
+                })
+            );
+            }
             onSaved();
         } catch (err) {
             setError(err.response?.data?.message || 'Une erreur est survenue.');
@@ -724,9 +747,9 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                                 key={v.id}
                                                 variant={v}
                                                 productId={product.id}
-                                                onUpdated={updated => setEditVariants(prev => prev.map(x => x.id === updated.id ? updated : x))}
+                                                onChange={(id, vals) => setVariantEdits(prev => ({ ...prev, [id]: vals }))}
                                                 onDeleted={vid => setEditVariants(prev => prev.filter(x => x.id !== vid))}
-                                            />
+                                                />
                                         ))
                                     )}
                                     {showAddVariant ? (
