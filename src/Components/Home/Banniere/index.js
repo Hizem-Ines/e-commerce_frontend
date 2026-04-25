@@ -22,7 +22,7 @@ const Banniere = () => (
                         Soutenez nos Producteurs Locaux
                     </h3>
                     <p className="text-xl text-green-50 mb-6 max-w-xl">
-                        Chaque achat contribue au développement de l'agriculture biologique en Tunisie
+                        Chaque achat contribue au développement de l'agriculture biologique 
                     </p>
                     <Link
                         to="/producteurs"

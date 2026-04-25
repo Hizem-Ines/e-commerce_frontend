@@ -10,6 +10,7 @@ import { useSiteSettings } from '../../../context/SiteSettingsContext';
 import { useAuth } from '../../../context/authContext';
 import { getAllProducts } from '../../../services/productService';
 import logo from '../../../assets/images/goffa-logo.png';
+import { BsStars } from "react-icons/bs";
 
 const Logo = () => (
     <Link to="/" className="shrink-0 no-underline flex items-center gap-2">
@@ -188,7 +189,13 @@ const Header = () => {
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0 ml-auto sm:ml-0">
-
+                        {/* Conseiller IA */}
+                        <Link to="/conseiller" className="no-underline">
+                            <button className="flex items-center gap-1.5 border border-white/30 rounded-full px-3 py-2 text-white hover:bg-white/10 transition text-xs font-bold">
+                                <BsStars size={14} />
+                                <span className="hidden sm:block">Conseiller IA</span>
+                            </button>
+                            </Link>
                         {/* FAVORIS */}
                         <Link to="/favoris" className="relative no-underline">
                             <button className="border border-white/30 rounded-full w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 transition group">

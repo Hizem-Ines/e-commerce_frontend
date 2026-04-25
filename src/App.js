@@ -32,6 +32,8 @@ import RecipesDetail from "./Pages/RecipesDetail";
 import Unsubscribe from "./Pages/Unsubscribe";
 import CartSidebar from './Components/layout/CartSidebar';
 import ScrollToTop from './Components/scrolltotop/ScrollToTop';
+import Conseiller from './Pages/Conseiller';
+
 function App() {
     return (
         <BrowserRouter>
@@ -54,6 +56,7 @@ function App() {
                                 <Route path="/complete-account/:token" element={<CompleteAccount />} />
                                 <Route element={<Layout />}>
                                     <Route path="/" element={<Home />} />
+                                    <Route path="/conseiller" element={<Conseiller />} />
                                     <Route path="/faq" element={<Faq />} />
                                     <Route path="/produits" element={<Products />} />
                                     <Route path="/produits/:id" element={<ProductDetail />} />

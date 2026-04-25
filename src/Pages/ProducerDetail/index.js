@@ -121,7 +121,6 @@ const ProducerDetail = () => {
                             <div className="text-center">
                                 <div className="text-5xl mb-3">🗺️</div>
                                 <p className="font-bold text-emerald-700">{producteur.region || producteur.address}</p>
-                                <p className="text-sm text-black/40 mt-1">Tunisie</p>
                             </div>
                         </div>
                     </div>

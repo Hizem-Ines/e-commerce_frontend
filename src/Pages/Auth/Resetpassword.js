@@ -52,7 +52,7 @@ const ResetPassword = () => {
                         <h1 className="text-2xl font-black tracking-widest font-serif" style={{ color: '#166534' }}>
                             GOF<span style={{ color: '#e63946' }}>FA</span>
                         </h1>
-                        <p className="text-xs font-semibold tracking-wider" style={{ color: '#4ade80' }}>artisanat tunisien</p>
+                        <p className="text-xs font-semibold tracking-wider" style={{ color: '#4ade80' }}>artisanat </p>
                     </div>
                 </Link>
 
