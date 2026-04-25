@@ -49,7 +49,7 @@ const VerifyEmail = () => {
                     </div>
                     <div>
                         <h1 className="text-2xl font-black text-[#2d5a27] tracking-widest font-serif">GOFFA</h1>
-                        <p className="text-xs text-[#4a8c42]  font-semibold tracking-wider">artisanat tunisien</p>
+                        <p className="text-xs text-[#4a8c42]  font-semibold tracking-wider">artisanat</p>
                     </div>
                 </Link>
 

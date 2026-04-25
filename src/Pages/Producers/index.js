@@ -41,7 +41,7 @@ const Producers = () => {
                         Rencontrez nos Artisans
                     </h1>
                     <p className="text-black/50 max-w-xl mx-auto">
-                        Des producteurs passionnés qui cultivent et fabriquent avec amour les meilleurs produits de Tunisie
+                        Des producteurs passionnés qui cultivent et fabriquent avec amour les meilleurs produits 
                     </p>
                 </div>
 

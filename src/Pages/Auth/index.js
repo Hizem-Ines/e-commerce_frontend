@@ -414,7 +414,7 @@ const Auth = () => {
                         </h2>
                         <p className="text-base opacity-75 text-center mb-10 leading-relaxed">
                             {isLogin
-                                ? 'Retrouvez vos favoris, suivez vos commandes et découvrez de nouvelles créations venues de Tunisie.'
+                                ? 'Retrouvez vos favoris, suivez vos commandes et découvrez de nouvelles créations.'
                                 : 'Des pièces artisanales authentiques, livrées directement chez vous en Suisse.'}
                         </p>
 

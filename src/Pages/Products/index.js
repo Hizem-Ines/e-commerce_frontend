@@ -115,10 +115,10 @@ const Products = () => {
                     >
                         ⚙️ Filtres
                     </button>
-                    <button className="flex items-center gap-2 bg-gradient-to-r from-[#2d5a27] to-teal-600 hover:from-[#4a8c42]  hover:to-teal-500 text-white font-bold px-6 py-3 rounded-full shadow-lg transition-all duration-300 group">
+                    <Link to="/conseiller" className="no-underline flex items-center gap-2 bg-gradient-to-r from-[#2d5a27] to-teal-600 hover:from-[#4a8c42] hover:to-teal-500 text-white font-bold px-6 py-3 rounded-full shadow-lg transition-all duration-300 group">
                         <BsStars size={18} className="group-hover:animate-spin" />
-                        Recherche IA
-                    </button>
+                        Conseiller IA
+                    </Link>
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-6">

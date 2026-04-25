@@ -126,7 +126,7 @@ const Offres = () => {
                         Nos Meilleures Offres
                     </h1>
                     <p className="text-black/50 max-w-xl mx-auto">
-                        Profitez de nos réductions exclusives sur les produits artisanaux tunisiens
+                        Profitez de nos réductions exclusives sur les produits artisanaux 
                     </p>
                 </div>
 
