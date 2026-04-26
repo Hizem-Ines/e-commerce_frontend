@@ -3,7 +3,8 @@ import {
     getMe,
     login as loginService,
     logout as logoutService,
-    register as registerService
+    register as registerService,
+    verifyMfa as verifyMfaService,
 } from '../services/authService';
 
 const AuthContext = createContext();
@@ -21,6 +22,15 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (data) => {
         const res = await loginService(data);
+        // MFA required → don't set user yet, return the response for the caller to handle
+        if (res.data.mfaRequired) return res;
+        // Direct login (shouldn't happen with current backend, but safe fallback)
+        setUser(res.data.user);
+        return res;
+    };
+
+    const verifyMfaLogin = async ({ mfaSessionToken, otp }) => {
+        const res = await verifyMfaService({ mfaSessionToken, otp });
         setUser(res.data.user);
         return res;
     };
@@ -46,7 +56,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, register, logout, loginSuccess }}>
+        <AuthContext.Provider value={{ user, loading, login, verifyMfaLogin, register, logout, loginSuccess }}>
             {!loading && children}
         </AuthContext.Provider>
     );

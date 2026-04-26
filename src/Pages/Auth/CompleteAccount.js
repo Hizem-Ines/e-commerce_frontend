@@ -18,7 +18,7 @@ const CompleteAccount = () => {
 
     // ── Validation mot de passe en temps réel ─────────────
     const rules = [
-        { label: 'Au moins 8 caractères',                ok: password.length >= 8 },
+        { label: 'Au moins 10 caractères', ok: password.length >= 10 },
         { label: 'Une lettre majuscule',                  ok: /[A-Z]/.test(password) },
         { label: 'Une lettre minuscule',                  ok: /[a-z]/.test(password) },
         { label: 'Un chiffre',                            ok: /[0-9]/.test(password) },

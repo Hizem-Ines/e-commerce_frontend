@@ -92,7 +92,7 @@ const Footer = () => {
                         <ul className="space-y-2 list-none p-0 m-0">
                             {[
                                 { label: 'FAQ', url: '/faq' },
-                                { label: 'Reclamations', url: '/reclamations' },
+                                { label: 'Réclamations', url: '/reclamations' },
                             ].map((lien) => (
                                 <li key={lien.label}>
                                     <Link

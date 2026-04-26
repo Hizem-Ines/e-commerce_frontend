@@ -5,7 +5,7 @@ import { useAuth } from '../../context/authContext';
 import logo from '../../assets/images/goffa-logo.png';
 
 const Auth = () => {
-   const [isSubmitting, setIsSubmitting] = useState(false); 
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLogin, setIsLogin] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
@@ -19,14 +19,19 @@ const Auth = () => {
         ville: ''
     });
 
-    const { login, register } = useAuth();
-    const { user, loading } = useAuth();
+    // ── MFA state ─────────────────────────────────────────
+    const [mfaRequired,     setMfaRequired]     = useState(false);
+    const [mfaSessionToken, setMfaSessionToken] = useState('');
+    const [otp,             setOtp]             = useState('');
+
+    const { login, register, verifyMfaLogin } = useAuth();
     const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    // ── Login / Register submit ───────────────────────────
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (isSubmitting) return;
@@ -39,16 +44,23 @@ const Auth = () => {
         setIsSubmitting(true);
         try {
             if (isLogin) {
-                await login({ email: formData.email, password: formData.password });
-                navigate('/');
+                const res = await login({ email: formData.email, password: formData.password });
+                if (res.data.mfaRequired) {
+                    // Backend sent an OTP — show the MFA step
+                    setMfaSessionToken(res.data.mfaSessionToken);
+                    setMfaRequired(true);
+                } else {
+                    // Direct login (fallback — not expected with current backend)
+                    navigate('/');
+                }
             } else {
                 await register({
-                    name: `${formData.prenom} ${formData.nom}`,
-                    email: formData.email,
+                    name:     `${formData.prenom} ${formData.nom}`,
+                    email:    formData.email,
                     password: formData.password,
-                    phone: formData.telephone,
-                    address: formData.adresse,
-                    city: formData.ville,
+                    phone:    formData.telephone,
+                    address:  formData.adresse,
+                    city:     formData.ville,
                 });
                 alert('Compte créé ! Vérifiez votre email pour activer votre compte.');
                 setIsLogin(true);
@@ -60,15 +72,30 @@ const Auth = () => {
         }
     };
 
+    // ── MFA submit ────────────────────────────────────────
+    const handleMfaSubmit = async (e) => {
+        e.preventDefault();
+        if (isSubmitting) return;
+        setIsSubmitting(true);
+        try {
+            await verifyMfaLogin({ mfaSessionToken, otp });
+            navigate('/');
+        } catch (err) {
+            alert(err.response?.data?.message || 'Code incorrect ou expiré. Réessayez.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     /* ─── couleurs GOFFA ─── */
     const GREEN_DARK  = '#2d5a27';
     const GREEN_MID   = '#3a7232';
     const GREEN_LIGHT = '#4a8f3f';
     const RED_ACCENT  = '#e63946';
 
-    const inputStyle = { border: `2px solid #e5e7eb` };
-    const focusBorder  = (e) => (e.target.style.borderColor = GREEN_DARK);
-    const blurBorder   = (e) => (e.target.style.borderColor = '#e5e7eb');
+    const inputStyle  = { border: `2px solid #e5e7eb` };
+    const focusBorder = (e) => (e.target.style.borderColor = GREEN_DARK);
+    const blurBorder  = (e) => (e.target.style.borderColor = '#e5e7eb');
 
     return (
         <div
@@ -112,57 +139,165 @@ const Auth = () => {
                         </div>
                     </Link>
 
-                    {/* TOGGLE */}
-                    <div className="flex rounded-full p-1 mb-8" style={{ background: '#f3f4f6' }}>
-                        {[
-                            { label: 'Connexion',       active: isLogin,  onClick: () => setIsLogin(true)  },
-                            { label: 'Créer un compte', active: !isLogin, onClick: () => setIsLogin(false) },
-                        ].map(({ label, active, onClick }) => (
-                            <button
-                                key={label}
-                                onClick={onClick}
-                                className={`flex-1 py-3 rounded-full font-bold text-sm transition-all duration-300 ${
-                                    active ? 'text-white shadow-lg' : 'text-gray-500 hover:text-gray-700'
-                                }`}
-                                style={active ? { background: `linear-gradient(135deg, ${GREEN_DARK}, ${GREEN_MID})` } : {}}
-                            >
-                                {label}
-                            </button>
-                        ))}
-                    </div>
+                    {/* ════════════════ MFA STEP ════════════════ */}
+                    {mfaRequired ? (
+                        <div>
+                            <div className="text-center mb-8">
+                                <div className="text-5xl mb-4">📬</div>
+                                <h2 className="text-2xl font-black font-serif text-gray-900 mb-2">
+                                    Vérification en deux étapes
+                                </h2>
+                                <p className="text-gray-500 text-sm">
+                                    Un code à 6 chiffres a été envoyé à votre adresse email.
+                                    Il expire dans <span className="font-bold text-gray-700">10 minutes</span>.
+                                </p>
+                            </div>
 
-                    {/* TITRE */}
-                    <div className="mb-6">
-                        <h2 className="text-3xl font-black text-gray-900 mb-1">
-                            {isLogin ? 'Bienvenue ! 👋' : 'Rejoignez-nous 🌿'}
-                        </h2>
-                        <p className="text-gray-500 text-sm">
-                            {isLogin
-                                ? 'Connectez-vous pour accéder à votre compte'
-                                : 'Créez votre compte et découvrez l\'artisanat '}
-                        </p>
-                    </div>
+                            <form onSubmit={handleMfaSubmit} className="space-y-5">
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-600 mb-1.5 text-center">
+                                        Code de vérification
+                                    </label>
+                                    <input
+                                        type="text"
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
+                                        value={otp}
+                                        onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                        placeholder="123456"
+                                        maxLength={6}
+                                        className="w-full text-center text-3xl tracking-[0.5em] font-bold py-4 rounded-xl transition focus:outline-none"
+                                        style={{
+                                            border: `2px solid ${otp.length === 6 ? GREEN_DARK : '#e5e7eb'}`,
+                                            letterSpacing: '0.4em',
+                                        }}
+                                        onFocus={focusBorder}
+                                        onBlur={blurBorder}
+                                        required
+                                        autoFocus
+                                    />
+                                </div>
 
-                    {/* FORMULAIRE */}
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                                <button
+                                    type="submit"
+                                    disabled={isSubmitting || otp.length !== 6}
+                                    className="w-full text-white py-4 rounded-xl font-bold text-base transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+                                    style={{
+                                        background: `linear-gradient(135deg, ${GREEN_DARK}, ${GREEN_MID})`,
+                                        boxShadow: `0 4px 20px rgba(45, 90, 39, 0.4)`,
+                                    }}
+                                >
+                                    {isSubmitting ? 'Vérification...' : 'Confirmer le code →'}
+                                </button>
 
-                        {/* NOM + PRÉNOM */}
-                        {!isLogin && (
-                            <div className="grid grid-cols-2 gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => { setMfaRequired(false); setOtp(''); }}
+                                    className="w-full text-sm font-semibold text-gray-400 hover:text-gray-600 hover:underline transition py-2"
+                                >
+                                    ← Retour à la connexion
+                                </button>
+                            </form>
+                        </div>
+
+                    ) : (
+                        /* ════════════════ LOGIN / REGISTER STEP ════════════════ */
+                        <>
+                            {/* TOGGLE */}
+                            <div className="flex rounded-full p-1 mb-8" style={{ background: '#f3f4f6' }}>
                                 {[
-                                    { label: 'Prénom', name: 'prenom', placeholder: 'Votre prénom' },
-                                    { label: 'Nom',    name: 'nom',    placeholder: 'Votre nom'    },
-                                ].map(({ label, name, placeholder }) => (
-                                    <div key={name}>
-                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">{label}</label>
+                                    { label: 'Connexion',       active: isLogin,  onClick: () => setIsLogin(true)  },
+                                    { label: 'Créer un compte', active: !isLogin, onClick: () => setIsLogin(false) },
+                                ].map(({ label, active, onClick }) => (
+                                    <button
+                                        key={label}
+                                        onClick={onClick}
+                                        className={`flex-1 py-3 rounded-full font-bold text-sm transition-all duration-300 ${
+                                            active ? 'text-white shadow-lg' : 'text-gray-500 hover:text-gray-700'
+                                        }`}
+                                        style={active ? { background: `linear-gradient(135deg, ${GREEN_DARK}, ${GREEN_MID})` } : {}}
+                                    >
+                                        {label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* TITRE */}
+                            <div className="mb-6">
+                                <h2 className="text-3xl font-black text-gray-900 mb-1">
+                                    {isLogin ? 'Bienvenue ! 👋' : 'Rejoignez-nous 🌿'}
+                                </h2>
+                                <p className="text-gray-500 text-sm">
+                                    {isLogin
+                                        ? 'Connectez-vous pour accéder à votre compte'
+                                        : "Créez votre compte et découvrez l'artisanat"}
+                                </p>
+                            </div>
+
+                            {/* FORMULAIRE */}
+                            <form onSubmit={handleSubmit} className="space-y-4">
+
+                                {/* NOM + PRÉNOM */}
+                                {!isLogin && (
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {[
+                                            { label: 'Prénom', name: 'prenom', placeholder: 'Votre prénom' },
+                                            { label: 'Nom',    name: 'nom',    placeholder: 'Votre nom'    },
+                                        ].map(({ label, name, placeholder }) => (
+                                            <div key={name}>
+                                                <label className="block text-xs font-bold text-gray-600 mb-1.5">{label}</label>
+                                                <div className="relative">
+                                                    <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
+                                                    <input
+                                                        type="text"
+                                                        name={name}
+                                                        value={formData[name]}
+                                                        onChange={handleChange}
+                                                        placeholder={placeholder}
+                                                        className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
+                                                        style={inputStyle}
+                                                        onFocus={focusBorder}
+                                                        onBlur={blurBorder}
+                                                        required={!isLogin}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* EMAIL */}
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Email</label>
+                                    <div className="relative">
+                                        <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            value={formData.email}
+                                            onChange={handleChange}
+                                            placeholder="votre.email@exemple.ch"
+                                            className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
+                                            style={inputStyle}
+                                            onFocus={focusBorder}
+                                            onBlur={blurBorder}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* TÉLÉPHONE */}
+                                {!isLogin && (
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Téléphone</label>
                                         <div className="relative">
-                                            <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
+                                            <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
                                             <input
-                                                type="text"
-                                                name={name}
-                                                value={formData[name]}
+                                                type="tel"
+                                                name="telephone"
+                                                value={formData.telephone}
                                                 onChange={handleChange}
-                                                placeholder={placeholder}
+                                                placeholder="+41 79 XXX XX XX"
                                                 className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
                                                 style={inputStyle}
                                                 onFocus={focusBorder}
@@ -171,193 +306,151 @@ const Auth = () => {
                                             />
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-                        )}
+                                )}
 
-                        {/* EMAIL */}
-                        <div>
-                            <label className="block text-xs font-bold text-gray-600 mb-1.5">Email</label>
-                            <div className="relative">
-                                <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    placeholder="votre.email@exemple.ch"
-                                    className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
-                                    style={inputStyle}
-                                    onFocus={focusBorder}
-                                    onBlur={blurBorder}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        {/* TÉLÉPHONE */}
-                        {!isLogin && (
-                            <div>
-                                <label className="block text-xs font-bold text-gray-600 mb-1.5">Téléphone</label>
-                                <div className="relative">
-                                    <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
-                                    <input
-                                        type="tel"
-                                        name="telephone"
-                                        value={formData.telephone}
-                                        onChange={handleChange}
-                                        placeholder="+41 79 XXX XX XX"
-                                        className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
-                                        style={inputStyle}
-                                        onFocus={focusBorder}
-                                        onBlur={blurBorder}
-                                        required={!isLogin}
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {/* MOT DE PASSE */}
-                        <div>
-                            <label className="block text-xs font-bold text-gray-600 mb-1.5">Mot de passe</label>
-                            <div className="relative">
-                                <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    name="password"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    placeholder="••••••••"
-                                    className="w-full pl-10 pr-10 py-3 rounded-xl text-sm transition focus:outline-none"
-                                    style={inputStyle}
-                                    onFocus={focusBorder}
-                                    onBlur={blurBorder}
-                                    required
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                >
-                                    {showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* CONFIRMER MOT DE PASSE */}
-                        {!isLogin && (
-                            <div>
-                                <label className="block text-xs font-bold text-gray-600 mb-1.5">Confirmer le mot de passe</label>
-                                <div className="relative">
-                                    <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
-                                    <input
-                                        type={showPassword ? 'text' : 'password'}
-                                        name="confirmPassword"
-                                        value={formData.confirmPassword}
-                                        onChange={handleChange}
-                                        placeholder="••••••••"
-                                        className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
-                                        style={inputStyle}
-                                        onFocus={focusBorder}
-                                        onBlur={blurBorder}
-                                        required={!isLogin}
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {/* ADRESSE + VILLE */}
-                        {!isLogin && (
-                            <div className="grid grid-cols-2 gap-3">
+                                {/* MOT DE PASSE */}
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Adresse</label>
+                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Mot de passe</label>
                                     <div className="relative">
-                                        <FiMapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
+                                        <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
                                         <input
-                                            type="text"
-                                            name="adresse"
-                                            value={formData.adresse}
+                                            type={showPassword ? 'text' : 'password'}
+                                            name="password"
+                                            value={formData.password}
                                             onChange={handleChange}
-                                            placeholder="Rue du Marché 12"
-                                            className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
+                                            placeholder="••••••••"
+                                            className="w-full pl-10 pr-10 py-3 rounded-xl text-sm transition focus:outline-none"
                                             style={inputStyle}
                                             onFocus={focusBorder}
                                             onBlur={blurBorder}
+                                            required
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        >
+                                            {showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
+                                        </button>
                                     </div>
                                 </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Localité</label>
-                                    <div className="relative">
-                                        <FiMapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
-                                        <input
-                                            type="text"
-                                            name="ville"
-                                            value={formData.ville}
-                                            onChange={handleChange}
-                                            placeholder="Zurich"
-                                            className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
-                                            style={inputStyle}
-                                            onFocus={focusBorder}
-                                            onBlur={blurBorder}
-                                            required={!isLogin}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
 
-                        {/* MOT DE PASSE OUBLIÉ */}
-                        {isLogin && (
-                            <div className="flex justify-end">
+                                {/* CONFIRMER MOT DE PASSE */}
+                                {!isLogin && (
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Confirmer le mot de passe</label>
+                                        <div className="relative">
+                                            <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
+                                            <input
+                                                type={showPassword ? 'text' : 'password'}
+                                                name="confirmPassword"
+                                                value={formData.confirmPassword}
+                                                onChange={handleChange}
+                                                placeholder="••••••••"
+                                                className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
+                                                style={inputStyle}
+                                                onFocus={focusBorder}
+                                                onBlur={blurBorder}
+                                                required={!isLogin}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* ADRESSE + VILLE */}
+                                {!isLogin && (
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-600 mb-1.5">Adresse</label>
+                                            <div className="relative">
+                                                <FiMapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
+                                                <input
+                                                    type="text"
+                                                    name="adresse"
+                                                    value={formData.adresse}
+                                                    onChange={handleChange}
+                                                    placeholder="Rue du Marché 12"
+                                                    className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
+                                                    style={inputStyle}
+                                                    onFocus={focusBorder}
+                                                    onBlur={blurBorder}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-600 mb-1.5">Localité</label>
+                                            <div className="relative">
+                                                <FiMapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
+                                                <input
+                                                    type="text"
+                                                    name="ville"
+                                                    value={formData.ville}
+                                                    onChange={handleChange}
+                                                    placeholder="Zurich"
+                                                    className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
+                                                    style={inputStyle}
+                                                    onFocus={focusBorder}
+                                                    onBlur={blurBorder}
+                                                    required={!isLogin}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* MOT DE PASSE OUBLIÉ */}
+                                {isLogin && (
+                                    <div className="flex justify-end">
+                                        <button
+                                            type="button"
+                                            onClick={() => navigate('/mot-de-passe-oublie')}
+                                            className="text-xs font-bold hover:underline"
+                                            style={{ color: RED_ACCENT }}
+                                        >
+                                            Mot de passe oublié ?
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* SUBMIT */}
                                 <button
-                                    type="button"
-                                    onClick={() => navigate('/mot-de-passe-oublie')}
-                                    className="text-xs font-bold hover:underline"
-                                    style={{ color: RED_ACCENT }}
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className="w-full text-white py-4 rounded-xl font-bold text-base transition-all duration-300 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
+                                    style={{
+                                        background: `linear-gradient(135deg, ${GREEN_DARK}, ${GREEN_MID})`,
+                                        boxShadow: `0 4px 20px rgba(45, 90, 39, 0.4)`
+                                    }}
+                                    onMouseEnter={e => (e.currentTarget.style.boxShadow = `0 8px 30px rgba(45, 90, 39, 0.6)`)}
+                                    onMouseLeave={e => (e.currentTarget.style.boxShadow = `0 4px 20px rgba(45, 90, 39, 0.4)`)}
                                 >
-                                    Mot de passe oublié ?
+                                    {isSubmitting ? 'Chargement...' : (isLogin ? 'Se connecter →' : 'Créer mon compte →')}
                                 </button>
+                            </form>
+
+                            {/* DIVIDER */}
+                            <div className="flex items-center my-5">
+                                <div className="flex-1 border-t border-gray-200" />
+                                <span className="px-4 text-xs text-gray-400 font-semibold">OU</span>
+                                <div className="flex-1 border-t border-gray-200" />
                             </div>
-                        )}
 
-                        {/* SUBMIT */}
-                        <button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className="w-full text-white py-4 rounded-xl font-bold text-base transition-all duration-300 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
-                            style={{
-                                background: `linear-gradient(135deg, ${GREEN_DARK}, ${GREEN_MID})`,
-                                boxShadow: `0 4px 20px rgba(45, 90, 39, 0.4)`
-                            }}
-                            onMouseEnter={e => (e.currentTarget.style.boxShadow = `0 8px 30px rgba(45, 90, 39, 0.6)`)}
-                            onMouseLeave={e => (e.currentTarget.style.boxShadow = `0 4px 20px rgba(45, 90, 39, 0.4)`)}
-                        >
-                             {isSubmitting ? 'Chargement...' : (isLogin ? 'Se connecter →' : 'Créer mon compte →')}
-                        </button>
-                    </form>
-
-                    {/* DIVIDER */}
-                    <div className="flex items-center my-5">
-                        <div className="flex-1 border-t border-gray-200" />
-                        <span className="px-4 text-xs text-gray-400 font-semibold">OU</span>
-                        <div className="flex-1 border-t border-gray-200" />
-                    </div>
-
-                    {/* SOCIAL LOGIN */}
-                    <button
-                        onClick={() => (window.location.href = `${process.env.REACT_APP_API_URL}/api/auth/google`)}
-                        className="w-full py-3 rounded-xl font-semibold text-gray-700 hover:bg-gray-50 transition flex items-center justify-center gap-3 text-sm"
-                        style={{ border: '2px solid #e5e7eb' }}
-                    >
-                        <svg className="w-5 h-5" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                        </svg>
-                        Continuer avec Google
-                    </button>
+                            {/* SOCIAL LOGIN */}
+                            <button
+                                onClick={() => (window.location.href = `${process.env.REACT_APP_API_URL}/api/auth/google`)}
+                                className="w-full py-3 rounded-xl font-semibold text-gray-700 hover:bg-gray-50 transition flex items-center justify-center gap-3 text-sm"
+                                style={{ border: '2px solid #e5e7eb' }}
+                            >
+                                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                </svg>
+                                Continuer avec Google
+                            </button>
+                        </>
+                    )}
                 </div>
 
                 {/* ══════════════════ COLONNE DROITE — VISUEL ══════════════════ */}
@@ -388,7 +481,11 @@ const Auth = () => {
                             style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.2)' }}
                         >
                             <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: RED_ACCENT }} />
-                            {isLogin ? 'Bon retour parmi nous !' : 'Rejoignez notre communauté'}
+                            {mfaRequired
+                                ? 'Vérification de votre identité'
+                                : isLogin
+                                    ? 'Bon retour parmi nous !'
+                                    : 'Rejoignez notre communauté'}
                         </div>
 
                         {/* LOGO centré dans la colonne droite */}
@@ -408,23 +505,27 @@ const Auth = () => {
 
                         {/* TITRE & SLOGAN */}
                         <h2 className="text-4xl font-black mb-3 leading-tight font-serif text-center">
-                            {isLogin
-                                ? <>Vos créations<br />vous attendent</>
-                                : <>L'artisanat,<br />réinventé</>}
+                            {mfaRequired
+                                ? <>Sécurité<br />renforcée</>
+                                : isLogin
+                                    ? <>Vos créations<br />vous attendent</>
+                                    : <>L'artisanat,<br />réinventé</>}
                         </h2>
                         <p className="text-base opacity-75 text-center mb-10 leading-relaxed">
-                            {isLogin
-                                ? 'Retrouvez vos favoris, suivez vos commandes et découvrez de nouvelles créations.'
-                                : 'Des pièces artisanales authentiques, livrées directement chez vous en Suisse.'}
+                            {mfaRequired
+                                ? 'Vérifiez votre identité avec le code envoyé par email pour finaliser la connexion.'
+                                : isLogin
+                                    ? 'Retrouvez vos favoris, suivez vos commandes et découvrez de nouvelles créations.'
+                                    : 'Des pièces artisanales authentiques, livrées directement chez vous en Suisse.'}
                         </p>
 
-                        {/* VALEURS — icônes uniquement, pas de chiffres */}
+                        {/* VALEURS */}
                         <div className="grid grid-cols-2 gap-4">
                             {[
-                                { icon: <FiGift     className="w-5 h-5" />, titre: 'Fait main ',             desc: 'Savoir-faire ancestral' },
-                                { icon: <FiStar     className="w-5 h-5" />, titre: 'Sélection curatée',      desc: 'Qualité certifiée'     },
-                                { icon: <FiPackage  className="w-5 h-5" />, titre: 'Livraison en Suisse',    desc: 'Partout en Suisse'     },
-                                { icon: <FiShield   className="w-5 h-5" />, titre: 'Paiement sécurisé',      desc: 'Données protégées'     },
+                                { icon: <FiGift    className="w-5 h-5" />, titre: 'Fait main',            desc: 'Savoir-faire ancestral' },
+                                { icon: <FiStar    className="w-5 h-5" />, titre: 'Sélection curatée',    desc: 'Qualité certifiée'     },
+                                { icon: <FiPackage className="w-5 h-5" />, titre: 'Livraison en Suisse',  desc: 'Partout en Suisse'     },
+                                { icon: <FiShield  className="w-5 h-5" />, titre: 'Paiement sécurisé',    desc: 'Données protégées'     },
                             ].map((item, i) => (
                                 <div
                                     key={i}
@@ -454,7 +555,6 @@ const Auth = () => {
                         className="relative z-10 pt-6 text-center"
                         style={{ borderTop: '1px solid rgba(255,255,255,0.2)' }}
                     >
-                    
                         <p className="text-xs opacity-50 mt-1 tracking-widest uppercase">
                             GOFFA · Artisanat · Suisse
                         </p>
