@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { FiLock, FiEye, FiEyeOff, FiArrowLeft } from 'react-icons/fi';
+import { FiLock, FiEye, FiEyeOff, FiArrowLeft, FiCheck } from 'react-icons/fi';
 import { resetPassword } from '../../services/authService';
 
 const ResetPassword = () => {
@@ -15,12 +15,20 @@ const ResetPassword = () => {
         confirmPassword: '',
     });
 
+    // ── Règles de validation (identiques au backend validatePassword) ──
+    const rules = [
+        { label: 'Au moins 10 caractères',                ok: formData.password.length >= 10 },
+        { label: 'Une lettre majuscule',                  ok: /[A-Z]/.test(formData.password) },
+        { label: 'Une lettre minuscule',                  ok: /[a-z]/.test(formData.password) },
+        { label: 'Un chiffre',                            ok: /[0-9]/.test(formData.password) },
+        { label: 'Un caractère spécial (!@#$%...)',       ok: /[!@#$%^&*()\-_=+\[\]{};':",.<>/?`~\\|]/.test(formData.password) },
+        { label: 'Les deux mots de passe identiques',     ok: formData.password === formData.confirmPassword && formData.confirmPassword.length > 0 },
+    ];
+    const isValid = rules.every(r => r.ok);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (formData.password !== formData.confirmPassword) {
-            setError('Les mots de passe ne correspondent pas !');
-            return;
-        }
+        if (!isValid) return;
         setLoading(true);
         setError('');
         try {
@@ -52,7 +60,7 @@ const ResetPassword = () => {
                         <h1 className="text-2xl font-black tracking-widest font-serif" style={{ color: '#166534' }}>
                             GOF<span style={{ color: '#e63946' }}>FA</span>
                         </h1>
-                        <p className="text-xs font-semibold tracking-wider" style={{ color: '#4ade80' }}>artisanat </p>
+                        <p className="text-xs font-semibold tracking-wider" style={{ color: '#4ade80' }}>artisanat</p>
                     </div>
                 </Link>
 
@@ -63,7 +71,8 @@ const ResetPassword = () => {
                             Nouveau mot de passe
                         </h2>
                         <p className="text-gray-500 text-sm mb-8">
-                            Choisissez un mot de passe sécurisé d'au moins 8 caractères, avec majuscule, chiffre et caractère spécial.
+                            Choisissez un mot de passe sécurisé d'au moins 10 caractères,
+                            avec majuscule, chiffre et caractère spécial.
                         </p>
 
                         {error && (
@@ -75,6 +84,7 @@ const ResetPassword = () => {
 
                         <form onSubmit={handleSubmit} className="space-y-4 text-left">
 
+                            {/* Mot de passe */}
                             <div>
                                 <label className="block text-xs font-bold text-gray-600 mb-1.5">Nouveau mot de passe</label>
                                 <div className="relative">
@@ -83,13 +93,13 @@ const ResetPassword = () => {
                                         type={showPassword ? 'text' : 'password'}
                                         value={formData.password}
                                         onChange={e => setFormData({ ...formData, password: e.target.value })}
-                                        placeholder="••••••••"
+                                        placeholder="Minimum 10 caractères"
                                         className="w-full pl-10 pr-10 py-3 rounded-xl text-sm transition focus:outline-none"
                                         style={{ border: '2px solid #e5e7eb' }}
                                         onFocus={e => e.target.style.borderColor = '#166534'}
                                         onBlur={e => e.target.style.borderColor = '#e5e7eb'}
                                         required
-                                        minLength={6}
+                                        minLength={10}
                                     />
                                     <button type="button" onClick={() => setShowPassword(!showPassword)}
                                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -98,6 +108,7 @@ const ResetPassword = () => {
                                 </div>
                             </div>
 
+                            {/* Confirmer */}
                             <div>
                                 <label className="block text-xs font-bold text-gray-600 mb-1.5">Confirmer le mot de passe</label>
                                 <div className="relative">
@@ -106,7 +117,7 @@ const ResetPassword = () => {
                                         type={showPassword ? 'text' : 'password'}
                                         value={formData.confirmPassword}
                                         onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                        placeholder="••••••••"
+                                        placeholder="Répétez votre mot de passe"
                                         className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
                                         style={{ border: '2px solid #e5e7eb' }}
                                         onFocus={e => e.target.style.borderColor = '#166534'}
@@ -116,9 +127,30 @@ const ResetPassword = () => {
                                 </div>
                             </div>
 
+                            {/* Règles de validation — affichées dès la première frappe */}
+                            {formData.password.length > 0 && (
+                                <div className="rounded-xl p-3 space-y-1.5"
+                                    style={{ background: '#f9fafb', border: '1px solid #f3f4f6' }}>
+                                    {rules.map((rule, i) => (
+                                        <div key={i} className="flex items-center gap-2 text-xs transition-all">
+                                            <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 transition-all"
+                                                style={{
+                                                    background: rule.ok ? '#dcfce7' : '#f3f4f6',
+                                                    border: `1.5px solid ${rule.ok ? '#86efac' : '#e5e7eb'}`,
+                                                }}>
+                                                {rule.ok && <FiCheck size={9} style={{ color: '#166534' }} />}
+                                            </div>
+                                            <span style={{ color: rule.ok ? '#166534' : '#9ca3af' }}>
+                                                {rule.label}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
                             <button
                                 type="submit"
-                                disabled={loading}
+                                disabled={loading || !isValid}
                                 className="w-full text-white py-4 rounded-xl font-bold text-base transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
                                 style={{
                                     background: 'linear-gradient(135deg, #166534, #15803d)',
