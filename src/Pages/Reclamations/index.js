@@ -1,20 +1,20 @@
 import React, { useState } from "react";
 import {
-  FiAlertCircle, FiUser, FiMail, FiPhone,
+  FiAlertCircle, FiMail, FiPhone,
   FiFileText, FiSend, FiCheckCircle,
 } from "react-icons/fi";
-import { submitReclamation } from "../../services/contactService";
+import { submitReclamation } from "../../services/reclamationService";
 
 const inputCls =
   "w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-900/20 focus:border-transparent transition";
 
 const RECLAMATION_TYPES = [
-  "Commande non reçue",
-  "Produit endommagé",
-  "Produit incorrect",
-  "Problème de paiement",
-  "Remboursement",
-  "Autre",
+  { value: "commande_non_recue",  label: "Commande non reçue" },
+  { value: "produit_defectueux",  label: "Produit défectueux" },
+  { value: "produit_incorrect",   label: "Produit incorrect"  },
+  { value: "retard_livraison",    label: "Retard de livraison" },
+  { value: "remboursement",       label: "Demande de remboursement" },
+  { value: "autre",               label: "Autre" },
 ];
 
 const Field = ({ label, children }) => (
@@ -28,8 +28,7 @@ const Field = ({ label, children }) => (
 
 const Reclamations = () => {
   const [form, setForm] = useState({
-    user_name: "", user_email: "", user_phone: "",
-    order_number: "", reclamation_type: "", message: "",
+    email: "", order_number: "", reclamation_type: "", message: "",
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -44,7 +43,7 @@ const Reclamations = () => {
     try {
       await submitReclamation(form);
       setSuccess(true);
-      setForm({ user_name: "", user_email: "", user_phone: "", order_number: "", reclamation_type: "", message: "" });
+      setForm({ email: "", order_number: "", reclamation_type: "", message: "" });
     } catch (err) {
       setError(err.response?.data?.message || "Une erreur est survenue.");
     } finally {
@@ -104,30 +103,18 @@ const Reclamations = () => {
               )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Field label="Votre nom">
-                  <div className="relative">
-                    <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
-                    <input type="text" name="user_name" required value={form.user_name} onChange={handleChange}
-                      placeholder="Votre nom" className={`${inputCls} pl-9`} />
-                  </div>
-                </Field>
+                
                 <Field label="Votre email">
                   <div className="relative">
                     <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
-                    <input type="email" name="user_email" required value={form.user_email} onChange={handleChange}
+                    <input type="email" name="email" required value={form.email} onChange={handleChange}
                       placeholder="votre@email.com" className={`${inputCls} pl-9`} />
                   </div>
                 </Field>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Field label="Téléphone (optionnel)">
-                  <div className="relative">
-                    <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
-                    <input type="tel" name="user_phone" value={form.user_phone} onChange={handleChange}
-                      placeholder="+41 79 XXX XX XX" className={`${inputCls} pl-9`} />
-                  </div>
-                </Field>
+                
                 <Field label="N° de commande (si applicable)">
                   <div className="relative">
                     <FiFileText className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
@@ -141,7 +128,7 @@ const Reclamations = () => {
                 <select name="reclamation_type" required value={form.reclamation_type} onChange={handleChange}
                   className={`${inputCls} text-gray-700`}>
                   <option value="">Sélectionner…</option>
-                  {RECLAMATION_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                  {RECLAMATION_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
               </Field>
 
