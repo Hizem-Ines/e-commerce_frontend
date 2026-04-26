@@ -1,32 +1,32 @@
 import { useState, useEffect } from 'react';
 import { getAllOrders, updateOrderStatus } from '../../../services/adminService';
-import api from '../../../services/api'; // ← ton instance axios GOFFA
-import { FiEye, FiLoader } from 'react-icons/fi';
+import { cancelOrder } from '../../../services/orderService'; // ✅ route /cancel avec raison
+import api from '../../../services/api';
+import { FiEye, FiX } from 'react-icons/fi';
 import formatPrice from '../../../utils/formatPrice';
 import { useSiteSettings } from '../../../context/SiteSettingsContext';
 
+// ✅ Clés en FR pour correspondre à la DB
 const STATUS_LABELS = {
-    pending:    { label: 'En attente',   color: 'bg-yellow-100 text-yellow-700' },
-    confirmed:  { label: 'Confirmée',    color: 'bg-blue-100 text-blue-700' },
-    processing: { label: 'En cours',     color: 'bg-orange-100 text-orange-700' },
-    shipped:    { label: 'Expédiée',     color: 'bg-purple-100 text-purple-700' },
-    delivered:  { label: 'Livrée',       color: 'bg-emerald-100 text-emerald-700' },
-    cancelled:  { label: 'Annulée',      color: 'bg-red-100 text-red-700' },
-    refunded: { label: 'Remboursée',     color: 'bg-gray-100 text-gray-600' },
+    en_attente:     { label: 'En attente',  color: 'bg-yellow-100 text-yellow-700' },
+    confirmee:      { label: 'Confirmée',   color: 'bg-blue-100 text-blue-700'     },
+    en_preparation: { label: 'En cours',    color: 'bg-orange-100 text-orange-700' },
+    expediee:       { label: 'Expédiée',    color: 'bg-purple-100 text-purple-700' },
+    livree:         { label: 'Livrée',      color: 'bg-emerald-100 text-emerald-700' },
+    annulee:        { label: 'Annulée',     color: 'bg-red-100 text-red-700'       },
+    remboursee:     { label: 'Remboursée',  color: 'bg-gray-100 text-gray-600'     },
 };
 
-const STATUS_OPTIONS = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled' , 'refunded'];
+// ✅ Valeurs FR — annulee gérée séparément via modal
+const STATUS_OPTIONS = ['en_attente', 'confirmee', 'en_preparation', 'expediee', 'livree', 'remboursee'];
 
 const PAYMENT_LABELS = {
-    card:  ' Carte bancaire',
-    twint: ' Twint',
+    card:  '💳 Carte bancaire',
+    twint: '📱 Twint',
 };
 
-// ─── Helper : adresse sans virgule orpheline ───────────────
-const formatAddress = (...parts) =>
-    parts.filter(Boolean).join(', ');
+const formatAddress = (...parts) => parts.filter(Boolean).join(', ');
 
-// ─── Badge statut ──────────────────────────────────────────
 const StatusBadge = ({ status }) => (
     <span className={`text-xs font-bold px-2 py-1 rounded-full ${STATUS_LABELS[status]?.color || 'bg-gray-100 text-gray-600'}`}>
         {STATUS_LABELS[status]?.label || status}
@@ -34,17 +34,22 @@ const StatusBadge = ({ status }) => (
 );
 
 const AdminCommandes = () => {
-    const [commandes, setCommandes]       = useState([]);
-    const [loading, setLoading]           = useState(true);
-    const [page, setPage]                 = useState(1);
-    const [totalPages, setTotalPages]     = useState(1);
-    const [filterStatus, setFilterStatus] = useState('');
-    const [selectedOrder, setSelectedOrder]       = useState(null);  // données liste
-    const [orderDetail, setOrderDetail]           = useState(null);  // données complètes
-    const [detailLoading, setDetailLoading]       = useState(false);
-    const [successMsg, setSuccessMsg]     = useState('');
-    const [errorMsg, setErrorMsg]         = useState('');
+    const [commandes, setCommandes]         = useState([]);
+    const [loading, setLoading]             = useState(true);
+    const [page, setPage]                   = useState(1);
+    const [totalPages, setTotalPages]       = useState(1);
+    const [filterStatus, setFilterStatus]   = useState('');
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const [orderDetail, setOrderDetail]     = useState(null);
+    const [detailLoading, setDetailLoading] = useState(false);
+    const [successMsg, setSuccessMsg]       = useState('');
+    const [errorMsg, setErrorMsg]           = useState('');
     const { currency } = useSiteSettings();
+
+    // ── Modal annulation ──────────────────────────────────
+    const [cancelModal, setCancelModal]   = useState(null);  // orderId en attente
+    const [cancelReason, setCancelReason] = useState('');
+    const [cancelLoading, setCancelLoading] = useState(false);
 
     // ── Fetch liste ───────────────────────────────────────
     useEffect(() => {
@@ -55,7 +60,8 @@ const AdminCommandes = () => {
                 setCommandes(res.data.orders);
                 setTotalPages(res.data.totalPages);
             } catch (err) {
-                console.error(err);
+                console.error('Détail erreur:', err.response?.status, err.response?.data);
+                setErrorMsg(err.response?.data?.message || `Erreur ${err.response?.status} — voir console`);
             } finally {
                 setLoading(false);
             }
@@ -63,7 +69,7 @@ const AdminCommandes = () => {
         fetchCommandes();
     }, [page, filterStatus]);
 
-    // ── Ouvrir modal + charger détail complet ─────────────
+    // ── Ouvrir modal détail ───────────────────────────────
     const openOrderDetail = async (commande) => {
         setSelectedOrder(commande);
         setOrderDetail(null);
@@ -78,22 +84,19 @@ const AdminCommandes = () => {
         }
     };
 
-    const closeModal = () => {
-        setSelectedOrder(null);
-        setOrderDetail(null);
-    };
+    const closeModal = () => { setSelectedOrder(null); setOrderDetail(null); };
 
     // ── Changement de statut ──────────────────────────────
     const handleStatusChange = async (orderId, newStatus) => {
+        // ✅ Annulation → modal avec raison obligatoire
+        if (newStatus === 'annulee') {
+            setCancelModal(orderId);
+            setCancelReason('');
+            return;
+        }
         try {
             await updateOrderStatus(orderId, newStatus);
-            setCommandes(prev =>
-                prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o)
-            );
-            if (selectedOrder?.id === orderId) {
-                setSelectedOrder(prev => ({ ...prev, status: newStatus }));
-                setOrderDetail(prev => prev ? { ...prev, status: newStatus } : prev);
-            }
+            applyStatusChange(orderId, newStatus);
             setSuccessMsg('Statut mis à jour avec succès.');
             setTimeout(() => setSuccessMsg(''), 3000);
         } catch (err) {
@@ -101,6 +104,41 @@ const AdminCommandes = () => {
             setTimeout(() => setErrorMsg(''), 3000);
         }
     };
+
+    // ── Confirmer l'annulation ────────────────────────────
+    const handleConfirmCancel = async () => {
+        if (!cancelReason.trim()) {
+            setErrorMsg('Une raison est obligatoire pour annuler.');
+            setTimeout(() => setErrorMsg(''), 3000);
+            return;
+        }
+        setCancelLoading(true);
+        try {
+            await cancelOrder(cancelModal, cancelReason.trim());
+            applyStatusChange(cancelModal, 'annulee');
+            setSuccessMsg('Commande annulée avec succès.');
+            setTimeout(() => setSuccessMsg(''), 3000);
+        } catch (err) {
+            setErrorMsg(err.response?.data?.message || 'Erreur lors de l\'annulation.');
+            setTimeout(() => setErrorMsg(''), 3000);
+        } finally {
+            setCancelLoading(false);
+            setCancelModal(null);
+            setCancelReason('');
+        }
+    };
+
+    // ── Helper : mettre à jour le statut dans le state ────
+    const applyStatusChange = (orderId, newStatus) => {
+        setCommandes(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+        if (selectedOrder?.id === orderId) {
+            setSelectedOrder(prev => ({ ...prev, status: newStatus }));
+            setOrderDetail(prev => prev ? { ...prev, status: newStatus } : prev);
+        }
+    };
+
+    // ── Tous les filtres (incl. annulée) ──────────────────
+    const ALL_FILTER_OPTIONS = [...STATUS_OPTIONS, 'annulee'];
 
     return (
         <div>
@@ -114,7 +152,7 @@ const AdminCommandes = () => {
 
             {/* ALERTES */}
             {successMsg && (
-                <div className="bg-emerald-50 border border-#b6eac7 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">
+                <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">
                     ✅ {successMsg}
                 </div>
             )}
@@ -134,7 +172,7 @@ const AdminCommandes = () => {
                 >
                     Toutes
                 </button>
-                {STATUS_OPTIONS.map(s => (
+                {ALL_FILTER_OPTIONS.map(s => (
                     <button
                         key={s}
                         onClick={() => { setFilterStatus(s); setPage(1); }}
@@ -193,15 +231,22 @@ const AdminCommandes = () => {
                                         {formatPrice(parseFloat(commande.total_price), currency)}
                                     </td>
                                     <td className="px-5 py-4 text-center">
-                                        <select
-                                            value={commande.status}
-                                            onChange={(e) => handleStatusChange(commande.id, e.target.value)}
-                                            className={`text-xs font-bold px-2 py-1 rounded-full border-0 outline-none cursor-pointer ${STATUS_LABELS[commande.status]?.color || 'bg-gray-100 text-gray-600'}`}
-                                        >
-                                            {STATUS_OPTIONS.map(s => (
-                                                <option key={s} value={s}>{STATUS_LABELS[s]?.label}</option>
-                                            ))}
-                                        </select>
+                                        {commande.status === 'annulee' || commande.status === 'livree' || commande.status === 'remboursee' ? (
+                                            // ✅ Statuts terminaux → badge non modifiable
+                                            <StatusBadge status={commande.status} />
+                                        ) : (
+                                            <select
+                                                value={commande.status}
+                                                onChange={(e) => handleStatusChange(commande.id, e.target.value)}
+                                                className={`text-xs font-bold px-2 py-1 rounded-full border-0 outline-none cursor-pointer ${STATUS_LABELS[commande.status]?.color || 'bg-gray-100 text-gray-600'}`}
+                                            >
+                                                {STATUS_OPTIONS.map(s => (
+                                                    <option key={s} value={s}>{STATUS_LABELS[s]?.label}</option>
+                                                ))}
+                                                {/* ✅ Option annuler toujours disponible */}
+                                                <option value="annulee">Annuler…</option>
+                                            </select>
+                                        )}
                                     </td>
                                     <td className="px-5 py-4 text-center">
                                         <button
@@ -239,6 +284,50 @@ const AdminCommandes = () => {
             )}
 
             {/* ═══════════════════════════════════════════════════
+                MODAL ANNULATION — raison obligatoire
+            ═══════════════════════════════════════════════════ */}
+            {cancelModal && (
+                <div
+                    className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+                    onClick={(e) => e.target === e.currentTarget && setCancelModal(null)}
+                >
+                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6">
+                        <div className="flex items-center justify-between mb-5">
+                            <h3 className="text-lg font-bold text-[#2c2c2c]">Annuler la commande</h3>
+                            <button onClick={() => setCancelModal(null)} className="text-black/30 hover:text-black/70 text-2xl font-bold leading-none">×</button>
+                        </div>
+                        <p className="text-sm text-black/50 mb-4">
+                            Cette action restaurera le stock et enverra un email au client.
+                            Une raison est obligatoire.
+                        </p>
+                        <textarea
+                            value={cancelReason}
+                            onChange={(e) => setCancelReason(e.target.value)}
+                            placeholder="Raison de l'annulation (ex : rupture de stock, demande client...)"
+                            rows={3}
+                            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-red-400 focus:outline-none resize-none"
+                        />
+                        <p className="text-xs text-black/30 mt-1 mb-5">{cancelReason.length}/500 caractères</p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setCancelModal(null)}
+                                className="flex-1 py-3 rounded-xl border-2 border-gray-200 text-sm font-bold text-black/50 hover:bg-gray-50 transition"
+                            >
+                                Annuler
+                            </button>
+                            <button
+                                onClick={handleConfirmCancel}
+                                disabled={cancelLoading || !cancelReason.trim()}
+                                className="flex-1 py-3 rounded-xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition disabled:opacity-50"
+                            >
+                                {cancelLoading ? '⏳ Traitement...' : '🚫 Confirmer l\'annulation'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ═══════════════════════════════════════════════════
                 MODAL DÉTAIL COMMANDE
             ═══════════════════════════════════════════════════ */}
             {selectedOrder && (
@@ -261,24 +350,19 @@ const AdminCommandes = () => {
                                     })}
                                 </p>
                             </div>
-                            <button
-                                onClick={closeModal}
-                                className="text-black/30 hover:text-black/70 text-2xl font-bold leading-none"
-                            >
-                                ×
-                            </button>
+                            <button onClick={closeModal} className="text-black/30 hover:text-black/70 text-2xl font-bold leading-none">×</button>
                         </div>
 
                         {/* Corps scrollable */}
                         <div className="overflow-y-auto flex-1 px-4 sm:px-8 py-6 space-y-6">
 
-                            {/* ── Infos client + statut ── */}
+                            {/* Infos client + livraison */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="bg-[#f9f5f0] rounded-xl p-4">
                                     <p className="text-xs text-black/40 font-semibold uppercase mb-2">Client</p>
                                     <p className="font-bold text-[#2c2c2c]">{selectedOrder.customer_name || orderDetail?.shipping_full_name || '—'}</p>
                                     <p className="text-sm text-black/50">{selectedOrder.customer_email}</p>
-                                    {(orderDetail?.shipping_phone) && (
+                                    {orderDetail?.shipping_phone && (
                                         <p className="text-sm text-black/50">{orderDetail.shipping_phone}</p>
                                     )}
                                 </div>
@@ -288,7 +372,6 @@ const AdminCommandes = () => {
                                         <p className="text-sm text-black/30 italic">Chargement…</p>
                                     ) : orderDetail ? (
                                         <>
-                                            {/* ✅ Adresse sans virgule orpheline */}
                                             <p className="text-sm font-semibold text-[#2c2c2c]">
                                                 {formatAddress(
                                                     orderDetail.shipping_address,
@@ -299,28 +382,22 @@ const AdminCommandes = () => {
                                             </p>
                                             {orderDetail.delivery_status && (
                                                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full mt-2 inline-block ${STATUS_LABELS[orderDetail.delivery_status]?.color || 'bg-gray-100 text-gray-600'}`}>
-                                                    {orderDetail.delivery_status}
+                                                    {STATUS_LABELS[orderDetail.delivery_status]?.label || orderDetail.delivery_status}
                                                 </span>
                                             )}
                                             {orderDetail.tracking_number && (
-                                                <p className="text-xs text-black/40 mt-1">
-                                                    Suivi : {orderDetail.tracking_number}
-                                                </p>
+                                                <p className="text-xs text-black/40 mt-1">Suivi : {orderDetail.tracking_number}</p>
                                             )}
                                         </>
                                     ) : (
-                                        // Fallback depuis la liste (adresse partielle)
                                         <p className="text-sm font-semibold text-[#2c2c2c]">
-                                            {formatAddress(
-                                                selectedOrder.shipping_address,
-                                                selectedOrder.shipping_city
-                                            ) || '—'}
+                                            {formatAddress(selectedOrder.shipping_address, selectedOrder.shipping_city) || '—'}
                                         </p>
                                     )}
                                 </div>
                             </div>
 
-                            {/* ── Récapitulatif financier ── */}
+                            {/* Récapitulatif financier */}
                             <div className="bg-[#f9f5f0] rounded-xl p-3 grid grid-cols-3 gap-2 text-center">
                                 <div>
                                     <p className="text-xs text-black/40 uppercase font-semibold mb-1">Sous-total</p>
@@ -331,7 +408,7 @@ const AdminCommandes = () => {
                                 <div>
                                     <p className="text-xs text-black/40 uppercase font-semibold mb-1">Réduction</p>
                                     <p className="font-bold text-red-500">
-                                        {orderDetail?.discount_amount > 0
+                                        {parseFloat(orderDetail?.discount_amount) > 0
                                             ? `-${formatPrice(parseFloat(orderDetail.discount_amount), currency)}`
                                             : '—'}
                                     </p>
@@ -344,7 +421,7 @@ const AdminCommandes = () => {
                                 </div>
                             </div>
 
-                            {/* ── Paiement ── */}
+                            {/* Paiement */}
                             <div className="flex items-center justify-between text-sm bg-[#f9f5f0] rounded-xl px-4 py-3">
                                 <span className="text-black/50 font-semibold">Mode de paiement</span>
                                 <span className="font-bold">
@@ -352,12 +429,9 @@ const AdminCommandes = () => {
                                 </span>
                             </div>
 
-                            {/* ── Articles commandés ── */}
+                            {/* Articles commandés */}
                             <div>
-                                <p className="text-xs text-black/40 font-semibold uppercase mb-3">
-                                    Articles commandés
-                                </p>
-
+                                <p className="text-xs text-black/40 font-semibold uppercase mb-3">Articles commandés</p>
                                 {detailLoading ? (
                                     <div className="flex items-center justify-center py-8 text-black/30">
                                         <div className="animate-spin text-2xl mr-3">🌿</div>
@@ -366,58 +440,41 @@ const AdminCommandes = () => {
                                 ) : orderDetail?.items?.length > 0 ? (
                                     <div className="space-y-3">
                                         {orderDetail.items.map((item, idx) => {
-                                            // variant_details peut être string JSON ou tableau
                                             let attrs = [];
                                             try {
                                                 attrs = typeof item.variant_details === 'string'
                                                     ? JSON.parse(item.variant_details)
                                                     : (item.variant_details || []);
                                             } catch (_) {}
-
                                             return (
-                                                <div
-                                                    key={item.id || idx}
-                                                    className="flex items-start gap-4 bg-white border border-gray-100 rounded-xl px-4 py-3"
-                                                >
-                                                    {/* Icône produit */}
-                                                    <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center text-xl flex-shrink-0">
-                                                        🧺
-                                                    </div>
+                                                <div key={item.id || idx} className="flex items-start gap-4 bg-white border border-gray-100 rounded-xl px-4 py-3">
+                                                    <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center text-xl flex-shrink-0">🧺</div>
                                                     <div className="flex-1 min-w-0">
                                                         <p className="font-bold text-[#2c2c2c] text-sm truncate">
-                                                            {item.product_name_fr || 'Produit'}
+                                                            {item.product_name_fr || '—'}
                                                         </p>
-                                                        {/* Attributs variante (taille, couleur…) */}
                                                         {attrs.length > 0 && (
                                                             <p className="text-xs text-black/40 mt-0.5">
                                                                 {attrs.map(a => `${a.attribute_type} : ${a.attribute_value}`).join(' · ')}
                                                             </p>
                                                         )}
-                                                        {item.sku && (
-                                                            <p className="text-xs text-black/30 mt-0.5">SKU : {item.sku}</p>
-                                                        )}
+                                                        {item.sku && <p className="text-xs text-black/30 mt-0.5">SKU : {item.sku}</p>}
                                                     </div>
                                                     <div className="text-right flex-shrink-0">
-                                                        <p className="font-bold text-[#2d5a27] text-sm">
-                                                            {formatPrice(parseFloat(item.price_at_order), currency)}
-                                                        </p>
+                                                        <p className="font-bold text-[#2d5a27] text-sm">{formatPrice(parseFloat(item.price_at_order), currency)}</p>
                                                         <p className="text-xs text-black/40">× {item.quantity}</p>
-                                                        <p className="text-xs font-bold text-[#2c2c2c] mt-1">
-                                                            = {formatPrice(parseFloat(item.price_at_order) * item.quantity, currency)}
-                                                        </p>
+                                                        <p className="text-xs font-bold text-[#2c2c2c] mt-1">= {formatPrice(parseFloat(item.price_at_order) * item.quantity, currency)}</p>
                                                     </div>
                                                 </div>
                                             );
                                         })}
                                     </div>
                                 ) : (
-                                    <p className="text-sm text-black/30 italic text-center py-4">
-                                        Aucun article trouvé
-                                    </p>
+                                    <p className="text-sm text-black/30 italic text-center py-4">Aucun article trouvé</p>
                                 )}
                             </div>
 
-                            {/* ── Notes ── */}
+                            {/* Notes */}
                             {orderDetail?.notes && (
                                 <div className="bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3">
                                     <p className="text-xs text-yellow-700 font-semibold uppercase mb-1">Notes</p>
@@ -425,19 +482,29 @@ const AdminCommandes = () => {
                                 </div>
                             )}
 
-                            {/* ── Changer statut ── */}
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 border-t border-gray-100">
-                                <span className="text-sm text-black/50 font-semibold">Changer le statut</span>
-                                <select
-                                    value={selectedOrder.status}
-                                    onChange={(e) => handleStatusChange(selectedOrder.id, e.target.value)}
-                                    className="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm font-bold focus:border-[#4a8c42]  outline-none"
-                                >
-                                    {STATUS_OPTIONS.map(s => (
-                                        <option key={s} value={s}>{STATUS_LABELS[s]?.label}</option>
-                                    ))}
-                                </select>
-                            </div>
+                            {/* Changer statut */}
+                            {selectedOrder.status !== 'annulee' && selectedOrder.status !== 'livree' && selectedOrder.status !== 'remboursee' && (
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 border-t border-gray-100">
+                                    <span className="text-sm text-black/50 font-semibold">Changer le statut</span>
+                                    <div className="flex gap-2">
+                                        <select
+                                            value={selectedOrder.status}
+                                            onChange={(e) => handleStatusChange(selectedOrder.id, e.target.value)}
+                                            className="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm font-bold focus:border-[#4a8c42] outline-none"
+                                        >
+                                            {STATUS_OPTIONS.map(s => (
+                                                <option key={s} value={s}>{STATUS_LABELS[s]?.label}</option>
+                                            ))}
+                                        </select>
+                                        <button
+                                            onClick={() => { closeModal(); setCancelModal(selectedOrder.id); setCancelReason(''); }}
+                                            className="px-3 py-2 rounded-xl bg-red-50 text-red-500 border-2 border-red-100 text-sm font-bold hover:bg-red-100 transition"
+                                        >
+                                             Annuler
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
