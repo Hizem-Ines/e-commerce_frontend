@@ -83,7 +83,7 @@ const OrderDetail = () => {
                 <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
                     <div>
                         <h1 className="text-3xl font-bold font-serif text-[#2c2c2c]">
-                            Commande #{order.id.slice(0, 8).toUpperCase()}
+                            Commande {order.order_number || `#${order.id.slice(0, 8).toUpperCase()}`}
                         </h1>
                         <p className="text-black/50 text-sm mt-1">
                             Passée le {new Date(order.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}

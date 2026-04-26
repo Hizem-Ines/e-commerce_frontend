@@ -403,8 +403,8 @@ const Profile = () => {
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                                                     <span className="font-black text-[#2c2c2c] text-sm">
-                                                        #{order.id.slice(0, 8).toUpperCase()}
-                                                    </span>
+                                                        {order.order_number ? order.order_number : `#${order.id.slice(0, 8).toUpperCase()}`}
+                                                        </span>
                                                     <span className="text-xs font-bold px-3 py-1 rounded-full"
                                                         style={{ background: statusInfo.bg, color: statusInfo.color }}>
                                                         {statusInfo.label}

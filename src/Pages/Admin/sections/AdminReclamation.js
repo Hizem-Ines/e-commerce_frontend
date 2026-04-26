@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { FiEye, FiSearch, FiAlertCircle, FiCheckCircle, FiClock, FiX } from "react-icons/fi";
-import { getAllReclamations, updateReclamationStatus } from "../../../services/contactService";
+import { getAllReclamations, respondToReclamation } from "../../../services/reclamationService";
+import { FiMessageSquare } from "react-icons/fi";
 
 // ─── Constants ────────────────────────────────────────────
 const STATUS_CONFIG = {
-  en_attente: { label: "En attente", color: "bg-amber-100 text-amber-700" },
-  en_cours:   { label: "En cours",   color: "bg-blue-100 text-blue-700"   },
+  en_attente: { label: "En attente", color: "bg-amber-100 text-amber-700"     },
+  en_cours:   { label: "En cours",   color: "bg-blue-100 text-blue-700"       },
   resolue:    { label: "Résolue",    color: "bg-emerald-100 text-emerald-700" },
+  rejetee:    { label: "Rejetée",    color: "bg-red-100 text-red-700"         },
 };
 
 const TYPE_ICONS = {
-  "Commande non reçue": "📦",
-  "Produit endommagé":  "💔",
-  "Produit incorrect":  "❓",
-  "Problème de paiement": "💳",
-  "Remboursement":      "↩️",
-  "Autre":              "💬",
+  produit_defectueux: "💔",
+  commande_non_recue: "📦",
+  produit_incorrect:  "❓",
+  retard_livraison:   "🚚",
+  remboursement:      "↩️",
+  autre:              "💬",
 };
 
 // ─── Status Selector (Dropdown) ─────────────────────────────
@@ -114,6 +116,20 @@ function DetailModal({ open, reclamation, onClose }) {
               {reclamation.message}
             </p>
           </div>
+
+          {reclamation.admin_response && (
+            <div className="bg-emerald-50 rounded-2xl p-4">
+              <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-3">Réponse de l'équipe</p>
+              <p className="text-sm text-[#2c2c2c] leading-relaxed whitespace-pre-wrap">
+                {reclamation.admin_response}
+              </p>
+              {reclamation.responded_at && (
+                <p className="text-xs text-black/30 mt-2">
+                  Répondu le {new Date(reclamation.responded_at).toLocaleDateString("fr-FR")}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Footer */}
@@ -123,6 +139,71 @@ function DetailModal({ open, reclamation, onClose }) {
             className="w-full border-2 border-gray-200 text-black/60 font-bold py-3 rounded-xl hover:bg-gray-100 transition text-sm"
           >
             Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RespondModal({ open, reclamation, form, onChange, onSubmit, onClose, loading }) {
+  if (!open || !reclamation) return null;
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+        <div className="flex items-center justify-between px-7 py-5 border-b border-gray-100">
+          <h2 className="text-xl font-bold font-serif text-[#2c2c2c]">Répondre à la réclamation</h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl transition">
+            <FiX size={20} />
+          </button>
+        </div>
+        <div className="px-7 py-6 space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-black/40 uppercase tracking-wider mb-1.5">Statut</label>
+            <select
+              value={form.status}
+              onChange={(e) => onChange("status", e.target.value)}
+              className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#4a8c42]"
+            >
+              {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
+                <option key={key} value={key}>{cfg.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-black/40 uppercase tracking-wider mb-1.5">
+              Réponse <span className="text-red-400">*</span>
+            </label>
+            <textarea
+              rows={4}
+              value={form.admin_response}
+              onChange={(e) => onChange("admin_response", e.target.value)}
+              placeholder="Votre réponse au client…"
+              className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#4a8c42] resize-none"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-black/40 uppercase tracking-wider mb-1.5">
+              Délai de résolution (heures, optionnel)
+            </label>
+            <input
+              type="number" min="1"
+              value={form.resolution_delay}
+              onChange={(e) => onChange("resolution_delay", e.target.value)}
+              placeholder="ex: 48"
+              className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#4a8c42]"
+            />
+          </div>
+        </div>
+        <div className="px-7 py-5 border-t border-gray-100 flex gap-3">
+          <button onClick={onClose} className="flex-1 border-2 border-gray-200 text-black/60 font-bold py-3 rounded-xl hover:bg-gray-100 transition text-sm">
+            Annuler
+          </button>
+          <button
+            onClick={onSubmit} disabled={loading}
+            className="flex-1 bg-[#2d5a27] text-white font-bold py-3 rounded-xl hover:bg-[#3a7232] transition text-sm disabled:opacity-60"
+          >
+            {loading ? "Envoi…" : "Envoyer la réponse"}
           </button>
         </div>
       </div>
@@ -167,24 +248,40 @@ export default function AdminReclamations() {
     loadReclamations();
   }, []);
 
-  const handleStatusChange = async (id, newStatus) => {
-    try {
-      await updateReclamationStatus(id, newStatus);
+  
+const [respondTarget, setRespondTarget] = useState(null); // réclamation à traiter
+const [respondForm, setRespondForm]     = useState({ status: "", admin_response: "", resolution_delay: "" });
+const [respondLoading, setRespondLoading] = useState(false);
 
-      // Update local state
-      setReclamations((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, status: newStatus } : r))
-      );
+const openRespondModal = (r) => {
+  setRespondTarget(r);
+  setRespondForm({ status: r.status, admin_response: r.admin_response || "", resolution_delay: "" });
+};
 
-      // Update modal if open
-      setSelected((prev) => (prev?.id === id ? { ...prev, status: newStatus } : prev));
+const handleRespond = async () => {
+  if (!respondForm.status || !respondForm.admin_response.trim()) {
+    showError("Statut et réponse sont obligatoires.");
+    return;
+  }
+  setRespondLoading(true);
+  try {
+    await respondToReclamation(respondTarget.id, respondForm); // nouveau service
+    setReclamations((prev) =>
+      prev.map((r) =>
+        r.id === respondTarget.id
+          ? { ...r, status: respondForm.status, admin_response: respondForm.admin_response }
+          : r
+      )
+    );
+    setRespondTarget(null);
+    showSuccess("Réponse envoyée. Le client a été notifié par email.");
+  } catch (err) {
+    showError("Erreur lors de l'envoi de la réponse.");
+  } finally {
+    setRespondLoading(false);
+  }
+};
 
-      showSuccess("Statut mis à jour avec succès.");
-    } catch (err) {
-      showError("Erreur lors de la mise à jour du statut.");
-      console.error(err);
-    }
-  };
 
   const filtered = reclamations.filter((r) => {
     const matchSearch =
@@ -320,10 +417,9 @@ export default function AdminReclamations() {
                     )}
                   </td>
                   <td className="px-4 py-4 text-center">
-                    <StatusSelector
-                      status={r.status}
-                      onChange={(newStatus) => handleStatusChange(r.id, newStatus)}
-                    />
+                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${STATUS_CONFIG[r.status]?.color || ""}`}>
+                      {STATUS_CONFIG[r.status]?.label || r.status}
+                    </span>
                   </td>
                   <td className="px-5 py-4 hidden lg:table-cell">
                     <div className="flex items-center gap-1.5 text-xs text-black/40">
@@ -340,6 +436,15 @@ export default function AdminReclamations() {
                       >
                         <FiEye size={15} />
                       </button>
+                      {!["resolue", "rejetee"].includes(r.status) && (
+                        <button
+                          onClick={() => openRespondModal(r)}
+                          className="p-2 hover:bg-emerald-50 text-emerald-600 rounded-xl transition"
+                          title="Répondre"
+                        >
+                          <FiMessageSquare size={15} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -355,6 +460,17 @@ export default function AdminReclamations() {
         reclamation={selected}
         onClose={() => setSelected(null)}
       />
+
+      <RespondModal
+        open={!!respondTarget}
+        reclamation={respondTarget}
+        form={respondForm}
+        onChange={(key, val) => setRespondForm((f) => ({ ...f, [key]: val }))}
+        onSubmit={handleRespond}
+        onClose={() => setRespondTarget(null)}
+        loading={respondLoading}
+      />
+
     </div>
   );
 }
