@@ -4,7 +4,7 @@ import {
     FiDownload, FiUsers, FiPackage, FiShoppingBag, FiDollarSign,
     FiTrendingUp, FiClock, FiCalendar, FiChevronDown, FiAlertTriangle,
     FiAlertCircle, FiCheckCircle, FiMessageSquare, FiActivity,
-    FiAward, FiBarChart2, FiPieChart, FiRefreshCw,FiZap,
+    FiAward, FiBarChart2, FiPieChart,FiZap,
 } from 'react-icons/fi';
 import formatPrice from '../../../utils/formatPrice';
 import { useSiteSettings } from '../../../context/SiteSettingsContext';
@@ -19,19 +19,19 @@ import { adminFaqStats } from '../../../services/faqService';
 // ─── Constantes ────────────────────────────────────────────────────────────────
 
 const STATUS_LABELS = {
-    pending:   { label: 'En attente',  color: 'bg-yellow-100 text-yellow-700' },
-    confirmed: { label: 'Confirmée',   color: 'bg-blue-100   text-blue-700'   },
-    shipped:   { label: 'Expédiée',    color: 'bg-purple-100 text-purple-700' },
-    delivered: { label: 'Livrée',      color: 'bg-emerald-100 text-emerald-700' },
-    cancelled: { label: 'Annulée',     color: 'bg-red-100    text-red-700'    },
+    en_attente:  { label: 'En attente',  color: 'bg-yellow-100 text-yellow-700'   },
+    confirmee:   { label: 'Confirmée',   color: 'bg-blue-100   text-blue-700'     },
+    expediee:    { label: 'Expédiée',    color: 'bg-purple-100 text-purple-700'   },
+    livree:      { label: 'Livrée',      color: 'bg-emerald-100 text-emerald-700' },
+    annulee:     { label: 'Annulée',     color: 'bg-red-100    text-red-700'      },
 };
 
 const STATUS_COLORS = {
-    pending:   '#f59e0b',
-    confirmed: '#3b82f6',
-    shipped:   '#8b5cf6',
-    delivered: '#10b981',
-    cancelled: '#ef4444',
+    en_attente: '#f59e0b',
+    confirmee:  '#3b82f6',
+    expediee:   '#8b5cf6',
+    livree:     '#10b981',
+    annulee:    '#ef4444',
 };
 
 const CATEGORY_PALETTE = [
