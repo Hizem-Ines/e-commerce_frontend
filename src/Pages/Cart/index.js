@@ -1,9 +1,12 @@
+// src/pages/Cart.jsx
+
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 import formatPrice from '../../utils/formatPrice';
 import { getShippingCost } from '../../services/orderService';
+import SuggestionsRecettes from '../../Components/cart/Suggestionrecettes';
 
 const Cart = () => {
     const { panier, retirerDuPanier, changerQuantite, viderPanier, totalArticles, totalPrix } = useCart();
@@ -54,8 +57,10 @@ const Cart = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
 
-                    {/* LISTE PRODUITS */}
+                    {/* COLONNE GAUCHE — liste produits + suggestions IA */}
                     <div className="lg:col-span-2 space-y-4">
+
+                        {/* LISTE PRODUITS */}
                         {panier.map((item) => (
                             <div key={item.variant_id}
                                 className="bg-white rounded-2xl p-4 sm:p-5 shadow-[0_4px_15px_rgba(0,0,0,0.07)] flex items-center gap-4 sm:gap-5">
@@ -120,6 +125,9 @@ const Cart = () => {
                             className="text-sm text-red-400 hover:text-red-600 font-semibold transition-colors duration-200">
                             🗑 Vider le panier
                         </button>
+
+                        {/* ✨ SUGGESTIONS IA — affiché sous la liste produits */}
+                        <SuggestionsRecettes panier={panier} />
                     </div>
 
                     {/* RÉSUMÉ */}
