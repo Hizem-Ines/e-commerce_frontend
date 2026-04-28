@@ -91,7 +91,7 @@ const Auth = () => {
     const GREEN_DARK  = '#2d5a27';
     const GREEN_MID   = '#3a7232';
     const GREEN_LIGHT = '#4a8f3f';
-    const RED_ACCENT  = '#e63946';
+    const LIGHT_GREEN= '#8faa8b';
 
     const inputStyle  = { border: `2px solid #e5e7eb` };
     const focusBorder = (e) => (e.target.style.borderColor = GREEN_DARK);
@@ -123,7 +123,7 @@ const Auth = () => {
                             />
                             <span
                                 className="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white"
-                                style={{ background: RED_ACCENT }}
+                                style={{ background: LIGHT_GREEN}}
                             />
                         </div>
                         <div>
@@ -247,7 +247,7 @@ const Auth = () => {
                                             <div key={name}>
                                                 <label className="block text-xs font-bold text-gray-600 mb-1.5">{label}</label>
                                                 <div className="relative">
-                                                    <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
+                                                    <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: LIGHT_GREEN}} />
                                                     <input
                                                         type="text"
                                                         name={name}
@@ -270,7 +270,7 @@ const Auth = () => {
                                 <div>
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">Email</label>
                                     <div className="relative">
-                                        <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
+                                        <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: LIGHT_GREEN}} />
                                         <input
                                             type="email"
                                             name="email"
@@ -291,7 +291,7 @@ const Auth = () => {
                                     <div>
                                         <label className="block text-xs font-bold text-gray-600 mb-1.5">Téléphone</label>
                                         <div className="relative">
-                                            <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
+                                            <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: LIGHT_GREEN}} />
                                             <input
                                                 type="tel"
                                                 name="telephone"
@@ -312,7 +312,7 @@ const Auth = () => {
                                 <div>
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">Mot de passe</label>
                                     <div className="relative">
-                                        <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
+                                        <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: LIGHT_GREEN}} />
                                         <input
                                             type={showPassword ? 'text' : 'password'}
                                             name="password"
@@ -340,7 +340,7 @@ const Auth = () => {
                                     <div>
                                         <label className="block text-xs font-bold text-gray-600 mb-1.5">Confirmer le mot de passe</label>
                                         <div className="relative">
-                                            <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
+                                            <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: LIGHT_GREEN}} />
                                             <input
                                                 type={showPassword ? 'text' : 'password'}
                                                 name="confirmPassword"
@@ -363,7 +363,7 @@ const Auth = () => {
                                         <div>
                                             <label className="block text-xs font-bold text-gray-600 mb-1.5">Adresse</label>
                                             <div className="relative">
-                                                <FiMapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
+                                                <FiMapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: LIGHT_GREEN}} />
                                                 <input
                                                     type="text"
                                                     name="adresse"
@@ -380,7 +380,7 @@ const Auth = () => {
                                         <div>
                                             <label className="block text-xs font-bold text-gray-600 mb-1.5">Localité</label>
                                             <div className="relative">
-                                                <FiMapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: RED_ACCENT }} />
+                                                <FiMapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: LIGHT_GREEN}} />
                                                 <input
                                                     type="text"
                                                     name="ville"
@@ -405,7 +405,7 @@ const Auth = () => {
                                             type="button"
                                             onClick={() => navigate('/mot-de-passe-oublie')}
                                             className="text-xs font-bold hover:underline"
-                                            style={{ color: RED_ACCENT }}
+                                            style={{ color: LIGHT_GREEN}}
                                         >
                                             Mot de passe oublié ?
                                         </button>
@@ -466,9 +466,9 @@ const Auth = () => {
 
                     {/* LUEURS DÉCORATIVES */}
                     <div className="absolute top-0 right-0 w-72 h-72 rounded-full opacity-20"
-                        style={{ background: RED_ACCENT, filter: 'blur(70px)', transform: 'translate(35%, -35%)' }} />
+                        style={{ background: LIGHT_GREEN, filter: 'blur(70px)', transform: 'translate(35%, -35%)' }} />
                     <div className="absolute bottom-0 left-0 w-56 h-56 rounded-full opacity-15"
-                        style={{ background: RED_ACCENT, filter: 'blur(55px)', transform: 'translate(-35%, 35%)' }} />
+                        style={{ background: LIGHT_GREEN, filter: 'blur(55px)', transform: 'translate(-35%, 35%)' }} />
                     <div className="absolute top-1/2 left-1/2 w-40 h-40 rounded-full opacity-10"
                         style={{ background: '#ffffff', filter: 'blur(60px)', transform: 'translate(-50%, -50%)' }} />
 
@@ -480,7 +480,7 @@ const Auth = () => {
                             className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold mb-8"
                             style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.2)' }}
                         >
-                            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: RED_ACCENT }} />
+                            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: LIGHT_GREEN}} />
                             {mfaRequired
                                 ? 'Vérification de votre identité'
                                 : isLogin

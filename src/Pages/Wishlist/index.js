@@ -3,7 +3,7 @@ import { useWishlist } from '../../context/WishlistContext';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/authContext';
 import formatPrice from '../../utils/formatPrice';
-import { FaHeart } from 'react-icons/fa';
+import { FaHeart,FaHeartBroken } from 'react-icons/fa';
 
 const Wishlist = () => {
     const { favoris, retirerFavori, viderFavoris } = useWishlist();
@@ -121,9 +121,10 @@ const Wishlist = () => {
                                         </Link>
                                         <button
                                             onClick={() => retirerFavori(productId)}
-                                            className="ml-1 p-1 md:p-1.5 rounded-full hover:bg-red-50 transition-colors duration-200 shrink-0"
+                                            title="Retirer des favoris"
+                                            className="ml-1 p-1 md:p-1.5 rounded-full hover:bg-red-50 transition-colors duration-200 shrink-0 group"
                                         >
-                                            <FaHeart size={14} className="text-red-500" />
+                                            <FaHeartBroken size={14} className="text-red-400 group-hover:text-red-600 transition-colors" />
                                         </button>
                                     </div>
 
