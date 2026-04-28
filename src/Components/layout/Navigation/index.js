@@ -4,26 +4,28 @@ import { AiFillProduct } from "react-icons/ai";
 import { GiTalk } from "react-icons/gi";
 import { RiDiscountPercentLine } from "react-icons/ri";
 import { LuChefHat } from "react-icons/lu";
+import { FiMenu, FiX, FiMail } from 'react-icons/fi';
 import { useState } from 'react';
-import { FiMenu, FiX } from 'react-icons/fi';
 
 const navLinks = [
-    { label: 'Accueil',          url: '/',         icone: <FaHome size={16} /> },
-    { label: 'Tous les Produits',url: '/produits',  icone: <AiFillProduct size={16} /> },
-    { label: 'Recettes',         url: '/recettes',  icone: <LuChefHat size={16} /> },
-    { label: 'Offres',           url: '/offres',    icone: <RiDiscountPercentLine size={16} /> },
-    { label: 'FAQ',              url: '/faq',       icone: <GiTalk size={16} /> },
+    { label: 'Accueil',           url: '/',            icone: <FaHome size={16} /> },
+    { label: 'Tous les Produits', url: '/produits',     icone: <AiFillProduct size={16} /> },
+    { label: 'Recettes',          url: '/recettes',     icone: <LuChefHat size={16} /> },
+    { label: 'Offres',            url: '/offres',       icone: <RiDiscountPercentLine size={16} /> },
+    { label: 'FAQ',               url: '/faq',          icone: <GiTalk size={16} /> },
+    { label: 'Contact',           url: '/faq#contact',  icone: <FiMail size={16} /> },
 ];
 
 const Navigation = () => {
     const location = useLocation();
+    const [menuOpen, setMenuOpen] = useState(false);
 
     const estActif = (lien) => {
         if (lien.url === '/') return location.pathname === '/';
+        // Ne pas marquer Contact comme actif quand on est juste sur /faq
+        if (lien.url === '/faq#contact') return false;
         return location.pathname === lien.url || location.pathname.startsWith(lien.url + '/');
     };
-
-   const [menuOpen, setMenuOpen] = useState(false);
 
     return (
         <nav className="bg-white border-b border-gray-100 shadow-sm">
@@ -79,4 +81,5 @@ const Navigation = () => {
         </nav>
     );
 };
+
 export default Navigation;

@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
 import {
   FiSearch, FiTruck, FiCreditCard, FiShoppingBag,
   FiRotateCcw, FiMessageCircle, FiPlus, FiArrowRight,
   FiMail, FiUser, FiCheckCircle,
 } from "react-icons/fi";
 import { getAllFaqs, searchFaqs, askQuestion } from "../../services/faqService";
+import { Link, useLocation } from "react-router-dom";
 
 const CATEGORY_LABELS = {
   livraison: { label: "Livraison", Icon: FiTruck },
@@ -188,6 +188,16 @@ const Faq = () => {
   const [loading, setLoading]       = useState(true);
   const searchTimeout                = useRef(null);
 
+  const location = useLocation();
+
+  useEffect(() => {
+      if (location.hash === "#contact" && !loading) {
+          setTimeout(() => {
+              document.getElementById("contact")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }, 50);
+      }
+  }, [location.hash, loading]);
+
   useEffect(() => {
     getAllFaqs()
       .then((d) => { setAllFaqs(d.faqs); setFiltered(d.faqs); })
@@ -313,7 +323,8 @@ const Faq = () => {
         )}
 
         {/* Ask section */}
-        <div className="mt-20 bg-white rounded-3xl border border-gray-100 shadow-sm p-8 sm:p-10">
+        {/* Ask section */}
+<div id="contact" className="mt-20 bg-white rounded-3xl border border-gray-100 shadow-sm p-8 sm:p-10">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-4" style={{ backgroundColor: "#f0fdf4" }}>
               <FiMail size={22} style={{ color: "#2d5a27" }} />
