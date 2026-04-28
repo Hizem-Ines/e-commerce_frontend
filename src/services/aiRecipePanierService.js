@@ -9,8 +9,7 @@ import api from './api'; // l'instance axios configurée de GOFFA
  * @returns {Promise<Array>} - Tableau de recettes { titre, description, ingredients, temps, emoji }
  */
 export const suggererRecettes = async (panier) => {
-    if (!panier || panier.length === 0) return [];
-
+    if (!panier || panier.length === 0) return null;
     const response = await api.post('/ia/suggestions', { produits: panier });
     return response.data.recettes;
 };
