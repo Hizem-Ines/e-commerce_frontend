@@ -256,7 +256,7 @@ const LinkModal = ({ question, faqs, onClose, onSaved }) => {
     setError("");
     setLoading(true);
     try {
-      await adminLinkQuestionToFaq(question.id, faqId);
+      await adminLinkQuestionToFaq(question.id, Number(faqId));
       onSaved();
     } catch (err) {
       setError(err.response?.data?.message || "Une erreur est survenue.");
@@ -321,7 +321,7 @@ const LinkModal = ({ question, faqs, onClose, onSaved }) => {
                 Réponse qui sera envoyée au client
               </p>
               <p className="text-green-800">
-                {faqs.find((f) => f.id === faqId)?.answer_fr}
+                {faqs.find((f) => String(f.id) === faqId)?.answer_fr}
               </p>
             </div>
           )}
@@ -665,24 +665,24 @@ const AdminFaq = () => {
                           {/* Badge auto / manuel */}
                           {q.status === "answered" && (
                             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                              q.matched_automatically
-                                ? "bg-purple-100 text-purple-700"
-                                : "bg-blue-100 text-blue-700"
-                            }`}>
-                              {q.matched_automatically ? "⚡ Auto" : "✍️ Manuelle"}
-                            </span>
-                          )}
+                              q.linked_faqs?.[0]?.matched_automatically
+                              ? "bg-purple-100 text-purple-700"
+                              : "bg-blue-100 text-blue-700"
+                          }`}>
+                            {q.linked_faqs?.[0]?.matched_automatically ? "⚡ Auto" : "✍️ Manuelle"}
+                          </span>
+                        )}
                         </div>
 
                         {/* Question */}
                         <p className="text-sm text-gray-600 italic">« {q.question} »</p>
 
                         {/* FAQ liée */}
-                        {q.faq_question && (
+                        {q.linked_faqs?.[0]?.faq_question && (
                           <p className="text-xs text-gray-400 mt-1">
-                            Lié à : <span className="text-green-700 font-medium">{q.faq_question}</span>
-                            {q.faq_category && (
-                              <span className="ml-1 text-gray-300">({CATEGORY_LABELS[q.faq_category] || q.faq_category})</span>
+                            Lié à : <span className="text-green-700 font-medium">{q.linked_faqs[0].faq_question}</span>
+                            {q.linked_faqs[0].faq_category && (
+                              <span className="ml-1 text-gray-300">({CATEGORY_LABELS[q.linked_faqs[0].faq_category] || q.linked_faqs[0].faq_category})</span>
                             )}
                           </p>
                         )}

@@ -7,19 +7,19 @@ import formatPrice from '../../utils/formatPrice';
 import { FiHeart } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
 import { useAuth } from '../../context/authContext';
-import { createReview, getProductReviews, getReviewableProducts } from '../../services/reviewService';
+import { createReview, getProductReviews, updateReview, deleteReview } from '../../services/reviewService';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 
 // ─────────────────────────────────────────────────────────────
-// FORM AVIS
+// FORMULAIRE CRÉATION
 // ─────────────────────────────────────────────────────────────
-const FormAvis = ({ productId, orderId, onSuccess }) => {
-    const [rating, setRating] = useState(0);
+const FormAvis = ({ productId, onSuccess }) => {
+    const [rating, setRating]           = useState(0);
     const [hoverRating, setHoverRating] = useState(0);
-    const [comment, setComment] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState(false);
+    const [comment, setComment]         = useState('');
+    const [loading, setLoading]         = useState(false);
+    const [error, setError]             = useState('');
+    const [success, setSuccess]         = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -28,10 +28,8 @@ const FormAvis = ({ productId, orderId, onSuccess }) => {
         setLoading(true);
         setError('');
         try {
-            await createReview(productId, orderId, { rating, comment });
+            await createReview(productId, { rating, comment });
             setSuccess(true);
-            setRating(0);
-            setComment('');
             onSuccess();
         } catch (err) {
             setError(err.response?.data?.message || 'Erreur lors de l\'envoi');
@@ -60,14 +58,11 @@ const FormAvis = ({ productId, orderId, onSuccess }) => {
                     <p className="text-xs font-bold text-gray-600 mb-2">Note *</p>
                     <div className="flex gap-1">
                         {[1, 2, 3, 4, 5].map((star) => (
-                            <button
-                                key={star}
-                                type="button"
+                            <button key={star} type="button"
                                 onClick={() => setRating(star)}
                                 onMouseEnter={() => setHoverRating(star)}
                                 onMouseLeave={() => setHoverRating(0)}
-                                className="text-3xl transition-transform hover:scale-110"
-                            >
+                                className="text-3xl transition-transform hover:scale-110">
                                 <span className={(hoverRating || rating) >= star ? 'text-yellow-400' : 'text-gray-200'}>★</span>
                             </button>
                         ))}
@@ -78,27 +73,175 @@ const FormAvis = ({ productId, orderId, onSuccess }) => {
                         )}
                     </div>
                 </div>
-
                 <div>
                     <p className="text-xs font-bold text-gray-600 mb-2">Commentaire *</p>
-                    <textarea
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
+                    <textarea value={comment} onChange={(e) => setComment(e.target.value)}
                         placeholder="Partagez votre expérience avec ce produit..."
                         rows={3}
                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42] focus:outline-none text-sm transition resize-none"
-                        required
-                    />
+                        required />
                 </div>
-
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="bg-[#2d5a27] hover:bg-[#4a8c42] text-white font-bold px-6 py-3 rounded-xl transition-all duration-300 disabled:opacity-50 text-sm"
-                >
+                <button type="submit" disabled={loading}
+                    className="bg-[#2d5a27] hover:bg-[#4a8c42] text-white font-bold px-6 py-3 rounded-xl transition-all duration-300 disabled:opacity-50 text-sm">
                     {loading ? 'Envoi...' : 'Publier mon avis →'}
                 </button>
             </form>
+        </div>
+    );
+};
+
+// ─────────────────────────────────────────────────────────────
+// FORMULAIRE ÉDITION (inline dans la review)
+// ─────────────────────────────────────────────────────────────
+const FormEditAvis = ({ avis, onSuccess, onCancel }) => {
+    const [rating, setRating]           = useState(avis.rating);
+    const [hoverRating, setHoverRating] = useState(0);
+    const [comment, setComment]         = useState(avis.comment);
+    const [loading, setLoading]         = useState(false);
+    const [error, setError]             = useState('');
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (rating === 0) { setError('Veuillez choisir une note'); return; }
+        if (!comment.trim()) { setError('Veuillez écrire un commentaire'); return; }
+        setLoading(true);
+        setError('');
+        try {
+            await updateReview(avis.id, { rating, comment });
+            onSuccess();
+        } catch (err) {
+            setError(err.response?.data?.message || 'Erreur lors de la modification');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-5 space-y-4">
+            <p className="text-xs font-bold text-amber-700 uppercase tracking-wide">✏️ Modifier votre avis</p>
+            {error && (
+                <div className="bg-red-50 text-red-600 text-sm font-semibold px-4 py-2 rounded-xl">
+                    ❌ {error}
+                </div>
+            )}
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                        <button key={star} type="button"
+                            onClick={() => setRating(star)}
+                            onMouseEnter={() => setHoverRating(star)}
+                            onMouseLeave={() => setHoverRating(0)}
+                            className="text-3xl transition-transform hover:scale-110">
+                            <span className={(hoverRating || rating) >= star ? 'text-yellow-400' : 'text-gray-200'}>★</span>
+                        </button>
+                    ))}
+                </div>
+                <textarea value={comment} onChange={(e) => setComment(e.target.value)}
+                    rows={3}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-amber-400 focus:outline-none text-sm transition resize-none bg-white" />
+                <div className="flex gap-2">
+                    <button type="submit" disabled={loading}
+                        className="bg-amber-500 hover:bg-amber-600 text-white font-bold px-5 py-2.5 rounded-xl transition-colors text-sm disabled:opacity-50">
+                        {loading ? 'Enregistrement...' : 'Enregistrer'}
+                    </button>
+                    <button type="button" onClick={onCancel} disabled={loading}
+                        className="border-2 border-gray-200 text-black/50 font-bold px-5 py-2.5 rounded-xl hover:bg-gray-50 transition-colors text-sm">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
+};
+
+// ─────────────────────────────────────────────────────────────
+// CARTE AVIS (avec actions si c'est la sienne)
+// ─────────────────────────────────────────────────────────────
+const CarteAvis = ({ avis, currentUserId, onUpdated, onDeleted }) => {
+    const [editing, setEditing]         = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
+    const [confirmDelete, setConfirmDelete] = useState(false);
+
+    const isOwner = currentUserId && avis.user_id === currentUserId;
+
+    const handleDelete = async () => {
+        setDeleteLoading(true);
+        try {
+            await deleteReview(avis.id);
+            onDeleted();
+        } catch {
+            setDeleteLoading(false);
+            setConfirmDelete(false);
+        }
+    };
+
+    if (editing) return (
+        <FormEditAvis
+            avis={avis}
+            onSuccess={() => { setEditing(false); onUpdated(); }}
+            onCancel={() => setEditing(false)}
+        />
+    );
+
+    return (
+        <div className={`rounded-xl p-5 ${isOwner ? 'bg-emerald-50 border-2 border-emerald-100' : 'bg-[#f9f5f0]'}`}>
+            <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                    {avis.user_avatar ? (
+                        <img src={avis.user_avatar} alt={avis.user_name} className="w-10 h-10 rounded-full object-cover" />
+                    ) : (
+                        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-[#2d5a27] font-bold text-sm">
+                            {avis.user_name?.[0]}
+                        </div>
+                    )}
+                    <div>
+                        <p className="font-bold text-sm text-[#2c2c2c]">{avis.user_name}</p>
+                        {isOwner && (
+                            <span className="text-xs text-emerald-600 font-semibold">Votre avis</span>
+                        )}
+                    </div>
+                </div>
+                <div className="text-right">
+                    <div className="flex gap-0.5 mb-1 justify-end">
+                        {[...Array(5)].map((_, j) => (
+                            <span key={j} className={j < avis.rating ? 'text-yellow-400' : 'text-gray-200'}>★</span>
+                        ))}
+                    </div>
+                    <span className="text-xs text-black/40">
+                        {new Date(avis.created_at).toLocaleDateString('fr-FR')}
+                    </span>
+                </div>
+            </div>
+
+            <p className="text-sm text-black/60 leading-relaxed mb-3">{avis.comment}</p>
+
+            {/* Actions owner */}
+            {isOwner && (
+                confirmDelete ? (
+                    <div className="flex items-center gap-2 bg-red-50 rounded-xl px-4 py-3 mt-2">
+                        <p className="text-sm text-red-700 font-semibold flex-1">Supprimer votre avis ?</p>
+                        <button onClick={handleDelete} disabled={deleteLoading}
+                            className="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition-colors disabled:opacity-50">
+                            {deleteLoading ? '...' : 'Oui, supprimer'}
+                        </button>
+                        <button onClick={() => setConfirmDelete(false)} disabled={deleteLoading}
+                            className="border border-gray-300 text-black/50 font-bold px-3 py-1.5 rounded-lg text-xs hover:bg-white transition-colors">
+                            Annuler
+                        </button>
+                    </div>
+                ) : (
+                    <div className="flex gap-2 mt-2">
+                        <button onClick={() => setEditing(true)}
+                            className="text-xs font-bold text-amber-600 border border-amber-200 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-lg transition-colors">
+                             Modifier
+                        </button>
+                        <button onClick={() => setConfirmDelete(true)}
+                            className="text-xs font-bold text-red-500 border border-red-200 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors">
+                             Supprimer
+                        </button>
+                    </div>
+                )
+            )}
         </div>
     );
 };
@@ -113,29 +256,30 @@ const ProductDetail = () => {
     const { user } = useAuth();
     const { currency } = useSiteSettings();
 
-    const [quantite, setQuantite]                 = useState(1);
-    const [ajoute, setAjoute]                     = useState(false);
-    const [produit, setProduit]                   = useState(null);
-    const [similaires, setSimilaires]             = useState([]);
-    const [loading, setLoading]                   = useState(true);
-    const [varianteActive, setVarianteActive]     = useState(null);
-    const [imageActive, setImageActive]           = useState(0);
-    const [ongletActif, setOngletActif]           = useState('description');
-    const [reviews, setReviews]                   = useState([]);
-    const [reviewableOrderId, setReviewableOrderId] = useState(null);
+    const [quantite, setQuantite]             = useState(1);
+    const [ajoute, setAjoute]                 = useState(false);
+    const [produit, setProduit]               = useState(null);
+    const [similaires, setSimilaires]         = useState([]);
+    const [loading, setLoading]               = useState(true);
+    const [varianteActive, setVarianteActive] = useState(null);
+    const [imageActive, setImageActive]       = useState(0);
+    const [ongletActif, setOngletActif]       = useState('description');
+    const [reviews, setReviews]               = useState([]);
+    const [submitted, setSubmitted]           = useState(false);
 
     const fmt = (n) => formatPrice(parseFloat(n), currency);
 
-    // ── Fetch reviews ──────────────────────────────────────
     const fetchReviews = () => {
         getProductReviews(id)
             .then(res => setReviews(res.data.reviews))
             .catch(() => {});
     };
 
+    // L'user a déjà une review sur ce produit
+    const userReview = user ? reviews.find(r => r.user_id === user.id) : null;
+
     useEffect(() => { fetchReviews(); }, [id]);
 
-    // ── Fetch product ──────────────────────────────────────
     useEffect(() => {
         const fetchProduit = async () => {
             setLoading(true);
@@ -153,7 +297,6 @@ const ProductDetail = () => {
         fetchProduit();
     }, [id]);
 
-    // ── Fetch similar products ─────────────────────────────
     useEffect(() => {
         if (!produit?.category_id) return;
         getAllProducts({ category_id: produit.category_id, page: 1 })
@@ -163,17 +306,6 @@ const ProductDetail = () => {
             })
             .catch(console.error);
     }, [produit?.category_id, id]);
-
-    // ── Fetch reviewable order ─────────────────────────────
-    useEffect(() => {
-        if (!user || !produit) return;
-        getReviewableProducts()
-            .then(res => {
-                const match = res.data.products.find(p => p.product_id === produit.id);
-                if (match) setReviewableOrderId(match.order_id);
-            })
-            .catch(() => {});
-    }, [user, produit]);
 
     const handleAjouter = () => {
         if (!varianteActive?.id) return;
@@ -210,8 +342,8 @@ const ProductDetail = () => {
         );
     }
 
-    const images    = produit.images || [];
-    const prix      = varianteActive?.price || produit.variants?.[0]?.price || 0;
+    const images   = produit.images || [];
+    const prix     = varianteActive?.price || produit.variants?.[0]?.price || 0;
 
     const getPromoPrice = (variant) => {
         if (!variant?.promo_value) return null;
@@ -225,7 +357,7 @@ const ProductDetail = () => {
         <div className="bg-[#fdf6ec] min-h-screen py-12">
             <div className="container mx-auto px-4">
 
-                {/* ── FIL D'ARIANE ─────────────────────────────────── */}
+                {/* FIL D'ARIANE */}
                 <div className="flex items-center gap-2 text-sm text-black/50 mb-8 flex-wrap">
                     <Link to="/" className="hover:text-[#2d5a27] no-underline transition-colors duration-200">Accueil</Link>
                     <span>›</span>
@@ -236,7 +368,7 @@ const ProductDetail = () => {
                     <span className="text-[#2c2c2c] font-semibold">{produit.name_fr}</span>
                 </div>
 
-                {/* ── DÉTAIL PRODUIT ────────────────────────────────── */}
+                {/* DÉTAIL PRODUIT */}
                 <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-hidden mb-12">
                     <div className="grid grid-cols-1 md:grid-cols-2">
 
@@ -254,11 +386,8 @@ const ProductDetail = () => {
                             {images.length > 1 && (
                                 <div className="flex gap-2 flex-wrap justify-center">
                                     {images.map((img, idx) => (
-                                        <button
-                                            key={idx}
-                                            onClick={() => setImageActive(idx)}
-                                            className={`w-14 h-14 rounded-xl overflow-hidden border-2 transition-all ${imageActive === idx ? 'border-[#2d5a27]' : 'border-gray-200'}`}
-                                        >
+                                        <button key={idx} onClick={() => setImageActive(idx)}
+                                            className={`w-14 h-14 rounded-xl overflow-hidden border-2 transition-all ${imageActive === idx ? 'border-[#2d5a27]' : 'border-gray-200'}`}>
                                             <img src={img.url} alt="" className="w-full h-full object-cover" />
                                         </button>
                                     ))}
@@ -268,8 +397,6 @@ const ProductDetail = () => {
 
                         {/* INFOS */}
                         <div className="p-5 md:p-10 flex flex-col justify-center">
-
-                            {/* BADGES + COEUR */}
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex gap-2 flex-wrap">
                                     {produit.supplier_name && (
@@ -297,7 +424,6 @@ const ProductDetail = () => {
 
                             <h1 className="text-3xl font-bold font-serif text-[#2c2c2c] mb-1">{produit.name_fr}</h1>
 
-                            {/* NOTE */}
                             <div className="flex items-center gap-2 mb-4">
                                 <div className="flex gap-0.5">
                                     {[...Array(5)].map((_, i) => (
@@ -311,7 +437,6 @@ const ProductDetail = () => {
 
                             <p className="text-black/60 text-sm leading-relaxed whitespace-pre-line mb-6 line-clamp-3">{produit.description_fr}</p>
 
-                            {/* VARIANTES */}
                             {produit.variants?.length > 1 && (
                                 <div className="mb-6">
                                     <p className="text-sm font-semibold text-black/60 mb-2">Choisir une variante :</p>
@@ -326,7 +451,6 @@ const ProductDetail = () => {
                                 </div>
                             )}
 
-                            {/* PRIX */}
                             <div className="flex items-baseline gap-3 mb-4 flex-wrap">
                                 <div className="text-4xl font-black text-[#2d5a27]">{fmt(promoPrice ?? prix)}</div>
                                 {promoPrice && <div className="text-lg text-black/30 line-through">{fmt(prix)}</div>}
@@ -337,7 +461,6 @@ const ProductDetail = () => {
                                 )}
                             </div>
 
-                            {/* QUANTITÉ */}
                             <div className="flex items-center gap-4 mb-6">
                                 <span className="text-sm font-semibold text-black/60">Quantité :</span>
                                 <div className="flex items-center gap-3">
@@ -349,7 +472,6 @@ const ProductDetail = () => {
                                 </div>
                             </div>
 
-                            {/* BOUTONS */}
                             <div className="flex gap-3">
                                 <button onClick={handleAjouter} disabled={!varianteActive}
                                     className={`flex-1 font-bold py-4 rounded-xl transition-all duration-300 text-base ${ajoute ? 'bg-green-500 text-white' : 'bg-[#2d5a27] hover:bg-[#4a8c42] text-white'}`}>
@@ -363,9 +485,8 @@ const ProductDetail = () => {
                     </div>
                 </div>
 
-                {/* ══ ONGLETS ══════════════════════════════════════════ */}
+                {/* ONGLETS */}
                 <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] mb-8 overflow-hidden">
-
                     <div className="flex border-b border-gray-100 overflow-x-auto">
                         {[
                             { id: 'description', label: '📖 Description' },
@@ -382,7 +503,6 @@ const ProductDetail = () => {
 
                     <div className="p-4 md:p-8">
 
-                        {/* ── Description ───────────────────────────────── */}
                         {ongletActif === 'description' && (
                             <div className="space-y-6">
                                 {produit.ethical_info_fr && (
@@ -415,7 +535,6 @@ const ProductDetail = () => {
                             </div>
                         )}
 
-                        {/* ── Utilisation ───────────────────────────────── */}
                         {ongletActif === 'utilisation' && (
                             <div className="space-y-6">
                                 <h3 className="text-base font-bold text-[#2c2c2c]">Comment utiliser ce produit</h3>
@@ -437,7 +556,6 @@ const ProductDetail = () => {
                             </div>
                         )}
 
-                        {/* ── Composition ───────────────────────────────── */}
                         {ongletActif === 'composition' && (
                             <div className="space-y-6">
                                 {produit.ingredients_fr && (
@@ -495,61 +613,46 @@ const ProductDetail = () => {
                             </div>
                         )}
 
-                        {/* ── Avis ──────────────────────────────────────── */}
+                        {/* ONGLET AVIS */}
                         {ongletActif === 'avis' && (
                             <div className="space-y-6">
 
-                                {/* FORMULAIRE */}
-                                {user && reviewableOrderId ? (
-                                    <FormAvis
-                                        productId={id}
-                                        orderId={reviewableOrderId}
-                                        onSuccess={() => {
-                                            getProductById(id).then(res => setProduit(res.data.product));
-                                            fetchReviews();
-                                        }}
-                                    />
-                                ) : user ? (
-                                    <p className="text-sm text-black/40 text-center py-4">
-                                        Vous avez déjà noté ce produit ou n'avez pas de commande livrée.
-                                    </p>
-                                ) : (
+                                {/* FORMULAIRE CRÉATION — masqué si l'user a déjà un avis */}
+                                {!user ? (
                                     <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
                                         <p className="text-emerald-700 font-semibold text-sm mb-2">Connectez-vous pour laisser un avis</p>
                                         <Link to="/connexion" className="bg-[#2d5a27] text-white font-bold px-5 py-2 rounded-xl no-underline hover:bg-[#4a8c42] transition text-sm inline-block">
                                             Se connecter
                                         </Link>
                                     </div>
-                                )}
+                                ) : !userReview && !submitted ? (
+                                    <FormAvis
+                                        productId={id}
+                                        onSuccess={() => {
+                                            setSubmitted(true);
+                                            getProductById(id).then(res => setProduit(res.data.product));
+                                            fetchReviews();
+                                        }}
+                                    />
+                                ) : null}
 
                                 {/* LISTE DES AVIS */}
                                 {reviews.length > 0 ? (
                                     reviews.map((avis, i) => (
-                                        <div key={avis.id || i} className="bg-[#f9f5f0] rounded-xl p-5">
-                                            <div className="flex items-center justify-between mb-3">
-                                                <div className="flex items-center gap-3">
-                                                    {avis.user_avatar ? (
-                                                        <img src={avis.user_avatar} alt={avis.user_name} className="w-10 h-10 rounded-full object-cover" />
-                                                    ) : (
-                                                        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-[#2d5a27] font-bold text-sm">
-                                                            {avis.user_name?.[0]}
-                                                        </div>
-                                                    )}
-                                                    <p className="font-bold text-sm text-[#2c2c2c]">{avis.user_name}</p>
-                                                </div>
-                                                <div className="text-right">
-                                                    <div className="flex gap-0.5 mb-1 justify-end">
-                                                        {[...Array(5)].map((_, j) => (
-                                                            <span key={j} className={j < avis.rating ? 'text-yellow-400' : 'text-gray-200'}>★</span>
-                                                        ))}
-                                                    </div>
-                                                    <span className="text-xs text-black/40">
-                                                        {new Date(avis.created_at).toLocaleDateString('fr-FR')}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <p className="text-sm text-black/60 leading-relaxed">{avis.comment}</p>
-                                        </div>
+                                        <CarteAvis
+                                            key={avis.id || i}
+                                            avis={avis}
+                                            currentUserId={user?.id}
+                                            onUpdated={() => {
+                                                fetchReviews();
+                                                getProductById(id).then(res => setProduit(res.data.product));
+                                            }}
+                                            onDeleted={() => {
+                                                setSubmitted(false);
+                                                fetchReviews();
+                                                getProductById(id).then(res => setProduit(res.data.product));
+                                            }}
+                                        />
                                     ))
                                 ) : (
                                     <div className="text-center py-10">
@@ -564,7 +667,7 @@ const ProductDetail = () => {
                     </div>
                 </div>
 
-                {/* ── FOURNISSEUR ───────────────────────────────────── */}
+                {/* FOURNISSEUR */}
                 {produit.supplier_name && (
                     <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-5 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div>
@@ -586,7 +689,7 @@ const ProductDetail = () => {
                     </div>
                 )}
 
-                {/* ── PRODUITS SIMILAIRES ───────────────────────────── */}
+                {/* PRODUITS SIMILAIRES */}
                 {similaires.length > 0 && (
                     <div>
                         <h2 className="text-2xl font-bold font-serif text-[#2c2c2c] mb-6">Vous aimerez aussi</h2>

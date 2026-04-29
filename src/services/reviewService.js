@@ -1,12 +1,21 @@
 import api from './api';
 
-export const createReview = (productId, orderId, data) =>
-  api.post('/reviews', { product_id: productId, order_id: orderId, ...data });
-
+// ── Public ───────────────────────────────────────────────────
 export const getProductReviews = (productId) =>
   api.get(`/reviews/product/${productId}`);
 
-export const updateReview = (reviewId, data) => api.put(`/reviews/${reviewId}`, data);
-export const deleteReview = (reviewId) => api.delete(`/reviews/${reviewId}`);
+// ── User connecté ────────────────────────────────────────────
+// body : { rating, comment } — le back vérifie l'achat et le doublon lui-même
+export const createReview = (productId, data) =>
+  api.post('/reviews', { product_id: productId, ...data });
 
-export const getReviewableProducts = () => api.get('/reviews/reviewable');
+export const updateReview = (reviewId, data) =>
+  api.put(`/reviews/${reviewId}`, data);
+
+export const deleteReview = (reviewId) =>
+  api.delete(`/reviews/${reviewId}`);
+
+// ── Admin ────────────────────────────────────────────────────
+// GET /api/reviews?rating=&date_from=&date_to=&page=
+export const getAllReviews = (params = {}) =>
+  api.get('/reviews', { params });

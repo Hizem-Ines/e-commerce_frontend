@@ -28,10 +28,6 @@ api.interceptors.response.use(
       }
     }
 
-    if (status === 403) {
-      window.location.href = '/';
-    }
-
     if (status >= 500) {
       console.error('[API] Erreur serveur :', error.response?.data?.message || error.message);
     }
