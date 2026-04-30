@@ -348,7 +348,11 @@ const LinkModal = ({ question, faqs, onClose, onSaved }) => {
 
 // ─── Main admin page ───────────────────────────────────────
 const AdminFaq = () => {
-  const [tab, setTab] = useState("faqs"); // "faqs" | "questions" 
+  const [tab, setTab] = useState(() => {
+    const hash = window.location.hash;
+    const queryStr = hash.includes("?") ? hash.split("?")[1] : "";
+    return new URLSearchParams(queryStr).get("tab") === "questions" ? "questions" : "faqs";
+});
 
 
   // FAQs state

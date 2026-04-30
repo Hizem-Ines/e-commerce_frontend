@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState ,useEffect } from 'react';
 import { useAuth } from '../../context/authContext';
 import { Navigate } from 'react-router-dom';
 import { FiGrid, FiPackage, FiShoppingBag, FiUsers, FiTag, FiList, FiPercent, FiMenu, FiX, FiMail } from 'react-icons/fi';
@@ -37,7 +37,24 @@ const SECTIONS = [
 
 const Admin = () => {
     const { user, loading } = useAuth();
-    const [activeSection, setActiveSection] = useState('stats');
+        const [activeSection, setActiveSection] = useState(() => {
+        const hash = window.location.hash.replace("#", "");
+        const section = hash.split("?")[0];
+        const valid = SECTIONS.map(s => s.id);
+        return valid.includes(section) ? section : 'stats';
+    });
+
+    useEffect(() => {
+        const handleHash = () => {
+            const hash = window.location.hash.replace("#", "");
+            const section = hash.split("?")[0];
+            const valid = SECTIONS.map(s => s.id);
+            if (valid.includes(section)) setActiveSection(section);
+        };
+        window.addEventListener("hashchange", handleHash);
+        return () => window.removeEventListener("hashchange", handleHash);
+    }, []);
+
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
     if (loading) return (
