@@ -66,7 +66,7 @@ function DetailModal({ open, reclamation, onClose }) {
         {/* Body */}
         <div className="overflow-y-auto flex-1 px-7 py-6 space-y-5">
           {/* Client */}
-          <div className="bg-[#f9f5f0] rounded-2xl p-4 space-y-2">
+          <div className="bg-[#f9f5f0] rounded-2xl p-3 sm:p-4 space-y-2">
             <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-3">Client</p>
             <div className="flex items-center gap-2 text-sm">
               <span className="text-black/40">Nom :</span>
@@ -87,7 +87,7 @@ function DetailModal({ open, reclamation, onClose }) {
           </div>
 
           {/* Réclamation Info */}
-          <div className="bg-[#f9f5f0] rounded-2xl p-4 space-y-2">
+          <div className="bg-[#f9f5f0] rounded-2xl p-3 sm:p-4 space-y-2">
             <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-3">Réclamation</p>
             <div className="flex items-center gap-2 text-sm">
               <span className="text-black/40">Type :</span>
@@ -321,20 +321,30 @@ const handleRespond = async () => {
         </div>
       )}
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-7">
+      {/* Filtres — style AdminCommandes */}
+      <div className="flex gap-2 mb-6 flex-wrap">
+        <button
+          onClick={() => setFilterStatus("all")}
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition ${
+            filterStatus === "all" ? "bg-[#2d5a27] text-white" : "bg-white text-black/50 hover:bg-emerald-50"
+          }`}
+        >
+          Toutes
+        </button>
         {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
           <button
             key={key}
             onClick={() => setFilterStatus(filterStatus === key ? "all" : key)}
-            className={`rounded-2xl p-4 text-left border-2 transition ${
-              filterStatus === key ? "border-[#2d5a27] bg-[#f9f5f0]" : "bg-white border-gray-100 hover:border-[#4a8c42]"
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition ${
+              filterStatus === key ? "bg-[#2d5a27] text-white" : "bg-white text-black/50 hover:bg-emerald-50"
             }`}
           >
-            <p className={`text-2xl font-bold ${filterStatus === key ? "text-[#2d5a27]" : "text-[#2c2c2c]"}`}>
-              {counts[key] || 0}
-            </p>
-            <p className="text-xs font-bold text-black/40 mt-0.5">{cfg.label}</p>
+            {cfg.label}
+            {counts[key] > 0 && (
+              <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${filterStatus === key ? "bg-white/20" : "bg-gray-100"}`}>
+                {counts[key]}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -351,14 +361,7 @@ const handleRespond = async () => {
             className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42] focus:outline-none text-sm transition"
           />
         </div>
-        {filterStatus !== "all" && (
-          <button
-            onClick={() => setFilterStatus("all")}
-            className="flex items-center gap-1.5 px-4 py-3 border-2 border-[#2d5a27] text-[#2d5a27] font-bold rounded-xl text-sm hover:bg-[#f9f5f0] transition"
-          >
-            <FiX size={14} /> {STATUS_CONFIG[filterStatus]?.label}
-          </button>
-        )}
+        
       </div>
 
       {/* Table */}
