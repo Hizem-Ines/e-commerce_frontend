@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FiAlertCircle, FiMail, FiPhone,
   FiFileText, FiSend, FiCheckCircle,
 } from "react-icons/fi";
-import { submitReclamation } from "../../services/reclamationService";
+import { submitReclamation, createReclamation } from "../../services/reclamationService";
+import { getMyOrders } from "../../services/orderService";
+import { useAuth } from '../../context/authContext';
+import { useSiteSettings } from "../../context/SiteSettingsContext";
 
 const inputCls =
   "w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-900/20 focus:border-transparent transition";
@@ -28,11 +31,20 @@ const Field = ({ label, children }) => (
 
 const Reclamations = () => {
   const [form, setForm] = useState({
-    email: "", order_number: "", reclamation_type: "", message: "",
+    email: "", order_id: "", order_number: "", reclamation_type: "", message: "",
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError]     = useState("");
+  const { user } = useAuth(); 
+  const { currency } = useSiteSettings();
+  const [eligibleOrders, setEligibleOrders] = useState([]);
+
+  useEffect(() => {
+    if (user) {
+      getMyOrders().then((res) => setEligibleOrders(res.data.orders || []));
+    }
+  }, [user]);
 
   const handleChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
@@ -41,7 +53,11 @@ const Reclamations = () => {
     setError("");
     setLoading(true);
     try {
-      await submitReclamation(form);
+      const payload = user
+        ? { order_id: form.order_id || null, reclamation_type: form.reclamation_type, message: form.message }
+        : form;
+
+      await (user ? createReclamation(payload) : submitReclamation(payload));
       setSuccess(true);
       setForm({ email: "", order_number: "", reclamation_type: "", message: "" });
     } catch (err) {
@@ -80,7 +96,7 @@ const Reclamations = () => {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8">
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5 sm:p-8">
           {success ? (
             <div className="py-10 text-center">
               <FiCheckCircle className="mx-auto mb-4" size={48} style={{ color: "#3a7232" }} />
@@ -102,27 +118,36 @@ const Reclamations = () => {
                 <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">{error}</div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                
-                <Field label="Votre email">
-                  <div className="relative">
-                    <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
-                    <input type="email" name="email" required value={form.email} onChange={handleChange}
-                      placeholder="votre@email.com" className={`${inputCls} pl-9`} />
-                  </div>
+              {user ? (
+                <Field label="Commande concernée">
+                  <select name="order_id" value={form.order_id} onChange={handleChange} required className={inputCls}>
+                    <option value="">Sélectionner une commande…</option>
+                    {eligibleOrders.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        #{o.order_number} — {new Date(o.created_at).toLocaleDateString("fr-FR")} — {Number(o.total_price).toFixed(2)} {currency}
+                      </option>
+                    ))}
+                  </select>
                 </Field>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                
-                <Field label="N° de commande (si applicable)">
-                  <div className="relative">
-                    <FiFileText className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
-                    <input type="text" name="order_number" value={form.order_number} onChange={handleChange}
-                      placeholder="CMD-XXXXX" className={`${inputCls} pl-9`} />
-                  </div>
-                </Field>
-              </div>
+              ) : (
+                // Guest → email + order_number texte
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field label="Votre email">
+                    <div className="relative">
+                      <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
+                      <input type="email" name="email" required value={form.email} onChange={handleChange}
+                        placeholder="votre@email.com" className={`${inputCls} pl-9`} />
+                    </div>
+                  </Field>
+                  <Field label="N° de commande (si applicable)">
+                    <div className="relative">
+                      <FiFileText className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
+                      <input type="text" name="order_number" value={form.order_number} onChange={handleChange}
+                        placeholder="CMD-XXXXX" className={`${inputCls} pl-9`} />
+                    </div>
+                  </Field>
+                </div>
+              )}
 
               <Field label="Type de réclamation">
                 <select name="reclamation_type" required value={form.reclamation_type} onChange={handleChange}
