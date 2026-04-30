@@ -10,14 +10,20 @@ import api from "../../../services/api";
 
 // ─── Constants ────────────────────────────────────────────
 const DIFFICULTIES = ["facile", "moyen", "difficile"];
-const CATEGORIES   = ["entrée", "plat", "dessert", "boisson", "snack"];
+const CATEGORIES = [
+  { value: "entree",         label: "Entrée" },
+  { value: "plat-principal", label: "Plat principal" },
+  { value: "soupe",          label: "Soupe" },
+  { value: "dessert",        label: "Dessert" },
+  { value: "boisson",        label: "Boisson" },
+];
 
 const emptyForm = {
   title_fr: "",  description_fr: "", 
   prep_time: "", cook_time: "", servings: 4, difficulty: "facile",
   category: "", is_published: false, is_featured: false,
 };
-const emptyIngredient = { name_fr: "",  quantity: "", is_bio: false };
+const emptyIngredient = { name_fr: "", product_id: null, quantity: "", is_bio: false };
 const emptyStep       = { instruction_fr: "",  duration: "" };
 
 // ─── Field component ──────────────────────────────────────
@@ -83,6 +89,13 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
   const [tab, setTab]                 = useState("general");
   const [formLoading, setFormLoading] = useState(false);
   const fileRef                       = useRef();
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    api.get("/products/admin/all?admin=true&page=1")
+      .then(res => setProducts(res.data.products || []))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -118,6 +131,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
               name_fr:  i.name_fr  || "",
               quantity: i.quantity || "",
               is_bio:   i.is_bio   || false,
+              product_id: i.product_id || null,
             })));
           } else {
             setIngredients([{ ...emptyIngredient }]);
@@ -313,7 +327,9 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
                 <select className={selectCls} value={form.category}
                   onChange={e => set("category", e.target.value)}>
                   <option value="">— Sélectionner —</option>
-                  {CATEGORIES.map(c => <option key={c} value={c} className="capitalize">{c}</option>)}
+                  {CATEGORIES.map(c => (
+                    <option key={c.value} value={c.value}>{c.label}</option>
+                  ))}
                 </select>
               </Field>
             </div>
@@ -334,19 +350,35 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
                         </button>
                       )}
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <Field label="Nom FR *">
                         <input className={inputCls} value={ing.name_fr}
                           onChange={e => updateIngredient(i, "name_fr", e.target.value)}
                           placeholder="ex: Farine" />
                       </Field>
-                      
                       <Field label="Quantité">
                         <input className={inputCls} value={ing.quantity}
                           onChange={e => updateIngredient(i, "quantity", e.target.value)}
                           placeholder="ex: 200g" />
                       </Field>
                     </div>
+
+                    {/* Lien produit GOFFA */}
+                    <Field label="Produit GOFFA (optionnel)">
+                      <select
+                        className={selectCls}
+                        value={ing.product_id || ""}
+                        onChange={e => updateIngredient(i, "product_id", e.target.value || null)}
+                      >
+                        <option value="">— Aucun produit lié —</option>
+                        {products.map(p => (
+                          <option key={p.id} value={p.id}>
+                            {p.name_fr}
+                    
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
                     <div className="flex items-center gap-2 mt-3">
                       <button
                         onClick={() => updateIngredient(i, "is_bio", !ing.is_bio)}
@@ -505,20 +537,6 @@ export default function AdminRecettes() {
     loadRecipes();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleTogglePublished = async (recipe) => {
-    try {
-      const fd = new FormData();
-      fd.append("is_published", !recipe.is_published);
-      await updateRecipe(recipe.id, fd);
-      setRecipes(prev => prev.map(r =>
-        r.id === recipe.id ? { ...r, is_published: !r.is_published } : r
-      ));
-      showSuccess(`Recette ${!recipe.is_published ? "publiée" : "dépubliée"} avec succès.`);
-    } catch {
-      showError("Erreur lors de la mise à jour.");
-    }
-  };
-
   const handleDelete = async () => {
     try {
       await deleteRecipe(deleteTarget.id);
@@ -643,9 +661,7 @@ export default function AdminRecettes() {
                     <span className="capitalize text-sm text-black/60">{recipe.difficulty}</span>
                   </td>
                   <td className="px-5 py-4 text-center">
-                    <button onClick={() => handleTogglePublished(recipe)} title="Changer le statut">
-                      <StatusBadge published={recipe.is_published} />
-                    </button>
+                    <StatusBadge published={recipe.is_published} />
                   </td>
                   <td className="px-5 py-4 text-center hidden lg:table-cell">
                     <div className="flex items-center justify-center gap-3 text-xs text-black/40 font-medium">

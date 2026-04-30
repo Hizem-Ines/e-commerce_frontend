@@ -48,6 +48,7 @@ const FaqModal = ({ faq, onClose, onSaved }) => {
     question_fr: faq?.question_fr || "",
     answer_fr:   faq?.answer_fr   || "",
     order_index: faq?.order_index ?? 0,
+    is_active:   faq?.is_active   ?? true,
   });
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState("");
@@ -116,6 +117,23 @@ const FaqModal = ({ faq, onClose, onSaved }) => {
             <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Réponse</label>
             <textarea name="answer_fr" required rows={4} value={form.answer_fr} onChange={handleChange} className={textareaCls} />
           </div>
+
+          {isEdit && (
+            <div className="bg-gray-50 rounded-xl px-4 py-3 border border-gray-200">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={form.is_active}
+                  onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))}
+                  className="w-4 h-4 accent-green-700 rounded"
+                />
+                <span className="text-sm font-semibold text-gray-700">FAQ active</span>
+              </label>
+              <p className="text-xs text-gray-400 mt-1 ml-6">
+                Une FAQ inactive n'est pas visible sur le site.
+              </p>
+            </div>
+          )}
 
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={onClose} className="px-5 py-2 rounded-xl text-sm text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors">
@@ -256,7 +274,7 @@ const LinkModal = ({ question, faqs, onClose, onSaved }) => {
     setError("");
     setLoading(true);
     try {
-      await adminLinkQuestionToFaq(question.id, Number(faqId));
+      await adminLinkQuestionToFaq(question.id,(faqId));
       onSaved();
     } catch (err) {
       setError(err.response?.data?.message || "Une erreur est survenue.");
@@ -555,17 +573,13 @@ const AdminFaq = () => {
                         </div>
 
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          <button
-                            onClick={() => handleToggle(faq.id)}
-                            title={faq.is_active ? "Désactiver" : "Activer"}
-                            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
-                              faq.is_active
-                                ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
-                                : "bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100"
-                            }`}
-                          >
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                            faq.is_active
+                              ? "bg-green-50 text-green-700 border-green-200"
+                              : "bg-gray-50 text-gray-500 border-gray-200"
+                          }`}>
                             {faq.is_active ? "Actif" : "Inactif"}
-                          </button>
+                          </span>
 
                           <button onClick={() => setFaqModal(faq)} className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors" title="Modifier">
                             <FiEdit size={15} />

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   FiAlertCircle, FiMail, FiPhone,
-  FiFileText, FiSend, FiCheckCircle,
+  FiFileText, FiSend, FiCheckCircle,FiUser,
 } from "react-icons/fi";
 import { submitReclamation, createReclamation } from "../../services/reclamationService";
 import { getMyOrders } from "../../services/orderService";
@@ -59,7 +59,7 @@ const Reclamations = () => {
 
       await (user ? createReclamation(payload) : submitReclamation(payload));
       setSuccess(true);
-      setForm({ email: "", order_number: "", reclamation_type: "", message: "" });
+      setForm({ email: "", order_id: "", order_number: "", reclamation_type: "", message: "" });
     } catch (err) {
       setError(err.response?.data?.message || "Une erreur est survenue.");
     } finally {
@@ -162,6 +162,16 @@ const Reclamations = () => {
                   placeholder="Décrivez votre réclamation en détail…"
                   className={`${inputCls} resize-none`} />
               </Field>
+              
+              {user && (
+                <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
+                  <FiUser size={14} className="text-green-800 flex-shrink-0" />
+                  <span>
+                    Connecté en tant que <strong className="text-gray-700">{user.name}</strong>
+                    {" — "}réponse envoyée à <strong className="text-gray-700">{user.email}</strong>
+                  </span>
+                </div>
+              )}
 
               <button
                 type="submit" disabled={loading}

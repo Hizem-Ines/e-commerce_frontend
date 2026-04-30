@@ -764,6 +764,7 @@ const AdminStats = () => {
                                     title="Réclamations par type"
                                 />
                                 {reclamTypeData.length > 0 ? (
+                                    <div style={{ width: "100%", height: 220 }}>
                                     <ResponsiveContainer width="100%" height={220}>
                                         <BarChart
                                             layout="vertical"
@@ -790,6 +791,7 @@ const AdminStats = () => {
                                             </Bar>
                                         </BarChart>
                                     </ResponsiveContainer>
+                                    </div>
                                 ) : (
                                     <p className="text-sm text-black/30 text-center py-10">Aucune réclamation</p>
                                 )}
