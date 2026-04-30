@@ -6,6 +6,7 @@ import {
 } from "react-icons/fi";
 import { getAllFaqs, searchFaqs, askQuestion } from "../../services/faqService";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from '../../context/authContext';
 
 const CATEGORY_LABELS = {
   livraison: { label: "Livraison", Icon: FiTruck },
@@ -56,6 +57,7 @@ const FaqItem = ({ faq, defaultOpen = false }) => {
 
 // ─── Ask form ──────────────────────────────────────────────
 const AskForm = () => {
+  const { user } = useAuth(); 
   const [form, setForm]       = useState({ user_name: "", user_email: "", question: "" });
   const [loading, setLoading] = useState(false);
   const [result, setResult]   = useState(null); // { auto_answered, matched_faq, message }
@@ -144,27 +146,40 @@ const AskForm = () => {
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">{error}</div>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Votre nom</label>
-          <div className="relative">
-            <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
-            <input type="text" name="user_name" required value={form.user_name} onChange={handleChange}
-              placeholder="Votre nom" className={`${inputCls} pl-9`} />
+
+      {/* Champs nom/email : seulement si non connecté */}
+      {!user ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Votre nom</label>
+            <div className="relative">
+              <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
+              <input type="text" name="user_name" required value={form.user_name} onChange={handleChange}
+                placeholder="Votre nom" className={`${inputCls} pl-9`} />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Votre email</label>
+            <div className="relative">
+              <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
+              <input type="email" name="user_email" required value={form.user_email} onChange={handleChange}
+                placeholder="votre@email.com" className={`${inputCls} pl-9`} />
+            </div>
           </div>
         </div>
-        <div>
-          <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Votre email</label>
-          <div className="relative">
-            <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
-            <input type="email" name="user_email" required value={form.user_email} onChange={handleChange}
-              placeholder="votre@email.com" className={`${inputCls} pl-9`} />
-          </div>
+      ) : (
+        <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
+          <FiUser size={14} className="text-green-800 flex-shrink-0" />
+          <span>
+            Connecté en tant que <strong className="text-gray-700">{user.name}</strong>
+            {" — "}réponse envoyée à <strong className="text-gray-700">{user.email}</strong>
+          </span>
         </div>
-      </div>
+      )}
+
       <div>
         <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Votre question</label>
-        <textarea name="question" required rows={4} value={form.question} onChange={handleChange}
+        <textarea name="question" required minLength={10} rows={4} value={form.question} onChange={handleChange}
           placeholder="Décrivez votre question en détail…" className={`${inputCls} resize-none`} />
       </div>
       <button
