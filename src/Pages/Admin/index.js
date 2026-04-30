@@ -37,7 +37,12 @@ const SECTIONS = [
 
 const Admin = () => {
     const { user, loading } = useAuth();
-    const [activeSection, setActiveSection] = useState('stats');
+        const [activeSection, setActiveSection] = useState(() => {
+        const hash = window.location.hash.replace("#", "");
+        const section = hash.split("?")[0];
+        const valid = SECTIONS.map(s => s.id);
+        return valid.includes(section) ? section : 'stats';
+    });
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
     if (loading) return (
