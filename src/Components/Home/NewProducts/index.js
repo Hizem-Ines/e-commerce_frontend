@@ -100,11 +100,17 @@ const NewProducts = ({ produits, loading }) => {
                                     </div>
 
                                     <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                                        <div>
+                                    
+                                        <div className="flex flex-col">
+                                            {produit.original_min_price &&
+                                            parseFloat(produit.original_min_price) > parseFloat(produit.min_price) && (
+                                                <span className="text-xs text-black/40 line-through">
+                                                    {formatPrice(parseFloat(produit.original_min_price), currency)}
+                                                </span>
+                                            )}
                                             <span className="text-xl font-extrabold text-[#2d5a27]">
                                                 {produit.min_price ? formatPrice(parseFloat(produit.min_price), currency) : 'Prix N/A'}
                                             </span>
-                                            
                                         </div>
                                         <button
                                             onClick={() => ajouterAuPanier({

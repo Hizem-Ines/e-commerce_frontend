@@ -54,7 +54,7 @@ export default function CartSidebar() {
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-5 border-b border-stone-100">
                     <div className="flex items-center gap-2">
-                        <BsFillBasket3Fill FiX size={16}/>
+                        <BsFillBasket3Fill  size={16}/>
                         <h2 className="text-base font-semibold text-stone-800 tracking-tight">
                             Mon panier
                         </h2>
@@ -69,7 +69,7 @@ export default function CartSidebar() {
                         className="p-2 rounded-full hover:bg-stone-100 transition-colors text-stone-400 hover:text-stone-700"
                         aria-label="Fermer"
                     >
-                        <FiX FiX size={16} />
+                        <FiX  size={16} />
                     </button>
                 </div>
 
@@ -77,7 +77,7 @@ export default function CartSidebar() {
                 <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3 overscroll-contain">
                     {panier.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full gap-3 text-stone-400 py-16">
-                            <BsBoxSeam FiX size={16}/>
+                            <BsBoxSeam size={16}/>
                             <p className="text-sm">Votre panier est vide</p>
                             <button
                                 onClick={fermerPanier}
@@ -102,7 +102,7 @@ export default function CartSidebar() {
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center">
-                                            <BsFillBasket3Fill FiX size={16}/>
+                                            <BsFillBasket3Fill size={16}/>
                                         </div>
                                     )}
                                 </div>
@@ -127,7 +127,7 @@ export default function CartSidebar() {
                                             onClick={() => changerQuantite(item.variant_id, item.quantity - 1)}
                                             className="w-6 h-6 rounded-full border border-stone-300 flex items-center justify-center hover:bg-stone-200 transition-colors"
                                         >
-                                            <FiMinus FiX size={16} />
+                                            <FiMinus size={16} />
                                         </button>
                                         <span className="text-sm font-semibold text-stone-700 w-5 text-center">
                                             {item.quantity}
@@ -136,7 +136,7 @@ export default function CartSidebar() {
                                             onClick={() => changerQuantite(item.variant_id, item.quantity + 1)}
                                             className="w-6 h-6 rounded-full border border-stone-300 flex items-center justify-center hover:bg-stone-200 transition-colors"
                                         >
-                                            <FiPlus FiX size={16} />
+                                            <FiPlus size={16} />
                                         </button>
                                     </div>
                                 </div>
@@ -147,7 +147,7 @@ export default function CartSidebar() {
                                     className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-red-50 text-stone-400 hover:text-red-500"
                                     aria-label="Supprimer"
                                 >
-                                    <FiTrash2 FiX size={16} />
+                                    <FiTrash2 size={16} />
                                 </button>
                             </div>
                         ))
