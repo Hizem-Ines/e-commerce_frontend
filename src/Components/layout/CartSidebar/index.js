@@ -114,7 +114,7 @@ export default function CartSidebar() {
                                     </p>
                                     {item.attributes && (
                                         <p className="text-xs text-stone-400 mt-0.5 truncate">
-                                            {Object.values(item.attributes).join(' · ')}
+                                                {Array.isArray(item.attributes) && item.attributes.length > 0 && item.attributes.map(a => `${a.type_fr}: ${a.value_fr}`).join(' · ')}
                                         </p>
                                     )}
                                     <p className="text-sm font-bold text-amber-600 mt-1">
