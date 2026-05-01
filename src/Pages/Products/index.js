@@ -355,12 +355,21 @@ const Products = () => {
                                                 </div>
 
                                                 <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                                                    {/* ✅ Fixed: uses min_price */}
-                                                    <span className="text-lg font-extrabold text-[#2d5a27]">
-                                                        {produit.min_price
-                                                            ? formatPrice(parseFloat(produit.min_price), currency)
-                                                            : 'Prix N/A'}
-                                                    </span>
+                                                    {/*  uses min_price */}
+                                                   
+                                                    <div className="flex flex-col">
+                                                        {produit.original_min_price &&
+                                                        parseFloat(produit.original_min_price) > parseFloat(produit.min_price) && (
+                                                            <span className="text-xs text-black/40 line-through">
+                                                                {formatPrice(parseFloat(produit.original_min_price), currency)}
+                                                            </span>
+                                                        )}
+                                                        <span className="text-lg font-extrabold text-[#2d5a27]">
+                                                            {produit.min_price
+                                                                ? formatPrice(parseFloat(produit.min_price), currency)
+                                                                : 'Prix N/A'}
+                                                        </span>
+                                                    </div>
                                                     <button
                                                         onClick={() => navigate(`/produits/${produit.id}`)}
                                                         className="bg-[#2d5a27] hover:bg-[#4a8c42]  text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300"
