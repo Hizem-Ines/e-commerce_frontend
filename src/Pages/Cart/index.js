@@ -84,7 +84,7 @@ const Cart = () => {
                                     {/* Attributs */}
                                     {item.attributes?.length > 0 && (
                                         <p className="text-xs text-black/40 mb-2">
-                                            {item.attributes.map(a => `${a.attribute_type}: ${a.attribute_value}`).join(' — ')}
+                                                    {item.attributes.map(a => `${a.type_fr}: ${a.value_fr}`).join(' — ')}
                                         </p>
                                     )}
 
