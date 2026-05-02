@@ -25,7 +25,7 @@ export default function CartSidebar() {
 
     const handleCheckout = () => {
         fermerPanier();
-        navigate('/checkout');
+        navigate('/panier');
     };
 
     return (
@@ -167,7 +167,7 @@ export default function CartSidebar() {
                             onClick={handleCheckout}
                             className="w-full bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
                         >
-                            Passer la commande
+                            Voir le panier
                         </button>
                         <button
                             onClick={viderPanier}
