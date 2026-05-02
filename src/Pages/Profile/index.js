@@ -10,6 +10,10 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 import formatPrice from '../../utils/formatPrice';
+import {
+  getMyReclamations,
+  createReclamation,
+} from '../../services/reclamationService';
 
 // ✅ Clés FR pour correspondre à la DB
 const STATUS_LABELS = {
@@ -62,6 +66,14 @@ const Profile = () => {
     const [orders,         setOrders]         = useState([]);
     const [ordersLoading,  setOrdersLoading]  = useState(false);
     const [expandedOrder,  setExpandedOrder]  = useState(null);
+
+    // ── Réclamations ──────────────────────────────────────────
+    const [reclamations,         setReclamations]         = useState([]);
+    const [reclamationsLoading,  setReclamationsLoading]  = useState(false);
+    const [eligibleOrders,       setEligibleOrders]       = useState([]);
+    const [showNewForm,          setShowNewForm]          = useState(false);
+    const [reclamForm,           setReclamForm]           = useState({ order_id: '', reclamation_type: '', message: '' });
+    const [reclamSubmitting,     setReclamSubmitting]     = useState(false);
 
     const fileInputRef = useRef(null);
 
@@ -165,6 +177,43 @@ const Profile = () => {
                 .finally(() => setOrdersLoading(false));
         }
     }, [activeTab]);
+
+    // ── Charger réclamations ──────────────────────────────────
+        useEffect(() => {
+            if (activeTab !== 'reclamations') return;
+            setReclamationsLoading(true);
+
+            // Appels séparés — l'un n'empêche pas l'autre
+            getMyOrders()
+                .then(res => setEligibleOrders(res.data?.orders || []))
+                .catch(() => setEligibleOrders([]));
+
+            getMyReclamations()
+                .then(res => setReclamations(Array.isArray(res) ? res : (res.reclamations || [])))
+                .catch(() => setReclamations([]))
+                .finally(() => setReclamationsLoading(false));
+
+        }, [activeTab]);
+
+        const handleReclamSubmit = async () => {
+            if (!reclamForm.reclamation_type || reclamForm.message.trim().length < 10) {
+                showError('Type et message (min 10 caractères) sont obligatoires.');
+                return;
+            }
+            setReclamSubmitting(true);
+            try {
+                await createReclamation(reclamForm);
+                showSuccess('Réclamation envoyée ! Vous recevrez un email de confirmation.');
+                setShowNewForm(false);
+                setReclamForm({ order_id: '', reclamation_type: '', message: '' });
+                const res = await getMyReclamations();
+                setReclamations(Array.isArray(res) ? res : (res.reclamations || []));
+            } catch (err) {
+                showError(err.response?.data?.message || "Erreur lors de l'envoi.");
+            } finally {
+                setReclamSubmitting(false);
+            }
+        };
 
     // ── Handlers dirty ────────────────────────────────────
     const handleProfileChange = (field, value) => {
@@ -292,6 +341,7 @@ const Profile = () => {
     const tabs = [
         { id: 'profil',    label: 'Informations', icon: <FiUser size={16} />,    dirty: isProfileSectionDirty },
         { id: 'commandes', label: 'Commandes',    icon: <FiPackage size={16} />, dirty: false                  },
+          { id: 'reclamations', label: 'Réclamations', icon: <FiAlertCircle size={16} />,  dirty: false },
         { id: 'securite',  label: 'Sécurité',     icon: <FiLock size={16} />,    dirty: isPasswordDirty       },
     ];
 
@@ -688,6 +738,152 @@ const Profile = () => {
                         })}
                     </div>
                 )}
+
+                {/* ══════════════════════════════════════════════════
+                    TAB RÉCLAMATIONS
+                ══════════════════════════════════════════════════ */}
+                {activeTab === 'reclamations' && (() => {
+                    const STATUS_RECL = {
+                        en_attente: { label: 'En attente',   color: '#f59e0b', bg: '#fef3c7' },
+                        en_cours:   { label: 'En cours',     color: '#3b82f6', bg: '#dbeafe' },
+                        urgente:    { label: 'Urgente ⚡',   color: '#ea580c', bg: '#ffedd5' },
+                        en_retard:  { label: 'En retard ⏰', color: '#dc2626', bg: '#fee2e2' },
+                        resolue:    { label: 'Résolue ✅',   color: '#166534', bg: '#dcfce7' },
+                        rejetee:    { label: 'Rejetée',      color: '#6b7280', bg: '#f3f4f6' },
+                    };
+                    return (
+                        <div className="space-y-5">
+                            {/* Header */}
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-xl font-bold text-[#2c2c2c]">Mes réclamations</h3>
+                                <button
+                                    onClick={() => setShowNewForm(v => !v)}
+                                    className="flex items-center gap-2 bg-[#2d5a27] text-white font-bold px-5 py-2.5 rounded-xl hover:bg-[#4a8c42] transition text-sm"
+                                >
+                                    {showNewForm ? '✕ Annuler' : '+ Nouvelle réclamation'}
+                                </button>
+                            </div>
+
+                            {/* Formulaire */}
+                            {showNewForm && (
+                                <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-6 border-l-4 border-[#2d5a27]">
+                                    <h4 className="font-bold text-[#2c2c2c] mb-5">Soumettre une réclamation</h4>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-600 mb-1.5">
+                                                Commande concernée <span className="text-black/30 font-normal">(optionnel)</span>
+                                            </label>
+                                            <select
+                                                value={reclamForm.order_id}
+                                                onChange={e => setReclamForm(f => ({ ...f, order_id: e.target.value }))}
+                                                className={inputBase}
+                                            >
+                                                <option value="">— Sans commande spécifique —</option>
+                                                {eligibleOrders.map(o => (
+                                                    <option key={o.id} value={o.id}>
+                                                        {o.order_number} — {o.item_count} article{o.item_count > 1 ? 's' : ''}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-600 mb-1.5">
+                                                Type de réclamation <span className="text-red-400">*</span>
+                                            </label>
+                                            <select
+                                                value={reclamForm.reclamation_type}
+                                                onChange={e => setReclamForm(f => ({ ...f, reclamation_type: e.target.value }))}
+                                                className={inputBase}
+                                            >
+                                                <option value="">— Choisir un type —</option>
+                                                <option value="produit_defectueux">💔 Produit défectueux</option>
+                                                <option value="commande_non_recue">📦 Commande non reçue</option>
+                                                <option value="produit_incorrect">❓ Produit incorrect</option>
+                                                <option value="retard_livraison">🚚 Retard de livraison</option>
+                                                <option value="remboursement">↩️ Demande de remboursement</option>
+                                                <option value="autre">💬 Autre</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-600 mb-1.5">
+                                                Décrivez votre problème <span className="text-red-400">*</span>
+                                            </label>
+                                            <textarea
+                                                rows={4}
+                                                value={reclamForm.message}
+                                                onChange={e => setReclamForm(f => ({ ...f, message: e.target.value }))}
+                                                placeholder="Décrivez votre problème en détail (minimum 10 caractères)…"
+                                                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#4a8c42] resize-none"
+                                            />
+                                            <p className="text-xs text-black/30 mt-1">{reclamForm.message.length} caractères</p>
+                                        </div>
+                                        <button
+                                            onClick={handleReclamSubmit}
+                                            disabled={reclamSubmitting}
+                                            className="bg-[#2d5a27] text-white font-bold px-8 py-3 rounded-xl hover:bg-[#4a8c42] transition text-sm disabled:opacity-60"
+                                        >
+                                            {reclamSubmitting ? 'Envoi en cours…' : '📤 Envoyer la réclamation'}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Liste */}
+                            {reclamationsLoading ? (
+                                <div className="flex items-center justify-center py-16">
+                                    <div className="text-4xl animate-spin">🌿</div>
+                                </div>
+                            ) : reclamations.length === 0 ? (
+                                <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-12 text-center">
+                                    <div className="text-6xl mb-4">📭</div>
+                                    <h4 className="text-xl font-bold text-[#2c2c2c] mb-2">Aucune réclamation</h4>
+                                    <p className="text-black/50 text-sm">Vous n'avez pas encore soumis de réclamation.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {reclamations.map(r => {
+                                        const cfg = STATUS_RECL[r.status] || STATUS_RECL.en_attente;
+                                        return (
+                                            <div key={r.id} className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-5">
+                                                <div className="flex items-start justify-between gap-3 mb-3">
+                                                    <div>
+                                                        <p className="font-bold text-sm text-[#2c2c2c]">
+                                                            #{r.id.slice(0, 8).toUpperCase()}
+                                                            {r.order_number && (
+                                                                <span className="ml-2 font-mono text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-lg">
+                                                                    Cmd {r.order_number}
+                                                                </span>
+                                                            )}
+                                                        </p>
+                                                        <p className="text-xs text-black/40 mt-0.5">
+                                                            {new Date(r.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                                        </p>
+                                                    </div>
+                                                    <span className="text-xs font-bold px-3 py-1 rounded-full shrink-0"
+                                                        style={{ background: cfg.bg, color: cfg.color }}>
+                                                        {cfg.label}
+                                                    </span>
+                                                </div>
+                                                <p className="text-sm text-black/60 line-clamp-2 mb-3">{r.message}</p>
+                                                {r.admin_response && (
+                                                    <div className="bg-emerald-50 rounded-xl p-3 border-l-4 border-emerald-400">
+                                                        <p className="text-xs font-bold text-emerald-700 mb-1">Réponse de l'équipe GOFFA :</p>
+                                                        <p className="text-sm text-[#2c2c2c]">{r.admin_response}</p>
+                                                        {r.responded_at && (
+                                                            <p className="text-xs text-black/30 mt-1">
+                                                                {new Date(r.responded_at).toLocaleDateString('fr-FR')}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })()}
 
                 {/* ══════════════════════════════════════════════════
                     TAB SÉCURITÉ

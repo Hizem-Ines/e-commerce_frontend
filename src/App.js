@@ -1,5 +1,6 @@
 import './App.css';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { useEffect } from 'react';
 import Layout from './Components/layout/Layout';
 import Home from './Pages/Home';
 import Cart from './Pages/Cart';
@@ -13,37 +14,54 @@ import ProducerDetail from './Pages/ProducerDetail';
 import Auth from './Pages/Auth';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
-import { AuthProvider } from './context/authContext';
+import { AuthProvider, useAuth } from './context/authContext';
 import { SiteSettingsProvider } from './context/SiteSettingsContext';
 import Profile from './Pages/Profile';
-import VerifyEmail from './Pages/Auth/VerifyEmail'
+import VerifyEmail from './Pages/Auth/VerifyEmail';
 import ForgotPassword from './Pages/Auth/Forgotpassword';
-import ResetPassword  from './Pages/Auth/Resetpassword';
+import ResetPassword from './Pages/Auth/Resetpassword';
 import LoginSuccess from './Pages/Auth/LoginSuccess';
 import Checkout from './Pages/Checkout';
 import OrderConfirmation from './Pages/OrderConfirmation';
 import CompleteAccount from './Pages/Auth/CompleteAccount';
 import OrderDetail from './Pages/OrderDetail';
 import Offres from './Pages/Offres';
-import Reclamations from "./Pages/Reclamations";
+import Reclamations from './Pages/Reclamations';
 import Admin from './Pages/Admin';
-import Recipes    from "./Pages/Recipes";
-import RecipesDetail from "./Pages/RecipesDetail";
-import Unsubscribe from "./Pages/Unsubscribe";
+import Recipes from './Pages/Recipes';
+import RecipesDetail from './Pages/RecipesDetail';
+import Unsubscribe from './Pages/Unsubscribe';
 import CartSidebar from './Components/layout/CartSidebar';
 import ScrollToTop from './Components/scrolltotop/ScrollToTop';
 import Conseiller from './Pages/Conseiller';
+import { connectWebSocket, disconnectWebSocket } from './utils/websocket';
 
-function App() {
+// ── Gère la connexion WS après que AuthProvider soit monté ──
+function WSConnector() {
+    const { user } = useAuth();
+
+    useEffect(() => {
+        if (user?.id) {
+            connectWebSocket(user.id, user.role === 'admin' ? 'admin' : 'user');
+        }
+        return () => {
+            disconnectWebSocket();
+        };
+    }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    return null;
+}
+
+export default function App() {
     return (
         <BrowserRouter>
             <ScrollToTop />
             <AuthProvider>
+                <WSConnector />
                 <SiteSettingsProvider>
                     <CartProvider>
                         <WishlistProvider>
                             <CartSidebar />
-
                             <Routes>
                                 <Route path="/admin" element={<Admin />} />
                                 <Route path="/connexion" element={<Auth />} />
@@ -68,7 +86,7 @@ function App() {
                                     <Route path="/profil" element={<Profile />} />
                                     <Route path="/commandes/:orderId" element={<OrderDetail />} />
                                     <Route path="/offres" element={<Offres />} />
-                                    <Route path="/recettes"       element={<Recipes />} />
+                                    <Route path="/recettes" element={<Recipes />} />
                                     <Route path="/recettes/:slug" element={<RecipesDetail />} />
                                     <Route path="/unsubscribe" element={<Unsubscribe />} />
                                     <Route path="*" element={<NotFound />} />
@@ -81,5 +99,3 @@ function App() {
         </BrowserRouter>
     );
 }
-
-export default App;

@@ -12,6 +12,11 @@ export const createReclamation = (data) =>
 export const getEligibleOrders = () =>
   api.get("/reclamations/eligible-orders").then((res) => res.data);
 
+// GET /api/reclamations/my (user connecté)
+export const getMyReclamations = () =>
+  api.get("/reclamations/my").then((res) => res.data);
+
+
 // GET /api/reclamations (admin)
 export const getAllReclamations = (params = {}) =>
   api.get("/reclamations", { params }).then((res) => res.data);
