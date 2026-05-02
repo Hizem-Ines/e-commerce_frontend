@@ -147,6 +147,7 @@ setCategories(flat);
                         <div className="px-5 py-4 border-b border-gray-100 bg-[#f9f5f0]">
                             <h3 className="font-bold text-[#2c2c2c]">Catégories principales ({parentCategories.length})</h3>
                         </div>
+                        <div className="hidden md:block overflow-x-auto">
                         <table className="w-full text-sm min-w-[500px]">
                             <thead>
                                 <tr className="border-b border-gray-100">
@@ -190,6 +191,24 @@ setCategories(flat);
                                 ))}
                             </tbody>
                         </table>
+                        </div>
+                        {/* Mobile cards */}
+                        <div className="md:hidden divide-y divide-gray-100">
+                        {parentCategories.map(cat => (
+                            <div key={cat.id} className="p-4 flex items-center gap-3">
+                            <CategoryImageUpload category={cat} onUpdated={handleCategoryUpdated} />
+                            <div className="flex-1 min-w-0">
+                                <p className="font-bold text-[#2c2c2c] text-sm">{cat.name_fr}</p>
+                                <p className="text-xs font-mono text-black/40">{cat.slug}</p>
+                            </div>
+                            <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-1 rounded-full">{cat.product_count || 0}</span>
+                            <div className="flex gap-1">
+                                <button onClick={() => handleEdit(cat)} className="p-1.5 hover:bg-blue-50 text-blue-500 rounded-xl transition"><FiEdit size={14}/></button>
+                                <button onClick={() => setDeleteConfirm(cat.id)} className="p-1.5 hover:bg-red-50 text-red-500 rounded-xl transition"><FiTrash2 size={14}/></button>
+                            </div>
+                            </div>
+                        ))}
+                        </div>
                     </div>
 
                     {/* ── SOUS-CATÉGORIES ────────────────────────────────── */}

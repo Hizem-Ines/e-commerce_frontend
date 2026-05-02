@@ -35,9 +35,9 @@ const STATUS_BADGE = {
 };
 
 const selectCls =
-  "w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-300";
+  "w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-[#4a8c42] focus:outline-none";
 const textareaCls =
-  "w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 resize-none";
+  "w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-[#4a8c42] focus:outline-none resize-none";
 
 
 // ─── Modale FAQ (créer / modifier) ────────────────────────
@@ -139,7 +139,7 @@ const FaqModal = ({ faq, onClose, onSaved }) => {
             <button type="button" onClick={onClose} className="px-5 py-2 rounded-xl text-sm text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors">
               Annuler
             </button>
-            <button type="submit" disabled={loading} className="px-5 py-2 rounded-xl text-sm text-white bg-green-700 hover:bg-green-800 disabled:opacity-60 transition-colors font-semibold">
+            <button type="submit" disabled={loading} className="px-5 py-2 rounded-xl text-sm text-white bg-[#2d5a27] hover:bg-[#4a8c42] disabled:opacity-60 transition-colors font-semibold">
               {loading ? "Enregistrement…" : isEdit ? "Mettre à jour" : "Créer la FAQ"}
             </button>
           </div>
@@ -250,7 +250,7 @@ const AnswerModal = ({ question, onClose, onSaved }) => {
             <button type="button" onClick={onClose} className="px-5 py-2 rounded-xl text-sm text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors">
               Annuler
             </button>
-            <button type="submit" disabled={loading} className="px-5 py-2 rounded-xl text-sm text-white bg-green-700 hover:bg-green-800 disabled:opacity-60 transition-colors font-semibold">
+            <button type="submit" disabled={loading} className="px-5 py-2 rounded-xl text-sm text-white bg-[#2d5a27] hover:bg-[#4a8c42] disabled:opacity-60 transition-colors font-semibold">
               {loading ? "Envoi…" : createFaq ? "Envoyer & créer FAQ ✉️" : "Envoyer la réponse ✉️"}
             </button>
           </div>
@@ -352,7 +352,7 @@ const LinkModal = ({ question, faqs, onClose, onSaved }) => {
             <button type="button" onClick={onClose} className="px-5 py-2 rounded-xl text-sm text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors">
               Annuler
             </button>
-            <button type="submit" disabled={loading || !faqId} className="px-5 py-2 rounded-xl text-sm text-white bg-green-700 hover:bg-green-800 disabled:opacity-60 transition-colors font-semibold flex items-center gap-1.5">
+            <button type="submit" disabled={loading || !faqId} className="px-5 py-2 rounded-xl text-sm text-white bg-[#2d5a27] hover:bg-[#4a8c42] disabled:opacity-60 transition-colors font-semibold flex items-center gap-1.5">
               <FiLink size={14} />
               {loading ? "Liaison…" : "Lier et envoyer ✉️"}
             </button>
@@ -475,11 +475,11 @@ const AdminFaq = () => {
   }, {});
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">FAQ</h1>
+          <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">FAQ</h2>
           <p className="text-gray-400 text-sm mt-0.5">
             Gérez les questions fréquentes et les demandes clients.
           </p>
@@ -487,7 +487,7 @@ const AdminFaq = () => {
         {tab === "faqs" && (
           <button
             onClick={() => setFaqModal({})}
-            className="flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
+            className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
           >
             <span className="text-lg leading-none">+</span> Nouvelle FAQ
           </button>
@@ -505,7 +505,7 @@ const AdminFaq = () => {
             onClick={() => setTab(key)}
             className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${
               tab === key
-                ? "bg-white text-green-700 shadow-sm"
+                ? "bg-white text-[#2d5a27] shadow-sm"
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
@@ -726,7 +726,7 @@ const AdminFaq = () => {
                           <>
                             <button
                               onClick={() => setAnswerModal(q)}
-                              className="flex items-center gap-1.5 text-xs font-semibold bg-green-700 hover:bg-green-800 text-white px-3 py-1.5 rounded-xl transition-colors"
+                              className="flex items-center gap-1.5 text-xs font-semibold bg-[#2d5a27] hover:bg-[#4a8c42] text-white px-3 py-1.5 rounded-xl transition-colors"
                             >
                               ✉️ Répondre
                             </button>
@@ -805,7 +805,7 @@ const AdminFaq = () => {
           onSaved={() => { setLinkModal(null); loadQuestions(); }}
         />
       )}
-    </div>
+      </div>
   );
 };
 

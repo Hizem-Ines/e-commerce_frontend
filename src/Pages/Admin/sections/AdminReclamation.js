@@ -380,6 +380,8 @@ const handleRespond = async () => {
             </p>
           </div>
         ) : (
+           <>
+          <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm min-w-[600px]">
             <thead>
               <tr className="bg-[#f9f5f0] border-b border-gray-100">
@@ -454,6 +456,45 @@ const handleRespond = async () => {
               ))}
             </tbody>
           </table>
+          </div>
+
+          {/* Mobile cards */}
+          {!loading && filtered.length > 0 && (
+            <div className="md:hidden divide-y divide-gray-100">
+              {filtered.map(r => (
+                <div key={r.id} className="p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0 font-bold text-[#2d5a27] text-sm">
+                        {r.user_name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="font-bold text-[#2c2c2c] text-sm">{r.user_name}</p>
+                        <p className="text-xs text-black/40">{r.user_email}</p>
+                      </div>
+                    </div>
+                    <span className={`text-xs font-bold px-2 py-1 rounded-full shrink-0 ${STATUS_CONFIG[r.status]?.color || ''}`}>
+                      {STATUS_CONFIG[r.status]?.label}
+                    </span>
+                  </div>
+                  <p className="text-xs text-black/60">{TYPE_ICONS[r.reclamation_type]} {r.reclamation_type}</p>
+                  {r.order_number && (
+                    <span className="font-mono text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-lg inline-block">{r.order_number}</span>
+                  )}
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-xs text-black/30">{new Date(r.created_at).toLocaleDateString('fr-FR')}</span>
+                    <div className="flex gap-1">
+                      <button onClick={() => setSelected(r)} className="p-2 hover:bg-blue-50 text-blue-500 rounded-xl transition"><FiEye size={14}/></button>
+                      {!['resolue', 'rejetee'].includes(r.status) && (
+                        <button onClick={() => openRespondModal(r)} className="p-2 hover:bg-emerald-50 text-emerald-600 rounded-xl transition"><FiMessageSquare size={14}/></button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          </>
         )}
       </div>
 

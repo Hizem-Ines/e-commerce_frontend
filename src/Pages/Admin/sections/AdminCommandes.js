@@ -192,6 +192,8 @@ const AdminCommandes = () => {
                         <div className="text-4xl animate-spin">🌿</div>
                     </div>
                 ) : (
+                    <>
+                    <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-sm min-w-[640px]">
                         <thead>
                             <tr className="bg-[#f9f5f0] border-b border-gray-100">
@@ -261,6 +263,49 @@ const AdminCommandes = () => {
                             ))}
                         </tbody>
                     </table>
+                    </div>
+                    {!loading && (
+                        <div className="md:hidden divide-y divide-gray-100">
+                            {commandes.length === 0 ? (
+                            <p className="text-center py-10 text-black/40 text-sm">Aucune commande trouvée</p>
+                            ) : commandes.map(commande => (
+                            <div key={commande.id} className="p-4 space-y-3">
+                                <div className="flex items-start justify-between gap-2">
+                                <div>
+                                    <p className="font-bold text-[#2c2c2c] text-sm">#{commande.order_number || commande.id.slice(0,8).toUpperCase()}</p>
+                                    <p className="text-xs text-black/40">{commande.item_count} article{commande.item_count > 1 ? 's' : ''}</p>
+                                </div>
+                                <p className="font-bold text-[#2d5a27] text-sm">{formatPrice(parseFloat(commande.total_price), currency)}</p>
+                                </div>
+                                <div>
+                                <p className="font-semibold text-[#2c2c2c] text-sm">{commande.customer_name}</p>
+                                <p className="text-xs text-black/40">{commande.customer_email}</p>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                <span className="text-xs text-black/40">{new Date(commande.created_at).toLocaleDateString('fr-FR')}</span>
+                                <div className="flex items-center gap-2">
+                                    {commande.status === 'annulee' || commande.status === 'livree' || commande.status === 'remboursee' ? (
+                                    <StatusBadge status={commande.status} />
+                                    ) : (
+                                    <select
+                                        value={commande.status}
+                                        onChange={e => handleStatusChange(commande.id, e.target.value)}
+                                        className={`text-xs font-bold px-2 py-1 rounded-full border-0 outline-none cursor-pointer ${STATUS_LABELS[commande.status]?.color || ''}`}
+                                    >
+                                        {STATUS_OPTIONS.map(s => <option key={s} value={s}>{STATUS_LABELS[s]?.label}</option>)}
+                                        <option value="annulee">Annuler…</option>
+                                    </select>
+                                    )}
+                                    <button onClick={() => openOrderDetail(commande)} className="p-2 hover:bg-blue-50 text-blue-500 rounded-xl transition">
+                                    <FiEye size={14}/>
+                                    </button>
+                                </div>
+                                </div>
+                            </div>
+                            ))}
+                        </div>
+                        )}
+                        </>
                 )}
             </div>
 
