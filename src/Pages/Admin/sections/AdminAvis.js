@@ -166,6 +166,9 @@ const AdminAvis = () => {
                     <p className="text-sm text-black/40 mt-0.5">
                         {total} avis au total
                     </p>
+                    {reviews.length > 0 && (
+                        <p className="text-xs text-black/40">Note moyenne : <span className="font-bold text-[#2c2c2c]">★ {moyenneLocale}</span></p>
+                    )}
                 </div>
             </div>
 

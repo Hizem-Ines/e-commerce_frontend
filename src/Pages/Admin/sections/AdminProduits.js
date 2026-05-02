@@ -992,6 +992,11 @@ const AdminProduits = () => {
     const [categories, setCategories]           = useState([]);
     const [suppliers, setSuppliers]             = useState([]);
 
+    // ── Filtres ──────────────────────────────────────────────────────────────
+    const [filterCategory, setFilterCategory] = useState('');
+    const [filterSupplier, setFilterSupplier] = useState('');
+    const [filterStatus,   setFilterStatus]   = useState('');   // '' | 'true' | 'false'
+
     useEffect(() => {
         getAllCategories().then(r => setCategories(r.data.categories || [])).catch(console.error);
         getAllSuppliers?.()?.then(r => setSuppliers(r.data.suppliers || [])).catch(() => {});
@@ -1000,7 +1005,12 @@ const AdminProduits = () => {
     const fetchProduits = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await getAllProducts({ search: committedSearch || undefined, page });
+            const params = { search: committedSearch || undefined, page };
+            if (filterCategory) params.category_id = filterCategory;
+            if (filterSupplier) params.supplier_id  = filterSupplier;
+            if (filterStatus !== '') params.is_active = filterStatus;
+
+            const res = await getAllProducts(params);
             setProduits(res.data.products);
             setTotalPages(res.data.totalPages);
         } catch (err) {
@@ -1008,15 +1018,32 @@ const AdminProduits = () => {
         } finally {
             setLoading(false);
         }
-    }, [page, committedSearch]);
+    }, [page, committedSearch, filterCategory, filterSupplier, filterStatus]);
 
     useEffect(() => { fetchProduits(); }, [fetchProduits]);
+
+    // reset page quand un filtre change
+    const applyFilter = (setter) => (val) => {
+        setPage(1);
+        setter(val);
+    };
 
     const handleSearch = (e) => {
         e.preventDefault();
         setPage(1);
         setCommittedSearch(search);
     };
+
+    const clearFilters = () => {
+        setPage(1);
+        setFilterCategory('');
+        setFilterSupplier('');
+        setFilterStatus('');
+        setSearch('');
+        setCommittedSearch('');
+    };
+
+    const hasActiveFilters = filterCategory || filterSupplier || filterStatus !== '' || committedSearch;
 
     const handleDelete = async (id) => {
         try {
@@ -1043,6 +1070,14 @@ const AdminProduits = () => {
         setSuccessMsg(editProduct ? 'Produit modifié avec succès.' : 'Produit créé avec succès.');
         setTimeout(() => setSuccessMsg(''), 4000);
     };
+
+    // aplatir catégories pour le select
+    const flatCategories = categories.flatMap(c => [
+        { id: c.id, label: c.name_fr },
+        ...(c.children || []).map(s => ({ id: s.id, label: `↳ ${s.name_fr}` })),
+    ]);
+
+    const selectCls = "bg-white border-2 border-gray-200 hover:border-[#4a8c42] focus:border-[#4a8c42] rounded-xl px-3 py-2.5 text-sm text-[#2c2c2c] outline-none transition cursor-pointer";
 
     return (
         <div>
@@ -1080,8 +1115,8 @@ const AdminProduits = () => {
             {successMsg && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">✅ {successMsg}</div>}
             {errorMsg   && <div className="bg-red-50 border border-red-200 text-red-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">❌ {errorMsg}</div>}
 
-            {/* Recherche */}
-            <form onSubmit={handleSearch} className="flex gap-3 mb-6">
+            {/* ── Recherche ── */}
+            <form onSubmit={handleSearch} className="flex gap-3 mb-3">
                 <div className="relative flex-1">
                     <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                     <input
@@ -1095,7 +1130,99 @@ const AdminProduits = () => {
                 </button>
             </form>
 
-            {/* Table — stock column removed */}
+            {/* ── Filtres ── */}
+            <div className="bg-white border-2 border-gray-100 rounded-2xl px-4 py-4 mb-6">
+                <div className="flex flex-wrap gap-3 items-center">
+                    {/* Catégorie */}
+                    <div className="flex flex-col gap-1 min-w-[140px] flex-1">
+                        <label className="text-xs font-bold text-black/40 uppercase tracking-wider">Catégorie</label>
+                        <select
+                            className={selectCls}
+                            value={filterCategory}
+                            onChange={e => applyFilter(setFilterCategory)(e.target.value)}
+                        >
+                            <option value="">Toutes</option>
+                            {flatCategories.map(c => (
+                                <option key={c.id} value={c.id}>{c.label}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Fournisseur */}
+                    <div className="flex flex-col gap-1 min-w-[140px] flex-1">
+                        <label className="text-xs font-bold text-black/40 uppercase tracking-wider">Fournisseur</label>
+                        <select
+                            className={selectCls}
+                            value={filterSupplier}
+                            onChange={e => applyFilter(setFilterSupplier)(e.target.value)}
+                        >
+                            <option value="">Tous</option>
+                            {suppliers.map(s => (
+                                <option key={s.id} value={s.id}>{s.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Statut */}
+                    <div className="flex flex-col gap-1 min-w-[120px] flex-1">
+                        <label className="text-xs font-bold text-black/40 uppercase tracking-wider">Statut</label>
+                        <select
+                            className={selectCls}
+                            value={filterStatus}
+                            onChange={e => applyFilter(setFilterStatus)(e.target.value)}
+                        >
+                            <option value="">Tous</option>
+                            <option value="true"> Actifs</option>
+                            <option value="false"> Inactifs</option>
+                        </select>
+                    </div>
+
+                    {/* Bouton reset — visible seulement si filtres actifs */}
+                    {hasActiveFilters && (
+                        <div className="flex flex-col gap-1 shrink-0 self-end">
+                            <label className="text-xs font-bold text-black/0 uppercase tracking-wider select-none">⠀</label>
+                            <button
+                                onClick={clearFilters}
+                                className="flex items-center gap-1.5 border-2 border-gray-200 text-black/50 hover:border-red-300 hover:text-red-500 font-bold px-4 py-2.5 rounded-xl text-sm transition"
+                            >
+                                <FiX size={14}/> Réinitialiser
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                {/* Résumé filtres actifs */}
+                {hasActiveFilters && (
+                    <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-100">
+                        {committedSearch && (
+                            <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-full">
+                                🔍 "{committedSearch}"
+                                <button onClick={() => { setSearch(''); setCommittedSearch(''); setPage(1); }} className="hover:text-red-500 ml-0.5"><FiX size={10}/></button>
+                            </span>
+                        )}
+                        {filterCategory && (
+                            <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full">
+                                📁 {flatCategories.find(c => c.id === filterCategory)?.label}
+                                <button onClick={() => applyFilter(setFilterCategory)('')} className="hover:text-red-500 ml-0.5"><FiX size={10}/></button>
+                            </span>
+                        )}
+                        {filterSupplier && (
+                            <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-xs font-bold px-2.5 py-1 rounded-full">
+                                🏭 {suppliers.find(s => s.id === filterSupplier)?.name}
+                                <button onClick={() => applyFilter(setFilterSupplier)('')} className="hover:text-red-500 ml-0.5"><FiX size={10}/></button>
+                            </span>
+                        )}
+                        {filterStatus !== '' && (
+                            <span className="inline-flex items-center gap-1 bg-gray-50 text-gray-700 text-xs font-bold px-2.5 py-1 rounded-full">
+                                {filterStatus === 'true' ? '✅ Actifs' : '⛔ Inactifs'}
+                                <button onClick={() => applyFilter(setFilterStatus)('')} className="hover:text-red-500 ml-0.5"><FiX size={10}/></button>
+                            </span>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            {/* Table */}
             <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-x-auto">
                 {loading ? (
                     <div className="flex items-center justify-center py-20">
@@ -1114,7 +1241,19 @@ const AdminProduits = () => {
                         </thead>
                         <tbody>
                             {produits.length === 0 ? (
-                                <tr><td colSpan={5} className="text-center py-10 text-black/40">Aucun produit trouvé</td></tr>
+                                <tr>
+                                    <td colSpan={5} className="text-center py-16">
+                                        <div className="flex flex-col items-center gap-2 text-black/30">
+                                            <span className="text-4xl">🔍</span>
+                                            <p className="font-medium text-sm">Aucun produit trouvé</p>
+                                            {hasActiveFilters && (
+                                                <button onClick={clearFilters} className="text-xs text-[#2d5a27] font-bold hover:underline mt-1">
+                                                    Réinitialiser les filtres
+                                                </button>
+                                            )}
+                                        </div>
+                                    </td>
+                                </tr>
                             ) : produits.map(produit => (
                                 <tr key={produit.id} className="border-b border-gray-50 hover:bg-[#fdf6ec] transition">
                                     <td className="px-5 py-4">
@@ -1134,7 +1273,7 @@ const AdminProduits = () => {
                                                             dès {formatPrice(parseFloat(produit.min_price), currency)}
                                                         </p>
                                                     )}
-                                                    {produit.is_new     && <span className="text-xs bg-blue-100 text-blue-600 font-bold px-1.5 py-0.5 rounded-full">Nouveau</span>}
+                                                    {produit.is_new      && <span className="text-xs bg-blue-100 text-blue-600 font-bold px-1.5 py-0.5 rounded-full">Nouveau</span>}
                                                     {produit.is_featured && <span className="text-xs bg-amber-100 text-amber-600 font-bold px-1.5 py-0.5 rounded-full">✨ Vedette</span>}
                                                 </div>
                                             </div>

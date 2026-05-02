@@ -125,13 +125,13 @@ const AdminEmailCampaigns = () => {
             {/* HEADER */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                    <h2 className="text-xl sm:text-2xl font-black text-gray-800">Campagnes Email</h2>
-                    <p className="text-sm text-gray-500 mt-1">Gérez vos newsletters et promotions</p>
+                    <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Campagnes Email</h2>
+                    <p className="text-sm text-black/40 mt-0.5">Gérez vos newsletters et promotions</p>
                 </div>
                 {tab === "campaigns" && (
                     <button
                         onClick={() => { setShowForm(!showForm); setError(""); setSuccess(""); }}
-                        className="flex items-center gap-2 bg-[#2d5a27] hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition"
+                        className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42]text-white px-4 py-2 rounded-xl text-sm font-semibold transition"
                     >
                         <FiPlus size={16} />
                         Nouvelle campagne
@@ -145,21 +145,21 @@ const AdminEmailCampaigns = () => {
 
             {/* STATS */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-white rounded-2xl p-5 border border-gray-100 flex items-center gap-4">
+                <div className="bg-white rounded-2xl p-5 shadow-[0_4px_15px_rgba(0,0,0,0.07)] flex items-center gap-4">
                     <div className="bg-emerald-100 p-3 rounded-xl"><FiUsers className="text-[#2d5a27]" size={20} /></div>
                     <div>
                         <p className="text-2xl font-black text-gray-800">{subscribers.active}</p>
                         <p className="text-xs text-gray-500">Abonnés actifs</p>
                     </div>
                 </div>
-                <div className="bg-white rounded-2xl p-5 border border-gray-100 flex items-center gap-4">
+                <div className="bg-white rounded-2xl p-5 shadow-[0_4px_15px_rgba(0,0,0,0.07)] flex items-center gap-4">
                     <div className="bg-gray-100 p-3 rounded-xl"><FiUsers className="text-gray-500" size={20} /></div>
                     <div>
                         <p className="text-2xl font-black text-gray-800">{subscribers.total}</p>
                         <p className="text-xs text-gray-500">Total abonnés</p>
                     </div>
                 </div>
-                <div className="bg-white rounded-2xl p-5 border border-gray-100 flex items-center gap-4">
+                <div className="bg-white rounded-2xl p-5 shadow-[0_4px_15px_rgba(0,0,0,0.07)] flex items-center gap-4">
                     <div className="bg-blue-100 p-3 rounded-xl"><FiMail className="text-blue-600" size={20} /></div>
                     <div>
                         <p className="text-2xl font-black text-gray-800">{campaigns.length}</p>
@@ -204,7 +204,7 @@ const AdminEmailCampaigns = () => {
                 <>
                     {/* FORM */}
                     {showForm && (
-                        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
+                        <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-6 space-y-4">
                             <h3 className="font-bold text-gray-800">Nouvelle campagne</h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
@@ -260,7 +260,7 @@ const AdminEmailCampaigns = () => {
                             <div className="flex gap-3">
                                 <button
                                     onClick={handleCreate}
-                                    className="bg-[#2d5a27] hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-sm font-semibold transition"
+                                    className="bg-[#2d5a27] hover:bg-[#4a8c42]text-white px-5 py-2 rounded-xl text-sm font-semibold transition"
                                 >
                                     Créer la campagne
                                 </button>
@@ -287,7 +287,7 @@ const AdminEmailCampaigns = () => {
                     </div>
 
                     {/* CAMPAIGN LIST */}
-                    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                    <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] overflow-hidden">
                         <div className="px-6 py-4 border-b border-gray-100">
                             <h3 className="font-bold text-gray-800">Toutes les campagnes</h3>
                         </div>
@@ -319,7 +319,7 @@ const AdminEmailCampaigns = () => {
                                             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition shrink-0 ${
                                                 c.status === "sent"
                                                     ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                                    : "bg-[#2d5a27] hover:bg-emerald-700 text-white"
+                                                    : "bg-[#2d5a27] hover:bg-[#4a8c42]text-white"
                                             }`}
                                         >
                                             <FiSend size={14} />
