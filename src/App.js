@@ -34,17 +34,38 @@ import Unsubscribe from './Pages/Unsubscribe';
 import CartSidebar from './Components/layout/CartSidebar';
 import ScrollToTop from './Components/scrolltotop/ScrollToTop';
 import Conseiller from './Pages/Conseiller';
-import { connectWebSocket, disconnectWebSocket } from './utils/websocket';
+import { connectWebSocket, disconnectWebSocket , addWSListener, removeWSListener } from './utils/websocket';
 
 // ── Gère la connexion WS après que AuthProvider soit monté ──
 function WSConnector() {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
 
     useEffect(() => {
-        if (user?.id) {
-            connectWebSocket(user.id, user.role === 'admin' ? 'admin' : 'user');
-        }
+        if (!user?.id) return;
+
+        connectWebSocket(user.id, user.role === 'admin' ? 'admin' : 'user');
+
+        addWSListener("app-global", (data) => {
+            if (data.type === "ACCOUNT_SUSPENDED") {
+                alert("⚠️ Votre compte a été suspendu. Vous allez être déconnecté.");
+                logout();
+            }
+            if (data.type === "ACCOUNT_ACTIVATED") {
+                // Simple toast — pas de lib toast dans ton stack actuel
+                const div = document.createElement("div");
+                div.textContent = "✅ Votre compte a été réactivé. Bienvenue !";
+                div.style.cssText = `
+                    position:fixed; top:20px; right:20px; z-index:9999;
+                    background:#dcfce7; color:#166534; border:1px solid #bbf7d0;
+                    padding:12px 20px; border-radius:12px; font-weight:600; font-size:14px;
+                `;
+                document.body.appendChild(div);
+                setTimeout(() => div.remove(), 4000);
+            }
+        });
+
         return () => {
+            removeWSListener("app-global");
             disconnectWebSocket();
         };
     }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps

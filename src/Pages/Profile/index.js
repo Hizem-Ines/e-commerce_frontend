@@ -220,6 +220,55 @@ const Profile = () => {
         return () => removeWSListener("profile-reclamations");
     }, []);
 
+    // ── WS : mises à jour commandes en temps réel ─────────────
+        useEffect(() => {
+            addWSListener("profile-orders", (data) => {
+                if (
+                    data.type === "ORDER_CONFIRMED"      ||
+                    data.type === "ORDER_STATUS_UPDATE"  ||
+                    data.type === "ORDER_PAYMENT_FAILED" ||
+                    data.type === "ORDER_CANCELLED"
+                ) {
+                    // Mise à jour silencieuse du statut dans la liste
+                    setOrders((prev) =>
+                        prev.map((o) =>
+                            o.id === data.id
+                                ? {
+                                    ...o,
+                                    status: data.status ?? (
+                                        data.type === "ORDER_CONFIRMED"      ? "confirmee" :
+                                        data.type === "ORDER_PAYMENT_FAILED" ? "annulee"   :
+                                        data.type === "ORDER_CANCELLED"      ? "annulee"   :
+                                        o.status
+                                    )
+                                }
+                                : o
+                        )
+                    );
+
+                    // Toast visuel
+                    const NOTIF_ORDERS = {
+                        ORDER_CONFIRMED:      { label: "Commande confirmée ✅",   colorClass: "bg-emerald-50 border-emerald-200 text-emerald-700" },
+                        ORDER_STATUS_UPDATE:  { label: `Commande mise à jour`,    colorClass: "bg-blue-50 border-blue-200 text-blue-700"          },
+                        ORDER_PAYMENT_FAILED: { label: "Paiement échoué ❌",      colorClass: "bg-red-50 border-red-200 text-red-700"             },
+                        ORDER_CANCELLED:      { label: "Commande annulée 🚫",     colorClass: "bg-gray-50 border-gray-200 text-gray-700"          },
+                    };
+                    const cfg = NOTIF_ORDERS[data.type];
+                    if (cfg) {
+                        setWsNotif({
+                            ...cfg,
+                            id:   data.order_number || data.id,
+                            icon: <FiPackage size={16} className="shrink-0" />,
+                            isOrder: true,
+                        });
+                        setTimeout(() => setWsNotif(null), 5000);
+                    }
+                }
+            });
+
+            return () => removeWSListener("profile-orders");
+        }, []);
+
     // ── Handlers dirty ────────────────────────────────────
     const handleProfileChange = (field, value) => {
         setProfileData(prev => ({ ...prev, [field]: value }));
@@ -392,19 +441,24 @@ const Profile = () => {
                 {errorMsg   && <div className="bg-red-50 border border-red-200 text-red-700 font-semibold px-5 py-3 rounded-xl mb-6 text-sm">❌ {errorMsg}</div>}
 
                 {wsNotif && (
-                    <div
-                        className={`flex items-center gap-3 font-semibold px-5 py-3 rounded-xl mb-6 text-sm cursor-pointer border ${wsNotif.colorClass}`}
-                        onClick={() => { handleTabChange('reclamations'); setWsNotif(null); }}
-                    >
-                        {wsNotif.icon}
-                        <span>
-                            Réclamation <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-black/10">
-                                #{wsNotif.id.slice(0, 8).toUpperCase()}
-                            </span> — {wsNotif.label}
-                        </span>
-                        <span className="ml-auto text-xs underline opacity-60">Voir →</span>
-                    </div>
-                )}
+                        <div
+                            className={`flex items-center gap-3 font-semibold px-5 py-3 rounded-xl mb-6 text-sm cursor-pointer border ${wsNotif.colorClass}`}
+                            onClick={() => {
+                                handleTabChange(wsNotif.isOrder ? 'commandes' : 'reclamations');
+                                setWsNotif(null);
+                            }}
+                        >
+                            {wsNotif.icon}
+                            <span>
+                                {wsNotif.isOrder ? 'Commande' : 'Réclamation'}{' '}
+                                <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-black/10">
+                                    #{String(wsNotif.id).slice(0, 8).toUpperCase()}
+                                </span>{' '}
+                                — {wsNotif.label}
+                            </span>
+                            <span className="ml-auto text-xs underline opacity-60">Voir →</span>
+                        </div>
+                    )}
 
                 {/* TABS */}
                 <div className="flex bg-white rounded-2xl p-1 shadow-[0_4px_15px_rgba(0,0,0,0.07)] mb-6 gap-1">
