@@ -14,6 +14,7 @@ import {
   getMyReclamations,
 } from '../../services/reclamationService';
 
+import { addWSListener, removeWSListener } from '../../utils/websocket';
 // ✅ Clés FR pour correspondre à la DB
 const STATUS_LABELS = {
     en_attente:     { label: 'En attente',     color: '#f59e0b', bg: '#fef3c7' },
@@ -174,17 +175,32 @@ const Profile = () => {
     }, [activeTab]);
 
     // ── Charger réclamations ──────────────────────────────────
-        useEffect(() => {
-            if (activeTab !== 'reclamations') return;
-            setReclamationsLoading(true);
+    useEffect(() => {
+        if (activeTab !== 'reclamations') return;
+        setReclamationsLoading(true);
 
-            getMyReclamations()
-                .then(res => setReclamations(Array.isArray(res) ? res : (res.reclamations || [])))
-                .catch(() => setReclamations([]))
-                .finally(() => setReclamationsLoading(false));
+        getMyReclamations()
+            .then(res => setReclamations(Array.isArray(res) ? res : (res.reclamations || [])))
+            .catch(() => setReclamations([]))
+            .finally(() => setReclamationsLoading(false));
 
-        }, [activeTab]);
+    }, [activeTab]);
 
+    useEffect(() => {
+        addWSListener("profile-reclamations", (data) => {
+            if (data.type === "RECLAMATION_UPDATE") {
+                setReclamations((prev) =>
+                    prev.map((r) =>
+                        r.id === data.id
+                            ? { ...r, status: data.status, admin_response: data.admin_response || r.admin_response }
+                            : r
+                    )
+                );
+            }
+        });
+
+        return () => removeWSListener("profile-reclamations");
+    }, []);
 
     // ── Handlers dirty ────────────────────────────────────
     const handleProfileChange = (field, value) => {
@@ -310,10 +326,10 @@ const Profile = () => {
     };
 
     const tabs = [
-        { id: 'profil',    label: 'Informations', icon: <FiUser size={16} />,    dirty: isProfileSectionDirty },
-        { id: 'commandes', label: 'Commandes',    icon: <FiPackage size={16} />, dirty: false                  },
-          { id: 'reclamations', label: 'Réclamations', icon: <FiAlertCircle size={16} />,  dirty: false },
-        { id: 'securite',  label: 'Sécurité',     icon: <FiLock size={16} />,    dirty: isPasswordDirty       },
+        { id: 'profil',       label: 'Informations', icon: <FiUser size={16} />,        dirty: isProfileSectionDirty },
+        { id: 'commandes',    label: 'Commandes',    icon: <FiPackage size={16} />,      dirty: false                  },
+        { id: 'reclamations', label: 'Réclamations', icon: <FiAlertCircle size={16} />, dirty: false                  },
+        { id: 'securite',     label: 'Sécurité',     icon: <FiLock size={16} />,         dirty: isPasswordDirty        },
     ];
 
     // ── Styles champs ─────────────────────────────────────
@@ -725,15 +741,15 @@ const Profile = () => {
                     return (
                         <div className="space-y-5">
                             {/* Header */}
-                                <div className="flex items-center justify-between">
-                                    <h3 className="text-xl font-bold text-[#2c2c2c]">Mes réclamations</h3>
-                                    <Link
-                                        to="/reclamations"
-                                        className="flex items-center gap-2 bg-[#2d5a27] text-white font-bold px-5 py-2.5 rounded-xl hover:bg-[#4a8c42] transition text-sm no-underline"
-                                    >
-                                        + Nouvelle réclamation
-                                    </Link>
-                                </div>
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-xl font-bold text-[#2c2c2c]">Mes réclamations</h3>
+                                <Link
+                                    to="/reclamations"
+                                    className="flex items-center gap-2 bg-[#2d5a27] text-white font-bold px-5 py-2.5 rounded-xl hover:bg-[#4a8c42] transition text-sm no-underline"
+                                >
+                                    + Nouvelle réclamation
+                                </Link>
+                            </div>
 
                             {/* Liste */}
                             {reclamationsLoading ? (
@@ -807,8 +823,8 @@ const Profile = () => {
                         </div>
                         <form onSubmit={handlePasswordSubmit} className="space-y-5">
                             {[
-                                { field: 'currentPassword',  label: 'Mot de passe actuel',          placeholder: '••••••••', show: true },
-                                { field: 'newPassword',      label: 'Nouveau mot de passe',         placeholder: '••••••••', show: false },
+                                { field: 'currentPassword',  label: 'Mot de passe actuel',               placeholder: '••••••••', show: true  },
+                                { field: 'newPassword',      label: 'Nouveau mot de passe',              placeholder: '••••••••', show: false },
                                 { field: 'confirmPassword',  label: 'Confirmer le nouveau mot de passe', placeholder: '••••••••', show: false },
                             ].map(({ field, label, placeholder, show }) => (
                                 <div key={field}>

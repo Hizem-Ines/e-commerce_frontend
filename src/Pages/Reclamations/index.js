@@ -3,11 +3,10 @@ import {
   FiAlertCircle, FiMail, FiPhone,
   FiFileText, FiSend, FiCheckCircle, FiUser,
 } from "react-icons/fi";
-import { submitReclamation, createReclamation, getMyReclamations } from "../../services/reclamationService";
+import { submitReclamation, createReclamation } from "../../services/reclamationService";
 import { getMyOrders } from "../../services/orderService";
 import { useAuth } from "../../context/authContext";
 import { useSiteSettings } from "../../context/SiteSettingsContext";
-import { addWSListener, removeWSListener } from "../../utils/websocket";
 
 // ─── Constantes ────────────────────────────────────────────
 const inputCls =
@@ -22,14 +21,6 @@ const RECLAMATION_TYPES = [
   { value: "autre",              label: "Autre" },
 ];
 
-const STATUS_CONFIG = {
-  en_attente : { label: "En attente",          color: "bg-amber-100 text-amber-700"     },
-  en_cours   : { label: "En cours",            color: "bg-blue-100 text-blue-700"       },
-  urgente    : { label: "Urgente ⚡",          color: "bg-orange-100 text-orange-700"   },
-  en_retard  : { label: "En retard ⏰",        color: "bg-red-100 text-red-700"         },
-  resolue    : { label: "Résolue",             color: "bg-emerald-100 text-emerald-700" },
-  rejetee    : { label: "Rejetée",             color: "bg-gray-100 text-gray-600"       },
-};
 
 const Field = ({ label, children }) => (
   <div>
@@ -54,7 +45,7 @@ export default function Reclamations() {
   const [error, setError]             = useState("");
 
   // ── State mes réclamations (temps réel) ───────────────────
-  const [myReclamations, setMyReclamations] = useState([]);
+
   const [eligibleOrders, setEligibleOrders] = useState([]);
 
   // ── Charger commandes et réclamations ─────────────────────
@@ -64,27 +55,10 @@ export default function Reclamations() {
         .then((res) => setEligibleOrders(res.data.orders || []))
         .catch((err) => console.error("Erreur commandes:", err));
 
-      getMyReclamations()
-        .then((data) => setMyReclamations(data))
-        .catch((err) => console.error("Erreur réclamations:", err));
     }
   }, [user]);
 
-  // ── WebSocket — mises à jour temps réel ──────────────────
-  useEffect(() => {
-    addWSListener("reclamations-page", (data) => {
-      if (data.type === "RECLAMATION_UPDATE") {
-        // Mettre à jour le statut localement sans refetch
-        setMyReclamations((prev) =>
-          prev.map((r) =>
-            r.id === data.id ? { ...r, status: data.status } : r
-          )
-        );
-      }
-    });
 
-    return () => removeWSListener("reclamations-page");
-  }, []);
 
   // ── Handlers formulaire ───────────────────────────────────
   const handleChange = (e) =>
@@ -101,10 +75,7 @@ export default function Reclamations() {
 
       const newRec = await (user ? createReclamation(payload) : submitReclamation(payload));
 
-      // Ajouter en tête de liste si connecté
-      if (user && newRec) {
-        setMyReclamations((prev) => [newRec, ...prev]);
-      }
+  
 
       setSuccess(true);
       setForm({ email: "", order_id: "", order_number: "", reclamation_type: "", message: "" });
@@ -234,38 +205,6 @@ export default function Reclamations() {
             </form>
           )}
         </div>
-
-        {/* Historique réclamations (user connecté) */}
-        {user && myReclamations.length > 0 && (
-          <div className="mt-10">
-            <h2 className="text-lg font-bold text-[#2c2c2c] mb-4">Mes réclamations</h2>
-            <div className="space-y-3">
-              {myReclamations.map((r) => (
-                <div key={r.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                  <div className="flex items-center justify-between gap-3 mb-2">
-                    <p className="text-sm font-bold text-[#2c2c2c]">
-                      #{r.id.slice(0, 8).toUpperCase()}
-                      {r.order_number && <span className="text-black/40 font-normal"> — {r.order_number}</span>}
-                    </p>
-                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${STATUS_CONFIG[r.status]?.color || ""}`}>
-                      {STATUS_CONFIG[r.status]?.label || r.status}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-500 line-clamp-2">{r.message}</p>
-                  {r.admin_response && (
-                    <div className="mt-3 bg-emerald-50 rounded-xl px-4 py-3">
-                      <p className="text-xs font-bold text-emerald-700 mb-1">Réponse de l'équipe :</p>
-                      <p className="text-sm text-gray-700">{r.admin_response}</p>
-                    </div>
-                  )}
-                  <p className="text-xs text-black/30 mt-2">
-                    {new Date(r.created_at).toLocaleDateString("fr-FR")}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Contacts */}
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-center text-sm text-gray-500">
