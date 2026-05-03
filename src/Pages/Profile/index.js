@@ -14,6 +14,7 @@ import {
   getMyReclamations,
 } from '../../services/reclamationService';
 
+
 import { addWSListener, removeWSListener } from '../../utils/websocket';
 // ✅ Clés FR pour correspondre à la DB
 const STATUS_LABELS = {
@@ -41,7 +42,7 @@ const getDeliveryLabel = (s) => {
 };
 
 const Profile = () => {
-    const { user }     = useAuth();
+    const { user, logout } = useAuth();
     const { currency } = useSiteSettings();
 
     const VALID_TABS = ['profil', 'commandes', 'reclamations', 'securite'];
@@ -236,6 +237,20 @@ useEffect(() => {
         }
     });
     return () => removeWSListener("profile-orders");
+}, []);
+
+
+
+useEffect(() => {
+    addWSListener("profile-account-status", (data) => {
+        if (data.type === "ACCOUNT_SUSPENDED") {
+            logout();
+        }
+        if (data.type === "ACCOUNT_ACTIVATED") {
+            showSuccess(data.message);
+        }
+    });
+    return () => removeWSListener("profile-account-status");
 }, []);
 
     // ── Handlers dirty ────────────────────────────────────
@@ -495,7 +510,7 @@ useEffect(() => {
                                         <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                                         <input type="tel" value={profileData.phone}
                                             onChange={(e) => handleProfileChange('phone', e.target.value)}
-                                            className={`${inputBase} pl-10`} placeholder="+41 79 XXX XX XX" />
+                                            className={`${inputBase} pl-10`} placeholder="+216 XX XXX XXX" />
                                     </div>
                                 </div>
                             </div>
@@ -519,7 +534,7 @@ useEffect(() => {
                                 <div>
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">Téléphone</label>
                                     <input type="tel" name="shipping_phone" value={shippingData.shipping_phone}
-                                        onChange={handleShippingChange} placeholder="+41 79 XXX XX XX"
+                                        onChange={handleShippingChange} placeholder="+216 XX XXX XXX"
                                         className={inputBase} />
                                 </div>
                                 <div className="sm:col-span-2">
@@ -529,27 +544,27 @@ useEffect(() => {
                                         className={inputBase} />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">NPA</label>
+                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Code postal</label>
                                     <input type="text" name="shipping_postal_code" value={shippingData.shipping_postal_code}
-                                        onChange={handleShippingChange} placeholder="8001" maxLength={4}
+                                        onChange={handleShippingChange} placeholder="1000" maxLength={4}
                                         className={inputBase} />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Localité</label>
+                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Ville</label>
                                     <input type="text" name="shipping_city" value={shippingData.shipping_city}
-                                        onChange={handleShippingChange} placeholder="Zurich"
+                                        onChange={handleShippingChange} placeholder="Tunis"
                                         className={inputBase} />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Canton</label>
+                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Gouvernorat</label>
                                     <input type="text" name="shipping_governorate" value={shippingData.shipping_governorate}
-                                        onChange={handleShippingChange} placeholder="ZH"
+                                        onChange={handleShippingChange} placeholder="Tunis"
                                         className={inputBase} />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">Pays</label>
                                     <input type="text" name="shipping_country" value={shippingData.shipping_country}
-                                        onChange={handleShippingChange} placeholder="CH"
+                                        onChange={handleShippingChange} placeholder="TN"
                                         className={inputBase} />
                                 </div>
                             </div>
@@ -587,7 +602,7 @@ useEffect(() => {
                                     <div>
                                         <label className="block text-xs font-bold text-gray-600 mb-1.5">Téléphone</label>
                                         <input type="tel" name="billing_phone" value={billingData.billing_phone}
-                                            onChange={handleBillingChange} placeholder="+41 79 XXX XX XX"
+                                            onChange={handleBillingChange} placeholder="+216 XX XXX XXX"
                                             className={inputBase} />
                                     </div>
                                     <div className="sm:col-span-2">
@@ -597,27 +612,27 @@ useEffect(() => {
                                             className={inputBase} />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">NPA</label>
+                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Code postal</label>
                                         <input type="text" name="billing_postal_code" value={billingData.billing_postal_code}
-                                            onChange={handleBillingChange} placeholder="8001" maxLength={4}
+                                            onChange={handleBillingChange} placeholder="1000" maxLength={4}
                                             className={inputBase} />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Localité</label>
+                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Ville</label>
                                         <input type="text" name="billing_city" value={billingData.billing_city}
-                                            onChange={handleBillingChange} placeholder="Zurich"
+                                            onChange={handleBillingChange} placeholder="Tunis"
                                             className={inputBase} />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Canton</label>
+                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Gouvernorat</label>
                                         <input type="text" name="billing_governorate" value={billingData.billing_governorate}
-                                            onChange={handleBillingChange} placeholder="ZH"
+                                            onChange={handleBillingChange} placeholder="Tunis"
                                             className={inputBase} />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold text-gray-600 mb-1.5">Pays</label>
                                         <input type="text" name="billing_country" value={billingData.billing_country}
-                                            onChange={handleBillingChange} placeholder="CH"
+                                            onChange={handleBillingChange} placeholder="TN"
                                             className={inputBase} />
                                     </div>
                                 </div>
@@ -673,6 +688,7 @@ useEffect(() => {
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1 flex-wrap">
                                                 <span className="font-black text-[#2c2c2c] text-sm">
+                                                    {/* ✅ FIX: slice(0, 8) correct */}
                                                     {order.order_number || `#${order.id.slice(0, 8).toUpperCase()}`}
                                                 </span>
                                                 <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: statusInfo.bg, color: statusInfo.color }}>
@@ -691,7 +707,7 @@ useEffect(() => {
                                             <div className="flex items-center gap-2">
                                                 <Link to={`/commandes/${order.id}`}
                                                     className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl no-underline transition-all"
-                                                    style={{ background: '#ecfdf5', color: '#166534', border: '1.5px solid #bbf7d0' }}>
+                                                    style={{ background: '#ecfdf5', color: '#166634', border: '1.5px solid #bbf7d0' }}>
                                                     <FiExternalLink size={13} /><span>Détails</span>
                                                 </Link>
                                                 <button onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
@@ -809,6 +825,7 @@ useEffect(() => {
                                                 <div className="flex items-start justify-between gap-3 mb-3">
                                                     <div>
                                                         <p className="font-bold text-sm text-[#2c2c2c]">
+                                                            {/* ✅ FIX: slice(0, 8) correct */}
                                                             #{r.id.slice(0, 8).toUpperCase()}
                                                             {r.order_number && (
                                                                 <span className="ml-2 font-mono text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-lg">
