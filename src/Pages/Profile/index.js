@@ -5,12 +5,16 @@ import { getMyOrders } from '../../services/orderService';
 import {
     FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiSave,
     FiShoppingBag, FiHeart, FiPackage, FiChevronDown, FiChevronUp,
-    FiExternalLink, FiAlertCircle, FiMapPin, FiPhone,
+    FiExternalLink, FiAlertCircle, FiMapPin, FiPhone,FiCheckCircle,
 } from 'react-icons/fi';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 import formatPrice from '../../utils/formatPrice';
+import {
+  getMyReclamations,
+} from '../../services/reclamationService';
 
+import { addWSListener, removeWSListener } from '../../utils/websocket';
 // ✅ Clés FR pour correspondre à la DB
 const STATUS_LABELS = {
     en_attente:     { label: 'En attente',     color: '#f59e0b', bg: '#fef3c7' },
@@ -40,7 +44,11 @@ const Profile = () => {
     const { user }     = useAuth();
     const { currency } = useSiteSettings();
 
-    const [activeTab,        setActiveTab]        = useState('profil');
+    const VALID_TABS = ['profil', 'commandes', 'reclamations', 'securite'];
+    const hashTab = window.location.hash.replace('#', '');
+    const [activeTab, setActiveTab] = useState(
+        VALID_TABS.includes(hashTab) ? hashTab : 'profil'
+    );
     const [showPassword,     setShowPassword]     = useState(false);
     const [successMsg,       setSuccessMsg]       = useState('');
     const [errorMsg,         setErrorMsg]         = useState('');
@@ -62,6 +70,10 @@ const Profile = () => {
     const [orders,         setOrders]         = useState([]);
     const [ordersLoading,  setOrdersLoading]  = useState(false);
     const [expandedOrder,  setExpandedOrder]  = useState(null);
+
+    // ── Réclamations ──────────────────────────────────────────
+    const [reclamations,         setReclamations]         = useState([]);
+    const [reclamationsLoading,  setReclamationsLoading]  = useState(false);
 
     const fileInputRef = useRef(null);
 
@@ -123,6 +135,8 @@ const Profile = () => {
     const showSuccess = (msg) => { setSuccessMsg(msg); setErrorMsg('');  setTimeout(() => setSuccessMsg(''), 3500); };
     const showError   = (msg) => { setErrorMsg(msg);  setSuccessMsg(''); setTimeout(() => setErrorMsg(''),  3500); };
 
+    const [wsNotif, setWsNotif] = useState(null);
+
     // ── Warn before unload ────────────────────────────────
     useEffect(() => {
         const handle = (e) => { if (isProfileSectionDirty || isPasswordDirty) { e.preventDefault(); e.returnValue = ''; } };
@@ -153,6 +167,7 @@ const Profile = () => {
             }
         }
         setActiveTab(tabId);
+        window.location.hash = tabId;
     };
 
     // ── Charger commandes ─────────────────────────────────
@@ -165,6 +180,45 @@ const Profile = () => {
                 .finally(() => setOrdersLoading(false));
         }
     }, [activeTab]);
+
+    // ── Charger réclamations ──────────────────────────────────
+    useEffect(() => {
+        if (activeTab !== 'reclamations') return;
+        setReclamationsLoading(true);
+
+        getMyReclamations()
+            .then(res => setReclamations(Array.isArray(res) ? res : (res.reclamations || [])))
+            .catch(() => setReclamations([]))
+            .finally(() => setReclamationsLoading(false));
+
+    }, [activeTab]);
+
+    useEffect(() => {
+        addWSListener("profile-reclamations", (data) => {
+            if (data.type === "RECLAMATION_UPDATE") {
+                // ✅ Mise à jour silencieuse du tableau
+                setReclamations((prev) =>
+                    prev.map((r) =>
+                        r.id === data.id
+                            ? { ...r, status: data.status, admin_response: data.admin_response || r.admin_response }
+                            : r
+                    )
+                );
+                // ✅ Notification visuelle
+                
+                const NOTIF_CONFIG = {
+                    resolue:  { label: "Résolue ✅",            icon: <FiCheckCircle size={16} className="shrink-0" />, colorClass: "bg-emerald-50 border-emerald-200 text-emerald-700" },
+                    rejetee:  { label: "Rejetée ❌",            icon: <FiAlertCircle size={16} className="shrink-0" />, colorClass: "bg-red-50 border-red-200 text-red-700"             },
+                    en_cours: { label: "En cours de traitement", icon: <FiAlertCircle size={16} className="shrink-0" />, colorClass: "bg-blue-50 border-blue-200 text-blue-700"          },
+                };
+                const cfg = NOTIF_CONFIG[data.status] || NOTIF_CONFIG.en_cours;
+                setWsNotif({ ...cfg, id: data.id });
+                setTimeout(() => setWsNotif(null), 5000);
+            }
+        });
+
+        return () => removeWSListener("profile-reclamations");
+    }, []);
 
     // ── Handlers dirty ────────────────────────────────────
     const handleProfileChange = (field, value) => {
@@ -290,9 +344,10 @@ const Profile = () => {
     };
 
     const tabs = [
-        { id: 'profil',    label: 'Informations', icon: <FiUser size={16} />,    dirty: isProfileSectionDirty },
-        { id: 'commandes', label: 'Commandes',    icon: <FiPackage size={16} />, dirty: false                  },
-        { id: 'securite',  label: 'Sécurité',     icon: <FiLock size={16} />,    dirty: isPasswordDirty       },
+        { id: 'profil',       label: 'Informations', icon: <FiUser size={16} />,        dirty: isProfileSectionDirty },
+        { id: 'commandes',    label: 'Commandes',    icon: <FiPackage size={16} />,      dirty: false                  },
+        { id: 'reclamations', label: 'Réclamations', icon: <FiAlertCircle size={16} />, dirty: false                  },
+        { id: 'securite',     label: 'Sécurité',     icon: <FiLock size={16} />,         dirty: isPasswordDirty        },
     ];
 
     // ── Styles champs ─────────────────────────────────────
@@ -335,6 +390,21 @@ const Profile = () => {
                 {/* ALERTES */}
                 {successMsg && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-6 text-sm">✅ {successMsg}</div>}
                 {errorMsg   && <div className="bg-red-50 border border-red-200 text-red-700 font-semibold px-5 py-3 rounded-xl mb-6 text-sm">❌ {errorMsg}</div>}
+
+                {wsNotif && (
+                    <div
+                        className={`flex items-center gap-3 font-semibold px-5 py-3 rounded-xl mb-6 text-sm cursor-pointer border ${wsNotif.colorClass}`}
+                        onClick={() => { handleTabChange('reclamations'); setWsNotif(null); }}
+                    >
+                        {wsNotif.icon}
+                        <span>
+                            Réclamation <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-black/10">
+                                #{wsNotif.id.slice(0, 8).toUpperCase()}
+                            </span> — {wsNotif.label}
+                        </span>
+                        <span className="ml-auto text-xs underline opacity-60">Voir →</span>
+                    </div>
+                )}
 
                 {/* TABS */}
                 <div className="flex bg-white rounded-2xl p-1 shadow-[0_4px_15px_rgba(0,0,0,0.07)] mb-6 gap-1">
@@ -690,6 +760,88 @@ const Profile = () => {
                 )}
 
                 {/* ══════════════════════════════════════════════════
+                    TAB RÉCLAMATIONS
+                ══════════════════════════════════════════════════ */}
+                {activeTab === 'reclamations' && (() => {
+                    const STATUS_RECL = {
+                        en_attente: { label: 'En attente',   color: '#f59e0b', bg: '#fef3c7' },
+                        en_cours:   { label: 'En cours',     color: '#3b82f6', bg: '#dbeafe' },
+                        urgente:    { label: 'Urgente ⚡',   color: '#ea580c', bg: '#ffedd5' },
+                        en_retard:  { label: 'En retard ⏰', color: '#dc2626', bg: '#fee2e2' },
+                        resolue:    { label: 'Résolue ✅',   color: '#166534', bg: '#dcfce7' },
+                        rejetee:    { label: 'Rejetée',      color: '#6b7280', bg: '#f3f4f6' },
+                    };
+                    return (
+                        <div className="space-y-5">
+                            {/* Header */}
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-xl font-bold text-[#2c2c2c]">Mes réclamations</h3>
+                                <Link
+                                    to="/reclamations"
+                                    className="flex items-center gap-2 bg-[#2d5a27] text-white font-bold px-5 py-2.5 rounded-xl hover:bg-[#4a8c42] transition text-sm no-underline"
+                                >
+                                    + Nouvelle réclamation
+                                </Link>
+                            </div>
+
+                            {/* Liste */}
+                            {reclamationsLoading ? (
+                                <div className="flex items-center justify-center py-16">
+                                    <div className="text-4xl animate-spin">🌿</div>
+                                </div>
+                            ) : reclamations.length === 0 ? (
+                                <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-12 text-center">
+                                    <div className="text-6xl mb-4">📭</div>
+                                    <h4 className="text-xl font-bold text-[#2c2c2c] mb-2">Aucune réclamation</h4>
+                                    <p className="text-black/50 text-sm">Vous n'avez pas encore soumis de réclamation.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {reclamations.map(r => {
+                                        const cfg = STATUS_RECL[r.status] || STATUS_RECL.en_attente;
+                                        return (
+                                            <div key={r.id} className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-5">
+                                                <div className="flex items-start justify-between gap-3 mb-3">
+                                                    <div>
+                                                        <p className="font-bold text-sm text-[#2c2c2c]">
+                                                            #{r.id.slice(0, 8).toUpperCase()}
+                                                            {r.order_number && (
+                                                                <span className="ml-2 font-mono text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-lg">
+                                                                    Cmd {r.order_number}
+                                                                </span>
+                                                            )}
+                                                        </p>
+                                                        <p className="text-xs text-black/40 mt-0.5">
+                                                            {new Date(r.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                                        </p>
+                                                    </div>
+                                                    <span className="text-xs font-bold px-3 py-1 rounded-full shrink-0"
+                                                        style={{ background: cfg.bg, color: cfg.color }}>
+                                                        {cfg.label}
+                                                    </span>
+                                                </div>
+                                                <p className="text-sm text-black/60 line-clamp-2 mb-3">{r.message}</p>
+                                                {r.admin_response && (
+                                                    <div className="bg-emerald-50 rounded-xl p-3 border-l-4 border-emerald-400">
+                                                        <p className="text-xs font-bold text-emerald-700 mb-1">Réponse de l'équipe GOFFA :</p>
+                                                        <p className="text-sm text-[#2c2c2c]">{r.admin_response}</p>
+                                                        {r.responded_at && (
+                                                            <p className="text-xs text-black/30 mt-1">
+                                                                {new Date(r.responded_at).toLocaleDateString('fr-FR')}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })()}
+
+                {/* ══════════════════════════════════════════════════
                     TAB SÉCURITÉ
                 ══════════════════════════════════════════════════ */}
                 {activeTab === 'securite' && (
@@ -704,8 +856,8 @@ const Profile = () => {
                         </div>
                         <form onSubmit={handlePasswordSubmit} className="space-y-5">
                             {[
-                                { field: 'currentPassword',  label: 'Mot de passe actuel',          placeholder: '••••••••', show: true },
-                                { field: 'newPassword',      label: 'Nouveau mot de passe',         placeholder: '••••••••', show: false },
+                                { field: 'currentPassword',  label: 'Mot de passe actuel',               placeholder: '••••••••', show: true  },
+                                { field: 'newPassword',      label: 'Nouveau mot de passe',              placeholder: '••••••••', show: false },
                                 { field: 'confirmPassword',  label: 'Confirmer le nouveau mot de passe', placeholder: '••••••••', show: false },
                             ].map(({ field, label, placeholder, show }) => (
                                 <div key={field}>

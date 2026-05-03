@@ -1,14 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { FiEye, FiSearch, FiAlertCircle, FiCheckCircle, FiClock, FiX } from "react-icons/fi";
 import { getAllReclamations, respondToReclamation } from "../../../services/reclamationService";
+import { addWSListener, removeWSListener } from "../../../utils/websocket";
 import { FiMessageSquare } from "react-icons/fi";
 
 // ─── Constants ────────────────────────────────────────────
+//  — séparer affichage et options du formulaire
 const STATUS_CONFIG = {
-  en_attente: { label: "En attente", color: "bg-amber-100 text-amber-700"     },
-  en_cours:   { label: "En cours",   color: "bg-blue-100 text-blue-700"       },
-  resolue:    { label: "Résolue",    color: "bg-emerald-100 text-emerald-700" },
-  rejetee:    { label: "Rejetée",    color: "bg-red-100 text-red-700"         },
+  en_attente: { label: "En attente",   color: "bg-amber-100 text-amber-700"     },
+  en_cours:   { label: "En cours",     color: "bg-blue-100 text-blue-700"       },
+  urgente:    { label: "Urgente ⚡",   color: "bg-orange-100 text-orange-700"   },
+  en_retard:  { label: "En retard ⏰", color: "bg-red-100 text-red-700"         },
+  resolue:    { label: "Résolue",      color: "bg-emerald-100 text-emerald-700" },
+  rejetee:    { label: "Rejetée",      color: "bg-gray-100 text-gray-600"       },
+};
+
+// Options disponibles UNIQUEMENT dans le formulaire de réponse admin
+const STATUS_OPTIONS_ADMIN = {
+  en_cours: { label: "En cours"  },
+  resolue:  { label: "Résolue"   },
+  rejetee:  { label: "Rejetée"   },
 };
 
 const TYPE_ICONS = {
@@ -19,6 +30,9 @@ const TYPE_ICONS = {
   remboursement:      "↩️",
   autre:              "💬",
 };
+
+
+
 
 // ─── Status Selector (Dropdown) ─────────────────────────────
 function StatusSelector({ status, onChange }) {
@@ -165,9 +179,9 @@ function RespondModal({ open, reclamation, form, onChange, onSubmit, onClose, lo
               onChange={(e) => onChange("status", e.target.value)}
               className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#4a8c42]"
             >
-              {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
+              {Object.entries(STATUS_OPTIONS_ADMIN).map(([key, cfg]) => (
                 <option key={key} value={key}>{cfg.label}</option>
-              ))}
+            ))}
             </select>
           </div>
           <div>
@@ -248,6 +262,29 @@ export default function AdminReclamations() {
     loadReclamations();
   }, []);
 
+  useEffect(() => {
+  addWSListener("admin-reclamations", (data) => {
+    switch (data.type) {
+      case "NEW_RECLAMATION":
+        showSuccess(`📋 Nouvelle réclamation — ${data.user_name} (${data.type_label})`);
+        loadReclamations();
+        break;
+      case "RECLAMATION_URGENTE":
+        showError(`⚡ ${data.message}`);
+        loadReclamations();
+        break;
+      case "RECLAMATION_EN_RETARD":
+        showError(`⏰ ${data.message}`);
+        loadReclamations();
+        break;
+      default:
+        break;
+    }
+  });
+
+  return () => removeWSListener("admin-reclamations");
+}, []);
+
   
 const [respondTarget, setRespondTarget] = useState(null); // réclamation à traiter
 const [respondForm, setRespondForm]     = useState({ status: "", admin_response: "", resolution_delay: "" });
@@ -255,7 +292,11 @@ const [respondLoading, setRespondLoading] = useState(false);
 
 const openRespondModal = (r) => {
   setRespondTarget(r);
-  setRespondForm({ status: r.status, admin_response: r.admin_response || "", resolution_delay: "" });
+  setRespondForm({
+    status: STATUS_OPTIONS_ADMIN[r.status] ? r.status : "en_cours", // ← fallback sur la première option valide
+    admin_response: r.admin_response || "",
+    resolution_delay: "",
+  });
 };
 
 const handleRespond = async () => {

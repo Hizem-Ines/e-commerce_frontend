@@ -63,7 +63,7 @@ const TrendingProducts = ({ produits, loading }) => {
                                                 👁 {produit.views_count}
                                             </span>
                                         )}
-                                        {produit.rating_avg && (
+                                        {produit.rating_count > 0 && produit.rating_avg && parseFloat(produit.rating_avg) > 0 && (
                                             <span className="absolute bottom-3 right-3 bg-white/90 text-xs font-bold px-3 py-1 rounded-full">
                                                 ⭐ {parseFloat(produit.rating_avg).toFixed(1)}
                                             </span>

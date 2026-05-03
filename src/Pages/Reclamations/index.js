@@ -1,24 +1,26 @@
 import React, { useState, useEffect } from "react";
 import {
   FiAlertCircle, FiMail, FiPhone,
-  FiFileText, FiSend, FiCheckCircle,FiUser,
+  FiFileText, FiSend, FiCheckCircle, FiUser,
 } from "react-icons/fi";
 import { submitReclamation, createReclamation } from "../../services/reclamationService";
 import { getMyOrders } from "../../services/orderService";
-import { useAuth } from '../../context/authContext';
+import { useAuth } from "../../context/authContext";
 import { useSiteSettings } from "../../context/SiteSettingsContext";
 
+// ─── Constantes ────────────────────────────────────────────
 const inputCls =
   "w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-900/20 focus:border-transparent transition";
 
 const RECLAMATION_TYPES = [
-  { value: "commande_non_recue",  label: "Commande non reçue" },
-  { value: "produit_defectueux",  label: "Produit défectueux" },
-  { value: "produit_incorrect",   label: "Produit incorrect"  },
-  { value: "retard_livraison",    label: "Retard de livraison" },
-  { value: "remboursement",       label: "Demande de remboursement" },
-  { value: "autre",               label: "Autre" },
+  { value: "commande_non_recue", label: "Commande non reçue" },
+  { value: "produit_defectueux", label: "Produit défectueux" },
+  { value: "produit_incorrect",  label: "Produit incorrect"  },
+  { value: "retard_livraison",   label: "Retard de livraison" },
+  { value: "remboursement",      label: "Demande de remboursement" },
+  { value: "autre",              label: "Autre" },
 ];
+
 
 const Field = ({ label, children }) => (
   <div>
@@ -29,24 +31,38 @@ const Field = ({ label, children }) => (
   </div>
 );
 
-const Reclamations = () => {
+// ─── Composant principal ────────────────────────────────────
+export default function Reclamations() {
+  const { user }      = useAuth();
+  const { currency }  = useSiteSettings();
+
+  // ── State formulaire ──────────────────────────────────────
   const [form, setForm] = useState({
     email: "", order_id: "", order_number: "", reclamation_type: "", message: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError]     = useState("");
-  const { user } = useAuth(); 
-  const { currency } = useSiteSettings();
+  const [loading, setLoading]         = useState(false);
+  const [success, setSuccess]         = useState(false);
+  const [error, setError]             = useState("");
+
+  // ── State mes réclamations (temps réel) ───────────────────
+
   const [eligibleOrders, setEligibleOrders] = useState([]);
 
+  // ── Charger commandes et réclamations ─────────────────────
   useEffect(() => {
     if (user) {
-      getMyOrders().then((res) => setEligibleOrders(res.data.orders || []));
+      getMyOrders()
+        .then((res) => setEligibleOrders(res.data.orders || []))
+        .catch((err) => console.error("Erreur commandes:", err));
+
     }
   }, [user]);
 
-  const handleChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+
+
+  // ── Handlers formulaire ───────────────────────────────────
+  const handleChange = (e) =>
+    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,7 +73,10 @@ const Reclamations = () => {
         ? { order_id: form.order_id || null, reclamation_type: form.reclamation_type, message: form.message }
         : form;
 
-      await (user ? createReclamation(payload) : submitReclamation(payload));
+      const newRec = await (user ? createReclamation(payload) : submitReclamation(payload));
+
+  
+
       setSuccess(true);
       setForm({ email: "", order_id: "", order_number: "", reclamation_type: "", message: "" });
     } catch (err) {
@@ -95,7 +114,7 @@ const Reclamations = () => {
           </div>
         </div>
 
-        {/* Card */}
+        {/* Formulaire */}
         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5 sm:p-8">
           {success ? (
             <div className="py-10 text-center">
@@ -115,7 +134,9 @@ const Reclamations = () => {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">{error}</div>
+                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+                  {error}
+                </div>
               )}
 
               {user ? (
@@ -130,7 +151,6 @@ const Reclamations = () => {
                   </select>
                 </Field>
               ) : (
-                // Guest → email + order_number texte
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field label="Votre email">
                     <div className="relative">
@@ -153,7 +173,9 @@ const Reclamations = () => {
                 <select name="reclamation_type" required value={form.reclamation_type} onChange={handleChange}
                   className={`${inputCls} text-gray-700`}>
                   <option value="">Sélectionner…</option>
-                  {RECLAMATION_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  {RECLAMATION_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
                 </select>
               </Field>
 
@@ -162,7 +184,7 @@ const Reclamations = () => {
                   placeholder="Décrivez votre réclamation en détail…"
                   className={`${inputCls} resize-none`} />
               </Field>
-              
+
               {user && (
                 <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
                   <FiUser size={14} className="text-green-800 flex-shrink-0" />
@@ -184,7 +206,7 @@ const Reclamations = () => {
           )}
         </div>
 
-        {/* Info */}
+        {/* Contacts */}
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-center text-sm text-gray-500">
           <div className="bg-white rounded-2xl border border-gray-100 p-5">
             <FiMail className="mx-auto mb-2" size={20} style={{ color: "#3a7232" }} />
@@ -200,6 +222,4 @@ const Reclamations = () => {
       </div>
     </div>
   );
-};
-
-export default Reclamations;
+}

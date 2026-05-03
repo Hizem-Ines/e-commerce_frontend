@@ -182,6 +182,55 @@ const StripePaymentStep = ({ order, promoResult, onBack }) => {
     );
 };
 
+const AddressBlock = ({ prefix, data, onChange }) => {
+    const inputClass = "w-full px-4 py-3 rounded-xl text-sm focus:outline-none transition";
+    const inputStyle = { border: '2px solid #e5e7eb' };
+    const onFocus = e => (e.target.style.borderColor = '#166534');
+    const onBlur  = e => (e.target.style.borderColor = '#e5e7eb');
+    const n = (k) => `${prefix}_${k}`;
+    return (
+        <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-3">
+                <div className="col-span-2">
+                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Rue *</label>
+                    <input type="text" name={n('street')} value={data[n('street')] ?? data.shipping_street ?? ''}
+                        onChange={onChange} required placeholder="Rue du Marché"
+                        className={inputClass} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+                </div>
+                <div>
+                    <label className="block text-xs font-bold text-gray-600 mb-1.5">N°</label>
+                    <input type="text" name={n('street_number')} value={data[n('street_number')] ?? data.shipping_street_number ?? ''}
+                        onChange={onChange} placeholder="12"
+                        className={inputClass} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+                </div>
+            </div>
+            <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1.5">
+                    Complément <span className="font-normal text-black/30">(appartement, c/o...)</span>
+                </label>
+                <input type="text" name={n('address2')} value={data[n('address2')] ?? data.shipping_address2 ?? ''}
+                    onChange={onChange} placeholder="App. 3B"
+                    className={inputClass} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+                <div>
+                    <label className="block text-xs font-bold text-gray-600 mb-1.5">NPA *</label>
+                    <input type="text" name={n('postal_code')} value={data[n('postal_code')] ?? ''}
+                        onChange={onChange} required placeholder="8001" maxLength={4}
+                        className={inputClass} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+                </div>
+                <div className="col-span-2">
+                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Localité *</label>
+                    <input type="text" name={n('city')} value={data[n('city')] ?? ''}
+                        onChange={onChange} required placeholder="Zurich"
+                        className={inputClass} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
 // ════════════════════════════════════════════════════════════
 // ÉTAPE 1 — Formulaire principal
 // ════════════════════════════════════════════════════════════
@@ -377,50 +426,6 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
     const onFocus = e => (e.target.style.borderColor = '#166534');
     const onBlur  = e => (e.target.style.borderColor = '#e5e7eb');
 
-    // ── Bloc adresse réutilisable ─────────────────────────
-    const AddressBlock = ({ prefix, data, onChange }) => {
-        const n = (k) => `${prefix}_${k}`;
-        return (
-            <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-3">
-                    <div className="col-span-2">
-                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Rue *</label>
-                        <input type="text" name={n('street')} value={data[n('street')] ?? data.shipping_street ?? ''}
-                            onChange={onChange} required placeholder="Rue du Marché"
-                            className={inputClass} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-gray-600 mb-1.5">N°</label>
-                        <input type="text" name={n('street_number')} value={data[n('street_number')] ?? data.shipping_street_number ?? ''}
-                            onChange={onChange} placeholder="12"
-                            className={inputClass} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
-                    </div>
-                </div>
-                <div>
-                    <label className="block text-xs font-bold text-gray-600 mb-1.5">
-                        Complément <span className="font-normal text-black/30">(appartement, c/o...)</span>
-                    </label>
-                    <input type="text" name={n('address2')} value={data[n('address2')] ?? data.shipping_address2 ?? ''}
-                        onChange={onChange} placeholder="App. 3B"
-                        className={inputClass} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                    <div>
-                        <label className="block text-xs font-bold text-gray-600 mb-1.5">NPA *</label>
-                        <input type="text" name={n('postal_code')} value={data[n('postal_code')] ?? ''}
-                            onChange={onChange} required placeholder="8001" maxLength={4}
-                            className={inputClass} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
-                    </div>
-                    <div className="col-span-2">
-                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Localité *</label>
-                        <input type="text" name={n('city')} value={data[n('city')] ?? ''}
-                            onChange={onChange} required placeholder="Zurich"
-                            className={inputClass} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
-                    </div>
-                </div>
-            </div>
-        );
-    };
 
     return (
         <div className="bg-[#fdf6ec] min-h-screen py-8 sm:py-12">

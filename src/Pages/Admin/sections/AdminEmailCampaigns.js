@@ -131,7 +131,7 @@ const AdminEmailCampaigns = () => {
                 {tab === "campaigns" && (
                     <button
                         onClick={() => { setShowForm(!showForm); setError(""); setSuccess(""); }}
-                        className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42]text-white px-4 py-2 rounded-xl text-sm font-semibold transition"
+                        className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
                     >
                         <FiPlus size={16} />
                         Nouvelle campagne
@@ -260,7 +260,7 @@ const AdminEmailCampaigns = () => {
                             <div className="flex gap-3">
                                 <button
                                     onClick={handleCreate}
-                                    className="bg-[#2d5a27] hover:bg-[#4a8c42]text-white px-5 py-2 rounded-xl text-sm font-semibold transition"
+                                    className="bg-[#2d5a27] hover:bg-[#4a8c42] text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
                                 >
                                     Créer la campagne
                                 </button>
@@ -319,7 +319,7 @@ const AdminEmailCampaigns = () => {
                                             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition shrink-0 ${
                                                 c.status === "sent"
                                                     ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                                    : "bg-[#2d5a27] hover:bg-[#4a8c42]text-white"
+                                                    : "bg-[#2d5a27] hover:bg-[#4a8c42] text-white"
                                             }`}
                                         >
                                             <FiSend size={14} />

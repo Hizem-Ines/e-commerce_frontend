@@ -123,7 +123,7 @@ const Admin = () => {
                     {SECTIONS.map(section => (
                         <button
                             key={section.id}
-                            onClick={() => setActiveSection(section.id)}
+                            onClick={() => { window.location.hash = section.id; }}
                             className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-left ${
                                 activeSection === section.id
                                     ? 'bg-[#2d5a27] text-white'
