@@ -1,6 +1,7 @@
 import './App.css';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import Layout from './Components/layout/Layout';
 import Home from './Pages/Home';
 import Cart from './Pages/Cart';
@@ -87,6 +88,15 @@ const WS_TOAST_CONFIG = {
         border:  "#bbf7d0",
         link:    (d) => `/profil#reclamations`,
     },
+    NEW_RECLAMATION: {
+        icon:      "📋",
+        label:     (d) => `Nouvelle réclamation de ${d.user_name}`,
+        bg:        "#fefce8",
+        color:     "#854d0e",
+        border:    "#fde68a",
+        link:      () => `/admin#reclamations`,
+        adminOnly: true,
+    },
     // ── FAQ ────────────────────────────────────────────────
     NEW_FAQ_QUESTION: {
         icon:    "❓",
@@ -162,12 +172,15 @@ const ToastItem = ({ toast, onClose }) => {
 const ToastContainer = ({ toasts, onClose }) => {
     if (toasts.length === 0) return null;
 
-    return (
-        <div className="fixed top-5 right-5 z-[9999] flex flex-col gap-2 items-end">
+    return createPortal(
+        <div className="fixed top-5 right-5 z-[99999] flex flex-col gap-2 items-end pointer-events-none">
             {toasts.map(toast => (
-                <ToastItem key={toast.id} toast={toast} onClose={onClose} />
+                <div key={toast.id} className="pointer-events-auto">
+                    <ToastItem toast={toast} onClose={onClose} />
+                </div>
             ))}
-        </div>
+        </div>,
+        document.body
     );
 };
 
@@ -176,6 +189,11 @@ const ToastContainer = ({ toasts, onClose }) => {
 // ══════════════════════════════════════════════════════════════
 function WSConnector({ onToast }) {
     const { user, logout } = useAuth();
+    const logoutRef = useRef(logout);
+
+    useEffect(() => {
+        logoutRef.current = logout;
+    }, [logout]);
 
     useEffect(() => {
         if (!user?.id) return;
@@ -183,10 +201,13 @@ function WSConnector({ onToast }) {
         connectWebSocket(user.id, user.role === 'admin' ? 'admin' : 'user');
 
         addWSListener("app-global", (data) => {
-            // Cas spécial : suspension → logout immédiat
             if (data.type === "ACCOUNT_SUSPENDED") {
                 onToast(data);
-                setTimeout(() => logout(), 3000);
+                setTimeout(() => {
+                    Promise.resolve(logoutRef.current()).catch(() => {
+                        window.location.href = '/connexion';
+                    });
+                }, 3000);
                 return;
             }
 
