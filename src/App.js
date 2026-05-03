@@ -199,7 +199,7 @@ function WSConnector({ onToast }) {
         if (!user?.id) return;
 
         connectWebSocket(user.id, user.role === 'admin' ? 'admin' : 'user');
-
+console.log('[WS connect]', user.id, user.role);
         addWSListener("app-global", (data) => {
             if (data.type === "ACCOUNT_SUSPENDED") {
                 onToast(data);
