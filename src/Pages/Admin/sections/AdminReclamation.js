@@ -31,6 +31,9 @@ const TYPE_ICONS = {
   autre:              "💬",
 };
 
+
+
+
 // ─── Status Selector (Dropdown) ─────────────────────────────
 function StatusSelector({ status, onChange }) {
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.en_attente;

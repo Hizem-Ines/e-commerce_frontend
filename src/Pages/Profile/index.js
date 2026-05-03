@@ -7,12 +7,11 @@ import {
     FiShoppingBag, FiHeart, FiPackage, FiChevronDown, FiChevronUp,
     FiExternalLink, FiAlertCircle, FiMapPin, FiPhone,
 } from 'react-icons/fi';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 import formatPrice from '../../utils/formatPrice';
 import {
   getMyReclamations,
-  createReclamation,
 } from '../../services/reclamationService';
 
 // ✅ Clés FR pour correspondre à la DB
@@ -70,10 +69,6 @@ const Profile = () => {
     // ── Réclamations ──────────────────────────────────────────
     const [reclamations,         setReclamations]         = useState([]);
     const [reclamationsLoading,  setReclamationsLoading]  = useState(false);
-    const [eligibleOrders,       setEligibleOrders]       = useState([]);
-    const [showNewForm,          setShowNewForm]          = useState(false);
-    const [reclamForm,           setReclamForm]           = useState({ order_id: '', reclamation_type: '', message: '' });
-    const [reclamSubmitting,     setReclamSubmitting]     = useState(false);
 
     const fileInputRef = useRef(null);
 
@@ -183,11 +178,6 @@ const Profile = () => {
             if (activeTab !== 'reclamations') return;
             setReclamationsLoading(true);
 
-            // Appels séparés — l'un n'empêche pas l'autre
-            getMyOrders()
-                .then(res => setEligibleOrders(res.data?.orders || []))
-                .catch(() => setEligibleOrders([]));
-
             getMyReclamations()
                 .then(res => setReclamations(Array.isArray(res) ? res : (res.reclamations || [])))
                 .catch(() => setReclamations([]))
@@ -195,25 +185,6 @@ const Profile = () => {
 
         }, [activeTab]);
 
-        const handleReclamSubmit = async () => {
-            if (!reclamForm.reclamation_type || reclamForm.message.trim().length < 10) {
-                showError('Type et message (min 10 caractères) sont obligatoires.');
-                return;
-            }
-            setReclamSubmitting(true);
-            try {
-                await createReclamation(reclamForm);
-                showSuccess('Réclamation envoyée ! Vous recevrez un email de confirmation.');
-                setShowNewForm(false);
-                setReclamForm({ order_id: '', reclamation_type: '', message: '' });
-                const res = await getMyReclamations();
-                setReclamations(Array.isArray(res) ? res : (res.reclamations || []));
-            } catch (err) {
-                showError(err.response?.data?.message || "Erreur lors de l'envoi.");
-            } finally {
-                setReclamSubmitting(false);
-            }
-        };
 
     // ── Handlers dirty ────────────────────────────────────
     const handleProfileChange = (field, value) => {
@@ -754,79 +725,15 @@ const Profile = () => {
                     return (
                         <div className="space-y-5">
                             {/* Header */}
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-xl font-bold text-[#2c2c2c]">Mes réclamations</h3>
-                                <button
-                                    onClick={() => setShowNewForm(v => !v)}
-                                    className="flex items-center gap-2 bg-[#2d5a27] text-white font-bold px-5 py-2.5 rounded-xl hover:bg-[#4a8c42] transition text-sm"
-                                >
-                                    {showNewForm ? '✕ Annuler' : '+ Nouvelle réclamation'}
-                                </button>
-                            </div>
-
-                            {/* Formulaire */}
-                            {showNewForm && (
-                                <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-6 border-l-4 border-[#2d5a27]">
-                                    <h4 className="font-bold text-[#2c2c2c] mb-5">Soumettre une réclamation</h4>
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-600 mb-1.5">
-                                                Commande concernée <span className="text-black/30 font-normal">(optionnel)</span>
-                                            </label>
-                                            <select
-                                                value={reclamForm.order_id}
-                                                onChange={e => setReclamForm(f => ({ ...f, order_id: e.target.value }))}
-                                                className={inputBase}
-                                            >
-                                                <option value="">— Sans commande spécifique —</option>
-                                                {eligibleOrders.map(o => (
-                                                    <option key={o.id} value={o.id}>
-                                                        {o.order_number} — {o.item_count} article{o.item_count > 1 ? 's' : ''}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-600 mb-1.5">
-                                                Type de réclamation <span className="text-red-400">*</span>
-                                            </label>
-                                            <select
-                                                value={reclamForm.reclamation_type}
-                                                onChange={e => setReclamForm(f => ({ ...f, reclamation_type: e.target.value }))}
-                                                className={inputBase}
-                                            >
-                                                <option value="">— Choisir un type —</option>
-                                                <option value="produit_defectueux">💔 Produit défectueux</option>
-                                                <option value="commande_non_recue">📦 Commande non reçue</option>
-                                                <option value="produit_incorrect">❓ Produit incorrect</option>
-                                                <option value="retard_livraison">🚚 Retard de livraison</option>
-                                                <option value="remboursement">↩️ Demande de remboursement</option>
-                                                <option value="autre">💬 Autre</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-600 mb-1.5">
-                                                Décrivez votre problème <span className="text-red-400">*</span>
-                                            </label>
-                                            <textarea
-                                                rows={4}
-                                                value={reclamForm.message}
-                                                onChange={e => setReclamForm(f => ({ ...f, message: e.target.value }))}
-                                                placeholder="Décrivez votre problème en détail (minimum 10 caractères)…"
-                                                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#4a8c42] resize-none"
-                                            />
-                                            <p className="text-xs text-black/30 mt-1">{reclamForm.message.length} caractères</p>
-                                        </div>
-                                        <button
-                                            onClick={handleReclamSubmit}
-                                            disabled={reclamSubmitting}
-                                            className="bg-[#2d5a27] text-white font-bold px-8 py-3 rounded-xl hover:bg-[#4a8c42] transition text-sm disabled:opacity-60"
-                                        >
-                                            {reclamSubmitting ? 'Envoi en cours…' : '📤 Envoyer la réclamation'}
-                                        </button>
-                                    </div>
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xl font-bold text-[#2c2c2c]">Mes réclamations</h3>
+                                    <Link
+                                        to="/reclamations"
+                                        className="flex items-center gap-2 bg-[#2d5a27] text-white font-bold px-5 py-2.5 rounded-xl hover:bg-[#4a8c42] transition text-sm no-underline"
+                                    >
+                                        + Nouvelle réclamation
+                                    </Link>
                                 </div>
-                            )}
 
                             {/* Liste */}
                             {reclamationsLoading ? (

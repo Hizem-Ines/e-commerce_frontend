@@ -1,24 +1,35 @@
 import React, { useState, useEffect } from "react";
 import {
   FiAlertCircle, FiMail, FiPhone,
-  FiFileText, FiSend, FiCheckCircle,FiUser,
+  FiFileText, FiSend, FiCheckCircle, FiUser,
 } from "react-icons/fi";
-import { submitReclamation, createReclamation } from "../../services/reclamationService";
+import { submitReclamation, createReclamation, getMyReclamations } from "../../services/reclamationService";
 import { getMyOrders } from "../../services/orderService";
-import { useAuth } from '../../context/authContext';
+import { useAuth } from "../../context/authContext";
 import { useSiteSettings } from "../../context/SiteSettingsContext";
+import { addWSListener, removeWSListener } from "../../utils/websocket";
 
+// ─── Constantes ────────────────────────────────────────────
 const inputCls =
   "w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-900/20 focus:border-transparent transition";
 
 const RECLAMATION_TYPES = [
-  { value: "commande_non_recue",  label: "Commande non reçue" },
-  { value: "produit_defectueux",  label: "Produit défectueux" },
-  { value: "produit_incorrect",   label: "Produit incorrect"  },
-  { value: "retard_livraison",    label: "Retard de livraison" },
-  { value: "remboursement",       label: "Demande de remboursement" },
-  { value: "autre",               label: "Autre" },
+  { value: "commande_non_recue", label: "Commande non reçue" },
+  { value: "produit_defectueux", label: "Produit défectueux" },
+  { value: "produit_incorrect",  label: "Produit incorrect"  },
+  { value: "retard_livraison",   label: "Retard de livraison" },
+  { value: "remboursement",      label: "Demande de remboursement" },
+  { value: "autre",              label: "Autre" },
 ];
+
+const STATUS_CONFIG = {
+  en_attente : { label: "En attente",          color: "bg-amber-100 text-amber-700"     },
+  en_cours   : { label: "En cours",            color: "bg-blue-100 text-blue-700"       },
+  urgente    : { label: "Urgente ⚡",          color: "bg-orange-100 text-orange-700"   },
+  en_retard  : { label: "En retard ⏰",        color: "bg-red-100 text-red-700"         },
+  resolue    : { label: "Résolue",             color: "bg-emerald-100 text-emerald-700" },
+  rejetee    : { label: "Rejetée",             color: "bg-gray-100 text-gray-600"       },
+};
 
 const Field = ({ label, children }) => (
   <div>
@@ -29,24 +40,55 @@ const Field = ({ label, children }) => (
   </div>
 );
 
-const Reclamations = () => {
+// ─── Composant principal ────────────────────────────────────
+export default function Reclamations() {
+  const { user }      = useAuth();
+  const { currency }  = useSiteSettings();
+
+  // ── State formulaire ──────────────────────────────────────
   const [form, setForm] = useState({
     email: "", order_id: "", order_number: "", reclamation_type: "", message: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError]     = useState("");
-  const { user } = useAuth(); 
-  const { currency } = useSiteSettings();
+  const [loading, setLoading]         = useState(false);
+  const [success, setSuccess]         = useState(false);
+  const [error, setError]             = useState("");
+
+  // ── State mes réclamations (temps réel) ───────────────────
+  const [myReclamations, setMyReclamations] = useState([]);
   const [eligibleOrders, setEligibleOrders] = useState([]);
 
+  // ── Charger commandes et réclamations ─────────────────────
   useEffect(() => {
     if (user) {
-      getMyOrders().then((res) => setEligibleOrders(res.data.orders || []));
+      getMyOrders()
+        .then((res) => setEligibleOrders(res.data.orders || []))
+        .catch((err) => console.error("Erreur commandes:", err));
+
+      getMyReclamations()
+        .then((data) => setMyReclamations(data))
+        .catch((err) => console.error("Erreur réclamations:", err));
     }
   }, [user]);
 
-  const handleChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  // ── WebSocket — mises à jour temps réel ──────────────────
+  useEffect(() => {
+    addWSListener("reclamations-page", (data) => {
+      if (data.type === "RECLAMATION_UPDATE") {
+        // Mettre à jour le statut localement sans refetch
+        setMyReclamations((prev) =>
+          prev.map((r) =>
+            r.id === data.id ? { ...r, status: data.status } : r
+          )
+        );
+      }
+    });
+
+    return () => removeWSListener("reclamations-page");
+  }, []);
+
+  // ── Handlers formulaire ───────────────────────────────────
+  const handleChange = (e) =>
+    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,7 +99,13 @@ const Reclamations = () => {
         ? { order_id: form.order_id || null, reclamation_type: form.reclamation_type, message: form.message }
         : form;
 
-      await (user ? createReclamation(payload) : submitReclamation(payload));
+      const newRec = await (user ? createReclamation(payload) : submitReclamation(payload));
+
+      // Ajouter en tête de liste si connecté
+      if (user && newRec) {
+        setMyReclamations((prev) => [newRec, ...prev]);
+      }
+
       setSuccess(true);
       setForm({ email: "", order_id: "", order_number: "", reclamation_type: "", message: "" });
     } catch (err) {
@@ -95,7 +143,7 @@ const Reclamations = () => {
           </div>
         </div>
 
-        {/* Card */}
+        {/* Formulaire */}
         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5 sm:p-8">
           {success ? (
             <div className="py-10 text-center">
@@ -115,7 +163,9 @@ const Reclamations = () => {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">{error}</div>
+                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+                  {error}
+                </div>
               )}
 
               {user ? (
@@ -130,7 +180,6 @@ const Reclamations = () => {
                   </select>
                 </Field>
               ) : (
-                // Guest → email + order_number texte
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field label="Votre email">
                     <div className="relative">
@@ -153,7 +202,9 @@ const Reclamations = () => {
                 <select name="reclamation_type" required value={form.reclamation_type} onChange={handleChange}
                   className={`${inputCls} text-gray-700`}>
                   <option value="">Sélectionner…</option>
-                  {RECLAMATION_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  {RECLAMATION_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
                 </select>
               </Field>
 
@@ -162,7 +213,7 @@ const Reclamations = () => {
                   placeholder="Décrivez votre réclamation en détail…"
                   className={`${inputCls} resize-none`} />
               </Field>
-              
+
               {user && (
                 <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
                   <FiUser size={14} className="text-green-800 flex-shrink-0" />
@@ -184,7 +235,39 @@ const Reclamations = () => {
           )}
         </div>
 
-        {/* Info */}
+        {/* Historique réclamations (user connecté) */}
+        {user && myReclamations.length > 0 && (
+          <div className="mt-10">
+            <h2 className="text-lg font-bold text-[#2c2c2c] mb-4">Mes réclamations</h2>
+            <div className="space-y-3">
+              {myReclamations.map((r) => (
+                <div key={r.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                  <div className="flex items-center justify-between gap-3 mb-2">
+                    <p className="text-sm font-bold text-[#2c2c2c]">
+                      #{r.id.slice(0, 8).toUpperCase()}
+                      {r.order_number && <span className="text-black/40 font-normal"> — {r.order_number}</span>}
+                    </p>
+                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${STATUS_CONFIG[r.status]?.color || ""}`}>
+                      {STATUS_CONFIG[r.status]?.label || r.status}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-500 line-clamp-2">{r.message}</p>
+                  {r.admin_response && (
+                    <div className="mt-3 bg-emerald-50 rounded-xl px-4 py-3">
+                      <p className="text-xs font-bold text-emerald-700 mb-1">Réponse de l'équipe :</p>
+                      <p className="text-sm text-gray-700">{r.admin_response}</p>
+                    </div>
+                  )}
+                  <p className="text-xs text-black/30 mt-2">
+                    {new Date(r.created_at).toLocaleDateString("fr-FR")}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Contacts */}
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-center text-sm text-gray-500">
           <div className="bg-white rounded-2xl border border-gray-100 p-5">
             <FiMail className="mx-auto mb-2" size={20} style={{ color: "#3a7232" }} />
@@ -200,6 +283,4 @@ const Reclamations = () => {
       </div>
     </div>
   );
-};
-
-export default Reclamations;
+}
