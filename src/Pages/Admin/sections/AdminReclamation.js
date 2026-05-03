@@ -292,7 +292,11 @@ const [respondLoading, setRespondLoading] = useState(false);
 
 const openRespondModal = (r) => {
   setRespondTarget(r);
-  setRespondForm({ status: r.status, admin_response: r.admin_response || "", resolution_delay: "" });
+  setRespondForm({
+    status: STATUS_OPTIONS_ADMIN[r.status] ? r.status : "en_cours", // ← fallback sur la première option valide
+    admin_response: r.admin_response || "",
+    resolution_delay: "",
+  });
 };
 
 const handleRespond = async () => {

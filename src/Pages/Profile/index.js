@@ -5,7 +5,7 @@ import { getMyOrders } from '../../services/orderService';
 import {
     FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiSave,
     FiShoppingBag, FiHeart, FiPackage, FiChevronDown, FiChevronUp,
-    FiExternalLink, FiAlertCircle, FiMapPin, FiPhone,
+    FiExternalLink, FiAlertCircle, FiMapPin, FiPhone,FiCheckCircle,
 } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
@@ -44,7 +44,11 @@ const Profile = () => {
     const { user }     = useAuth();
     const { currency } = useSiteSettings();
 
-    const [activeTab,        setActiveTab]        = useState('profil');
+    const VALID_TABS = ['profil', 'commandes', 'reclamations', 'securite'];
+    const hashTab = window.location.hash.replace('#', '');
+    const [activeTab, setActiveTab] = useState(
+        VALID_TABS.includes(hashTab) ? hashTab : 'profil'
+    );
     const [showPassword,     setShowPassword]     = useState(false);
     const [successMsg,       setSuccessMsg]       = useState('');
     const [errorMsg,         setErrorMsg]         = useState('');
@@ -131,6 +135,8 @@ const Profile = () => {
     const showSuccess = (msg) => { setSuccessMsg(msg); setErrorMsg('');  setTimeout(() => setSuccessMsg(''), 3500); };
     const showError   = (msg) => { setErrorMsg(msg);  setSuccessMsg(''); setTimeout(() => setErrorMsg(''),  3500); };
 
+    const [wsNotif, setWsNotif] = useState(null);
+
     // ── Warn before unload ────────────────────────────────
     useEffect(() => {
         const handle = (e) => { if (isProfileSectionDirty || isPasswordDirty) { e.preventDefault(); e.returnValue = ''; } };
@@ -161,6 +167,7 @@ const Profile = () => {
             }
         }
         setActiveTab(tabId);
+        window.location.hash = tabId;
     };
 
     // ── Charger commandes ─────────────────────────────────
@@ -189,6 +196,7 @@ const Profile = () => {
     useEffect(() => {
         addWSListener("profile-reclamations", (data) => {
             if (data.type === "RECLAMATION_UPDATE") {
+                // ✅ Mise à jour silencieuse du tableau
                 setReclamations((prev) =>
                     prev.map((r) =>
                         r.id === data.id
@@ -196,6 +204,16 @@ const Profile = () => {
                             : r
                     )
                 );
+                // ✅ Notification visuelle
+                
+                const NOTIF_CONFIG = {
+                    resolue:  { label: "Résolue ✅",            icon: <FiCheckCircle size={16} className="shrink-0" />, colorClass: "bg-emerald-50 border-emerald-200 text-emerald-700" },
+                    rejetee:  { label: "Rejetée ❌",            icon: <FiAlertCircle size={16} className="shrink-0" />, colorClass: "bg-red-50 border-red-200 text-red-700"             },
+                    en_cours: { label: "En cours de traitement", icon: <FiAlertCircle size={16} className="shrink-0" />, colorClass: "bg-blue-50 border-blue-200 text-blue-700"          },
+                };
+                const cfg = NOTIF_CONFIG[data.status] || NOTIF_CONFIG.en_cours;
+                setWsNotif({ ...cfg, id: data.id });
+                setTimeout(() => setWsNotif(null), 5000);
             }
         });
 
@@ -372,6 +390,21 @@ const Profile = () => {
                 {/* ALERTES */}
                 {successMsg && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-6 text-sm">✅ {successMsg}</div>}
                 {errorMsg   && <div className="bg-red-50 border border-red-200 text-red-700 font-semibold px-5 py-3 rounded-xl mb-6 text-sm">❌ {errorMsg}</div>}
+
+                {wsNotif && (
+                    <div
+                        className={`flex items-center gap-3 font-semibold px-5 py-3 rounded-xl mb-6 text-sm cursor-pointer border ${wsNotif.colorClass}`}
+                        onClick={() => { handleTabChange('reclamations'); setWsNotif(null); }}
+                    >
+                        {wsNotif.icon}
+                        <span>
+                            Réclamation <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-black/10">
+                                #{wsNotif.id.slice(0, 8).toUpperCase()}
+                            </span> — {wsNotif.label}
+                        </span>
+                        <span className="ml-auto text-xs underline opacity-60">Voir →</span>
+                    </div>
+                )}
 
                 {/* TABS */}
                 <div className="flex bg-white rounded-2xl p-1 shadow-[0_4px_15px_rgba(0,0,0,0.07)] mb-6 gap-1">

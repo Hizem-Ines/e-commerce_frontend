@@ -301,10 +301,11 @@ const Products = () => {
                                                             <span className="text-xs text-black/30 font-semibold">Pas d'image</span>
                                                         </div>
                                                     )}
-                                                    {/* ✅ Fixed: uses rating_avg */}
-                                                    <span className="absolute bottom-3 right-3 bg-white/90 text-xs font-bold px-3 py-1 rounded-full">
-                                                        ⭐ {produit.rating_avg ? parseFloat(produit.rating_avg).toFixed(1) : 'N/A'}
-                                                    </span>
+                                                    {produit.rating_count > 0 && produit.rating_avg && parseFloat(produit.rating_avg) > 0 && (
+                                                        <span className="absolute bottom-3 right-3 bg-white/90 text-xs font-bold px-3 py-1 rounded-full">
+                                                            ⭐ {parseFloat(produit.rating_avg).toFixed(1)}
+                                                        </span>
+                                                    )}
                                                     {produit.is_featured && (
                                                         <span className="absolute top-3 left-3 bg-amber-400 text-white text-xs font-bold px-2 py-1 rounded-full">
                                                             ✨ Coup de cœur

@@ -352,6 +352,9 @@ const ProductDetail = () => {
         return Math.max(0, parseFloat(variant.price) - parseFloat(variant.promo_value));
     };
     const promoPrice = getPromoPrice(varianteActive);
+    const avgRating = reviews.length > 0
+        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+        : 0;
 
     return (
         <div className="bg-[#fdf6ec] min-h-screen py-12">
@@ -424,16 +427,18 @@ const ProductDetail = () => {
 
                             <h1 className="text-3xl font-bold font-serif text-[#2c2c2c] mb-1">{produit.name_fr}</h1>
 
-                            <div className="flex items-center gap-2 mb-4">
-                                <div className="flex gap-0.5">
-                                    {[...Array(5)].map((_, i) => (
-                                        <span key={i} className={i < Math.round(produit.rating_avg || 0) ? 'text-yellow-400' : 'text-gray-200'}>★</span>
-                                    ))}
+                            {reviews.length > 0 && (
+                                <div className="flex items-center gap-2 mb-4">
+                                    <div className="flex gap-0.5">
+                                        {[...Array(5)].map((_, i) => (
+                                            <span key={i} className={i < Math.round(avgRating) ? 'text-yellow-400' : 'text-gray-200'}>★</span>
+                                        ))}
+                                    </div>
+                                    <span className="font-bold text-[#2c2c2c]">{avgRating.toFixed(1)}</span>
+                                    <span className="text-black/40 text-sm">/ 5.0</span>
+                                    <span className="text-black/40 text-sm">({reviews.length} avis)</span>
                                 </div>
-                                <span className="font-bold text-[#2c2c2c]">{produit.rating_avg ? parseFloat(produit.rating_avg).toFixed(1) : 'N/A'}</span>
-                                <span className="text-black/40 text-sm">/ 5.0</span>
-                                {produit.rating_count > 0 && <span className="text-black/40 text-sm">({produit.rating_count} avis)</span>}
-                            </div>
+                            )}
 
                             <p className="text-black/60 text-sm leading-relaxed whitespace-pre-line mb-6 line-clamp-3">{produit.description_fr}</p>
 
