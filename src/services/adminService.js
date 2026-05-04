@@ -5,7 +5,7 @@ export const exportStats = (params = {}) =>
   api.get('/stats/export', { params, responseType: 'blob' });
 export const getAllUsers        = ()           => api.get('/auth/users');
 export const getAllOrders = (params) => api.get('/orders/all', { params });
-export const updateOrderStatus = (id, data)   => api.patch(`/orders/${id}/status`, data);
+export const updateOrderStatus = (id, status) => api.patch(`/orders/${id}/status`, { status });
 export const getAllProducts     = (params)     => api.get('/products', { params: { ...params, admin: 'true' } });
 export const deleteProduct     = (id)         => api.delete(`/products/${id}`);
 export const getAllSuppliers    = ()           => api.get('/suppliers');

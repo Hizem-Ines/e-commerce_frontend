@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { getAllOrders, updateOrderStatus } from '../../../services/adminService';
 import { cancelOrder } from '../../../services/orderService'; // ✅ route /cancel avec raison
 import api from '../../../services/api';
-import { FiEye, FiX } from 'react-icons/fi';
+import { FiEye , FiEdit } from 'react-icons/fi';
 import formatPrice from '../../../utils/formatPrice';
 import { useSiteSettings } from '../../../context/SiteSettingsContext';
+import { updateDelivery } from '../../../services/orderService';
 
 // ✅ Clés en FR pour correspondre à la DB
 const STATUS_LABELS = {
@@ -45,11 +46,31 @@ const AdminCommandes = () => {
     const [successMsg, setSuccessMsg]       = useState('');
     const [errorMsg, setErrorMsg]           = useState('');
     const { currency } = useSiteSettings();
+    const [modalMode, setModalMode] = useState('view');
 
     // ── Modal annulation ──────────────────────────────────
     const [cancelModal, setCancelModal]   = useState(null);  // orderId en attente
     const [cancelReason, setCancelReason] = useState('');
     const [cancelLoading, setCancelLoading] = useState(false);
+
+    const [deliveryForm, setDeliveryForm] = useState({ carrier: '', tracking_number: '', estimated_date: '', status: '' });
+    const [deliveryLoading, setDeliveryLoading] = useState(false);
+
+    const handleUpdateDelivery = async () => {
+        if (!selectedOrder) return;
+        setDeliveryLoading(true);
+        try {
+            await updateDelivery(selectedOrder.id, deliveryForm);
+            setSuccessMsg('Livraison mise à jour.');
+            setTimeout(() => setSuccessMsg(''), 3000);
+            closeModal();
+        } catch (err) {
+            setErrorMsg(err.response?.data?.message || 'Erreur livraison.');
+            setTimeout(() => setErrorMsg(''), 3000);
+        } finally {
+            setDeliveryLoading(false);
+        }
+    };
 
     // ── Fetch liste ───────────────────────────────────────
     useEffect(() => {
@@ -70,13 +91,23 @@ const AdminCommandes = () => {
     }, [page, filterStatus]);
 
     // ── Ouvrir modal détail ───────────────────────────────
-    const openOrderDetail = async (commande) => {
+    const openOrderDetail = async (commande, mode = 'view') => {
+        setModalMode(mode);
         setSelectedOrder(commande);
         setOrderDetail(null);
         setDetailLoading(true);
         try {
             const res = await api.get(`/orders/${commande.id}`);
-            setOrderDetail(res.data.order);
+            const detail = res.data.order;
+            setOrderDetail(detail);
+            setDeliveryForm({
+                carrier:        detail.carrier        || '',
+                tracking_number: detail.tracking_number || '',
+                estimated_date: detail.estimated_date
+                    ? detail.estimated_date.split('T')[0]
+                    : '',
+                status: detail.delivery_status || '',
+            });
         } catch (err) {
             console.error('Erreur chargement détail commande:', err);
         } finally {
@@ -84,7 +115,7 @@ const AdminCommandes = () => {
         }
     };
 
-    const closeModal = () => { setSelectedOrder(null); setOrderDetail(null); };
+    const closeModal = () => { setSelectedOrder(null); setOrderDetail(null); setModalMode('view'); };
 
     // ── Changement de statut ──────────────────────────────
     const handleStatusChange = async (orderId, newStatus) => {
@@ -233,32 +264,26 @@ const AdminCommandes = () => {
                                         {formatPrice(parseFloat(commande.total_price), currency)}
                                     </td>
                                     <td className="px-5 py-4 text-center">
-                                        {commande.status === 'annulee' || commande.status === 'livree' || commande.status === 'remboursee' ? (
-                                            // ✅ Statuts terminaux → badge non modifiable
-                                            <StatusBadge status={commande.status} />
-                                        ) : (
-                                            <select
-                                                value={commande.status}
-                                                onChange={(e) => handleStatusChange(commande.id, e.target.value)}
-                                                className={`text-xs font-bold px-2 py-1 rounded-full border-0 outline-none cursor-pointer ${STATUS_LABELS[commande.status]?.color || 'bg-gray-100 text-gray-600'}`}
-                                            >
-                                                {STATUS_OPTIONS.map(s => (
-                                                    <option key={s} value={s}>{STATUS_LABELS[s]?.label}</option>
-                                                ))}
-                                                {/* ✅ Option annuler toujours disponible */}
-                                                <option value="annulee">Annuler…</option>
-                                            </select>
-                                        )}
+                                        <StatusBadge status={commande.status} />
                                     </td>
                                     <td className="px-5 py-4 text-center">
+                                    <div className="flex items-center justify-center gap-1">
                                         <button
-                                            onClick={() => openOrderDetail(commande)}
-                                            className="p-2 hover:bg-blue-50 text-blue-500 rounded-xl transition"
-                                            title="Voir les détails"
-                                        >
-                                            <FiEye size={15} />
-                                        </button>
-                                    </td>
+                                                onClick={() => openOrderDetail(commande, 'view')}
+                                               className="p-2 hover:bg-gray-100 text-gray-400 rounded-xl transition"
+                                                title="Voir les détails"
+                                            >
+                                                <FiEye size={15} />
+                                            </button>
+                                            <button
+                                                onClick={() => openOrderDetail(commande, 'edit')}
+                                                className="p-2 hover:bg-blue-50 text-blue-500 rounded-xl transition"
+                                                title="Modifier"
+                                            >
+                                                <FiEdit size={15} />
+                                            </button>
+                                    </div>
+                                </td>
                                 </tr>
                             ))}
                         </tbody>
@@ -284,21 +309,13 @@ const AdminCommandes = () => {
                                 <div className="flex items-center justify-between">
                                 <span className="text-xs text-black/40">{new Date(commande.created_at).toLocaleDateString('fr-FR')}</span>
                                 <div className="flex items-center gap-2">
-                                    {commande.status === 'annulee' || commande.status === 'livree' || commande.status === 'remboursee' ? (
                                     <StatusBadge status={commande.status} />
-                                    ) : (
-                                    <select
-                                        value={commande.status}
-                                        onChange={e => handleStatusChange(commande.id, e.target.value)}
-                                        className={`text-xs font-bold px-2 py-1 rounded-full border-0 outline-none cursor-pointer ${STATUS_LABELS[commande.status]?.color || ''}`}
-                                    >
-                                        {STATUS_OPTIONS.map(s => <option key={s} value={s}>{STATUS_LABELS[s]?.label}</option>)}
-                                        <option value="annulee">Annuler…</option>
-                                    </select>
-                                    )}
-                                    <button onClick={() => openOrderDetail(commande)} className="p-2 hover:bg-blue-50 text-blue-500 rounded-xl transition">
-                                    <FiEye size={14}/>
-                                    </button>
+                                    <button onClick={() => openOrderDetail(commande, 'view')} className="p-2 hover:bg-blue-50 text-blue-500 rounded-xl transition">
+                                                    <FiEye size={14}/>
+                                                </button>
+                                                <button onClick={() => openOrderDetail(commande, 'view')} className="p-2 hover:bg-gray-100 text-gray-400 rounded-xl transition">
+                                                    <FiEdit size={14}/>
+                                                </button>
                                 </div>
                                 </div>
                             </div>
@@ -455,7 +472,7 @@ const AdminCommandes = () => {
                                     <p className="font-bold text-red-500">
                                         {parseFloat(orderDetail?.discount_amount) > 0
                                             ? `-${formatPrice(parseFloat(orderDetail.discount_amount), currency)}`
-                                            : '—'}
+                                            : formatPrice(0, currency)}
                                     </p>
                                 </div>
                                 <div>
@@ -493,7 +510,12 @@ const AdminCommandes = () => {
                                             } catch (_) {}
                                             return (
                                                 <div key={item.id || idx} className="flex items-start gap-4 bg-white border border-gray-100 rounded-xl px-4 py-3">
-                                                    <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center text-xl flex-shrink-0">🧺</div>
+                                                    <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center text-xl flex-shrink-0 overflow-hidden">
+                                                        {item.product_image
+                                                            ? <img src={item.product_image} alt={item.product_name_fr} className="w-full h-full object-cover" onError={e => { e.target.style.display='none'; }} />
+                                                            : <span>🧺</span>
+                                                        }
+                                                    </div>
                                                     <div className="flex-1 min-w-0">
                                                         <p className="font-bold text-[#2c2c2c] text-sm truncate">
                                                             {item.product_name_fr || '—'}
@@ -527,8 +549,51 @@ const AdminCommandes = () => {
                                 </div>
                             )}
 
+                            {/* ── Livraison (transporteur / tracking) ── */}
+                            {modalMode === 'edit' && selectedOrder && selectedOrder.status !== 'annulee' && (
+                                <div className="pt-4 border-t border-gray-100 space-y-3">
+                                    <p className="text-xs text-black/40 font-semibold uppercase">Mise à jour livraison</p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <input
+                                            type="text"
+                                            placeholder="Transporteur"
+                                            value={deliveryForm.carrier}
+                                            onChange={e => setDeliveryForm(p => ({ ...p, carrier: e.target.value }))}
+                                            className="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-[#4a8c42] outline-none"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="N° de suivi"
+                                            value={deliveryForm.tracking_number}
+                                            onChange={e => setDeliveryForm(p => ({ ...p, tracking_number: e.target.value }))}
+                                            className="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-[#4a8c42] outline-none"
+                                        />
+                                        <input
+                                            type="date"
+                                            value={deliveryForm.estimated_date}
+                                            onChange={e => setDeliveryForm(p => ({ ...p, estimated_date: e.target.value }))}
+                                            className="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-[#4a8c42] outline-none"
+                                        />
+                                        <select
+                                            value={deliveryForm.status}
+                                            onChange={e => setDeliveryForm(p => ({ ...p, status: e.target.value }))}
+                                            className="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-[#4a8c42] outline-none"
+                                        >
+                                            <option value="">— Statut livraison —</option>
+                                            <option value="en_preparation">En préparation</option>
+                                            <option value="expediee">Expédiée</option>
+                                            <option value="en_transit">En transit</option>
+                                            <option value="livre">Livrée</option>
+                                            <option value="echec">Échec</option>
+                                            <option value="retourne">Retourné</option>
+                                        </select>
+                                    </div>
+                                
+                                </div>
+                            )}
+
                             {/* Changer statut */}
-                            {selectedOrder.status !== 'annulee' && selectedOrder.status !== 'livree' && selectedOrder.status !== 'remboursee' && (
+                            {modalMode === 'edit' && selectedOrder.status !== 'annulee' && selectedOrder.status !== 'livree' && selectedOrder.status !== 'remboursee' && (
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 border-t border-gray-100">
                                     <span className="text-sm text-black/50 font-semibold">Changer le statut</span>
                                     <div className="flex gap-2">
@@ -549,6 +614,24 @@ const AdminCommandes = () => {
                                         </button>
                                     </div>
                                 </div>
+                            )}
+                        </div>
+                        {/* Footer */}
+                        <div className="flex gap-3 px-4 sm:px-8 py-5 border-t border-gray-100 bg-[#fdf6ec] shrink-0">
+                            <button
+                                onClick={closeModal}
+                                className="flex-1 border-2 border-gray-200 text-black/60 font-bold py-3 rounded-xl hover:bg-gray-100 transition text-sm"
+                            >
+                                {modalMode === 'edit' ? 'Annuler' : 'Fermer'}
+                            </button>
+                            {modalMode === 'edit' && (
+                                <button
+                                    onClick={handleUpdateDelivery}
+                                    disabled={deliveryLoading}
+                                    className="flex-[2] bg-[#2d5a27] hover:bg-[#4a8c42] disabled:opacity-50 text-white font-bold py-3 rounded-xl transition text-sm"
+                                >
+                                    {deliveryLoading ? '⏳ Enregistrement...' : '💾 Enregistrer les modifications'}
+                                </button>
                             )}
                         </div>
                     </div>

@@ -31,7 +31,7 @@ const STATUS_LABELS = {
 const getDeliveryLabel = (s) => {
     const map = {
         en_preparation: '📦 En préparation',
-        expedie:        '🚚 En route',
+        expediee:       '🚚 En route',
         en_transit:     '🚚 En transit',
         en_cours:       '🚚 En cours',
         livre:          '✅ Livré',
@@ -765,6 +765,12 @@ useEffect(() => {
                                                         <p className="font-semibold text-[#2c2c2c]">{order.tracking_number}</p>
                                                     </div>
                                                 )}
+                                                {order.carrier && (
+                                                    <div>
+                                                        <p className="text-xs text-black/40 mb-1">Transporteur</p>
+                                                        <p className="font-semibold text-[#2c2c2c]">{order.carrier}</p>
+                                                    </div>
+                                                )}
                                                 {order.estimated_date && (
                                                     <div>
                                                         <p className="text-xs text-black/40 mb-1">Livraison estimée</p>
@@ -787,8 +793,8 @@ useEffect(() => {
                     const STATUS_RECL = {
                         en_attente: { label: 'En attente',   color: '#f59e0b', bg: '#fef3c7' },
                         en_cours:   { label: 'En cours',     color: '#3b82f6', bg: '#dbeafe' },
-                        urgente:    { label: 'Urgente ⚡',   color: '#ea580c', bg: '#ffedd5' },
-                        en_retard:  { label: 'En retard ⏰', color: '#dc2626', bg: '#fee2e2' },
+                        urgente:    { label: 'En cours', color: '#3b82f6', bg: '#dbeafe' },
+                        en_retard:  { label: 'En cours', color: '#3b82f6', bg: '#dbeafe' },
                         resolue:    { label: 'Résolue ✅',   color: '#166534', bg: '#dcfce7' },
                         rejetee:    { label: 'Rejetée',      color: '#6b7280', bg: '#f3f4f6' },
                     };

@@ -19,7 +19,7 @@ const STATUS_LABELS = {
 // ✅ Valeurs DB pour les livraisons (deliveries.status)
 const DELIVERY_STEPS = [
     { key: 'en_preparation', label: 'En préparation', icon: '📦' },
-    { key: 'expedie',        label: 'Expédiée',        icon: '🚚' },
+    { key: 'expediee',       label: 'Expédiée',        icon: '🚚' },
     { key: 'livre',          label: 'Livrée',          icon: '✅' },
 ];
 
@@ -43,8 +43,8 @@ const OrderDetail = () => {
     // ✅ Correspondance avec les valeurs DB réelles
     const getDeliveryStep = () => {
         const s = order?.delivery_status;
-        if (s === 'livre'   || s === 'en_cours') return 2;
-        if (s === 'expedie' || s === 'en_transit') return 1;
+        if (s === 'livre') return 2;
+        if (s === 'expediee' || s === 'en_transit' || s === 'en_cours') return 1;
         return 0;
     };
 
@@ -75,7 +75,7 @@ const OrderDetail = () => {
             <div className="container mx-auto px-4 max-w-3xl">
 
                 {/* RETOUR */}
-                <button onClick={() => navigate('/profil')}
+                <button onClick={() => navigate('/profil#commandes')}
                     className="flex items-center gap-2 text-sm font-semibold text-black/50 hover:text-[#166534] mb-6 transition">
                     <FiArrowLeft size={16} /> Retour à mon profil
                 </button>
@@ -150,6 +150,18 @@ const OrderDetail = () => {
                                     <span className="font-bold text-[#2c2c2c]">
                                         {new Date(order.estimated_date).toLocaleDateString('fr-FR')}
                                     </span>
+                                </div>
+                            )}
+                            {/* ── Statut problème livraison ── */}
+                            {(order.delivery_status === 'echec' || order.delivery_status === 'retourne') && (
+                                <div className={`mt-5 px-4 py-3 rounded-xl text-sm font-semibold ${
+                                    order.delivery_status === 'echec'
+                                        ? 'bg-red-50 text-red-700 border border-red-200'
+                                        : 'bg-orange-50 text-orange-700 border border-orange-200'
+                                }`}>
+                                    {order.delivery_status === 'echec'
+                                        ? '❌ Échec de livraison — notre équipe va vous recontacter.'
+                                        : '↩️ Colis retourné — veuillez contacter le service client.'}
                                 </div>
                             )}
                         </div>
