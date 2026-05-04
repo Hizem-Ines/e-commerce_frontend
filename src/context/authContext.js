@@ -45,6 +45,11 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
+    // Clears local state only — does NOT call the API (no cookie clearing)
+    const localLogout = () => {
+        setUser(null);
+    };
+
     // Utilisé après Google OAuth pour récupérer l'utilisateur connecté
     const loginSuccess = async () => {
         try {
@@ -56,7 +61,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, verifyMfaLogin, register, logout, loginSuccess }}>
+       <AuthContext.Provider value={{ user, loading, login, verifyMfaLogin, register, logout, localLogout, loginSuccess }}>
             {!loading && children}
         </AuthContext.Provider>
     );

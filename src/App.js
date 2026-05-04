@@ -116,14 +116,6 @@ const WS_TOAST_CONFIG = {
         border:  "#fecaca",
         link:    null,
     },
-    ACCOUNT_ACTIVATED: {
-        icon:    "🎉",
-        label:   () => "Votre compte a été réactivé. Bienvenue !",
-        bg:      "#dcfce7",
-        color:   "#166534",
-        border:  "#bbf7d0",
-        link:    null,
-    },
 };
 
 // ══════════════════════════════════════════════════════════════
@@ -188,12 +180,18 @@ const ToastContainer = ({ toasts, onClose }) => {
 // WS CONNECTOR — gère connexion + toasts globaux
 // ══════════════════════════════════════════════════════════════
 function WSConnector({ onToast }) {
-    const { user, logout } = useAuth();
-    const logoutRef = useRef(logout);
+    const { user, localLogout } = useAuth();
+    const navigate = useNavigate();
+    const localLogoutRef = useRef(localLogout);
+    const navigateRef = useRef(navigate);
 
     useEffect(() => {
-        logoutRef.current = logout;
-    }, [logout]);
+        navigateRef.current = navigate;
+    }, [navigate]);
+
+    useEffect(() => {
+        localLogoutRef.current = localLogout;
+    }, [localLogout]);
 
     useEffect(() => {
         if (!user?.id) return;
@@ -202,11 +200,12 @@ function WSConnector({ onToast }) {
 console.log('[WS connect]', user.id, user.role);
         addWSListener("app-global", (data) => {
             if (data.type === "ACCOUNT_SUSPENDED") {
+                // Only logout if this message is for the currently logged-in user
+                if (data.userId && String(data.userId) !== String(user?.id)) return;
                 onToast(data);
                 setTimeout(() => {
-                    Promise.resolve(logoutRef.current()).catch(() => {
-                        window.location.href = '/connexion';
-                    });
+                    localLogoutRef.current();
+                    navigateRef.current('/connexion');
                 }, 3000);
                 return;
             }

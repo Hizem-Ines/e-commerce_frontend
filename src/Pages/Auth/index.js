@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState , useEffect} from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiMail, FiLock, FiUser, FiPhone, FiMapPin, FiEye, FiEyeOff, FiGift, FiStar, FiPackage, FiShield } from 'react-icons/fi';
 import { useAuth } from '../../context/authContext';
@@ -26,6 +26,14 @@ const Auth = () => {
 
     const { login, register, verifyMfaLogin } = useAuth();
     const navigate = useNavigate();
+
+    const [oauthError, setOauthError] = useState('');
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('error') === 'suspended') {
+            setOauthError('Votre compte a été suspendu. Contactez le support.');
+        }
+    }, []);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -79,7 +87,8 @@ const Auth = () => {
         setIsSubmitting(true);
         try {
             await verifyMfaLogin({ mfaSessionToken, otp });
-            navigate('/');
+            navigate('/login/success');
+
         } catch (err) {
             alert(err.response?.data?.message || 'Code incorrect ou expiré. Réessayez.');
         } finally {
@@ -203,8 +212,14 @@ const Auth = () => {
                     ) : (
                         /* ════════════════ LOGIN / REGISTER STEP ════════════════ */
                         <>
-                            {/* TOGGLE */}
-                            <div className="flex rounded-full p-1 mb-8" style={{ background: '#f3f4f6' }}>
+                            {oauthError && (
+                        <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-semibold px-4 py-3 rounded-xl mb-6">
+                            ⚠️ {oauthError}
+                        </div>
+                    )}
+
+                    {/* TOGGLE */}
+                    <div className="flex rounded-full p-1 mb-8" style={{ background: '#f3f4f6' }}>
                                 {[
                                     { label: 'Connexion',       active: isLogin,  onClick: () => setIsLogin(true)  },
                                     { label: 'Créer un compte', active: !isLogin, onClick: () => setIsLogin(false) },
