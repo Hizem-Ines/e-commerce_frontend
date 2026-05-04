@@ -3,7 +3,7 @@ let shouldReconnect = false; // ← flag pour distinguer déco volontaire vs per
 const listeners   = new Map();
 
 export const connectWebSocket = (userId, role = "user") => {
-  if (ws && ws.readyState === WebSocket.OPEN) return;
+   if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
 
   shouldReconnect = true;
   const WS_URL    = process.env.REACT_APP_WS_URL || "ws://localhost:5000";
@@ -27,11 +27,12 @@ export const connectWebSocket = (userId, role = "user") => {
     console.error("❌ WS erreur:", err);
   };
 
+  const thisWs = ws;
   ws.onclose = () => {
-    ws = null;
+    if (ws === thisWs) ws = null; // only clear if no newer socket exists
     if (shouldReconnect) {
       console.log("🔌 WS fermé — reconnexion dans 5s...");
-      setTimeout(() => connectWebSocket(userId, role), 5000);
+      setTimeout(() => { if (shouldReconnect) connectWebSocket(userId, role); }, 5000);
     }
   };
 };

@@ -8,8 +8,11 @@ const LoginSuccess = () => {
 
     useEffect(() => {
         const handleSuccess = async () => {
-            await loginSuccess(); // ✅ récupère l'user depuis le cookie Google
-            navigate('/');        // ✅ redirige vers l'accueil connecté
+            await Promise.all([
+                loginSuccess(),
+                new Promise(resolve => setTimeout(resolve, 1500)),
+            ]);
+            navigate('/');
         };
         handleSuccess();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -22,10 +25,10 @@ const LoginSuccess = () => {
                 style={{ boxShadow: '0 25px 60px rgba(0,0,0,0.12)' }}>
                 <div className="text-6xl mb-4 animate-spin inline-block">🌿</div>
                 <h2 className="text-2xl font-black font-serif text-gray-900 mb-2">
-                    Connexion en cours...
+                    Connexion réussie !
                 </h2>
                 <p className="text-gray-500 text-sm">
-                    Veuillez patienter quelques secondes
+                    Redirection en cours...
                 </p>
             </div>
         </div>

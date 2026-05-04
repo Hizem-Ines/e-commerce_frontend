@@ -5,7 +5,7 @@ import { getMyOrders } from '../../services/orderService';
 import {
     FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiSave,
     FiShoppingBag, FiHeart, FiPackage, FiChevronDown, FiChevronUp,
-    FiExternalLink, FiAlertCircle, FiMapPin, FiPhone,FiCheckCircle,
+    FiExternalLink, FiAlertCircle, FiMapPin, FiPhone,
 } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
@@ -13,6 +13,7 @@ import formatPrice from '../../utils/formatPrice';
 import {
   getMyReclamations,
 } from '../../services/reclamationService';
+
 
 import { addWSListener, removeWSListener } from '../../utils/websocket';
 // ✅ Clés FR pour correspondre à la DB
@@ -41,7 +42,7 @@ const getDeliveryLabel = (s) => {
 };
 
 const Profile = () => {
-    const { user }     = useAuth();
+    const { user, logout } = useAuth();
     const { currency } = useSiteSettings();
 
     const VALID_TABS = ['profil', 'commandes', 'reclamations', 'securite'];
@@ -135,7 +136,6 @@ const Profile = () => {
     const showSuccess = (msg) => { setSuccessMsg(msg); setErrorMsg('');  setTimeout(() => setSuccessMsg(''), 3500); };
     const showError   = (msg) => { setErrorMsg(msg);  setSuccessMsg(''); setTimeout(() => setErrorMsg(''),  3500); };
 
-    const [wsNotif, setWsNotif] = useState(null);
 
     // ── Warn before unload ────────────────────────────────
     useEffect(() => {
@@ -204,21 +204,54 @@ const Profile = () => {
                             : r
                     )
                 );
-                // ✅ Notification visuelle
-                
-                const NOTIF_CONFIG = {
-                    resolue:  { label: "Résolue ✅",            icon: <FiCheckCircle size={16} className="shrink-0" />, colorClass: "bg-emerald-50 border-emerald-200 text-emerald-700" },
-                    rejetee:  { label: "Rejetée ❌",            icon: <FiAlertCircle size={16} className="shrink-0" />, colorClass: "bg-red-50 border-red-200 text-red-700"             },
-                    en_cours: { label: "En cours de traitement", icon: <FiAlertCircle size={16} className="shrink-0" />, colorClass: "bg-blue-50 border-blue-200 text-blue-700"          },
-                };
-                const cfg = NOTIF_CONFIG[data.status] || NOTIF_CONFIG.en_cours;
-                setWsNotif({ ...cfg, id: data.id });
-                setTimeout(() => setWsNotif(null), 5000);
             }
         });
 
         return () => removeWSListener("profile-reclamations");
     }, []);
+
+    // ── WS : mise à jour silencieuse statut commandes ──────────
+useEffect(() => {
+    addWSListener("profile-orders", (data) => {
+        if (
+            data.type === "ORDER_CONFIRMED"      ||
+            data.type === "ORDER_STATUS_UPDATE"  ||
+            data.type === "ORDER_PAYMENT_FAILED" ||
+            data.type === "ORDER_CANCELLED"
+        ) {
+            setOrders((prev) =>
+                prev.map((o) =>
+                    o.id === data.id
+                        ? {
+                            ...o,
+                            status: data.status ?? (
+                                data.type === "ORDER_CONFIRMED"      ? "confirmee" :
+                                data.type === "ORDER_PAYMENT_FAILED" ? "annulee"   :
+                                data.type === "ORDER_CANCELLED"      ? "annulee"   :
+                                o.status
+                            ),
+                          }
+                        : o
+                )
+            );
+        }
+    });
+    return () => removeWSListener("profile-orders");
+}, []);
+
+
+
+useEffect(() => {
+    addWSListener("profile-account-status", (data) => {
+        if (data.type === "ACCOUNT_SUSPENDED") {
+            logout();
+        }
+        if (data.type === "ACCOUNT_ACTIVATED") {
+            showSuccess(data.message);
+        }
+    });
+    return () => removeWSListener("profile-account-status");
+}, []);
 
     // ── Handlers dirty ────────────────────────────────────
     const handleProfileChange = (field, value) => {
@@ -391,20 +424,7 @@ const Profile = () => {
                 {successMsg && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-5 py-3 rounded-xl mb-6 text-sm">✅ {successMsg}</div>}
                 {errorMsg   && <div className="bg-red-50 border border-red-200 text-red-700 font-semibold px-5 py-3 rounded-xl mb-6 text-sm">❌ {errorMsg}</div>}
 
-                {wsNotif && (
-                    <div
-                        className={`flex items-center gap-3 font-semibold px-5 py-3 rounded-xl mb-6 text-sm cursor-pointer border ${wsNotif.colorClass}`}
-                        onClick={() => { handleTabChange('reclamations'); setWsNotif(null); }}
-                    >
-                        {wsNotif.icon}
-                        <span>
-                            Réclamation <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-black/10">
-                                #{wsNotif.id.slice(0, 8).toUpperCase()}
-                            </span> — {wsNotif.label}
-                        </span>
-                        <span className="ml-auto text-xs underline opacity-60">Voir →</span>
-                    </div>
-                )}
+
 
                 {/* TABS */}
                 <div className="flex bg-white rounded-2xl p-1 shadow-[0_4px_15px_rgba(0,0,0,0.07)] mb-6 gap-1">
@@ -490,7 +510,7 @@ const Profile = () => {
                                         <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                                         <input type="tel" value={profileData.phone}
                                             onChange={(e) => handleProfileChange('phone', e.target.value)}
-                                            className={`${inputBase} pl-10`} placeholder="+41 79 XXX XX XX" />
+                                            className={`${inputBase} pl-10`} placeholder="+216 XX XXX XXX" />
                                     </div>
                                 </div>
                             </div>
@@ -514,7 +534,7 @@ const Profile = () => {
                                 <div>
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">Téléphone</label>
                                     <input type="tel" name="shipping_phone" value={shippingData.shipping_phone}
-                                        onChange={handleShippingChange} placeholder="+41 79 XXX XX XX"
+                                        onChange={handleShippingChange} placeholder="+216 XX XXX XXX"
                                         className={inputBase} />
                                 </div>
                                 <div className="sm:col-span-2">
@@ -524,27 +544,27 @@ const Profile = () => {
                                         className={inputBase} />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">NPA</label>
+                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Code postal</label>
                                     <input type="text" name="shipping_postal_code" value={shippingData.shipping_postal_code}
-                                        onChange={handleShippingChange} placeholder="8001" maxLength={4}
+                                        onChange={handleShippingChange} placeholder="1000" maxLength={4}
                                         className={inputBase} />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Localité</label>
+                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Ville</label>
                                     <input type="text" name="shipping_city" value={shippingData.shipping_city}
-                                        onChange={handleShippingChange} placeholder="Zurich"
+                                        onChange={handleShippingChange} placeholder="Tunis"
                                         className={inputBase} />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Canton</label>
+                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Gouvernorat</label>
                                     <input type="text" name="shipping_governorate" value={shippingData.shipping_governorate}
-                                        onChange={handleShippingChange} placeholder="ZH"
+                                        onChange={handleShippingChange} placeholder="Tunis"
                                         className={inputBase} />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">Pays</label>
                                     <input type="text" name="shipping_country" value={shippingData.shipping_country}
-                                        onChange={handleShippingChange} placeholder="CH"
+                                        onChange={handleShippingChange} placeholder="TN"
                                         className={inputBase} />
                                 </div>
                             </div>
@@ -582,7 +602,7 @@ const Profile = () => {
                                     <div>
                                         <label className="block text-xs font-bold text-gray-600 mb-1.5">Téléphone</label>
                                         <input type="tel" name="billing_phone" value={billingData.billing_phone}
-                                            onChange={handleBillingChange} placeholder="+41 79 XXX XX XX"
+                                            onChange={handleBillingChange} placeholder="+216 XX XXX XXX"
                                             className={inputBase} />
                                     </div>
                                     <div className="sm:col-span-2">
@@ -592,27 +612,27 @@ const Profile = () => {
                                             className={inputBase} />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">NPA</label>
+                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Code postal</label>
                                         <input type="text" name="billing_postal_code" value={billingData.billing_postal_code}
-                                            onChange={handleBillingChange} placeholder="8001" maxLength={4}
+                                            onChange={handleBillingChange} placeholder="1000" maxLength={4}
                                             className={inputBase} />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Localité</label>
+                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Ville</label>
                                         <input type="text" name="billing_city" value={billingData.billing_city}
-                                            onChange={handleBillingChange} placeholder="Zurich"
+                                            onChange={handleBillingChange} placeholder="Tunis"
                                             className={inputBase} />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Canton</label>
+                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Gouvernorat</label>
                                         <input type="text" name="billing_governorate" value={billingData.billing_governorate}
-                                            onChange={handleBillingChange} placeholder="ZH"
+                                            onChange={handleBillingChange} placeholder="Tunis"
                                             className={inputBase} />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold text-gray-600 mb-1.5">Pays</label>
                                         <input type="text" name="billing_country" value={billingData.billing_country}
-                                            onChange={handleBillingChange} placeholder="CH"
+                                            onChange={handleBillingChange} placeholder="TN"
                                             className={inputBase} />
                                     </div>
                                 </div>
@@ -668,6 +688,7 @@ const Profile = () => {
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1 flex-wrap">
                                                 <span className="font-black text-[#2c2c2c] text-sm">
+                                                    {/* ✅ FIX: slice(0, 8) correct */}
                                                     {order.order_number || `#${order.id.slice(0, 8).toUpperCase()}`}
                                                 </span>
                                                 <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: statusInfo.bg, color: statusInfo.color }}>
@@ -686,7 +707,7 @@ const Profile = () => {
                                             <div className="flex items-center gap-2">
                                                 <Link to={`/commandes/${order.id}`}
                                                     className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl no-underline transition-all"
-                                                    style={{ background: '#ecfdf5', color: '#166534', border: '1.5px solid #bbf7d0' }}>
+                                                    style={{ background: '#ecfdf5', color: '#166634', border: '1.5px solid #bbf7d0' }}>
                                                     <FiExternalLink size={13} /><span>Détails</span>
                                                 </Link>
                                                 <button onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
@@ -804,6 +825,7 @@ const Profile = () => {
                                                 <div className="flex items-start justify-between gap-3 mb-3">
                                                     <div>
                                                         <p className="font-bold text-sm text-[#2c2c2c]">
+                                                            {/* ✅ FIX: slice(0, 8) correct */}
                                                             #{r.id.slice(0, 8).toUpperCase()}
                                                             {r.order_number && (
                                                                 <span className="ml-2 font-mono text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-lg">

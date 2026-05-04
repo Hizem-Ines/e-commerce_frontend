@@ -12,6 +12,7 @@ import {
   adminLinkQuestionToFaq,
   adminDeleteQuestion,
 } from "../../../services/faqService";
+import { addWSListener, removeWSListener } from '../../../utils/websocket';
 
 const CATEGORY_OPTIONS = [
   { value: "livraison", label: "🚚 Livraison" },
@@ -428,6 +429,21 @@ const AdminFaq = () => {
 
   useEffect(() => {
     if (tab === "questions") loadQuestions();
+  }, [tab, loadQuestions]);
+
+  // ── WS : nouvelle question reçue en temps réel ────────────
+  useEffect(() => {
+      addWSListener("admin-faq-ws", (data) => {
+          if (data.type === "NEW_FAQ_QUESTION") {
+              // Recharger les questions si l'onglet est actif
+              if (tab === "questions") {
+                  loadQuestions();
+              }
+              // Incrémenter le badge même si on est sur l'onglet FAQs
+              setQTotal((prev) => prev + 1);
+          }
+      });
+      return () => removeWSListener("admin-faq-ws");
   }, [tab, loadQuestions]);
 
   // ── FAQ actions ──
