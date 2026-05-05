@@ -256,10 +256,11 @@ const Offres = () => {
                     <div className="flex items-start justify-between mb-6">
                         <div>
                             <span className="bg-[#c8872a] text-white text-xs font-bold px-4 py-1.5 rounded-full inline-block mb-3">
-                                ⭐ VEDETTES
+                                ❤️ COUPS DE CŒUR
                             </span>
+
                             <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">
-                                Produits Sélectionnés
+                                Nos Sélections
                             </h2>
                         </div>
                         <Link to="/produits" className="text-[#c8872a] font-bold text-sm hover:underline no-underline mt-2">
@@ -272,7 +273,7 @@ const Offres = () => {
                                 <ProductCard
                                     key={p.id}
                                     produit={p}
-                                    badge={{ label: '⭐ Vedette', color: '#c8872a' }}
+                                    badge={{ label: '❤️ Coup de cœur', color: '#c8872a' }}
                                 />
                             ))}
                         </div>
