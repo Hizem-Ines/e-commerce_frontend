@@ -906,16 +906,20 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                             />
 
                             <ToggleRow
-                                label="Coup de cœur ✨"
-                                sub="Mis en avant sur la page d'accueil"
+                                label="Coup de cœur ❤️"
+                                sub="Apparaît dans la section « Nos Sélections » sur la page d'accueil"
                                 value={form.is_featured}
                                 onChange={v => set('is_featured', v)}
-                                color="bg-amber-400"
+                                color="bg-[#c8872a]"
                             />
 
                             <ToggleRow
                                 label="Nouveau 🆕"
-                                sub="Affiche le badge « Nouveau » sur le produit"
+                                sub={
+                                    form.is_new
+                                        ? "Badge actif — désactiver pour le retirer manuellement"
+                                        : "Badge inactif — s'active automatiquement si le produit a moins de 30 jours"
+                                }
                                 value={form.is_new}
                                 onChange={v => set('is_new', v)}
                                 color="bg-blue-400"
@@ -1274,7 +1278,7 @@ const AdminProduits = () => {
                                                         </p>
                                                     )}
                                                     {produit.is_new      && <span className="text-xs bg-blue-100 text-blue-600 font-bold px-1.5 py-0.5 rounded-full">Nouveau</span>}
-                                                    {produit.is_featured && <span className="text-xs bg-amber-100 text-amber-600 font-bold px-1.5 py-0.5 rounded-full">✨ Vedette</span>}
+                                                    {produit.is_featured && <span className="text-xs bg-amber-100 text-amber-600 font-bold px-1.5 py-0.5 rounded-full">❤️ Coup de cœur</span>}
                                                 </div>
                                             </div>
                                         </div>
