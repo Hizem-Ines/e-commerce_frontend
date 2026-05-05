@@ -21,7 +21,12 @@ const Categories = ({ categories, loading }) => {
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-                        {categories.map((cat) => (
+                        {categories.map((cat) => {
+                            const totalCount =
+                                (parseInt(cat.product_count) || 0) +
+                                (cat.children || []).reduce((s, c) => s + (parseInt(c.product_count) || 0), 0);
+                            return (
+
                             <Link
                                 key={cat.id}
                                 to={`/produits?category_id=${cat.id}`}
@@ -36,10 +41,11 @@ const Categories = ({ categories, loading }) => {
                                     {cat.name_fr}
                                 </h3>
                                 <span className="text-xs text-black/50 bg-black/5 group-hover:text-white group-hover:bg-white/20 px-3 py-1 rounded-full transition-colors duration-300">
-                                    {cat.product_count || 0} produits
+                                    {totalCount} produits
                                 </span>
                             </Link>
-                        ))}
+                        );
+                    })}
                     </div>
                 )}
             </div>

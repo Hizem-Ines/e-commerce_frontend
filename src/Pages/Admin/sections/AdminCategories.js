@@ -11,7 +11,7 @@ const AdminCategories = () => {
     const [errorMsg, setErrorMsg] = useState('');
     const [showForm, setShowForm] = useState(false);
     const [editItem, setEditItem] = useState(null);
-    const [formData, setFormData] = useState({ name_fr: '', parent_id: '' });
+    const [formData, setFormData] = useState({ name_fr: '', description_fr: '', parent_id: '' });
     const [formLoading, setFormLoading] = useState(false);
 
     const fetchCategories = async () => {
@@ -32,7 +32,7 @@ roots.forEach(root => {
 
     flat.push({
         ...rootData,
-        product_count: totalProducts, // ← sum of children's products
+        product_count: (parseInt(rootData.product_count) || 0) + totalProducts,
         images: typeof rootData.images === 'string'
             ? JSON.parse(rootData.images)
             : rootData.images ?? [],
@@ -93,16 +93,26 @@ setCategories(flat);
         e.preventDefault();
         setFormLoading(true);
         try {
+            const payload = new FormData();
+            payload.append('name_fr', formData.name_fr);
+            payload.append('description_fr', formData.description_fr || '');
+            if (formData.parent_id) payload.append('parent_id', formData.parent_id);
+            if (formData.imageFile) payload.append('images', formData.imageFile);
+
             if (editItem) {
-                await api.put(`/categories/${editItem.id}`, formData);
+                await api.put(`/categories/${editItem.id}`, payload, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                });
                 setSuccessMsg('Catégorie mise à jour.');
             } else {
-                await api.post('/categories', formData);
+                await api.post('/categories', payload, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                });
                 setSuccessMsg('Catégorie créée avec succès.');
             }
             setShowForm(false);
             setEditItem(null);
-            setFormData({ name_fr: '', parent_id: '' });
+            setFormData({ name_fr: '', description_fr: '', parent_id: '' });
             fetchCategories();
             setTimeout(() => setSuccessMsg(''), 3000);
         } catch (err) {
@@ -115,7 +125,7 @@ setCategories(flat);
 
     const handleEdit = (cat) => {
         setEditItem(cat);
-        setFormData({ name_fr: cat.name_fr, parent_id: cat.parent_id || '' });
+        setFormData({ name_fr: cat.name_fr, description_fr: cat.description_fr || '', parent_id: cat.parent_id || '' });
         setShowForm(true);
     };
 
@@ -124,7 +134,7 @@ setCategories(flat);
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
                 <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Catégories</h2>
                 <button
-                    onClick={() => { setShowForm(true); setEditItem(null); setFormData({ name_fr: '', parent_id: '' }); }}
+                    onClick={() => { setShowForm(true); setEditItem(null); setFormData({ name_fr: '', description_fr: '', parent_id: '' }); }}
                     className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
                 >
                     <FiPlus size={16} /> Nouvelle catégorie
@@ -217,6 +227,7 @@ setCategories(flat);
                             <div className="px-5 py-4 border-b border-gray-100 bg-[#f9f5f0]">
                                 <h3 className="font-bold text-[#2c2c2c]">Sous-catégories ({subCategories.length})</h3>
                             </div>
+                            <div className="hidden md:block overflow-x-auto">
                             <table className="w-full text-sm min-w-[620px]">
                                 <thead>
                                     <tr className="border-b border-gray-100">
@@ -261,6 +272,28 @@ setCategories(flat);
                                     ))}
                                 </tbody>
                             </table>
+                            </div>
+                            <div className="md:hidden divide-y divide-gray-100">
+                            {subCategories.map(cat => (
+                                <div key={cat.id} className="p-4 flex items-center gap-3">
+                                <CategoryImageUpload category={cat} onUpdated={handleCategoryUpdated} />
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-bold text-[#2c2c2c] text-sm">{cat.name_fr}</p>
+                                    <p className="text-xs text-black/40">
+                                    {parentCategories.find(p => p.id === cat.parent_id)?.name_fr || '—'}
+                                    </p>
+                                </div>
+                                <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-1 rounded-full">
+                                    {cat.product_count || 0}
+                                </span>
+                                <div className="flex gap-1">
+                                    <button onClick={() => handleEdit(cat)} className="p-1.5 hover:bg-blue-50 text-blue-500 rounded-xl transition"><FiEdit size={14}/></button>
+                                    <button onClick={() => setDeleteConfirm(cat.id)} className="p-1.5 hover:bg-red-50 text-red-500 rounded-xl transition"><FiTrash2 size={14}/></button>
+                                </div>
+                                </div>
+                            ))}
+                            </div>
+                            
                         </div>
                     )}
                 </div>
@@ -289,6 +322,27 @@ setCategories(flat);
                                 />
                             </div>
                             
+                            <div>
+                                <label className="block text-xs font-bold text-gray-600 mb-1.5">Description (optionnel)</label>
+                                <textarea
+                                    value={formData.description_fr}
+                                    onChange={(e) => setFormData({ ...formData, description_fr: e.target.value })}
+                                    placeholder="Ex: Huiles vierges extra, olives marinées..."
+                                    rows={2}
+                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42] focus:outline-none text-sm transition resize-none"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-gray-600 mb-1.5">Image (optionnel)</label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => setFormData({ ...formData, imageFile: e.target.files[0] || null })}
+                                    className="w-full text-sm text-black/50 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#f9f5f0] file:text-[#2d5a27] hover:file:bg-emerald-50 transition"
+                                />
+                            </div>
+
                             <div>
                                 <label className="block text-xs font-bold text-gray-600 mb-1.5">Catégorie parente</label>
                                 <select
