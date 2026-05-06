@@ -672,7 +672,7 @@ const ProductDetail = () => {
                     </div>
                 </div>
 
-                {/* FOURNISSEUR */}
+                {/* Producteur */}
                 {produit.supplier_name && (
                     <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-5 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div>
