@@ -540,8 +540,8 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
 
     const handleSubmit = async () => {
         setError('');
-        if (!form.name_fr.trim())        { setError('Le nom (FR) est obligatoire.');         setTab('general');  return; }
-        if (!form.description_fr.trim()) { setError('La description (FR) est obligatoire.'); setTab('general');  return; }
+        if (!form.name_fr.trim())        { setError('Le nom  est obligatoire.');         setTab('general');  return; }
+        if (!form.description_fr.trim()) { setError('La description est obligatoire.'); setTab('general');  return; }
         if (!form.category_id)           { setError('La catégorie est obligatoire.');         setTab('general');  return; }
         if (!isEdit && variants.some(v => !v.price || parseFloat(v.price) < 0)) {
             setError('Chaque variante doit avoir un prix valide.'); setTab('variants'); return;
@@ -697,7 +697,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                 <textarea className={textareaCls} rows={4} value={form.description_fr} onChange={e => set('description_fr', e.target.value)} placeholder="Décrivez le produit en détail..." />
                             </Field>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <Field label="Fournisseur">
+                                <Field label="Producteur">
                                     <select className={inputCls} value={form.supplier_id} onChange={e => set('supplier_id', e.target.value)}>
                                         <option value="">— Aucun —</option>
                                         {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -1152,9 +1152,9 @@ const AdminProduits = () => {
                         </select>
                     </div>
 
-                    {/* Fournisseur */}
+                    {/* Producteur*/}
                     <div className="flex flex-col gap-1 min-w-[140px] flex-1">
-                        <label className="text-xs font-bold text-black/40 uppercase tracking-wider">Fournisseur</label>
+                        <label className="text-xs font-bold text-black/40 uppercase tracking-wider">Producteur</label>
                         <select
                             className={selectCls}
                             value={filterSupplier}

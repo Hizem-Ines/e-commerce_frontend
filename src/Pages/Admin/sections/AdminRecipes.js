@@ -420,7 +420,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
                         )}
                       </div>
                     </div>
-                    <Field label="Instruction (FR) *">
+                    <Field label="Instruction*">
                       <textarea className={textareaCls} rows={2} value={step.instruction_fr}
                         onChange={e => updateStep(i, "instruction_fr", e.target.value)}
                         placeholder="Décrivez cette étape en français..." />
