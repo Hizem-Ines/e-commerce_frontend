@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getAllProducts, deleteProduct, createProduct, updateProduct, getAllCategories, getAllSuppliers } from '../../../services/adminService';
-import { FiEdit,  FiCheck ,FiTrash2, FiPlus, FiSearch, FiX, FiUpload } from 'react-icons/fi';
+import { FiEdit,FiTrash2, FiPlus, FiSearch, FiX, FiUpload } from 'react-icons/fi';
 import formatPrice from '../../../utils/formatPrice';
 import { useSiteSettings } from '../../../context/SiteSettingsContext';
 import api from '../../../services/api';
@@ -547,6 +547,18 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
             setError('Chaque variante doit avoir un prix valide.'); setTab('variants'); return;
         }
 
+        if (!isEdit) {
+                for (const v of variants) {
+                    for (const a of v.attributes) {
+                        if ((a.type_fr && !a.value_fr) || (!a.type_fr && a.value_fr)) {
+                            setError('Chaque attribut doit avoir un type et une valeur.');
+                            setTab('variants');
+                            return;
+                        }
+                    }
+                }
+            }
+
         setLoading(true);
         try {
             const fd = new FormData();
@@ -1032,12 +1044,6 @@ const AdminProduits = () => {
         setter(val);
     };
 
-    const handleSearch = (e) => {
-        e.preventDefault();
-        setPage(1);
-        setCommittedSearch(search);
-    };
-
     const clearFilters = () => {
         setPage(1);
         setFilterCategory('');
@@ -1120,19 +1126,17 @@ const AdminProduits = () => {
             {errorMsg   && <div className="bg-red-50 border border-red-200 text-red-700 font-semibold px-5 py-3 rounded-xl mb-5 text-sm">❌ {errorMsg}</div>}
 
             {/* ── Recherche ── */}
-            <form onSubmit={handleSearch} className="flex gap-3 mb-3">
+            <div className="flex gap-3 mb-3">
                 <div className="relative flex-1">
                     <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                     <input
-                        type="text" value={search} onChange={e => setSearch(e.target.value)}
+                        type="text" value={search}
+                        onChange={e => { setSearch(e.target.value); setCommittedSearch(e.target.value); setPage(1); }}
                         placeholder="Rechercher un produit..."
                         className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42] focus:outline-none text-sm transition"
                     />
                 </div>
-                <button type="submit" className="bg-[#2d5a27] text-white font-bold px-5 py-3 rounded-xl hover:bg-[#4a8c42] transition text-sm">
-                    Rechercher
-                </button>
-            </form>
+            </div>
 
             {/* ── Filtres ── */}
             <div className="bg-white border-2 border-gray-100 rounded-2xl px-4 py-4 mb-6">
