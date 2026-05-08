@@ -488,12 +488,12 @@ const ProductDetail = () => {
                                 </div>
                             </div>
 
-                            <div className="flex gap-3">
+                            <div className="flex flex-wrap gap-3">
                                 <button onClick={handleAjouter} disabled={!varianteActive}
                                     className={`flex-1 font-bold py-4 rounded-xl transition-all duration-300 text-base ${ajoute ? 'bg-green-500 text-white' : 'bg-[#2d5a27] hover:bg-[#4a8c42] text-white'}`}>
                                     {ajoute ? '✅ Ajouté au panier !' : 'Ajouter au panier'}
                                 </button>
-                                <Link to="/panier" className="border-2 border-[#2d5a27] text-[#2d5a27] hover:bg-[#2d5a27] hover:text-white font-bold px-6 py-4 rounded-xl transition-colors duration-300 no-underline text-center">
+                                <Link to="/panier" className="border-2 border-[#2d5a27] text-[#2d5a27] hover:bg-[#2d5a27] hover:text-white font-bold px-6 py-4 rounded-xl transition-colors duration-300 no-underline text-center shrink-0">
                                     🛒 Panier
                                 </Link>
                             </div>
