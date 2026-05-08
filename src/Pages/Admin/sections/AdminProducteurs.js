@@ -130,7 +130,7 @@ const AdminProducteurs = () => {
     };
 
     const fields = [
-        { label: 'Nom (FR) *', key: 'name', placeholder: 'Nom du producteur', required: true },
+        { label: 'Nom  *', key: 'name', placeholder: 'Nom du producteur', required: true },
         { label: 'Région', key: 'region', placeholder: 'Canton' },
         { label: 'Adresse', key: 'address', placeholder: '' },
         { label: 'Contact', key: 'contact', placeholder: '+41 xx xxx xx xx' },

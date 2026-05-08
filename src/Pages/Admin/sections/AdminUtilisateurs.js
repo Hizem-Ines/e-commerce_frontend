@@ -34,12 +34,9 @@ const AdminUtilisateurs = () => {
         }
     };
 
-    useEffect(() => { fetchUsers(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
     // Re-fetch automatically when filters change
-    useEffect(() => { fetchUsers(); }, [filterRole, filterStatus]); // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() => { fetchUsers(); }, [filterRole, filterStatus, search]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const handleSearch = (e) => { e.preventDefault(); fetchUsers(); };
 
     const handleDelete = async (id) => {
         try {
@@ -114,7 +111,7 @@ const AdminUtilisateurs = () => {
             {/* RECHERCHE + FILTRES */}
             <div className="flex flex-col gap-3 mb-6">
                 {/* Search row */}
-                <form onSubmit={handleSearch} className="flex gap-3">
+                <div className="flex gap-3">
                     <div className="relative flex-1">
                         <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                         <input
@@ -125,10 +122,7 @@ const AdminUtilisateurs = () => {
                             className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#4a8c42] focus:outline-none text-sm transition"
                         />
                     </div>
-                    <button type="submit" className="bg-[#2d5a27] text-white font-bold px-5 py-3 rounded-xl hover:bg-[#4a8c42] transition text-sm">
-                        Rechercher
-                    </button>
-                </form>
+                </div>
 
                 {/* Filter row */}
                 <div className="flex flex-wrap items-center gap-3">
