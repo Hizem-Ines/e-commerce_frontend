@@ -17,7 +17,7 @@ const BLANK_FORM = {
 const BLANK_VARIANT = {
     price: '', cost_price: '',
     stock: '0', sku: '', weight_grams: '',
-    attributes: [{ type_fr: '', value_fr: '', unit: '' }],
+    attributes: [{ type_fr: '', value_fr: ''}],
 };
 
 const Field = ({ label, required, children }) => (
@@ -217,7 +217,7 @@ const VariantEditRow = ({ variant, productId, onDeleted, onChange }) => {
     sku:          variant.sku          ?? '',
     weight_grams: variant.weight_grams ?? '',
     is_active:    variant.is_active    ?? true,
-    attributes:   variant.attributes?.map(a => ({ type_fr: a.type_fr, value_fr: a.value_fr, unit: a.unit ?? '' })) ?? [],
+    attributes:   variant.attributes?.map(a => ({ type_fr: a.type_fr, value_fr: a.value_fr })) ?? [],
   });
   const [deleting, setDeleting] = useState(false);
   const [err, setErr] = useState('');
@@ -238,7 +238,7 @@ const VariantEditRow = ({ variant, productId, onDeleted, onChange }) => {
   };
 
   const addAttr = () => {
-    const next = { ...vals, attributes: [...vals.attributes, { type_fr: '', value_fr: '', unit: '' }] };
+    const next = { ...vals, attributes: [...vals.attributes, { type_fr: '', value_fr: '' }] };
     setVals(next);
     onChange(variant.id, next);
   };
@@ -294,10 +294,6 @@ const VariantEditRow = ({ variant, productId, onDeleted, onChange }) => {
                     <input className={inputCls + " flex-1"} value={a.value_fr}
                     onChange={e => setAttrField(ai, 'value_fr', e.target.value)}
                     placeholder="Valeur (ex: 500)" />
-                    <input className="bg-[#f9f5f0] border-2 border-transparent focus:border-[#4a8c42] focus:bg-white rounded-xl px-3 py-2.5 text-sm text-[#2c2c2c] outline-none transition placeholder-black/25 w-20 shrink-0"
-                    value={a.unit ?? ''}
-                    onChange={e => setAttrField(ai, 'unit', e.target.value)}
-                    placeholder="Unité" />
                     {vals.attributes.length > 1 && (
                     <button onClick={() => removeAttr(ai)} className="text-red-400 hover:text-red-600 p-1 shrink-0"><FiX size={12}/></button>
                     )}
@@ -344,13 +340,13 @@ const VariantEditRow = ({ variant, productId, onDeleted, onChange }) => {
 
 // ─── AddVariantForm — inchangé ────────────────────────────────────────────────
 const AddVariantForm = ({ productId, onAdded, onCancel }) => {
-    const [v, setV]       = useState({ ...BLANK_VARIANT, attributes: [{ type_fr: '', value_fr: '', unit: '' }] });
+    const [v, setV]       = useState({ ...BLANK_VARIANT, attributes: [{ type_fr: '', value_fr: ''}] });
     const [saving, setSaving] = useState(false);
     const [err, setErr]   = useState('');
 
     const set     = (k, val) => setV(p => ({ ...p, [k]: val }));
     const setAttr = (ai, k, val) => setV(p => ({ ...p, attributes: p.attributes.map((a, j) => j === ai ? { ...a, [k]: val } : a) }));
-    const addAttr = () => setV(p => ({ ...p, attributes: [...p.attributes, { type_fr: '', value_fr: '', unit: '' }] }));
+    const addAttr = () => setV(p => ({ ...p, attributes: [...p.attributes, { type_fr: '', value_fr: ''}] }));
     const remAttr = (ai) => setV(p => ({ ...p, attributes: p.attributes.filter((_, j) => j !== ai) }));
 
     const save = async () => {
@@ -408,9 +404,7 @@ const AddVariantForm = ({ productId, onAdded, onCancel }) => {
                                 onChange={e => setAttr(ai, 'type_fr', e.target.value)} placeholder="Type (ex: Poids)" />
                                 <input className={inputCls + " flex-1"} value={a.value_fr}
                                 onChange={e => setAttr(ai, 'value_fr', e.target.value)} placeholder="Valeur (ex: 500)" />
-                            <input className="bg-[#f9f5f0] border-2 border-transparent focus:border-[#4a8c42] focus:bg-white rounded-xl px-3 py-2.5 text-sm text-[#2c2c2c] outline-none transition placeholder-black/25 w-20 shrink-0"
-                                value={a.unit ?? ''}
-                                onChange={e => setAttr(ai, 'unit', e.target.value)} placeholder="Unité" />
+                        
                             {v.attributes.length > 1 && (
                                 <button onClick={() => remAttr(ai)} className="text-red-400 hover:text-red-600 p-1 shrink-0"><FiX size={12}/></button>
                             )}
@@ -469,7 +463,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
         low_stock_threshold: product.low_stock_threshold ?? 5,
     } : { ...BLANK_FORM });
 
-    const [variants, setVariants]         = useState([{ ...BLANK_VARIANT, attributes: [{ type_fr: '', value_fr: '' , unit: ''}] }]);
+    const [variants, setVariants]         = useState([{ ...BLANK_VARIANT, attributes: [{ type_fr: '', value_fr: ''}] }]);
     const [editVariants, setEditVariants] = useState(product?.variants || []);
     const [showAddVariant, setShowAddVariant] = useState(false);
     const [variantEdits, setVariantEdits] = useState({}); 
@@ -533,12 +527,12 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
         ...vt, attributes: vt.attributes.map((a, j) => j === ai ? { ...a, [k]: v } : a),
     }));
     const addAttr    = (vi) => setVariants(vs => vs.map((vt, i) => i !== vi ? vt : {
-        ...vt, attributes: [...vt.attributes, { type_fr: '', value_fr: '' , unit: ''}],
+        ...vt, attributes: [...vt.attributes, { type_fr: '', value_fr: '' }],
     }));
     const removeAttr = (vi, ai) => setVariants(vs => vs.map((vt, i) => i !== vi ? vt : {
         ...vt, attributes: vt.attributes.filter((_, j) => j !== ai),
     }));
-    const addVariant    = () => setVariants(vs => [...vs, { ...BLANK_VARIANT, attributes: [{ type_fr: '', value_fr: '', unit: '' }] }]);
+    const addVariant    = () => setVariants(vs => [...vs, { ...BLANK_VARIANT, attributes: [{ type_fr: '', value_fr: ''}] }]);
     const removeVariant = (vi) => setVariants(vs => vs.filter((_, i) => i !== vi));
 
     const handleSubmit = async () => {
@@ -810,10 +804,6 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                                                 <input className={inputCls + " flex-1"} value={a.value_fr}
                                                                 onChange={e => setAttr(vi, ai, 'value_fr', e.target.value)}
                                                                 placeholder="Valeur (ex: 500)" />
-                                                                <input className="bg-[#f9f5f0] border-2 border-transparent focus:border-[#4a8c42] focus:bg-white rounded-xl px-3 py-2.5 text-sm text-[#2c2c2c] outline-none transition placeholder-black/25 w-20 shrink-0"
-                                                                value={a.unit ?? ''}
-                                                                onChange={e => setAttr(vi, ai, 'unit', e.target.value)}
-                                                                placeholder="Unité" />
                                                                 {v.attributes.length > 1 && (
                                                                 <button onClick={() => removeAttr(vi, ai)} className="text-red-400 hover:text-red-600 p-1 shrink-0"><FiX size={12}/></button>
                                                                 )}
