@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getAllProducts, deleteProduct, createProduct, updateProduct, getAllCategories, getAllSuppliers } from '../../../services/adminService';
-import { FiEdit,FiTrash2, FiPlus, FiSearch, FiX, FiUpload } from 'react-icons/fi';
+import { FiEdit, FiTrash2, FiPlus, FiSearch, FiX, FiUpload } from 'react-icons/fi';
 import formatPrice from '../../../utils/formatPrice';
 import { useSiteSettings } from '../../../context/SiteSettingsContext';
 import api from '../../../services/api';
@@ -17,7 +17,7 @@ const BLANK_FORM = {
 const BLANK_VARIANT = {
     price: '', cost_price: '',
     stock: '0', sku: '', weight_grams: '',
-    attributes: [{ type_fr: '', value_fr: '' }],
+    attributes: [{ type_fr: '', value_fr: ''}],
 };
 
 const Field = ({ label, required, children }) => (
@@ -288,21 +288,15 @@ const VariantEditRow = ({ variant, productId, onDeleted, onChange }) => {
           <div className="space-y-2">
             {vals.attributes.map((a, ai) => (
               <div key={ai} className="flex gap-2 items-center">
-                <input
-                  className={inputCls + " flex-1"}
-                  value={a.type_fr}
-                  onChange={e => setAttrField(ai, 'type_fr', e.target.value)}
-                  placeholder="Type (ex: Poids)"
-                />
-                <input
-                  className={inputCls + " flex-1"}
-                  value={a.value_fr}
-                  onChange={e => setAttrField(ai, 'value_fr', e.target.value)}
-                  placeholder="Valeur (ex: 500ml)"
-                />
-                {vals.attributes.length > 1 && (
-                  <button onClick={() => removeAttr(ai)} className="text-red-400 hover:text-red-600 p-1 shrink-0"><FiX size={12}/></button>
-                )}
+                <input className={inputCls + " flex-1"} value={a.type_fr}
+                    onChange={e => setAttrField(ai, 'type_fr', e.target.value)}
+                    placeholder="Type (ex: Poids)" />
+                    <input className={inputCls + " flex-1"} value={a.value_fr}
+                    onChange={e => setAttrField(ai, 'value_fr', e.target.value)}
+                    placeholder="Valeur (ex: 500)" />
+                    {vals.attributes.length > 1 && (
+                    <button onClick={() => removeAttr(ai)} className="text-red-400 hover:text-red-600 p-1 shrink-0"><FiX size={12}/></button>
+                    )}
               </div>
             ))}
           </div>
@@ -346,13 +340,13 @@ const VariantEditRow = ({ variant, productId, onDeleted, onChange }) => {
 
 // ─── AddVariantForm — inchangé ────────────────────────────────────────────────
 const AddVariantForm = ({ productId, onAdded, onCancel }) => {
-    const [v, setV]       = useState({ ...BLANK_VARIANT, attributes: [{ type_fr: '', value_fr: '' }] });
+    const [v, setV]       = useState({ ...BLANK_VARIANT, attributes: [{ type_fr: '', value_fr: ''}] });
     const [saving, setSaving] = useState(false);
     const [err, setErr]   = useState('');
 
     const set     = (k, val) => setV(p => ({ ...p, [k]: val }));
     const setAttr = (ai, k, val) => setV(p => ({ ...p, attributes: p.attributes.map((a, j) => j === ai ? { ...a, [k]: val } : a) }));
-    const addAttr = () => setV(p => ({ ...p, attributes: [...p.attributes, { type_fr: '', value_fr: '' }] }));
+    const addAttr = () => setV(p => ({ ...p, attributes: [...p.attributes, { type_fr: '', value_fr: ''}] }));
     const remAttr = (ai) => setV(p => ({ ...p, attributes: p.attributes.filter((_, j) => j !== ai) }));
 
     const save = async () => {
@@ -406,8 +400,11 @@ const AddVariantForm = ({ productId, onAdded, onCancel }) => {
                 <div className="space-y-2">
                     {v.attributes.map((a, ai) => (
                         <div key={ai} className="flex gap-2 items-center">
-                            <input className={inputCls + " flex-1"} value={a.type_fr} onChange={e => setAttr(ai, 'type_fr', e.target.value)} placeholder="Type (ex: Poids)" />
-                            <input className={inputCls + " flex-1"} value={a.value_fr} onChange={e => setAttr(ai, 'value_fr', e.target.value)} placeholder="Valeur (ex: 500ml)" />
+                            <input className={inputCls + " flex-1"} value={a.type_fr}
+                                onChange={e => setAttr(ai, 'type_fr', e.target.value)} placeholder="Type (ex: Poids)" />
+                                <input className={inputCls + " flex-1"} value={a.value_fr}
+                                onChange={e => setAttr(ai, 'value_fr', e.target.value)} placeholder="Valeur (ex: 500)" />
+                        
                             {v.attributes.length > 1 && (
                                 <button onClick={() => remAttr(ai)} className="text-red-400 hover:text-red-600 p-1 shrink-0"><FiX size={12}/></button>
                             )}
@@ -466,7 +463,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
         low_stock_threshold: product.low_stock_threshold ?? 5,
     } : { ...BLANK_FORM });
 
-    const [variants, setVariants]         = useState([{ ...BLANK_VARIANT, attributes: [{ type_fr: '', value_fr: '' }] }]);
+    const [variants, setVariants]         = useState([{ ...BLANK_VARIANT, attributes: [{ type_fr: '', value_fr: ''}] }]);
     const [editVariants, setEditVariants] = useState(product?.variants || []);
     const [showAddVariant, setShowAddVariant] = useState(false);
     const [variantEdits, setVariantEdits] = useState({}); 
@@ -535,7 +532,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
     const removeAttr = (vi, ai) => setVariants(vs => vs.map((vt, i) => i !== vi ? vt : {
         ...vt, attributes: vt.attributes.filter((_, j) => j !== ai),
     }));
-    const addVariant    = () => setVariants(vs => [...vs, { ...BLANK_VARIANT, attributes: [{ type_fr: '', value_fr: '' }] }]);
+    const addVariant    = () => setVariants(vs => [...vs, { ...BLANK_VARIANT, attributes: [{ type_fr: '', value_fr: ''}] }]);
     const removeVariant = (vi) => setVariants(vs => vs.filter((_, i) => i !== vi));
 
     const handleSubmit = async () => {
@@ -813,11 +810,15 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                                 <div className="space-y-2">
                                                     {v.attributes.map((a, ai) => (
                                                         <div key={ai} className="flex gap-2 items-center">
-                                                            <input className={inputCls + " flex-1"} value={a.type_fr} onChange={e => setAttr(vi, ai, 'type_fr', e.target.value)} placeholder="Type (ex: Poids)" />
-                                                            <input className={inputCls + " flex-1"} value={a.value_fr} onChange={e => setAttr(vi, ai, 'value_fr', e.target.value)} placeholder="Valeur (ex: 500ml)" />
-                                                            {v.attributes.length > 1 && (
+                                                            <input className={inputCls + " flex-1"} value={a.type_fr}
+                                                                onChange={e => setAttr(vi, ai, 'type_fr', e.target.value)}
+                                                                placeholder="Type (ex: Poids)" />
+                                                                <input className={inputCls + " flex-1"} value={a.value_fr}
+                                                                onChange={e => setAttr(vi, ai, 'value_fr', e.target.value)}
+                                                                placeholder="Valeur (ex: 500)" />
+                                                                {v.attributes.length > 1 && (
                                                                 <button onClick={() => removeAttr(vi, ai)} className="text-red-400 hover:text-red-600 p-1 shrink-0"><FiX size={12}/></button>
-                                                            )}
+                                                                )}
                                                         </div>
                                                     ))}
                                                 </div>

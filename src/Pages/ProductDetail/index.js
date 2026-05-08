@@ -286,6 +286,7 @@ const ProductDetail = () => {
             try {
                 const res = await getProductById(id);
                 const p   = res.data.product;
+
                 setProduit(p);
                 if (p.variants?.length > 0) setVarianteActive(p.variants[0]);
             } catch (err) {
@@ -427,6 +428,16 @@ const ProductDetail = () => {
 
                             <h1 className="text-3xl font-bold font-serif text-[#2c2c2c] mb-1">{produit.name_fr}</h1>
 
+                            {varianteActive?.attributes?.length > 0 && (
+                                <div className="flex gap-2 flex-wrap mb-3">
+                                    {varianteActive.attributes.map((a, i) => (
+                                        <span key={i} className="bg-[#f0fdf4] text-[#2d5a27] text-xs font-bold px-3 py-1 rounded-full border border-emerald-200">
+                                            {a.type_fr} : {a.value_fr}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+
                             {reviews.length > 0 && (
                                 <div className="flex items-center gap-2 mb-4">
                                     <div className="flex gap-0.5">
@@ -442,7 +453,7 @@ const ProductDetail = () => {
 
                             <p className="text-black/60 text-sm leading-relaxed whitespace-pre-line mb-6 line-clamp-3">{produit.description_fr}</p>
 
-                            {produit.variants?.length > 1 && (
+                            {produit.variants?.length > 0 && (
                                 <div className="mb-6">
                                     <p className="text-sm font-semibold text-black/60 mb-2">Choisir une variante :</p>
                                     <div className="flex gap-2 flex-wrap">
@@ -589,7 +600,7 @@ const ProductDetail = () => {
                                                     {produit.variants.map((v, i) => (
                                                         <tr key={v.id} className={`border-t border-gray-50 ${i % 2 !== 0 ? 'bg-[#fafafa]' : ''}`}>
                                                             <td className="px-4 py-3 font-semibold text-[#2c2c2c]">
-                                                                {v.attributes?.map(a => `${a.value_fr}${a.unit ? ' ' + a.unit : ''}`).join(' · ') || '—'}
+                                                                {v.attributes?.map(a => a.value_fr).join(' · ') || '—'}
                                                             </td>
                                                             <td className="px-4 py-3 text-black/40 font-mono text-xs">{v.sku || '—'}</td>
                                                             <td className="px-4 py-3 text-right font-bold text-[#2d5a27]">{fmt(v.price)}</td>
