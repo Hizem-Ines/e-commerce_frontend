@@ -432,7 +432,7 @@ const ProductDetail = () => {
                                 <div className="flex gap-2 flex-wrap mb-3">
                                     {varianteActive.attributes.map((a, i) => (
                                         <span key={i} className="bg-[#f0fdf4] text-[#2d5a27] text-xs font-bold px-3 py-1 rounded-full border border-emerald-200">
-                                            {a.type_fr} : {a.value_fr}{a.unit ? ` ${a.unit}` : ''}
+                                            {a.type_fr} : {a.value_fr}
                                         </span>
                                     ))}
                                 </div>
@@ -600,7 +600,7 @@ const ProductDetail = () => {
                                                     {produit.variants.map((v, i) => (
                                                         <tr key={v.id} className={`border-t border-gray-50 ${i % 2 !== 0 ? 'bg-[#fafafa]' : ''}`}>
                                                             <td className="px-4 py-3 font-semibold text-[#2c2c2c]">
-                                                                {v.attributes?.map(a => `${a.value_fr}${a.unit ? ' ' + a.unit : ''}`).join(' · ') || '—'}
+                                                                {v.attributes?.map(a => a.value_fr).join(' · ') || '—'}
                                                             </td>
                                                             <td className="px-4 py-3 text-black/40 font-mono text-xs">{v.sku || '—'}</td>
                                                             <td className="px-4 py-3 text-right font-bold text-[#2d5a27]">{fmt(v.price)}</td>
