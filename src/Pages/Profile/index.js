@@ -5,7 +5,7 @@ import { getMyOrders } from '../../services/orderService';
 import {
     FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiSave,
     FiShoppingBag, FiHeart, FiPackage, FiChevronDown, FiChevronUp,
-    FiExternalLink, FiAlertCircle, FiMapPin, FiPhone,
+    FiExternalLink, FiAlertCircle, FiPhone,
 } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
@@ -94,37 +94,7 @@ const Profile = () => {
         city:    user?.city    || '',
     });
 
-    // ── Adresse de livraison préférée ──────────────────────
-    const [shippingData, setShippingData] = useState({
-        shipping_full_name:   user?.shipping_full_name   || '',
-        shipping_phone:       user?.shipping_phone       || '',
-        shipping_address:     user?.shipping_address     || '',
-        shipping_city:        user?.shipping_city        || '',
-        shipping_governorate: user?.shipping_governorate || '',
-        shipping_postal_code: user?.shipping_postal_code || '',
-        shipping_country:     user?.shipping_country     || 'CH',
-    });
-
-    const savedShippingRef = useRef({ ...shippingData });
-    const [shippingDirty, setShippingDirty] = useState(false);
-
-    // ── Adresse de facturation préférée ───────────────────
-    const [billingSameAsShipping, setBillingSameAsShipping] = useState(false);
-
-    const [billingData, setBillingData] = useState({
-        billing_full_name:   user?.billing_full_name   || '',
-        billing_phone:       user?.billing_phone       || '',
-        billing_address:     user?.billing_address     || '',
-        billing_city:        user?.billing_city        || '',
-        billing_governorate: user?.billing_governorate || '',
-        billing_postal_code: user?.billing_postal_code || '',
-        billing_country:     user?.billing_country     || 'CH',
-    });
-
-    const savedBillingRef  = useRef({ ...billingData });
-    const [billingDirty, setBillingDirty] = useState(false);
-
-    const isProfileSectionDirty = isProfileDirty || shippingDirty || billingDirty;
+    const isProfileSectionDirty = isProfileDirty ;
 
     // ── Mot de passe ──────────────────────────────────────
     const [passwordData, setPasswordData] = useState({
@@ -150,7 +120,7 @@ const Profile = () => {
         if (currentTabDirty) {
             if (!window.confirm('Vous avez des modifications non sauvegardées. Continuer ?')) return;
             if (activeTab === 'profil') {
-                setProfileDirty(false); setAvatarDirty(false); setShippingDirty(false); setBillingDirty(false);
+                setProfileDirty(false); setAvatarDirty(false);
                 setAvatarPreview(user?.avatar || null);
                 setProfileData({
                     name:    savedProfileRef.current.name,
@@ -159,8 +129,7 @@ const Profile = () => {
                     address: savedProfileRef.current.address,
                     city:    savedProfileRef.current.city,
                 });
-                setShippingData({ ...savedShippingRef.current });
-                setBillingData({ ...savedBillingRef.current });
+                
             } else if (activeTab === 'securite') {
                 setPasswordDirty(false);
                 setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -264,35 +233,7 @@ useEffect(() => {
         );
     };
 
-    const handleShippingChange = (e) => {
-        const { name, value } = e.target;
-        setShippingData(prev => ({ ...prev, [name]: value }));
-        setShippingDirty(true);
-    };
 
-    const handleBillingChange = (e) => {
-        const { name, value } = e.target;
-        setBillingData(prev => ({ ...prev, [name]: value }));
-        setBillingDirty(true);
-    };
-
-    const handleBillingSameToggle = () => {
-        const next = !billingSameAsShipping;
-        setBillingSameAsShipping(next);
-        if (next) {
-            // Copier shipping vers billing
-            setBillingData({
-                billing_full_name:   shippingData.shipping_full_name,
-                billing_phone:       shippingData.shipping_phone,
-                billing_address:     shippingData.shipping_address,
-                billing_city:        shippingData.shipping_city,
-                billing_governorate: shippingData.shipping_governorate,
-                billing_postal_code: shippingData.shipping_postal_code,
-                billing_country:     shippingData.shipping_country,
-            });
-            setBillingDirty(true);
-        }
-    };
 
     // ── Avatar ────────────────────────────────────────────
     const handleAvatarChange = (e) => {
@@ -317,22 +258,6 @@ useEffect(() => {
             fd.append('address', profileData.address);
             fd.append('city',    profileData.city);
 
-            // ✅ Champs shipping
-            Object.entries(shippingData).forEach(([k, v]) => fd.append(k, v || ''));
-
-            // ✅ Champs billing (ou copie depuis shipping si cochée)
-            if (billingSameAsShipping) {
-                fd.append('billing_full_name',   shippingData.shipping_full_name);
-                fd.append('billing_phone',        shippingData.shipping_phone);
-                fd.append('billing_address',      shippingData.shipping_address);
-                fd.append('billing_city',         shippingData.shipping_city);
-                fd.append('billing_governorate',  shippingData.shipping_governorate);
-                fd.append('billing_postal_code',  shippingData.shipping_postal_code);
-                fd.append('billing_country',      shippingData.shipping_country);
-            } else {
-                Object.entries(billingData).forEach(([k, v]) => fd.append(k, v || ''));
-            }
-
             if (fileInputRef.current?.files[0]) {
                 fd.append('avatar', fileInputRef.current.files[0]);
             } else if (deleteAvatar) {
@@ -342,10 +267,9 @@ useEffect(() => {
             await updateProfile(fd);
 
             // Marquer comme sauvegardé
-            savedProfileRef.current  = { name: profileData.name, phone: profileData.phone, address: profileData.address, city: profileData.city };
-            savedShippingRef.current = { ...shippingData };
-            savedBillingRef.current  = { ...billingData };
-            setProfileDirty(false); setAvatarDirty(false); setShippingDirty(false); setBillingDirty(false);
+        
+            savedProfileRef.current = { name: profileData.name, phone: profileData.phone, address: profileData.address, city: profileData.city };
+            setProfileDirty(false); setAvatarDirty(false);
             showSuccess('Profil mis à jour avec succès !');
         } catch (err) {
             showError(err.response?.data?.message || 'Erreur lors de la mise à jour');
@@ -516,128 +440,6 @@ useEffect(() => {
                             </div>
                         </div>
 
-                        {/* ── Adresse de livraison préférée ── */}
-                        <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-5 sm:p-8">
-                            <h3 className="text-lg font-bold text-[#2c2c2c] mb-1 flex items-center gap-2">
-                                <FiMapPin style={{ color: '#e63946' }} /> Adresse de livraison préférée
-                            </h3>
-                            <p className="text-xs text-black/40 mb-5">
-                                Pré-remplie automatiquement au checkout lors de votre prochaine commande.
-                            </p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Nom complet</label>
-                                    <input type="text" name="shipping_full_name" value={shippingData.shipping_full_name}
-                                        onChange={handleShippingChange} placeholder="Nom pour la livraison"
-                                        className={inputBase} />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Téléphone</label>
-                                    <input type="tel" name="shipping_phone" value={shippingData.shipping_phone}
-                                        onChange={handleShippingChange} placeholder="+216 XX XXX XXX"
-                                        className={inputBase} />
-                                </div>
-                                <div className="sm:col-span-2">
-                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Adresse</label>
-                                    <input type="text" name="shipping_address" value={shippingData.shipping_address}
-                                        onChange={handleShippingChange} placeholder="Rue, numéro..."
-                                        className={inputBase} />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Code postal</label>
-                                    <input type="text" name="shipping_postal_code" value={shippingData.shipping_postal_code}
-                                        onChange={handleShippingChange} placeholder="1000" maxLength={4}
-                                        className={inputBase} />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Ville</label>
-                                    <input type="text" name="shipping_city" value={shippingData.shipping_city}
-                                        onChange={handleShippingChange} placeholder="Tunis"
-                                        className={inputBase} />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Gouvernorat</label>
-                                    <input type="text" name="shipping_governorate" value={shippingData.shipping_governorate}
-                                        onChange={handleShippingChange} placeholder="Tunis"
-                                        className={inputBase} />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Pays</label>
-                                    <input type="text" name="shipping_country" value={shippingData.shipping_country}
-                                        onChange={handleShippingChange} placeholder="TN"
-                                        className={inputBase} />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* ── Adresse de facturation préférée ── */}
-                        <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-5 sm:p-8">
-                            <h3 className="text-lg font-bold text-[#2c2c2c] mb-4 flex items-center gap-2">
-                                <FiMapPin style={{ color: '#6366f1' }} /> Adresse de facturation préférée
-                            </h3>
-
-                            {/* Checkbox identique */}
-                            <label className="flex items-center gap-3 cursor-pointer mb-5">
-                                <div
-                                    onClick={handleBillingSameToggle}
-                                    className={`w-5 h-5 rounded flex items-center justify-center border-2 transition-all cursor-pointer shrink-0 ${
-                                        billingSameAsShipping ? 'border-[#166534] bg-[#166534]' : 'border-gray-300 bg-white'
-                                    }`}
-                                >
-                                    {billingSameAsShipping && <span className="text-white text-xs font-bold">✓</span>}
-                                </div>
-                                <span className="text-sm font-semibold text-[#2c2c2c]">
-                                    Identique à l'adresse de livraison
-                                </span>
-                            </label>
-
-                            {!billingSameAsShipping && (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Nom complet</label>
-                                        <input type="text" name="billing_full_name" value={billingData.billing_full_name}
-                                            onChange={handleBillingChange} placeholder="Nom pour la facture"
-                                            className={inputBase} />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Téléphone</label>
-                                        <input type="tel" name="billing_phone" value={billingData.billing_phone}
-                                            onChange={handleBillingChange} placeholder="+216 XX XXX XXX"
-                                            className={inputBase} />
-                                    </div>
-                                    <div className="sm:col-span-2">
-                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Adresse</label>
-                                        <input type="text" name="billing_address" value={billingData.billing_address}
-                                            onChange={handleBillingChange} placeholder="Rue, numéro..."
-                                            className={inputBase} />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Code postal</label>
-                                        <input type="text" name="billing_postal_code" value={billingData.billing_postal_code}
-                                            onChange={handleBillingChange} placeholder="1000" maxLength={4}
-                                            className={inputBase} />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Ville</label>
-                                        <input type="text" name="billing_city" value={billingData.billing_city}
-                                            onChange={handleBillingChange} placeholder="Tunis"
-                                            className={inputBase} />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Gouvernorat</label>
-                                        <input type="text" name="billing_governorate" value={billingData.billing_governorate}
-                                            onChange={handleBillingChange} placeholder="Tunis"
-                                            className={inputBase} />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Pays</label>
-                                        <input type="text" name="billing_country" value={billingData.billing_country}
-                                            onChange={handleBillingChange} placeholder="TN"
-                                            className={inputBase} />
-                                    </div>
-                                </div>
-                            )}
-                        </div>
 
                         {/* Bouton sauvegarder */}
                         <button type="submit" disabled={loadingProfile || !isProfileSectionDirty}
