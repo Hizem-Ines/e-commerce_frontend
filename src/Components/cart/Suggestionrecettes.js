@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { suggererRecettes } from '../../services/aiRecipePanierService';
+import CarteIA from '../common/CartIA';
 
 export default function SuggestionsRecettes({ panier }) {
     const [recette, setRecette] = useState(null);
@@ -142,26 +142,13 @@ export default function SuggestionsRecettes({ panier }) {
 
                             {/* Suggestions GOFFA */}
                             {recette.suggestionGoffa?.length > 0 && (
-                                <div className="rounded-xl p-3"
-                                    style={{ background: '#fef9c3', border: '1px solid #fde68a' }}>
-                                    <p className="text-xs font-bold mb-2" style={{ color: '#92400e' }}>
+                                <div className="mt-4">
+                                    <p className="text-xs font-bold text-[#2c2c2c] mb-3 uppercase tracking-wide">
                                         🛒 Complétez votre recette avec GOFFA
                                     </p>
-                                    <div className="flex flex-wrap gap-1.5">
-                                        {recette.suggestionGoffa.map((item, i) => (
-                                            item.slug ? (
-                                                <Link key={i} to={`/produits/${item.slug}`}
-                                                    className="text-xs px-2.5 py-1 rounded-full font-semibold no-underline"
-                                                    style={{ background: '#c8872a', color: '#fff' }}>
-                                                    + {item.nom}
-                                                </Link>
-                                            ) : (
-                                                <span key={i}
-                                                    className="text-xs px-2.5 py-1 rounded-full"
-                                                    style={{ background: '#fde68a', color: '#92400e' }}>
-                                                    {item.nom}
-                                                </span>
-                                            )
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        {recette.suggestionGoffa.map((produit) => (
+                                            <CarteIA key={produit.id} produit={produit} />
                                         ))}
                                     </div>
                                 </div>

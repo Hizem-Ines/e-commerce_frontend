@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../../../services/api';
 import { FiTrash2, FiPlus, FiEdit } from 'react-icons/fi';
-import CategoryImageUpload from '../../../Components/admin/CategoryImageUpload';
+
 
 const AdminCategories = () => {
     const [categories, setCategories] = useState([]);       // flat list of ALL categories
@@ -11,7 +11,7 @@ const AdminCategories = () => {
     const [errorMsg, setErrorMsg] = useState('');
     const [showForm, setShowForm] = useState(false);
     const [editItem, setEditItem] = useState(null);
-    const [formData, setFormData] = useState({ name_fr: '', description_fr: '', parent_id: '' });
+    const [formData, setFormData] = useState({ name_fr: '', description_fr: '', parent_id: '' , images: [] });
     const [formLoading, setFormLoading] = useState(false);
 
     const fetchCategories = async () => {
@@ -33,18 +33,16 @@ roots.forEach(root => {
     flat.push({
         ...rootData,
         product_count: (parseInt(rootData.product_count) || 0) + totalProducts,
-        images: typeof rootData.images === 'string'
-            ? JSON.parse(rootData.images)
-            : rootData.images ?? [],
+        images: (typeof rootData.images === 'string' ? JSON.parse(rootData.images) : rootData.images ?? [])
+            .map(img => typeof img === 'object' ? img.url : img),
     });
 
     if (children?.length > 0) {
         children.forEach(child => flat.push({
             ...child,
             product_count: parseInt(child.product_count) || 0, // ← own products
-            images: typeof child.images === 'string'
-                ? JSON.parse(child.images)
-                : child.images ?? [],
+            images: (typeof child.images === 'string' ? JSON.parse(child.images) : child.images ?? [])
+                .map(img => typeof img === 'object' ? img.url : img),
         }));
     }
 });
@@ -112,7 +110,7 @@ setCategories(flat);
             }
             setShowForm(false);
             setEditItem(null);
-            setFormData({ name_fr: '', description_fr: '', parent_id: '' });
+            setFormData({ name_fr: '', description_fr: '', parent_id: '' , images: [] });
             fetchCategories();
             setTimeout(() => setSuccessMsg(''), 3000);
         } catch (err) {
@@ -125,7 +123,7 @@ setCategories(flat);
 
     const handleEdit = (cat) => {
         setEditItem(cat);
-        setFormData({ name_fr: cat.name_fr, description_fr: cat.description_fr || '', parent_id: cat.parent_id || '' });
+        setFormData({ name_fr: cat.name_fr, description_fr: cat.description_fr || '', parent_id: cat.parent_id || '' , images: cat.images || []});
         setShowForm(true);
     };
 
@@ -134,7 +132,7 @@ setCategories(flat);
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
                 <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Catégories</h2>
                 <button
-                    onClick={() => { setShowForm(true); setEditItem(null); setFormData({ name_fr: '', description_fr: '', parent_id: '' }); }}
+                    onClick={() => { setShowForm(true); setEditItem(null); setFormData({ name_fr: '', description_fr: '', parent_id: '' , images: []}); }}
                     className="flex items-center gap-2 bg-[#2d5a27] hover:bg-[#4a8c42]  text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
                 >
                     <FiPlus size={16} /> Nouvelle catégorie
@@ -174,10 +172,10 @@ setCategories(flat);
                                     <tr key={cat.id} className="border-b border-gray-50 hover:bg-[#fdf6ec] transition">
 
                                         <td className="px-5 py-3">
-                                            <CategoryImageUpload
-                                                category={cat}
-                                                onUpdated={handleCategoryUpdated}
-                                            />
+                                            {cat.images?.[0]
+                                                ? <img src={cat.images[0]} alt={cat.name_fr} className="w-10 h-10 object-cover rounded-lg border border-gray-100" />
+                                                : <div className="w-10 h-10 bg-[#f9f5f0] rounded-lg border border-gray-100 flex items-center justify-center text-lg">🌿</div>
+                                            }
                                         </td>
 
                                         <td className="px-5 py-4 font-bold text-[#2c2c2c]">{cat.name_fr}</td>
@@ -206,7 +204,10 @@ setCategories(flat);
                         <div className="md:hidden divide-y divide-gray-100">
                         {parentCategories.map(cat => (
                             <div key={cat.id} className="p-4 flex items-center gap-3">
-                            <CategoryImageUpload category={cat} onUpdated={handleCategoryUpdated} />
+                            {cat.images?.[0]
+                                ? <img src={cat.images[0]} alt={cat.name_fr} className="w-10 h-10 object-cover rounded-lg border border-gray-100" />
+                                : <div className="w-10 h-10 bg-[#f9f5f0] rounded-lg border border-gray-100 flex items-center justify-center text-lg">🌿</div>
+                            }
                             <div className="flex-1 min-w-0">
                                 <p className="font-bold text-[#2c2c2c] text-sm">{cat.name_fr}</p>
                                 <p className="text-xs font-mono text-black/40">{cat.slug}</p>
@@ -243,10 +244,10 @@ setCategories(flat);
                                     {subCategories.map(cat => (
                                         <tr key={cat.id} className="border-b border-gray-50 hover:bg-[#fdf6ec] transition">
                                             <td className="px-5 py-3">
-                                                <CategoryImageUpload
-                                                    category={cat}
-                                                    onUpdated={handleCategoryUpdated}
-                                                />
+                                                {cat.images?.[0]
+                                                    ? <img src={cat.images[0]} alt={cat.name_fr} className="w-10 h-10 object-cover rounded-lg border border-gray-100" />
+                                                    : <div className="w-10 h-10 bg-[#f9f5f0] rounded-lg border border-gray-100 flex items-center justify-center text-lg">🌿</div>
+                                                }
                                             </td>
                                             <td className="px-5 py-4 font-semibold text-[#2c2c2c]">{cat.name_fr}</td>
                                             <td className="px-5 py-4 text-black/60">
@@ -276,7 +277,10 @@ setCategories(flat);
                             <div className="md:hidden divide-y divide-gray-100">
                             {subCategories.map(cat => (
                                 <div key={cat.id} className="p-4 flex items-center gap-3">
-                                <CategoryImageUpload category={cat} onUpdated={handleCategoryUpdated} />
+                                {cat.images?.[0]
+                                    ? <img src={cat.images[0]} alt={cat.name_fr} className="w-10 h-10 object-cover rounded-lg border border-gray-100" />
+                                    : <div className="w-10 h-10 bg-[#f9f5f0] rounded-lg border border-gray-100 flex items-center justify-center text-lg">🌿</div>
+                                }
                                 <div className="flex-1 min-w-0">
                                     <p className="font-bold text-[#2c2c2c] text-sm">{cat.name_fr}</p>
                                     <p className="text-xs text-black/40">
@@ -335,6 +339,12 @@ setCategories(flat);
 
                             <div>
                                 <label className="block text-xs font-bold text-gray-600 mb-1.5">Image (optionnel)</label>
+                                {formData.images?.[0] && !formData.imageFile && (
+                                    <div className="mb-2 flex items-center gap-3">
+                                        <img src={formData.images[0]} alt="Actuelle" className="w-14 h-14 object-cover rounded-xl border border-gray-200" />
+                                        <span className="text-xs text-black/40">Image actuelle</span>
+                                    </div>
+                                )}
                                 <input
                                     type="file"
                                     accept="image/*"
