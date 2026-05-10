@@ -203,9 +203,9 @@ const AdminStats = () => {
     }));
 
     const reclamTypeData = (data?.reclamations?.byType || []).map((r, i) => ({
-        type:  r.reclamation_type || 'autre',
+        type:  r.complaint_type || 'autre',
         count: r.count,
-        fill:  RECLAMATION_COLORS[r.reclamation_type] || '#94a3b8',
+        fill:  RECLAMATION_COLORS[r.complaint_type] || '#94a3b8',
     }));
 
     const dailyData = data?.charts?.revenueByDay || [];
@@ -817,7 +817,7 @@ const AdminStats = () => {
                                                         <span className="text-xs text-black/30 whitespace-nowrap">{fmtDate(r.created_at)}</span>
                                                     </div>
                                                     <p className="text-xs text-black/40 mt-0.5">
-                                                        #{r.order_number} · <span className="capitalize">{(r.reclamation_type || '').replace(/_/g, ' ')}</span>
+                                                        #{r.order_number} · <span className="capitalize">{(r.complaint_type || '').replace(/_/g, ' ')}</span>
                                                     </p>
                                                     <p className="text-xs text-black/50 mt-0.5 line-clamp-1">{r.message}</p>
                                                 </div>
