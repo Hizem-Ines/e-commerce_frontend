@@ -28,7 +28,8 @@ export const WishlistProvider = ({ children }) => {
         const productId = produit.product_id || produit.id;
         try {
             await addToWishlist(productId);
-            setFavoris(prev => [...prev, { ...produit, product_id: productId }]);
+             const res = await getWishlist();
+    setFavoris(res.data.items);
         } catch (err) {
             console.error(err);
         }

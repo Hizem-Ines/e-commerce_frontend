@@ -34,8 +34,9 @@ const CarteIA = ({ produit }) => {
 
           {/* NOTE */}
           <span className="absolute bottom-3 right-3 bg-white/90 text-xs font-bold px-3 py-1 rounded-full">
-            ⭐ {produit.rating_avg ? parseFloat(produit.rating_avg).toFixed(1) : 'N/A'}
-          </span>
+{produit.rating_avg > 0
+  ? `⭐ ${parseFloat(produit.rating_avg).toFixed(1)}`
+  : '✨ Nouveau'}          </span>
 
           {/* BADGE PROMO */}
           {aPromo && (
