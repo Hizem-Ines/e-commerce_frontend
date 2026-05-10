@@ -1,5 +1,3 @@
-// src/services/geminiService.js
-
 import api from './api'; // l'instance axios configurée de GOFFA
 
 /**
@@ -11,5 +9,5 @@ import api from './api'; // l'instance axios configurée de GOFFA
 export const suggererRecettes = async (panier) => {
     if (!panier || panier.length === 0) return null;
     const response = await api.post('/ia/suggestions', { produits: panier });
-    return response.data.recettes;
+    return response.data.recette;
 };

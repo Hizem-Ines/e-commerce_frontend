@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getAllProducts, deleteProduct, createProduct, updateProduct, getAllCategories, getAllSuppliers } from '../../../services/adminService';
-import { FiEdit, FiTrash2, FiPlus, FiSearch, FiX, FiUpload } from 'react-icons/fi';
+import { FiTag ,FiEdit, FiTrash2, FiPlus, FiSearch, FiX, FiUpload } from 'react-icons/fi';
 import formatPrice from '../../../utils/formatPrice';
 import { useSiteSettings } from '../../../context/SiteSettingsContext';
 import api from '../../../services/api';
-import { FiTag } from "react-icons/fi";
+
 
 const BLANK_FORM = {
     name_fr: '', description_fr: '', ethical_info_fr: '', origin: '',
@@ -217,7 +217,9 @@ const VariantEditRow = ({ variant, productId, onDeleted, onChange }) => {
     sku:          variant.sku          ?? '',
     weight_grams: variant.weight_grams ?? '',
     is_active:    variant.is_active    ?? true,
-    attributes:   variant.attributes?.map(a => ({ type_fr: a.type_fr, value_fr: a.value_fr })) ?? [],
+    attributes: variant.attributes?.length
+        ? variant.attributes.map(a => ({ type_fr: a.type_fr, value_fr: a.value_fr }))
+        : [{ type_fr: '', value_fr: '' }],
   });
   const [deleting, setDeleting] = useState(false);
   const [err, setErr] = useState('');
@@ -596,10 +598,10 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                 Object.entries(variantEdits).map(([variantId, vals]) => {
                 const fd2 = new FormData();
                 fd2.append('price',        String(vals.price));
-                fd2.append('cost_price',   String(vals.cost_price));
+                if (vals.cost_price)   fd2.append('cost_price',   String(vals.cost_price));
                 fd2.append('stock',        String(vals.stock));
-                fd2.append('sku',          String(vals.sku));
-                fd2.append('weight_grams', String(vals.weight_grams));
+                if (vals.sku)          fd2.append('sku',           String(vals.sku));
+                if (vals.weight_grams) fd2.append('weight_grams',  String(vals.weight_grams));
                 fd2.append('is_active',    String(vals.is_active));
                 const cleanAttrs = vals.attributes.filter(a => a.type_fr && a.value_fr);
                 if (cleanAttrs.length) fd2.append('attributes', JSON.stringify(cleanAttrs));
@@ -675,16 +677,16 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                 {/* Body */}
                 <div className="overflow-y-auto flex-1 px-4 sm:px-7 py-6">
 
-                    {formLoading && (
+                    {formLoading ? (
                         <div className="flex flex-col items-center justify-center py-20 gap-3">
                             <div className="text-3xl animate-spin">🌿</div>
                             <p className="text-sm text-black/40 font-medium">Chargement des données...</p>
                         </div>
-                    )}
+                    ) : (
+                    <>
 
                     {/* GÉNÉRAL */}
-                    {!formLoading && tab === 'general' && (
-                        <div className="space-y-5">
+                    <div className={tab === 'general' ? 'space-y-5' : 'hidden'}>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <Field label="Nom (FR)" required>
                                     <input className={inputCls} value={form.name_fr} onChange={e => set('name_fr', e.target.value)} placeholder="ex: Huile d'argan bio" />
@@ -721,11 +723,9 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                 <textarea className={textareaCls} rows={2} value={form.ethical_info_fr} onChange={e => set('ethical_info_fr', e.target.value)} placeholder="Engagements éthiques, labels..." />
                             </Field>
                         </div>
-                    )}
 
                     {/* DÉTAILS */}
-                    {!formLoading && tab === 'details' && (
-                        <div className="space-y-5">
+                    <div className={tab === 'details' ? 'space-y-5' : 'hidden'}>
                             <Field label="Mode d'emploi (FR)">
                                 <textarea className={textareaCls} rows={3} value={form.usage_fr} onChange={e => set('usage_fr', e.target.value)} placeholder="Instructions d'utilisation..." />
                             </Field>
@@ -742,11 +742,9 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                 <input className={inputCls} value={form.slug} onChange={e => set('slug', e.target.value)} placeholder="auto-généré si vide" />
                             </Field>
                         </div>
-                    )}
 
                     {/* VARIANTES */}
-                    {!formLoading && tab === 'variants' && (
-                        <div className="space-y-4">
+                    <div className={tab === 'variants' ? 'space-y-4' : 'hidden'}>
                             {isEdit ? (
                                 <>
                                     {editVariants.length === 0 ? (
@@ -758,7 +756,10 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                                 variant={v}
                                                 productId={product.id}
                                                 onChange={(id, vals) => setVariantEdits(prev => ({ ...prev, [id]: vals }))}
-                                                onDeleted={vid => setEditVariants(prev => prev.filter(x => x.id !== vid))}
+                                                onDeleted={vid => {
+                                                    setEditVariants(prev => prev.filter(x => x.id !== vid));
+                                                    setVariantEdits(prev => { const next = { ...prev }; delete next[vid]; return next; });
+                                                }}
                                                 />
                                         ))
                                     )}
@@ -836,11 +837,9 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                 </>
                             )}
                         </div>
-                    )}
 
                  {/* IMAGES - avec suppression possible */}
-                    {!formLoading && tab === 'images' && (
-                        <div className="space-y-6">
+                    <div className={tab === 'images' ? 'space-y-6' : 'hidden'}>
                             <button
                                 onClick={() => fileRef.current?.click()}
                                 className="w-full border-2 border-dashed border-emerald-300 hover:border-[#4a8c42] rounded-2xl py-10 flex flex-col items-center gap-3 text-[#2d5a27] hover:bg-emerald-50 transition"
@@ -906,11 +905,9 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                 <p className="text-xs text-black/30 text-center py-8">Aucune image sélectionnée pour le nouveau produit</p>
                             )}
                         </div>
-                    )}
 
                     {/* ── PARAMÈTRES ── avec is_new, is_featured, low_stock_threshold */}
-                    {!formLoading && tab === 'settings' && (
-                        <div className="space-y-4">
+                    <div className={tab === 'settings' ? 'space-y-4' : 'hidden'}>
 
                             <ToggleRow
                                 label="Produit actif"
@@ -970,6 +967,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                 </p>
                             </div>
                         </div>
+                    </>
                     )}
                 </div>
 
@@ -1212,13 +1210,13 @@ const AdminProduits = () => {
                         )}
                         {filterCategory && (
                             <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full">
-                                📁 {flatCategories.find(c => c.id === filterCategory)?.label}
+                                📁 {flatCategories.find(c => String(c.id) === filterCategory)?.label}
                                 <button onClick={() => applyFilter(setFilterCategory)('')} className="hover:text-red-500 ml-0.5"><FiX size={10}/></button>
                             </span>
                         )}
                         {filterSupplier && (
                             <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-xs font-bold px-2.5 py-1 rounded-full">
-                                🏭 {suppliers.find(s => s.id === filterSupplier)?.name}
+                                🏭 {suppliers.find(s => String(s.id) === filterSupplier)?.name}
                                 <button onClick={() => applyFilter(setFilterSupplier)('')} className="hover:text-red-500 ml-0.5"><FiX size={10}/></button>
                             </span>
                         )}

@@ -1,4 +1,3 @@
-// src/Components/common/CarteIA.jsx
 import { Link, useNavigate } from 'react-router-dom';
 import { FiHeart } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
@@ -11,7 +10,7 @@ const CarteIA = ({ produit }) => {
   const { currency } = useSiteSettings();
   const navigate = useNavigate();
 
-  const aPromo = produit.prix_promo !== null && produit.prix_promo < produit.prix_min;
+  const aPromo = produit.prix_promo != null && parseFloat(produit.prix_promo) < parseFloat(produit.prix_min);
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent hover:border-[#4a8c42] hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col">
@@ -34,7 +33,9 @@ const CarteIA = ({ produit }) => {
 
           {/* NOTE */}
           <span className="absolute bottom-3 right-3 bg-white/90 text-xs font-bold px-3 py-1 rounded-full">
-            ⭐ {produit.rating_avg ? parseFloat(produit.rating_avg).toFixed(1) : 'N/A'}
+            {produit.rating_avg > 0
+              ? `⭐ ${parseFloat(produit.rating_avg).toFixed(1)}`
+              : '✨ Nouveau'}
           </span>
 
           {/* BADGE PROMO */}
@@ -47,7 +48,7 @@ const CarteIA = ({ produit }) => {
           {/* BADGE NOUVEAU / COUP DE CŒUR */}
           {produit.is_featured && (
             <span className="absolute top-3 left-3 bg-amber-400 text-white text-xs font-bold px-2 py-1 rounded-full">
-              ✨ Coup de cœur
+              ❤️ Coup de cœur
             </span>
           )}
           {produit.is_new && !produit.is_featured && (
@@ -68,6 +69,7 @@ const CarteIA = ({ produit }) => {
           </Link>
           <button
             onClick={() => toggleFavori(produit)}
+            aria-label={estFavori(produit.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
             className="ml-2 p-1.5 rounded-full hover:bg-red-50 transition-colors duration-200 shrink-0"
           >
             {estFavori(produit.id)
