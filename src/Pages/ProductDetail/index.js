@@ -269,16 +269,11 @@ const ProductDetail = () => {
 
     const fmt = (n) => formatPrice(parseFloat(n), currency);
 
-    const fetchReviews = () => {
-        getProductReviews(id)
-            .then(res => setReviews(res.data.reviews))
-            .catch(() => {});
-    };
+  
 
     // L'user a déjà une review sur ce produit
     const userReview = user ? reviews.find(r => r.user_id === user.id) : null;
 
-    useEffect(() => { fetchReviews(); }, [id]);
 
     useEffect(() => {
         const fetchProduit = async () => {
@@ -289,6 +284,9 @@ const ProductDetail = () => {
 
                 setProduit(p);
                 if (p.variants?.length > 0) setVarianteActive(p.variants[0]);
+                 getProductReviews(p.id)
+                .then(res => setReviews(res.data.reviews))
+                .catch(() => {});
             } catch (err) {
                 console.error(err);
             } finally {
@@ -297,7 +295,13 @@ const ProductDetail = () => {
         };
         fetchProduit();
     }, [id]);
-
+    
+const fetchReviews = () => {
+    if (!produit?.id) return;
+    getProductReviews(produit.id)
+        .then(res => setReviews(res.data.reviews))
+        .catch(() => {});
+};
     useEffect(() => {
         if (!produit?.category_id) return;
         getAllProducts({ category_id: produit.category_id, page: 1 })
@@ -643,8 +647,7 @@ const ProductDetail = () => {
                                     </div>
                                 ) : !userReview && !submitted ? (
                                     <FormAvis
-                                        productId={id}
-                                        onSuccess={() => {
+                                            productId={produit.id}                                        onSuccess={() => {
                                             setSubmitted(true);
                                             getProductById(id).then(res => setProduit(res.data.product));
                                             fetchReviews();

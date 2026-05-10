@@ -1,33 +1,17 @@
-import { Link } from 'react-router-dom';
 import { useWishlist } from '../../context/WishlistContext';
-import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/authContext';
 import formatPrice from '../../utils/formatPrice';
 import { FaHeart,FaHeartBroken } from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Wishlist = () => {
-    const { favoris, retirerFavori, viderFavoris } = useWishlist();
-    const { ajouterAuPanier } = useCart();
     const { user } = useAuth();
-
-    const addToCart = (produit) => {
-        const productId   = produit.product_id || produit.id;
-        const productName = produit.product_name_fr || produit.name_fr || produit.name;
-        const productImg  = produit.images?.[0]?.url || produit.image || null;
-        const productPrix = produit.price || produit.min_price || produit.prix;
-
-        ajouterAuPanier({
-            ...produit,
-            id: productId,
-            product_id: productId,
-            variant_id: productId,
-            product_name: productName,
-            name_fr: productName,
-            image: productImg,
-            images: produit.images,
-            price: productPrix,
-        });
-    };
+    const { favoris, retirerFavori, viderFavoris } = useWishlist();
+const navigate = useNavigate();
+const addToCart = (produit) => {
+    const productId = produit.product_id || produit.id;
+    navigate(`/produits/${productId}`);
+};
 
     if (!user) {
         return (
