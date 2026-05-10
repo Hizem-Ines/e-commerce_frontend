@@ -21,6 +21,7 @@ export default function SuggestionsRecettes({ panier }) {
                 }
                 setRecette(resultat);
         } catch {
+            setDemande(false);
             setErreur('Impossible de charger les suggestions pour le moment.');
         } finally {
             setChargement(false);

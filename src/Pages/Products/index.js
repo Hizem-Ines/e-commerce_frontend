@@ -308,7 +308,7 @@ const Products = () => {
                                                     )}
                                                     {produit.is_featured && (
                                                         <span className="absolute top-3 left-3 bg-amber-400 text-white text-xs font-bold px-2 py-1 rounded-full">
-                                                            ✨ Coup de cœur
+                                                            ❤️ Coup de cœur
                                                         </span>
                                                     )}
                                                     {produit.is_new && !produit.is_featured && (

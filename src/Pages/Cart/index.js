@@ -1,5 +1,3 @@
-// src/pages/Cart.jsx
-
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
@@ -170,7 +168,7 @@ const Cart = () => {
                                 <div className="border-t border-gray-100 pt-3 flex justify-between font-extrabold text-base sm:text-lg text-[#2c2c2c]">
                                     <span>Total</span>
                                     <span style={{ color: '#166534' }}>
-                                        {fmt(totalPrix + (shippingInfo?.shipping_cost ?? 0))}
+                                        {fmt(totalPrix + parseFloat(shippingInfo?.shipping_cost ?? 0))}
                                     </span>
                                 </div>
                             </div>

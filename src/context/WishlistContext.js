@@ -12,6 +12,7 @@ const WishlistContext = createContext();
 export const WishlistProvider = ({ children }) => {
     const { user } = useAuth();
     const [favoris, setFavoris] = useState([]);
+    const [isLoading, setIsLoading] = useState(false); 
 
     useEffect(() => {
         if (user) {
@@ -26,22 +27,30 @@ export const WishlistProvider = ({ children }) => {
     const ajouterFavori = async (produit) => {
         if (!user) return;
         const productId = produit.product_id || produit.id;
+        setIsLoading(true);
         try {
             await addToWishlist(productId);
-             const res = await getWishlist();
-    setFavoris(res.data.items);
+            const res = await getWishlist();
+            setFavoris(res.data.items);
         } catch (err) {
             console.error(err);
+        } finally {
+            setIsLoading(false); // ←  (finally pour couvrir les erreurs aussi)
         }
+        
     };
 
     const retirerFavori = async (id) => {
         if (!user) return;
+        setIsLoading(true); 
         try {
             await removeFromWishlist(id);
-            setFavoris(prev => prev.filter(p => (p.product_id || p.id) !== id));
+            const res = await getWishlist();
+            setFavoris(res.data.items);
         } catch (err) {
             console.error(err);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -58,10 +67,7 @@ export const WishlistProvider = ({ children }) => {
 
     const toggleFavori = (produit) => {
         const productId = produit.product_id || produit.id;
-        console.log('toggleFavori called with productId:', productId);
-    console.log('favoris IDs:', favoris.map(p => p.product_id || p.id));
         const existe = favoris.find(p => (p.product_id || p.id) === productId);
-        console.log('existe:', existe);
         if (existe) {
             retirerFavori(productId);
         } else {
@@ -81,6 +87,7 @@ export const WishlistProvider = ({ children }) => {
             estFavori,
             totalFavoris,
             viderFavoris,
+            isLoading,
         }}>
             {children}
         </WishlistContext.Provider>
