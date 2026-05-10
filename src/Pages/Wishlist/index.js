@@ -1,33 +1,17 @@
-import { Link } from 'react-router-dom';
 import { useWishlist } from '../../context/WishlistContext';
-import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/authContext';
 import formatPrice from '../../utils/formatPrice';
 import { FaHeart,FaHeartBroken } from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Wishlist = () => {
-    const { favoris, retirerFavori, viderFavoris } = useWishlist();
-    const { ajouterAuPanier } = useCart();
     const { user } = useAuth();
-
-    const addToCart = (produit) => {
-        const productId   = produit.product_id || produit.id;
-        const productName = produit.product_name_fr || produit.name_fr || produit.name;
-        const productImg  = produit.images?.[0]?.url || produit.image || null;
-        const productPrix = produit.price || produit.min_price || produit.prix;
-
-        ajouterAuPanier({
-            ...produit,
-            id: productId,
-            product_id: productId,
-            variant_id: productId,
-            product_name: productName,
-            name_fr: productName,
-            image: productImg,
-            images: produit.images,
-            price: productPrix,
-        });
-    };
+    const { favoris, retirerFavori, viderFavoris } = useWishlist();
+const navigate = useNavigate();
+const addToCart = (produit) => {
+    const productId = produit.product_id || produit.id;
+    navigate(`/produits/${productId}`);
+};
 
     if (!user) {
         return (
@@ -144,7 +128,7 @@ const Wishlist = () => {
                                             onClick={() => addToCart(produit)}
                                             className="bg-[#2d5a27] hover:bg-[#4a8c42] text-white text-xs font-bold px-2 md:px-4 py-1.5 md:py-2 rounded-xl transition-colors duration-300"
                                         >
-                                            Ajouter
+                                            Voir le produit
                                         </button>
                                     </div>
                                 </div>
@@ -153,14 +137,8 @@ const Wishlist = () => {
                     })}
                 </div>
 
-                {/* BOUTONS BAS */}
-                <div className="mt-8 md:mt-10 flex flex-col sm:flex-row justify-center gap-3 md:gap-4">
-                    <button
-                        onClick={() => favoris.forEach(p => addToCart(p))}
-                        className="bg-[#2d5a27] hover:bg-[#4a8c42] text-white font-bold px-8 md:px-10 py-3 md:py-4 rounded-full transition-colors duration-300 shadow-lg text-sm md:text-base"
-                    >
-                        🛒 Tout ajouter au panier
-                    </button>
+                {/* BOUTON BAS */}
+                <div className="mt-8 md:mt-10 flex justify-center">
                     <button
                         onClick={viderFavoris}
                         className="bg-[#7a1c1c] hover:bg-red-700 text-white font-bold px-8 md:px-10 py-3 md:py-4 rounded-full transition-colors duration-300 shadow-lg text-sm md:text-base"
