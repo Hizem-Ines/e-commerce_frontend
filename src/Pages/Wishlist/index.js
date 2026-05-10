@@ -128,7 +128,7 @@ const addToCart = (produit) => {
                                             onClick={() => addToCart(produit)}
                                             className="bg-[#2d5a27] hover:bg-[#4a8c42] text-white text-xs font-bold px-2 md:px-4 py-1.5 md:py-2 rounded-xl transition-colors duration-300"
                                         >
-                                            Ajouter
+                                            Voir le produit
                                         </button>
                                     </div>
                                 </div>
@@ -137,14 +137,8 @@ const addToCart = (produit) => {
                     })}
                 </div>
 
-                {/* BOUTONS BAS */}
-                <div className="mt-8 md:mt-10 flex flex-col sm:flex-row justify-center gap-3 md:gap-4">
-                    <button
-                        onClick={() => favoris.forEach(p => addToCart(p))}
-                        className="bg-[#2d5a27] hover:bg-[#4a8c42] text-white font-bold px-8 md:px-10 py-3 md:py-4 rounded-full transition-colors duration-300 shadow-lg text-sm md:text-base"
-                    >
-                        🛒 Tout ajouter au panier
-                    </button>
+                {/* BOUTON BAS */}
+                <div className="mt-8 md:mt-10 flex justify-center">
                     <button
                         onClick={viderFavoris}
                         className="bg-[#7a1c1c] hover:bg-red-700 text-white font-bold px-8 md:px-10 py-3 md:py-4 rounded-full transition-colors duration-300 shadow-lg text-sm md:text-base"
