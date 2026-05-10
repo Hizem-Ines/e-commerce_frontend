@@ -12,7 +12,7 @@ import { useSiteSettings } from "../../context/SiteSettingsContext";
 const inputCls =
   "w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-900/20 focus:border-transparent transition";
 
-const RECLAMATION_TYPES = [
+const COMPLAINT_TYPES = [
   { value: "commande_non_recue", label: "Commande non reçue" },
   { value: "produit_defectueux", label: "Produit défectueux" },
   { value: "produit_incorrect",  label: "Produit incorrect"  },
@@ -38,7 +38,7 @@ export default function Reclamations() {
 
   // ── State formulaire ──────────────────────────────────────
   const [form, setForm] = useState({
-    email: "", order_id: "", order_number: "", reclamation_type: "", message: "",
+    email: "", order_id: "", order_number: "", complaint_type: "", message: "",
   });
   const [loading, setLoading]         = useState(false);
   const [success, setSuccess]         = useState(false);
@@ -70,7 +70,7 @@ export default function Reclamations() {
     setLoading(true);
     try {
       const payload = user
-        ? { order_id: form.order_id || null, reclamation_type: form.reclamation_type, message: form.message }
+        ? { order_id: form.order_id || null, complaint_type: form.complaint_type, message: form.message }
         : form;
 
       const newRec = await (user ? createReclamation(payload) : submitReclamation(payload));
@@ -78,7 +78,7 @@ export default function Reclamations() {
   
 
       setSuccess(true);
-      setForm({ email: "", order_id: "", order_number: "", reclamation_type: "", message: "" });
+      setForm({ email: "", order_id: "", order_number: "", complaint_type: "", message: "" });
     } catch (err) {
       setError(err.response?.data?.message || "Une erreur est survenue.");
     } finally {
@@ -170,10 +170,10 @@ export default function Reclamations() {
               )}
 
               <Field label="Type de réclamation">
-                <select name="reclamation_type" required value={form.reclamation_type} onChange={handleChange}
+                <select name="complaint_type" required value={form.complaint_type} onChange={handleChange}
                   className={`${inputCls} text-gray-700`}>
                   <option value="">Sélectionner…</option>
-                  {RECLAMATION_TYPES.map((t) => (
+                  {COMPLAINT_TYPES.map((t) => (
                     <option key={t.value} value={t.value}>{t.label}</option>
                   ))}
                 </select>

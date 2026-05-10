@@ -516,10 +516,11 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
 
     const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
+    // ✅ Accumule les nouvelles photos
     const handleImages = (e) => {
         const files = Array.from(e.target.files);
-        setImages(files);
-        setPreviews(files.map(f => URL.createObjectURL(f)));
+        setImages(prev => [...prev, ...files]);
+        setPreviews(prev => [...prev, ...files.map(f => URL.createObjectURL(f))]);
     };
 
     const setVariant = (vi, k, v) => setVariants(vs => vs.map((vt, i) => i === vi ? { ...vt, [k]: v } : vt));

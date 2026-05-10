@@ -106,7 +106,7 @@ function DetailModal({ open, reclamation, onClose }) {
             <div className="flex items-center gap-2 text-sm">
               <span className="text-black/40">Type :</span>
               <span className="font-semibold text-[#2c2c2c]">
-                {TYPE_ICONS[reclamation.reclamation_type] || "💬"} {reclamation.reclamation_type}
+                {TYPE_ICONS[reclamation.complaint_type] || "💬"} {reclamation.complaint_type}
               </span>
             </div>
             {reclamation.order_number && (
@@ -329,7 +329,7 @@ const handleRespond = async () => {
       r.user_name.toLowerCase().includes(search.toLowerCase()) ||
       r.user_email.toLowerCase().includes(search.toLowerCase()) ||
       (r.order_number || "").toLowerCase().includes(search.toLowerCase()) ||
-      r.reclamation_type.toLowerCase().includes(search.toLowerCase());
+      r.complaint_type.toLowerCase().includes(search.toLowerCase());
 
     const matchStatus = filterStatus === "all" || r.status === filterStatus;
 
@@ -450,7 +450,7 @@ const handleRespond = async () => {
                   </td>
                   <td className="px-5 py-4 hidden sm:table-cell">
                     <span className="text-sm text-black/60">
-                      {TYPE_ICONS[r.reclamation_type] || "💬"} {r.reclamation_type}
+                      {TYPE_ICONS[r.complaint_type] || "💬"} {r.complaint_type}
                     </span>
                   </td>
                   <td className="px-5 py-4 hidden md:table-cell">
@@ -518,7 +518,7 @@ const handleRespond = async () => {
                       {STATUS_CONFIG[r.status]?.label}
                     </span>
                   </div>
-                  <p className="text-xs text-black/60">{TYPE_ICONS[r.reclamation_type]} {r.reclamation_type}</p>
+                  <p className="text-xs text-black/60">{TYPE_ICONS[r.complaint_type]} {r.complaint_type}</p>
                   {r.order_number && (
                     <span className="font-mono text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-lg inline-block">{r.order_number}</span>
                   )}
