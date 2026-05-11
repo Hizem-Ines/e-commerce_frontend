@@ -3,6 +3,7 @@ import { getAllSuppliers, deleteSupplier } from '../../../services/adminService'
 import { FiTrash2, FiPlus, FiSearch, FiEdit, FiUploadCloud, FiX } from 'react-icons/fi';
 import { MdVerified } from 'react-icons/md';
 import useToast from '../../../hooks/useToast';
+import api from '../../../services/api';
 
 const EMPTY_FORM = { name: '', description_fr: '', region: '', address: '', contact: '', email: '', website: '', is_certified_bio: false };
 
@@ -95,7 +96,6 @@ const AdminProducteurs = () => {
         e.preventDefault();
         setFormLoading(true);
         try {
-            const { default: api } = await import('../../../services/api');
 
             const fd = new FormData();
             Object.entries(formData).forEach(([k, v]) => fd.append(k, v));
