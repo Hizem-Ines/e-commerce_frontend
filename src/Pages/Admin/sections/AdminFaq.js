@@ -13,22 +13,11 @@ import {
   adminDeleteQuestion,
 } from "../../../services/faqService";
 import { addWSListener, removeWSListener } from '../../../utils/websocket';
+import {
+    FAQ_CATEGORY_OPTIONS as CATEGORY_OPTIONS,
+    FAQ_CATEGORY_LABELS  as CATEGORY_LABELS,
+} from '../../../constants/faqCategories';
 
-const CATEGORY_OPTIONS = [
-  { value: "livraison", label: "🚚 Livraison" },
-  { value: "paiement",  label: "💳 Paiement"  },
-  { value: "produits",  label: "🧺 Produits"  },
-  { value: "retours",   label: "↩️ Retours"   },
-  { value: "autre",     label: "💬 Autre"     },
-];
-
-const CATEGORY_LABELS = {
-  livraison: "🚚 Livraison",
-  paiement:  "💳 Paiement",
-  produits:  "🧺 Produits",
-  retours:   "↩️ Retours",
-  autre:     "💬 Autre",
-};
 
 const STATUS_BADGE = {
   pending:  "bg-yellow-100 text-yellow-700",

@@ -7,6 +7,7 @@ import {
 } from "../../../services/recipesService";
 import { FiEdit, FiTrash2, FiPlus, FiSearch, FiX, FiUpload, FiEye } from "react-icons/fi";
 import api from "../../../services/api";
+import useToast from '../../../hooks/useToast';
 
 // ─── Constants ────────────────────────────────────────────
 const DIFFICULTIES = ["facile", "moyen", "difficile"];
@@ -512,12 +513,8 @@ export default function AdminRecettes() {
   const [showForm, setShowForm]         = useState(false);
   const [editRecipe, setEditRecipe]     = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [successMsg, setSuccessMsg]     = useState("");
-  const [errorMsg, setErrorMsg]         = useState("");
   const [search, setSearch]             = useState("");
-
-  const showSuccess = (msg) => { setSuccessMsg(msg); setTimeout(() => setSuccessMsg(""), 3000); };
-  const showError   = (msg) => { setErrorMsg(msg);   setTimeout(() => setErrorMsg(""), 3000); };
+  const { successMsg, errorMsg, showSuccess, showError } = useToast();
 
   // ── standalone loader (used by useEffect AND onSaved) ──
   const loadRecipes = async () => {

@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import api from '../../../services/api';
 import { FiTrash2, FiPlus, FiEdit } from 'react-icons/fi';
-
+import useToast from '../../../hooks/useToast';
 
 const AdminCategories = () => {
     const [categories, setCategories] = useState([]);       // flat list of ALL categories
     const [loading, setLoading] = useState(true);
     const [deleteConfirm, setDeleteConfirm] = useState(null);
-    const [successMsg, setSuccessMsg] = useState('');
-    const [errorMsg, setErrorMsg] = useState('');
+    const { successMsg, errorMsg, showSuccess, showError } = useToast();
     const [showForm, setShowForm] = useState(false);
     const [editItem, setEditItem] = useState(null);
     const [formData, setFormData] = useState({ name_fr: '', description_fr: '', parent_id: '' , images: [] });

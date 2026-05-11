@@ -4,7 +4,7 @@ import { FiTag ,FiEdit, FiTrash2, FiPlus, FiSearch, FiX, FiUpload } from 'react-
 import formatPrice from '../../../utils/formatPrice';
 import { useSiteSettings } from '../../../context/SiteSettingsContext';
 import api from '../../../services/api';
-
+import useToast from '../../../hooks/useToast';
 
 const BLANK_FORM = {
     name_fr: '', description_fr: '', ethical_info_fr: '', origin: '',
@@ -1001,8 +1001,7 @@ const AdminProduits = () => {
     const [page, setPage]                       = useState(1);
     const [totalPages, setTotalPages]           = useState(1);
     const [deleteConfirm, setDeleteConfirm]     = useState(null);
-    const [successMsg, setSuccessMsg]           = useState('');
-    const [errorMsg, setErrorMsg]               = useState('');
+    const { successMsg, errorMsg, showSuccess, showError } = useToast();
     const [showModal, setShowModal]             = useState(false);
     const [editProduct, setEditProduct]         = useState(null);
     const [categories, setCategories]           = useState([]);
@@ -1059,11 +1058,10 @@ const AdminProduits = () => {
         try {
             await deleteProduct(id);
             setProduits(prev => prev.filter(p => p.id !== id));
-            setSuccessMsg('Produit supprimé avec succès.');
-            setTimeout(() => setSuccessMsg(''), 3000);
+            showSuccess('Produit supprimé avec succès.');
         } catch (err) {
-            setErrorMsg(err.response?.data?.message || 'Erreur lors de la suppression.');
-            setTimeout(() => setErrorMsg(''), 3000);
+            showError(err.response?.data?.message || 'Erreur lors de la suppression.');
+
         } finally {
             setDeleteConfirm(null);
         }
@@ -1077,8 +1075,7 @@ const AdminProduits = () => {
         closeModal();
         setPage(1);
         fetchProduits();
-        setSuccessMsg(editProduct ? 'Produit modifié avec succès.' : 'Produit créé avec succès.');
-        setTimeout(() => setSuccessMsg(''), 4000);
+        showSuccess(editProduct ? 'Produit modifié avec succès.' : 'Produit créé avec succès.');
     };
 
     // aplatir catégories pour le select

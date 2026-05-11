@@ -1,15 +1,16 @@
 import { createContext, useContext, useState } from 'react';
+import { CURRENCY_KEY } from '../constants/storageKeys';
 
 const SiteSettingsContext = createContext();
 
 export const SiteSettingsProvider = ({ children }) => {
     const [currency, setCurrency] = useState(
-        () => localStorage.getItem('goffa_currency') || ''
+        () => localStorage.getItem(CURRENCY_KEY) || ''
     );
 
     const updateCurrency = (val) => {
         setCurrency(val);
-        localStorage.setItem('goffa_currency', val);
+        localStorage.setItem(CURRENCY_KEY, val);
     };
 
     return (

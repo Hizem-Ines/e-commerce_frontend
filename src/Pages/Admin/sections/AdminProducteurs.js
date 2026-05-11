@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { getAllSuppliers, deleteSupplier } from '../../../services/adminService';
 import { FiTrash2, FiPlus, FiSearch, FiEdit, FiUploadCloud, FiX } from 'react-icons/fi';
 import { MdVerified } from 'react-icons/md';
+import useToast from '../../../hooks/useToast';
 
 const EMPTY_FORM = { name: '', description_fr: '', region: '', address: '', contact: '', email: '', website: '', is_certified_bio: false };
 
@@ -10,8 +11,7 @@ const AdminProducteurs = () => {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [deleteConfirm, setDeleteConfirm] = useState(null);
-    const [successMsg, setSuccessMsg] = useState('');
-    const [errorMsg, setErrorMsg] = useState('');
+    const { successMsg, errorMsg, showSuccess, showError } = useToast();
     const [showForm, setShowForm] = useState(false);
     const [editTarget, setEditTarget] = useState(null);
     const [formData, setFormData] = useState(EMPTY_FORM);
@@ -83,11 +83,9 @@ const AdminProducteurs = () => {
         try {
             await deleteSupplier(id);
             setProducteurs(prev => prev.filter(p => p.id !== id));
-            setSuccessMsg('Producteur supprimé avec succès.');
-            setTimeout(() => setSuccessMsg(''), 3000);
+            showSuccess('Producteur supprimé avec succès.');
         } catch (err) {
-            setErrorMsg(err.response?.data?.message || 'Erreur lors de la suppression.');
-            setTimeout(() => setErrorMsg(''), 3000);
+            showError(err.response?.data?.message || 'Erreur lors de la suppression.');
         } finally {
             setDeleteConfirm(null);
         }

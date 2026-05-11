@@ -4,24 +4,11 @@ import { getSingleOrder } from '../../services/orderService';
 import { FiArrowLeft, FiPackage, FiMapPin, FiCreditCard, FiTruck } from 'react-icons/fi';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 import formatPrice from '../../utils/formatPrice';
+import {
+    ORDER_STATUS_INLINE as STATUS_LABELS,
+    DELIVERY_STEPS,
+} from '../../constants/orderStatus';
 
-// ✅ Clés FR pour correspondre aux valeurs DB
-const STATUS_LABELS = {
-    en_attente:     { label: 'En attente',     color: '#f59e0b', bg: '#fef3c7' },
-    confirmee:      { label: 'Confirmée',       color: '#3b82f6', bg: '#dbeafe' },
-    en_preparation: { label: 'En préparation',  color: '#f97316', bg: '#ffedd5' },
-    expediee:       { label: 'Expédiée',        color: '#8b5cf6', bg: '#ede9fe' },
-    livree:         { label: 'Livrée',          color: '#166534', bg: '#dcfce7' },
-    annulee:        { label: 'Annulée',         color: '#dc2626', bg: '#fee2e2' },
-    remboursee:     { label: 'Remboursée',      color: '#6b7280', bg: '#f3f4f6' },
-};
-
-// ✅ Valeurs DB pour les livraisons (deliveries.status)
-const DELIVERY_STEPS = [
-    { key: 'en_preparation', label: 'En préparation', icon: '📦' },
-    { key: 'expediee',       label: 'Expédiée',        icon: '🚚' },
-    { key: 'livre',          label: 'Livrée',          icon: '✅' },
-];
 
 const OrderDetail = () => {
     const { orderId }  = useParams();

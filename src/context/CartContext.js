@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { CART_KEY } from '../constants/storageKeys';
 
 const CartContext = createContext();
 
-const CART_KEY = 'goffa_cart';
 
 // ── Helpers localStorage ────────────────────────────
 const loadCart = () => {

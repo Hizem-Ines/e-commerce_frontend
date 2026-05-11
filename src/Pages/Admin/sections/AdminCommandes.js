@@ -6,25 +6,13 @@ import { FiEye , FiEdit } from 'react-icons/fi';
 import formatPrice from '../../../utils/formatPrice';
 import { useSiteSettings } from '../../../context/SiteSettingsContext';
 import { updateDelivery } from '../../../services/orderService';
-
-// ✅ Clés en FR pour correspondre à la DB
-const STATUS_LABELS = {
-    en_attente:     { label: 'En attente',  color: 'bg-yellow-100 text-yellow-700' },
-    confirmee:      { label: 'Confirmée',   color: 'bg-blue-100 text-blue-700'     },
-    en_preparation: { label: 'En cours',    color: 'bg-orange-100 text-orange-700' },
-    expediee:       { label: 'Expédiée',    color: 'bg-purple-100 text-purple-700' },
-    livree:         { label: 'Livrée',      color: 'bg-emerald-100 text-emerald-700' },
-    annulee:        { label: 'Annulée',     color: 'bg-red-100 text-red-700'       },
-    remboursee:     { label: 'Remboursée',  color: 'bg-gray-100 text-gray-600'     },
-};
-
-// ✅ Valeurs FR — annulee gérée séparément via modal
-const STATUS_OPTIONS = ['en_attente', 'confirmee', 'en_preparation', 'expediee', 'livree', 'remboursee'];
-
-const PAYMENT_LABELS = {
-    card:  '💳 Carte bancaire',
-    twint: '📱 Twint',
-};
+import {
+    ORDER_STATUS_CONFIG as STATUS_LABELS,
+    ORDER_STATUS_OPTIONS as STATUS_OPTIONS,
+    PAYMENT_LABELS,
+    DELIVERY_STATUS_OPTIONS,
+} from '../../../constants/orderStatus';
+import useToast from '../../../hooks/useToast';
 
 const formatAddress = (...parts) => parts.filter(Boolean).join(', ');
 
@@ -43,11 +31,9 @@ const AdminCommandes = () => {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [orderDetail, setOrderDetail]     = useState(null);
     const [detailLoading, setDetailLoading] = useState(false);
-    const [successMsg, setSuccessMsg]       = useState('');
-    const [errorMsg, setErrorMsg]           = useState('');
     const { currency } = useSiteSettings();
     const [modalMode, setModalMode] = useState('view');
-
+    const { successMsg, errorMsg, showSuccess, showError } = useToast();
     // ── Modal annulation ──────────────────────────────────
     const [cancelModal, setCancelModal]   = useState(null);  // orderId en attente
     const [cancelReason, setCancelReason] = useState('');
@@ -61,12 +47,10 @@ const AdminCommandes = () => {
         setDeliveryLoading(true);
         try {
             await updateDelivery(selectedOrder.id, deliveryForm);
-            setSuccessMsg('Livraison mise à jour.');
-            setTimeout(() => setSuccessMsg(''), 3000);
+            showSuccess('Livraison mise à jour.');
             closeModal();
         } catch (err) {
-            setErrorMsg(err.response?.data?.message || 'Erreur livraison.');
-            setTimeout(() => setErrorMsg(''), 3000);
+            showError(err.response?.data?.message || 'Erreur livraison.');
         } finally {
             setDeliveryLoading(false);
         }
@@ -82,7 +66,7 @@ const AdminCommandes = () => {
                 setTotalPages(res.data.totalPages);
             } catch (err) {
                 console.error('Détail erreur:', err.response?.status, err.response?.data);
-                setErrorMsg(err.response?.data?.message || `Erreur ${err.response?.status} — voir console`);
+                showError(err.response?.data?.message || `Erreur ${err.response?.status} — voir console`);
             } finally {
                 setLoading(false);
             }
@@ -128,30 +112,25 @@ const AdminCommandes = () => {
         try {
             await updateOrderStatus(orderId, newStatus);
             applyStatusChange(orderId, newStatus);
-            setSuccessMsg('Statut mis à jour avec succès.');
-            setTimeout(() => setSuccessMsg(''), 3000);
+            showSuccess('Statut mis à jour avec succès.');
         } catch (err) {
-            setErrorMsg(err.response?.data?.message || 'Erreur lors de la mise à jour.');
-            setTimeout(() => setErrorMsg(''), 3000);
+            showError(err.response?.data?.message || 'Erreur lors de la mise à jour.');
         }
     };
 
     // ── Confirmer l'annulation ────────────────────────────
     const handleConfirmCancel = async () => {
         if (!cancelReason.trim()) {
-            setErrorMsg('Une raison est obligatoire pour annuler.');
-            setTimeout(() => setErrorMsg(''), 3000);
+            showError('Une raison est obligatoire pour annuler.');
             return;
         }
         setCancelLoading(true);
         try {
             await cancelOrder(cancelModal, cancelReason.trim());
             applyStatusChange(cancelModal, 'annulee');
-            setSuccessMsg('Commande annulée avec succès.');
-            setTimeout(() => setSuccessMsg(''), 3000);
+            showSuccess('Commande annulée avec succès.');
         } catch (err) {
-            setErrorMsg(err.response?.data?.message || 'Erreur lors de l\'annulation.');
-            setTimeout(() => setErrorMsg(''), 3000);
+            showError(err.response?.data?.message || "Erreur lors de l'annulation.");
         } finally {
             setCancelLoading(false);
             setCancelModal(null);
@@ -579,13 +558,9 @@ const AdminCommandes = () => {
                                             onChange={e => setDeliveryForm(p => ({ ...p, status: e.target.value }))}
                                             className="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-[#4a8c42] outline-none"
                                         >
-                                            <option value="">— Statut livraison —</option>
-                                            <option value="en_preparation">En préparation</option>
-                                            <option value="expediee">Expédiée</option>
-                                            <option value="en_transit">En transit</option>
-                                            <option value="livre">Livrée</option>
-                                            <option value="echec">Échec</option>
-                                            <option value="retourne">Retourné</option>
+                                            {DELIVERY_STATUS_OPTIONS.map(({ value, label }) => (
+                                                <option key={value} value={value}>{label}</option>
+                                            ))}
                                         </select>
                                     </div>
                                 

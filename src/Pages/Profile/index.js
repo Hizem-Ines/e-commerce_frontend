@@ -13,33 +13,16 @@ import formatPrice from '../../utils/formatPrice';
 import {
   getMyReclamations,
 } from '../../services/reclamationService';
+import {
+    ORDER_STATUS_INLINE as STATUS_LABELS,
+    getDeliveryLabel,
+} from '../../constants/orderStatus';
+import {
+    RECLAMATION_STATUS_CONFIG,
+} from '../../constants/reclamationStatus';
+import useToast from '../../hooks/useToast';
+import useWSListener from '../../hooks/useWSListener';
 
-
-import { addWSListener, removeWSListener } from '../../utils/websocket';
-// ✅ Clés FR pour correspondre à la DB
-const STATUS_LABELS = {
-    en_attente:     { label: 'En attente',     color: '#f59e0b', bg: '#fef3c7' },
-    confirmee:      { label: 'Confirmée',       color: '#3b82f6', bg: '#dbeafe' },
-    en_preparation: { label: 'En préparation',  color: '#f97316', bg: '#ffedd5' },
-    expediee:       { label: 'Expédiée',        color: '#8b5cf6', bg: '#ede9fe' },
-    livree:         { label: 'Livrée',          color: '#166534', bg: '#dcfce7' },
-    annulee:        { label: 'Annulée',         color: '#dc2626', bg: '#fee2e2' },
-    remboursee:     { label: 'Remboursée',      color: '#6b7280', bg: '#f3f4f6' },
-};
-
-// ✅ Statuts livraison DB (deliveries.status)
-const getDeliveryLabel = (s) => {
-    const map = {
-        en_preparation: '📦 En préparation',
-        expediee:       '🚚 En route',
-        en_transit:     '🚚 En transit',
-        en_cours:       '🚚 En cours',
-        livre:          '✅ Livré',
-        echec:          '❌ Échec de livraison',
-        retourne:       '↩️ Retourné',
-    };
-    return map[s] || s || '—';
-};
 
 const Profile = () => {
     const { user, logout } = useAuth();
@@ -50,9 +33,8 @@ const Profile = () => {
     const [activeTab, setActiveTab] = useState(
         VALID_TABS.includes(hashTab) ? hashTab : 'profil'
     );
+    const { successMsg, errorMsg, showSuccess, showError } = useToast(3500);
     const [showPassword,     setShowPassword]     = useState(false);
-    const [successMsg,       setSuccessMsg]       = useState('');
-    const [errorMsg,         setErrorMsg]         = useState('');
     const [loadingProfile,   setLoadingProfile]   = useState(false);
     const [loadingPassword,  setLoadingPassword]  = useState(false);
     const [avatarPreview,    setAvatarPreview]    = useState(user?.avatar || null);
@@ -133,8 +115,6 @@ const Profile = () => {
         confirmPassword:  '',
     });
 
-    const showSuccess = (msg) => { setSuccessMsg(msg); setErrorMsg('');  setTimeout(() => setSuccessMsg(''), 3500); };
-    const showError   = (msg) => { setErrorMsg(msg);  setSuccessMsg(''); setTimeout(() => setErrorMsg(''),  3500); };
 
 
     // ── Warn before unload ────────────────────────────────
@@ -193,65 +173,48 @@ const Profile = () => {
 
     }, [activeTab]);
 
-    useEffect(() => {
-        addWSListener("profile-reclamations", (data) => {
-            if (data.type === "RECLAMATION_UPDATE") {
-                // ✅ Mise à jour silencieuse du tableau
-                setReclamations((prev) =>
-                    prev.map((r) =>
-                        r.id === data.id
-                            ? { ...r, status: data.status, admin_response: data.admin_response || r.admin_response }
-                            : r
-                    )
-                );
-            }
-        });
+    useWSListener("profile-reclamations", (data) => {
+    if (data.type === "RECLAMATION_UPDATE") {
+        setReclamations((prev) =>
+            prev.map((r) =>
+                r.id === data.id
+                    ? { ...r, status: data.status, admin_response: data.admin_response || r.admin_response }
+                    : r
+            )
+        );
+    }
+});
 
-        return () => removeWSListener("profile-reclamations");
-    }, []);
-
-    // ── WS : mise à jour silencieuse statut commandes ──────────
-useEffect(() => {
-    addWSListener("profile-orders", (data) => {
-        if (
-            data.type === "ORDER_CONFIRMED"      ||
-            data.type === "ORDER_STATUS_UPDATE"  ||
-            data.type === "ORDER_PAYMENT_FAILED" ||
-            data.type === "ORDER_CANCELLED"
-        ) {
-            setOrders((prev) =>
-                prev.map((o) =>
-                    o.id === data.id
-                        ? {
-                            ...o,
-                            status: data.status ?? (
-                                data.type === "ORDER_CONFIRMED"      ? "confirmee" :
-                                data.type === "ORDER_PAYMENT_FAILED" ? "annulee"   :
-                                data.type === "ORDER_CANCELLED"      ? "annulee"   :
-                                o.status
-                            ),
-                          }
-                        : o
-                )
-            );
-        }
-    });
-    return () => removeWSListener("profile-orders");
-}, []);
+useWSListener("profile-orders", (data) => {
+    if (
+        data.type === "ORDER_CONFIRMED"      ||
+        data.type === "ORDER_STATUS_UPDATE"  ||
+        data.type === "ORDER_PAYMENT_FAILED" ||
+        data.type === "ORDER_CANCELLED"
+    ) {
+        setOrders((prev) =>
+            prev.map((o) =>
+                o.id === data.id
+                    ? {
+                        ...o,
+                        status: data.status ?? (
+                            data.type === "ORDER_CONFIRMED"      ? "confirmee" :
+                            data.type === "ORDER_PAYMENT_FAILED" ? "annulee"   :
+                            data.type === "ORDER_CANCELLED"      ? "annulee"   :
+                            o.status
+                        ),
+                      }
+                    : o
+            )
+        );
+    }
+});
 
 
-
-useEffect(() => {
-    addWSListener("profile-account-status", (data) => {
-        if (data.type === "ACCOUNT_SUSPENDED") {
-            logout();
-        }
-        if (data.type === "ACCOUNT_ACTIVATED") {
-            showSuccess(data.message);
-        }
-    });
-    return () => removeWSListener("profile-account-status");
-}, []);
+useWSListener("profile-account-status", (data) => {
+    if (data.type === "ACCOUNT_SUSPENDED") logout();
+    if (data.type === "ACCOUNT_ACTIVATED") showSuccess(data.message);
+});
 
     // ── Handlers dirty ────────────────────────────────────
     const handleProfileChange = (field, value) => {
@@ -795,8 +758,8 @@ useEffect(() => {
                         en_cours:   { label: 'En cours',     color: '#3b82f6', bg: '#dbeafe' },
                         urgente:    { label: 'En cours', color: '#3b82f6', bg: '#dbeafe' },
                         en_retard:  { label: 'En cours', color: '#3b82f6', bg: '#dbeafe' },
-                        resolue:    { label: 'Résolue ✅',   color: '#166534', bg: '#dcfce7' },
-                        rejetee:    { label: 'Rejetée',      color: '#6b7280', bg: '#f3f4f6' },
+                        resolue:    { label: RECLAMATION_STATUS_CONFIG.resolue.label, color: '#166534', bg: '#dcfce7' },
+                        rejetee:    { label: RECLAMATION_STATUS_CONFIG.rejetee.label, color: '#6b7280', bg: '#f3f4f6' },
                     };
                     return (
                         <div className="space-y-5">
