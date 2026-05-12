@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useCallback} from "react";
 import { FiEye, FiSearch, FiAlertCircle, FiCheckCircle, FiClock, FiX } from "react-icons/fi";
 import { getAllReclamations, respondToReclamation } from "../../../services/reclamationService";
 import { FiMessageSquare } from "react-icons/fi";
@@ -11,25 +11,6 @@ import {
 import useToast from '../../../hooks/useToast';
 import useWSListener from '../../../hooks/useWSListener';
 
-
-// ─── Status Selector (Dropdown) ─────────────────────────────
-function StatusSelector({ status, onChange }) {
-  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.en_attente;
-
-  return (
-    <select
-      value={status}
-      onChange={(e) => onChange(e.target.value)}
-      className={`text-xs font-bold px-4 py-2 rounded-full border-2 bg-white cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-[#4a8c42] hover:shadow-sm ${cfg.color.replace("bg-", "border-").replace("text-", "")}`}
-    >
-      {Object.entries(STATUS_CONFIG).map(([key, config]) => (
-        <option key={key} value={key}>
-          {config.label}
-        </option>
-      ))}
-    </select>
-  );
-}
 
 // ─── Detail Modal (Clean version - only view) ─────────────────
 function DetailModal({ open, reclamation, onClose }) {
@@ -212,7 +193,7 @@ export default function AdminReclamations() {
   const [selected, setSelected] = useState(null);
   const { successMsg, errorMsg, showSuccess, showError } = useToast();
 
-  const loadReclamations = async () => {
+ const loadReclamations = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getAllReclamations();
@@ -223,11 +204,11 @@ export default function AdminReclamations() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showError]);
 
   useEffect(() => {
     loadReclamations();
-  }, []);
+  }, [loadReclamations]);
 
   useWSListener("admin-reclamations", (data) => {
     switch (data.type) {

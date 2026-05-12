@@ -72,7 +72,7 @@ const AdminCommandes = () => {
             }
         };
         fetchCommandes();
-    }, [page, filterStatus]);
+    }, [page, filterStatus, showError]);
 
     // ── Ouvrir modal détail ───────────────────────────────
     const openOrderDetail = async (commande, mode = 'view') => {
@@ -290,11 +290,11 @@ const AdminCommandes = () => {
                                 <div className="flex items-center gap-2">
                                     <StatusBadge status={commande.status} />
                                     <button onClick={() => openOrderDetail(commande, 'view')} className="p-2 hover:bg-blue-50 text-blue-500 rounded-xl transition">
-                                                    <FiEye size={14}/>
-                                                </button>
-                                                <button onClick={() => openOrderDetail(commande, 'view')} className="p-2 hover:bg-gray-100 text-gray-400 rounded-xl transition">
-                                                    <FiEdit size={14}/>
-                                                </button>
+                                            <FiEye size={14}/>
+                                    </button>
+                                    <button onClick={() => openOrderDetail(commande, 'edit')} className="p-2 hover:bg-blue-50 text-blue-500 rounded-xl transition">
+                                        <FiEdit size={14}/>
+                                    </button>
                                 </div>
                                 </div>
                             </div>

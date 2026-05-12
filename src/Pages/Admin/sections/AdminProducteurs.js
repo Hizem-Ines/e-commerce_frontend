@@ -4,6 +4,7 @@ import { FiTrash2, FiPlus, FiSearch, FiEdit, FiUploadCloud, FiX } from 'react-ic
 import { MdVerified } from 'react-icons/md';
 import useToast from '../../../hooks/useToast';
 import api from '../../../services/api';
+import ConfirmDeleteModal from '../../../Components/common/ConfirmDeleteModal';
 
 const EMPTY_FORM = { name: '', description_fr: '', region: '', address: '', contact: '', email: '', website: '', is_certified_bio: false };
 
@@ -33,7 +34,7 @@ const AdminProducteurs = () => {
         }
     };
 
-    useEffect(() => { fetchProducteurs(); }, []);
+    useEffect(() => { fetchProducteurs(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const filtered = producteurs.filter(p =>
         p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -105,23 +106,20 @@ const AdminProducteurs = () => {
                 await api.put(`/suppliers/${editTarget.id}`, fd, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 });
-                setSuccessMsg('Producteur modifié avec succès.');
             } else {
                 await api.post('/suppliers', fd, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 });
-                setSuccessMsg('Producteur créé avec succès.');
             }
+            showSuccess(editTarget ? 'Producteur modifié avec succès.' : 'Producteur créé avec succès.');
             setShowForm(false);
             setFormData(EMPTY_FORM);
             setEditTarget(null);
             setImageFile(null);
             setImagePreview(null);
             fetchProducteurs();
-            setTimeout(() => setSuccessMsg(''), 3000);
         } catch (err) {
-            setErrorMsg(err.response?.data?.message || 'Erreur lors de l\'opération.');
-            setTimeout(() => setErrorMsg(''), 3000);
+            showError(err.response?.data?.message || 'Erreur lors de l\'opération.');
         } finally {
             setFormLoading(false);
         }
@@ -319,20 +317,14 @@ const AdminProducteurs = () => {
                 </div>
             )}
 
-            {/* MODAL SUPPRESSION */}
-            {deleteConfirm && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-2xl text-center">
-                        <div className="text-5xl mb-4">⚠️</div>
-                        <h3 className="text-xl font-bold text-[#2c2c2c] mb-2">Supprimer ce producteur ?</h3>
-                        <p className="text-black/50 text-sm mb-6">Les produits liés seront dissociés.</p>
-                        <div className="flex gap-3">
-                            <button onClick={() => setDeleteConfirm(null)} className="flex-1 border-2 border-gray-200 text-black/60 font-bold py-3 rounded-xl hover:bg-gray-50 transition">Annuler</button>
-                            <button onClick={() => handleDelete(deleteConfirm)} className="flex-1 bg-red-500 hover:bg-red-400 text-white font-bold py-3 rounded-xl transition">Supprimer</button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <ConfirmDeleteModal
+                open={!!deleteConfirm}
+                onConfirm={() => handleDelete(deleteConfirm)}
+                onCancel={() => setDeleteConfirm(null)}
+                title="Supprimer ce producteur ?"
+                message="Les produits liés seront dissociés."
+            />
+
         </div>
     );
 };

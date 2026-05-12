@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../../../services/api';
 import { FiTrash2, FiPlus, FiEdit } from 'react-icons/fi';
 import useToast from '../../../hooks/useToast';
+import ConfirmDeleteModal from '../../../Components/common/ConfirmDeleteModal';
 
 const AdminCategories = () => {
     const [categories, setCategories] = useState([]);       // flat list of ALL categories
@@ -59,28 +60,15 @@ setCategories(flat);
     const parentCategories = categories.filter(c => !c.parent_id);
     const subCategories    = categories.filter(c =>  c.parent_id);
 
-    
-    const handleCategoryUpdated = (updatedCategory) => {
-        setCategories(prev =>
-            prev.map(c => c.id === updatedCategory.id ? {
-                ...updatedCategory,
-                // parse images if backend returns it as a string
-                images: typeof updatedCategory.images === 'string'
-                    ? JSON.parse(updatedCategory.images)
-                    : updatedCategory.images ?? []
-            } : c)
-        );
-    };
+
 
     const handleDelete = async (id) => {
         try {
             await api.delete(`/categories/${id}`);
             setCategories(prev => prev.filter(c => c.id !== id));
-            setSuccessMsg('Catégorie supprimée avec succès.');
-            setTimeout(() => setSuccessMsg(''), 3000);
+            showSuccess('Catégorie supprimée avec succès.');
         } catch (err) {
-            setErrorMsg(err.response?.data?.message || 'Erreur lors de la suppression.');
-            setTimeout(() => setErrorMsg(''), 3000);
+            showError(err.response?.data?.message || 'Erreur lors de la suppression.');
         } finally {
             setDeleteConfirm(null);
         }
@@ -100,21 +88,18 @@ setCategories(flat);
                 await api.put(`/categories/${editItem.id}`, payload, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 });
-                setSuccessMsg('Catégorie mise à jour.');
             } else {
                 await api.post('/categories', payload, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 });
-                setSuccessMsg('Catégorie créée avec succès.');
             }
+            showSuccess(editItem ? 'Catégorie mise à jour.' : 'Catégorie créée avec succès.');
             setShowForm(false);
             setEditItem(null);
             setFormData({ name_fr: '', description_fr: '', parent_id: '' , images: [] });
             fetchCategories();
-            setTimeout(() => setSuccessMsg(''), 3000);
         } catch (err) {
-            setErrorMsg(err.response?.data?.message || 'Erreur.');
-            setTimeout(() => setErrorMsg(''), 3000);
+            showError(err.response?.data?.message || 'Erreur.');
         } finally {
             setFormLoading(false);
         }
@@ -380,20 +365,14 @@ setCategories(flat);
                 </div>
             )}
 
-            {/* MODAL SUPPRESSION */}
-            {deleteConfirm && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-2xl text-center">
-                        <div className="text-5xl mb-4">⚠️</div>
-                        <h3 className="text-xl font-bold text-[#2c2c2c] mb-2">Supprimer cette catégorie ?</h3>
-                        <p className="text-black/50 text-sm mb-6">Les produits liés seront dissociés.</p>
-                        <div className="flex gap-3">
-                            <button onClick={() => setDeleteConfirm(null)} className="flex-1 border-2 border-gray-200 text-black/60 font-bold py-3 rounded-xl hover:bg-gray-50 transition">Annuler</button>
-                            <button onClick={() => handleDelete(deleteConfirm)} className="flex-1 bg-red-500 hover:bg-red-400 text-white font-bold py-3 rounded-xl transition">Supprimer</button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <ConfirmDeleteModal
+                open={!!deleteConfirm}
+                onConfirm={() => handleDelete(deleteConfirm)}
+                onCancel={() => setDeleteConfirm(null)}
+                title="Supprimer cette catégorie ?"
+                message="Les produits liés seront dissociés."
+            />
+        
         </div>
     );
 };

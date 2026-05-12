@@ -5,6 +5,9 @@ import formatPrice from '../../../utils/formatPrice';
 import { useSiteSettings } from '../../../context/SiteSettingsContext';
 import api from '../../../services/api';
 import useToast from '../../../hooks/useToast';
+import { inputCls, textareaCls, selectCls } from '../../../constants/formStyles';
+import Field from '../../../Components/common/Field';
+import ConfirmDeleteModal from '../../../Components/common/ConfirmDeleteModal';
 
 const BLANK_FORM = {
     name_fr: '', description_fr: '', ethical_info_fr: '', origin: '',
@@ -20,17 +23,7 @@ const BLANK_VARIANT = {
     attributes: [{ type_fr: '', value_fr: ''}],
 };
 
-const Field = ({ label, required, children }) => (
-    <div>
-        <label className="block text-xs font-bold text-black/50 uppercase tracking-wider mb-1.5">
-            {label}{required && <span className="text-red-400 ml-0.5">*</span>}
-        </label>
-        {children}
-    </div>
-);
 
-const inputCls = "w-full bg-[#f9f5f0] border-2 border-transparent focus:border-[#4a8c42] focus:bg-white rounded-xl px-4 py-2.5 text-sm text-[#2c2c2c] outline-none transition placeholder-black/25";
-const textareaCls = inputCls + " resize-none";
 
 // ─── VariantEditRow — inchangé ────────────────────────────────────────────────
 const VariantPromotions = ({ variantId, productId }) => {
@@ -1084,7 +1077,7 @@ const AdminProduits = () => {
         ...(c.children || []).map(s => ({ id: s.id, label: `↳ ${s.name_fr}` })),
     ]);
 
-    const selectCls = "bg-white border-2 border-gray-200 hover:border-[#4a8c42] focus:border-[#4a8c42] rounded-xl px-3 py-2.5 text-sm text-[#2c2c2c] outline-none transition cursor-pointer";
+    const filterSelectCls = "bg-white border-2 border-gray-200 hover:border-[#4a8c42] focus:border-[#4a8c42] rounded-xl px-3 py-2.5 text-sm text-[#2c2c2c] outline-none transition cursor-pointer";
 
     return (
         <div>
@@ -1142,7 +1135,7 @@ const AdminProduits = () => {
                     <div className="flex flex-col gap-1 min-w-[140px] flex-1">
                         <label className="text-xs font-bold text-black/40 uppercase tracking-wider">Catégorie</label>
                         <select
-                            className={selectCls}
+                            className={filterSelectCls}
                             value={filterCategory}
                             onChange={e => applyFilter(setFilterCategory)(e.target.value)}
                         >
@@ -1157,7 +1150,7 @@ const AdminProduits = () => {
                     <div className="flex flex-col gap-1 min-w-[140px] flex-1">
                         <label className="text-xs font-bold text-black/40 uppercase tracking-wider">Producteur</label>
                         <select
-                            className={selectCls}
+                            className={filterSelectCls}
                             value={filterSupplier}
                             onChange={e => applyFilter(setFilterSupplier)(e.target.value)}
                         >
@@ -1172,7 +1165,7 @@ const AdminProduits = () => {
                     <div className="flex flex-col gap-1 min-w-[120px] flex-1">
                         <label className="text-xs font-bold text-black/40 uppercase tracking-wider">Statut</label>
                         <select
-                            className={selectCls}
+                            className={filterSelectCls}
                             value={filterStatus}
                             onChange={e => applyFilter(setFilterStatus)(e.target.value)}
                         >
@@ -1323,24 +1316,13 @@ const AdminProduits = () => {
                 </div>
             )}
 
-            {/* Delete confirm */}
-            {deleteConfirm && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-2xl text-center">
-                        <div className="text-5xl mb-4">⚠️</div>
-                        <h3 className="text-xl font-bold text-[#2c2c2c] mb-2">Supprimer ce produit ?</h3>
-                        <p className="text-black/50 text-sm mb-6">Cette action est irréversible. Toutes les variantes seront supprimées.</p>
-                        <div className="flex gap-3">
-                            <button onClick={() => setDeleteConfirm(null)} className="flex-1 border-2 border-gray-200 text-black/60 font-bold py-3 rounded-xl hover:bg-gray-50 transition">
-                                Annuler
-                            </button>
-                            <button onClick={() => handleDelete(deleteConfirm)} className="flex-1 bg-red-500 hover:bg-red-400 text-white font-bold py-3 rounded-xl transition">
-                                Supprimer
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <ConfirmDeleteModal
+                open={!!deleteConfirm}
+                onConfirm={() => handleDelete(deleteConfirm)}
+                onCancel={() => setDeleteConfirm(null)}
+                title="Supprimer ce produit ?"
+                message="Cette action est irréversible. Toutes les variantes seront supprimées."
+            />
 
             {showModal && (
                 <ProductFormModal

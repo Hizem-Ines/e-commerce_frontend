@@ -16,7 +16,12 @@ const useToast = (duration = 3000) => {
         setTimeout(() => setErrorMsg(''), duration);
     }, [duration]);
 
-    return { successMsg, errorMsg, showSuccess, showError };
+    const clearAll = useCallback(() => {
+        setSuccessMsg('');
+        setErrorMsg('');
+    }, []);
+
+    return { successMsg, errorMsg, showSuccess, showError, clearAll };
 };
 
 export default useToast;
