@@ -1,57 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useCallback} from "react";
 import { FiEye, FiSearch, FiAlertCircle, FiCheckCircle, FiClock, FiX } from "react-icons/fi";
 import { getAllReclamations, respondToReclamation } from "../../../services/reclamationService";
-import { addWSListener, removeWSListener } from "../../../utils/websocket";
 import { FiMessageSquare } from "react-icons/fi";
+import {
+    RECLAMATION_STATUS_CONFIG as STATUS_CONFIG,
+    RECLAMATION_STATUS_OPTIONS_ADMIN as STATUS_OPTIONS_ADMIN,
+    RECLAMATION_CLOSED_STATUSES,
+    COMPLAINT_TYPE_ICONS as TYPE_ICONS,
+} from '../../../constants/reclamationStatus';
+import useToast from '../../../hooks/useToast';
+import useWSListener from '../../../hooks/useWSListener';
 
-// ─── Constants ────────────────────────────────────────────
-//  — séparer affichage et options du formulaire
-const STATUS_CONFIG = {
-  en_attente: { label: "En attente",   color: "bg-amber-100 text-amber-700"     },
-  en_cours:   { label: "En cours",     color: "bg-blue-100 text-blue-700"       },
-  urgente:    { label: "Urgente ⚡",   color: "bg-orange-100 text-orange-700"   },
-  en_retard:  { label: "En retard ⏰", color: "bg-red-100 text-red-700"         },
-  resolue:    { label: "Résolue",      color: "bg-emerald-100 text-emerald-700" },
-  rejetee:    { label: "Rejetée",      color: "bg-gray-100 text-gray-600"       },
-};
-
-// Options disponibles UNIQUEMENT dans le formulaire de réponse admin
-const STATUS_OPTIONS_ADMIN = {
-  en_cours: { label: "En cours"  },
-  resolue:  { label: "Résolue"   },
-  rejetee:  { label: "Rejetée"   },
-};
-
-const TYPE_ICONS = {
-  produit_defectueux: "💔",
-  commande_non_recue: "📦",
-  produit_incorrect:  "❓",
-  retard_livraison:   "🚚",
-  remboursement:      "↩️",
-  autre:              "💬",
-};
-
-
-
-
-// ─── Status Selector (Dropdown) ─────────────────────────────
-function StatusSelector({ status, onChange }) {
-  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.en_attente;
-
-  return (
-    <select
-      value={status}
-      onChange={(e) => onChange(e.target.value)}
-      className={`text-xs font-bold px-4 py-2 rounded-full border-2 bg-white cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-[#4a8c42] hover:shadow-sm ${cfg.color.replace("bg-", "border-").replace("text-", "")}`}
-    >
-      {Object.entries(STATUS_CONFIG).map(([key, config]) => (
-        <option key={key} value={key}>
-          {config.label}
-        </option>
-      ))}
-    </select>
-  );
-}
 
 // ─── Detail Modal (Clean version - only view) ─────────────────
 function DetailModal({ open, reclamation, onClose }) {
@@ -232,20 +191,9 @@ export default function AdminReclamations() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [selected, setSelected] = useState(null);
-  const [successMsg, setSuccessMsg] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
+  const { successMsg, errorMsg, showSuccess, showError } = useToast();
 
-  const showSuccess = (msg) => {
-    setSuccessMsg(msg);
-    setTimeout(() => setSuccessMsg(""), 3000);
-  };
-
-  const showError = (msg) => {
-    setErrorMsg(msg);
-    setTimeout(() => setErrorMsg(""), 3000);
-  };
-
-  const loadReclamations = async () => {
+ const loadReclamations = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getAllReclamations();
@@ -256,34 +204,30 @@ export default function AdminReclamations() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showError]);
 
   useEffect(() => {
     loadReclamations();
-  }, []);
+  }, [loadReclamations]);
 
-  useEffect(() => {
-  addWSListener("admin-reclamations", (data) => {
+  useWSListener("admin-reclamations", (data) => {
     switch (data.type) {
-      case "NEW_RECLAMATION":
-        showSuccess(`📋 Nouvelle réclamation — ${data.user_name} (${data.type_label})`);
-        loadReclamations();
-        break;
-      case "RECLAMATION_URGENTE":
-        showError(`⚡ ${data.message}`);
-        loadReclamations();
-        break;
-      case "RECLAMATION_EN_RETARD":
-        showError(`⏰ ${data.message}`);
-        loadReclamations();
-        break;
-      default:
-        break;
+        case "NEW_RECLAMATION":
+            showSuccess(`📋 Nouvelle réclamation — ${data.user_name} (${data.type_label})`);
+            loadReclamations();
+            break;
+        case "RECLAMATION_URGENTE":
+            showError(`⚡ ${data.message}`);
+            loadReclamations();
+            break;
+        case "RECLAMATION_EN_RETARD":
+            showError(`⏰ ${data.message}`);
+            loadReclamations();
+            break;
+        default:
+            break;
     }
-  });
-
-  return () => removeWSListener("admin-reclamations");
-}, []);
+});
 
   
 const [respondTarget, setRespondTarget] = useState(null); // réclamation à traiter
@@ -482,7 +426,7 @@ const handleRespond = async () => {
                       >
                         <FiEye size={15} />
                       </button>
-                      {!["resolue", "rejetee"].includes(r.status) && (
+                      {!RECLAMATION_CLOSED_STATUSES.includes(r.status) && (
                         <button
                           onClick={() => openRespondModal(r)}
                           className="p-2 hover:bg-emerald-50 text-emerald-600 rounded-xl transition"
@@ -526,7 +470,7 @@ const handleRespond = async () => {
                     <span className="text-xs text-black/30">{new Date(r.created_at).toLocaleDateString('fr-FR')}</span>
                     <div className="flex gap-1">
                       <button onClick={() => setSelected(r)} className="p-2 hover:bg-blue-50 text-blue-500 rounded-xl transition"><FiEye size={14}/></button>
-                      {!['resolue', 'rejetee'].includes(r.status) && (
+                      {!RECLAMATION_CLOSED_STATUSES.includes(r.status) && (
                         <button onClick={() => openRespondModal(r)} className="p-2 hover:bg-emerald-50 text-emerald-600 rounded-xl transition"><FiMessageSquare size={14}/></button>
                       )}
                     </div>

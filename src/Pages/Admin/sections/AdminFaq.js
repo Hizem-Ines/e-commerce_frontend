@@ -12,23 +12,12 @@ import {
   adminLinkQuestionToFaq,
   adminDeleteQuestion,
 } from "../../../services/faqService";
-import { addWSListener, removeWSListener } from '../../../utils/websocket';
+import useWSListener from '../../../hooks/useWSListener';
+import {
+    FAQ_CATEGORY_OPTIONS as CATEGORY_OPTIONS,
+    FAQ_CATEGORY_LABELS  as CATEGORY_LABELS,
+} from '../../../constants/faqCategories';
 
-const CATEGORY_OPTIONS = [
-  { value: "livraison", label: "🚚 Livraison" },
-  { value: "paiement",  label: "💳 Paiement"  },
-  { value: "produits",  label: "🧺 Produits"  },
-  { value: "retours",   label: "↩️ Retours"   },
-  { value: "autre",     label: "💬 Autre"     },
-];
-
-const CATEGORY_LABELS = {
-  livraison: "🚚 Livraison",
-  paiement:  "💳 Paiement",
-  produits:  "🧺 Produits",
-  retours:   "↩️ Retours",
-  autre:     "💬 Autre",
-};
 
 const STATUS_BADGE = {
   pending:  "bg-yellow-100 text-yellow-700",
@@ -432,30 +421,15 @@ const AdminFaq = () => {
   }, [tab, loadQuestions]);
 
   // ── WS : nouvelle question reçue en temps réel ────────────
-  useEffect(() => {
-      addWSListener("admin-faq-ws", (data) => {
-          if (data.type === "NEW_FAQ_QUESTION") {
-              // Recharger les questions si l'onglet est actif
-              if (tab === "questions") {
-                  loadQuestions();
-              }
-              // Incrémenter le badge même si on est sur l'onglet FAQs
-              setQTotal((prev) => prev + 1);
-          }
-      });
-      return () => removeWSListener("admin-faq-ws");
+  useWSListener("admin-faq-ws", (data) => {
+      if (data.type === "NEW_FAQ_QUESTION") {
+          if (tab === "questions") loadQuestions();
+          setQTotal((prev) => prev + 1);
+      }
   }, [tab, loadQuestions]);
 
   // ── FAQ actions ──
-  const handleToggle = async (id) => {
-    try {
-      const d = await adminToggleFaq(id);
-      setFaqs((prev) => prev.map((f) => (f.id === id ? d.faq : f)));
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
+ 
   const handleDeleteFaq = async (id) => {
     if (!window.confirm("Supprimer cette FAQ ?")) return;
     setDeletingId(id);

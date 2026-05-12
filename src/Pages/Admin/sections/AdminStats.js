@@ -15,24 +15,11 @@ import {
     PolarAngleAxis, PolarRadiusAxis,
 } from 'recharts';
 import { adminFaqStats } from '../../../services/faqService';
+import {
+    ORDER_STATUS_CONFIG as STATUS_LABELS,
+    ORDER_STATUS_COLORS as STATUS_COLORS,
+} from '../../../constants/orderStatus';
 
-// ─── Constantes ────────────────────────────────────────────────────────────────
-
-const STATUS_LABELS = {
-    en_attente:  { label: 'En attente',  color: 'bg-yellow-100 text-yellow-700'   },
-    confirmee:   { label: 'Confirmée',   color: 'bg-blue-100   text-blue-700'     },
-    expediee:    { label: 'Expédiée',    color: 'bg-purple-100 text-purple-700'   },
-    livree:      { label: 'Livrée',      color: 'bg-emerald-100 text-emerald-700' },
-    annulee:     { label: 'Annulée',     color: 'bg-red-100    text-red-700'      },
-};
-
-const STATUS_COLORS = {
-    en_attente: '#f59e0b',
-    confirmee:  '#3b82f6',
-    expediee:   '#8b5cf6',
-    livree:     '#10b981',
-    annulee:    '#ef4444',
-};
 
 const CATEGORY_PALETTE = [
     '#2d5a27','#4a8c42','#10b981','#34d399',

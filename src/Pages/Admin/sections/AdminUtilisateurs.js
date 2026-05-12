@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import api from '../../../services/api';
 import { FiSearch, FiTrash2, FiEdit, FiX, FiCheck, FiFilter } from 'react-icons/fi';
+import { USER_ROLE_LABELS, USER_STATUS_FILTERS } from '../../../constants/userRoles';
+import useToast from '../../../hooks/useToast';
 
 const AdminUtilisateurs = () => {
     const [users, setUsers]               = useState([]);
@@ -9,9 +11,7 @@ const AdminUtilisateurs = () => {
     const [filterRole, setFilterRole]     = useState('');   // '' | 'user' | 'admin'
     const [filterStatus, setFilterStatus] = useState('');   // '' | 'active' | 'suspended' | 'unverified'
     const [deleteConfirm, setDeleteConfirm] = useState(null);
-    const [successMsg, setSuccessMsg]     = useState('');
-    const [errorMsg, setErrorMsg]         = useState('');
-
+    const { successMsg, errorMsg, showSuccess, showError } = useToast();
     const [editUser, setEditUser]         = useState(null);
     const [editForm, setEditForm]         = useState({});
     const [editLoading, setEditLoading]   = useState(false);
@@ -42,11 +42,9 @@ const AdminUtilisateurs = () => {
         try {
             await api.delete(`/auth/users/${id}`);
             setUsers(prev => prev.filter(u => u.id !== id));
-            setSuccessMsg('Utilisateur supprimé avec succès.');
-            setTimeout(() => setSuccessMsg(''), 3000);
+            showSuccess('Utilisateur supprimé avec succès.');
         } catch (err) {
-            setErrorMsg(err.response?.data?.message || 'Erreur lors de la suppression.');
-            setTimeout(() => setErrorMsg(''), 3000);
+            showError(err.response?.data?.message || 'Erreur lors de la suppression.');
         } finally { setDeleteConfirm(null); }
     };
 
@@ -76,12 +74,10 @@ const AdminUtilisateurs = () => {
             const res = await api.put(`/auth/users/${editUser.id}`, payload);
             const updated = res.data.user;
             setUsers(prev => prev.map(u => u.id === updated.id ? { ...u, ...updated } : u));
-            setSuccessMsg('Utilisateur mis à jour avec succès.');
-            setTimeout(() => setSuccessMsg(''), 3000);
+            showSuccess('Utilisateur mis à jour avec succès.');
             closeEdit();
         } catch (err) {
-            setErrorMsg(err.response?.data?.message || 'Erreur lors de la mise à jour.');
-            setTimeout(() => setErrorMsg(''), 3000);
+            showError(err.response?.data?.message || 'Erreur lors de la mise à jour.');
         } finally { setEditLoading(false); }
     };
 
@@ -139,8 +135,9 @@ const AdminUtilisateurs = () => {
                             ${filterRole ? 'border-[#4a8c42] text-[#2d5a27] font-bold' : 'border-gray-200 text-black/60'}`}
                     >
                         <option value="">Tous les rôles</option>
-                        <option value="user">Client</option>
-                        <option value="admin">Admin</option>
+                        {Object.entries(USER_ROLE_LABELS).map(([value, label]) => (
+                            <option key={value} value={value}>{label}</option>
+                        ))}
                     </select>
 
                     {/* Status filter */}
@@ -151,9 +148,9 @@ const AdminUtilisateurs = () => {
                             ${filterStatus ? 'border-[#4a8c42] text-[#2d5a27] font-bold' : 'border-gray-200 text-black/60'}`}
                     >
                         <option value="">Tous les statuts</option>
-                        <option value="active"> Actif</option>
-                        <option value="suspended"> Suspendu</option>
-                        <option value="unverified"> Non vérifié</option>
+                        {USER_STATUS_FILTERS.map(({ value, label }) => (
+                            <option key={value} value={value}>{label}</option>
+                        ))}
                     </select>
 
                     {/* Reset filters */}
@@ -216,7 +213,7 @@ const AdminUtilisateurs = () => {
                                                 ? 'bg-purple-100 text-purple-700'
                                                 : 'bg-gray-100 text-gray-600'
                                         }`}>
-                                            {user.role === 'admin' ? 'Admin' : 'Client'}
+                                            {USER_ROLE_LABELS[user.role] || user.role}
                                         </span>
                                     </td>
                                     <td className="px-5 py-4 text-center">
@@ -311,8 +308,9 @@ const AdminUtilisateurs = () => {
                                 <div>
                                     <label className="block text-xs font-bold text-black/50 mb-1">Rôle</label>
                                     <select value={editForm.role} onChange={e => handleEditChange('role', e.target.value)} className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-[#4a8c42] focus:outline-none transition bg-white">
-                                        <option value="user">Client</option>
-                                        <option value="admin">Admin</option>
+                                        {Object.entries(USER_ROLE_LABELS).map(([value, label]) => (
+                                            <option key={value} value={value}>{label}</option>
+                                        ))}
                                     </select>
                                 </div>
                                 <div>
