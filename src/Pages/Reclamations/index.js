@@ -180,9 +180,12 @@ export default function Reclamations() {
               </Field>
 
               <Field label="Description du problème">
-                <textarea name="message" required rows={5} value={form.message} onChange={handleChange}
+                <textarea name="message" required rows={5} maxLength={2000} value={form.message} onChange={handleChange}
                   placeholder="Décrivez votre réclamation en détail…"
                   className={`${inputCls} resize-none`} />
+                  <p className="text-xs text-black/30 text-right mt-1">
+                    {form.message.length}/2000
+                </p>
               </Field>
 
               {user && (

@@ -1,6 +1,5 @@
 import { useState ,useEffect } from 'react';
 import { useAuth } from '../../context/authContext';
-import { Navigate } from 'react-router-dom';
 import { FiGrid, FiPackage, FiShoppingBag, FiUsers, FiTag, FiList, FiPercent, FiMenu, FiX, FiMail } from 'react-icons/fi';
 import { GiCookingGlove } from "react-icons/gi";
 import { FaClipboardQuestion } from "react-icons/fa6";
@@ -36,7 +35,7 @@ const SECTIONS = [
 ];
 
 const Admin = () => {
-    const { user, loading } = useAuth();
+    const { user} = useAuth();
         const [activeSection, setActiveSection] = useState(() => {
         const hash = window.location.hash.replace("#", "");
         const section = hash.split("?")[0];
@@ -56,15 +55,6 @@ const Admin = () => {
     }, []);
 
     const [sidebarOpen, setSidebarOpen] = useState(true);
-
-    if (loading) return (
-        <div className="min-h-screen bg-[#f9f5f0] flex items-center justify-center">
-            <div className="text-4xl animate-spin">🌿</div>
-        </div>
-    );
-
-    if (!user) return <Navigate to="/connexion" />;
-    if (user.role !== 'admin') return <Navigate to="/" />;
 
     const renderSection = () => {
         switch (activeSection) {

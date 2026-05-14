@@ -37,6 +37,8 @@ import ScrollToTop from './Components/scrolltotop/ScrollToTop';
 import Conseiller from './Pages/Conseiller';
 import { connectWebSocket, disconnectWebSocket, addWSListener, removeWSListener } from './utils/websocket';
 import { useNavigate } from 'react-router-dom';
+import ProtectedRoute from './Components/common/ProtectedRoute';
+
 
 // ══════════════════════════════════════════════════════════════
 // TOAST CONFIG — tous les types WS
@@ -265,13 +267,21 @@ export default function App() {
                             <CartSidebar />
                             <ToastContainer toasts={toasts} onClose={removeToast} />
                             <Routes>
-                                <Route path="/admin" element={<Admin />} />
+                                <Route path="/admin" element={
+                                    <ProtectedRoute requiredRole="admin">
+                                        <Admin />
+                                    </ProtectedRoute>
+                                } />
                                 <Route path="/connexion" element={<Auth />} />
                                 <Route path="/verify-email/:token" element={<VerifyEmail />} />
                                 <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} />
                                 <Route path="/reset-password/:token" element={<ResetPassword />} />
                                 <Route path="/login/success" element={<LoginSuccess />} />
-                                <Route path="/checkout" element={<Checkout />} />
+                                <Route path="/checkout" element={
+                                    <ProtectedRoute>
+                                        <Checkout />
+                                    </ProtectedRoute>
+                                } />
                                 <Route path="/commande-confirmee/:orderId" element={<OrderConfirmation />} />
                                 <Route path="/complete-account/:token" element={<CompleteAccount />} />
                                 <Route element={<Layout />}>
@@ -285,8 +295,16 @@ export default function App() {
                                     <Route path="/reclamations" element={<Reclamations />} />
                                     <Route path="/producteurs" element={<Producers />} />
                                     <Route path="/producteurs/:nom" element={<ProducerDetail />} />
-                                    <Route path="/profil" element={<Profile />} />
-                                    <Route path="/commandes/:orderId" element={<OrderDetail />} />
+                                    <Route path="/profil" element={
+                                        <ProtectedRoute>
+                                            <Profile />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/commandes/:orderId" element={
+                                        <ProtectedRoute>
+                                            <OrderDetail />
+                                        </ProtectedRoute>
+                                    } />
                                     <Route path="/offres" element={<Offres />} />
                                     <Route path="/recettes" element={<Recipes />} />
                                     <Route path="/recettes/:slug" element={<RecipesDetail />} />
