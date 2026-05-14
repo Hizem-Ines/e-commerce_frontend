@@ -1,4 +1,5 @@
-import { useState ,useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
 import { FiGrid, FiPackage, FiShoppingBag, FiUsers, FiTag, FiList, FiPercent, FiMenu, FiX, FiMail } from 'react-icons/fi';
 import { GiCookingGlove } from "react-icons/gi";
@@ -35,8 +36,10 @@ const SECTIONS = [
 ];
 
 const Admin = () => {
-    const { user} = useAuth();
-        const [activeSection, setActiveSection] = useState(() => {
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
+    const [activeSection, setActiveSection] = useState(() => {
         const hash = window.location.hash.replace("#", "");
         const section = hash.split("?")[0];
         const valid = SECTIONS.map(s => s.id);
@@ -54,7 +57,16 @@ const Admin = () => {
         return () => window.removeEventListener("hashchange", handleHash);
     }, []);
 
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    // Default open only on desktop
+    const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 1024);
+
+    const handleNavClick = (sectionId) => {
+        window.location.hash = sectionId;
+        // Close sidebar on mobile after selecting a section
+        if (window.innerWidth < 1024) {
+            setSidebarOpen(false);
+        }
+    };
 
     const renderSection = () => {
         switch (activeSection) {
@@ -69,7 +81,7 @@ const Admin = () => {
             case 'campaigns':    return <AdminEmailCampaigns />;
             case 'faq':          return <AdminFaq />;
             case 'reclamation':  return <AdminReclamations />;
-            case 'avis':         return <AdminAvis/>;
+            case 'avis':         return <AdminAvis />;
             default:             return <AdminStats />;
         }
     };
@@ -95,10 +107,13 @@ const Admin = () => {
                 {/* LOGO */}
                 <div className="flex items-center justify-between p-4 border-b border-emerald-700">
                     {sidebarOpen && (
-                        <div>
+                        <button
+                            onClick={() => navigate('/')}
+                            className="text-left hover:opacity-80 transition-opacity"
+                        >
                             <h1 className="text-lg font-black tracking-widest font-serif">GOFFA</h1>
                             <p className="text-[#4a8c42] text-xs">Admin Dashboard</p>
-                        </div>
+                        </button>
                     )}
                     <button
                         onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -113,11 +128,11 @@ const Admin = () => {
                     {SECTIONS.map(section => (
                         <button
                             key={section.id}
-                            onClick={() => { window.location.hash = section.id; }}
+                            onClick={() => handleNavClick(section.id)}
                             className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-left ${
                                 activeSection === section.id
                                     ? 'bg-[#2d5a27] text-white'
-                                    : 'text-#b6eac7 hover:bg-emerald-800'
+                                    : 'text-emerald-100 hover:bg-emerald-800'
                             }`}
                         >
                             <span className="shrink-0">{section.icone}</span>
@@ -152,7 +167,12 @@ const Admin = () => {
                     >
                         <FiMenu size={20} />
                     </button>
-                    <h1 className="font-black text-lg font-serif text-emerald-900">GOFFA</h1>
+                    <button
+                        onClick={() => navigate('/')}
+                        className="font-black text-lg font-serif text-emerald-900 hover:opacity-80 transition-opacity"
+                    >
+                        GOFFA
+                    </button>
                 </div>
                 <div className="p-4 lg:p-8">
                     {renderSection()}

@@ -50,6 +50,12 @@ const Header = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    useEffect(() => {
+        return () => {
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+        };
+    }, []);
+
     const handleSearchChange = (e) => {
         const value = e.target.value;
         setSearch(value);
@@ -191,9 +197,9 @@ const Header = () => {
                     <div className="flex items-center gap-2 shrink-0 ml-auto sm:ml-0">
                         {/* Conseiller IA */}
                         <Link to="/conseiller" className="no-underline">
-                            <button className="flex items-center gap-1.5 border border-white/30 rounded-full px-3 py-2 text-white hover:bg-white/10 transition text-xs font-bold">
+                            <button className="flex items-center gap-1.5 border border-white/30 rounded-full w-10 h-10 md:w-auto md:h-auto px-0 md:px-3 md:py-2 justify-center text-white hover:bg-white/10 transition text-xs font-bold">
                                 <BsStars size={14} />
-                                <span className="hidden sm:block">Conseiller IA</span>
+                                <span className="hidden md:block">Conseiller IA</span>
                             </button>
                             </Link>
                         {/* FAVORIS */}
@@ -213,7 +219,7 @@ const Header = () => {
                             <div className="relative" ref={dropdownRef}>
                                 <button
                                     onClick={() => setDropdownOpen(!dropdownOpen)}
-                                    className="flex items-center gap-2 border border-white/30 rounded-full px-3 py-2 text-white hover:bg-white/10 transition"
+                                    className="flex items-center gap-2 border border-white/30 rounded-full w-10 h-10 sm:w-auto sm:h-auto px-0 sm:px-3 sm:py-2 justify-center text-white hover:bg-white/10 transition"
                                 >
                                     <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-black overflow-hidden">
                                         {user.avatar ? (
@@ -223,12 +229,12 @@ const Header = () => {
                                         )}
                                     </div>
                                     <span className="text-sm font-semibold hidden md:block">{user.name}</span>
-                                    <span className="text-xs opacity-60">{dropdownOpen ? '▲' : '▼'}</span>
+                                    <span className="text-xs opacity-60 hidden sm:inline">{dropdownOpen ? '▲' : '▼'}</span>
                                 </button>
 
                                 {/* DROPDOWN */}
                                 {dropdownOpen && (
-                                    <div className="absolute right-0 top-12 bg-white rounded-2xl shadow-xl border border-gray-100 w-48 z-50 overflow-hidden">
+                                    <div className="absolute right-0 top-12 bg-white rounded-2xl shadow-xl border border-gray-100 w-48 max-w-[calc(100vw-1rem)] z-50 overflow-hidden">
                                         <div className="px-4 py-3 border-b border-gray-100">
                                             <p className="font-bold text-sm text-[#2c2c2c]">{user.name}</p>
                                             <p className="text-xs text-black/40 truncate">{user.email}</p>
@@ -272,7 +278,7 @@ const Header = () => {
                             className="flex items-center gap-2 cursor-pointer"
                             onClick={() => navigate('/panier')}
                         >
-                            <span className="hidden sm:block text-white font-bold text-sm">
+                            <span className="hidden md:block text-white font-bold text-sm">
                                 {formatPrice(totalPrix, currency)}
                             </span>
                             
