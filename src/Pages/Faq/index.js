@@ -179,8 +179,9 @@ const AskForm = () => {
 
       <div>
         <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Votre question</label>
-        <textarea name="question" required minLength={10} rows={4} value={form.question} onChange={handleChange}
+        <textarea name="question" required minLength={10}  maxLength={1000} rows={4} value={form.question} onChange={handleChange}
           placeholder="Décrivez votre question en détail…" className={`${inputCls} resize-none`} />
+          <p className="text-xs text-gray-400 text-right mt-1">{form.question.length}/1000</p>
       </div>
       <button
         type="submit" disabled={loading}

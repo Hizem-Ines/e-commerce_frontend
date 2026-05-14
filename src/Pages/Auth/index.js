@@ -5,6 +5,8 @@ import { useAuth } from '../../context/authContext';
 import logo from '../../assets/images/goffa-logo.png';
 
 const Auth = () => {
+    const [authError, setAuthError] = useState('');
+    const [authSuccess, setAuthSuccess] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLogin, setIsLogin] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
@@ -41,11 +43,13 @@ const Auth = () => {
 
     // ── Login / Register submit ───────────────────────────
     const handleSubmit = async (e) => {
+        setAuthError('');
+        setAuthSuccess('');
         e.preventDefault();
         if (isSubmitting) return;
 
         if (!isLogin && formData.password !== formData.confirmPassword) {
-            alert('Les mots de passe ne correspondent pas !');
+            setAuthError('Les mots de passe ne correspondent pas !');
             return;
         }
 
@@ -70,11 +74,11 @@ const Auth = () => {
                     address:  formData.adresse,
                     city:     formData.ville,
                 });
-                alert('Compte créé ! Vérifiez votre email pour activer votre compte.');
+                setAuthSuccess('Compte créé ! Vérifiez votre email pour activer votre compte.');
                 setIsLogin(true);
             }
         } catch (err) {
-            alert(err.response?.data?.message || 'Une erreur est survenue');
+            setAuthError(err.response?.data?.message || 'Une erreur est survenue');
         } finally {
             setIsSubmitting(false);
         }
@@ -82,6 +86,8 @@ const Auth = () => {
 
     // ── MFA submit ────────────────────────────────────────
     const handleMfaSubmit = async (e) => {
+        setAuthError('');
+        setAuthSuccess('');
         e.preventDefault();
         if (isSubmitting) return;
         setIsSubmitting(true);
@@ -90,7 +96,7 @@ const Auth = () => {
             navigate('/login/success');
 
         } catch (err) {
-            alert(err.response?.data?.message || 'Code incorrect ou expiré. Réessayez.');
+            setAuthError(err.response?.data?.message || 'Code incorrect ou expiré. Réessayez.');
         } finally {
             setIsSubmitting(false);
         }
@@ -164,6 +170,7 @@ const Auth = () => {
 
                             <form onSubmit={handleMfaSubmit} className="space-y-5">
                                 <div>
+                                    
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5 text-center">
                                         Code de vérification
                                     </label>
@@ -215,6 +222,16 @@ const Auth = () => {
                             {oauthError && (
                         <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-semibold px-4 py-3 rounded-xl mb-6">
                             ⚠️ {oauthError}
+                        </div>
+                    )}
+                    {authError && (
+                        <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-semibold px-4 py-3 rounded-xl mb-4">
+                            ⚠️ {authError}
+                        </div>
+                    )}
+                    {authSuccess && (
+                        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold px-4 py-3 rounded-xl mb-4">
+                            ✅ {authSuccess}
                         </div>
                     )}
 

@@ -12,23 +12,27 @@ api.interceptors.response.use(
   (error) => {
     const status = error.response?.status;
 
+    if (error.code === 'ECONNABORTED') {
+      console.error('[API] Timeout — le serveur ne répond pas');
+    }
+
+    if (!error.response) {
+      console.error('[API] Pas de réponse réseau');
+    }
+
     if (status === 401) {
       const publicPaths = [
-        '/connexion',
-        '/reset-password',
-        '/verify-email',
-        '/mot-de-passe-oublie',
-        '/complete-account',
-        '/login/success',
-        '/',
+        '/connexion', '/reset-password', '/verify-email',
+        '/mot-de-passe-oublie', '/complete-account', '/login/success', '/',
       ];
       const isPublic = publicPaths.some(path => window.location.pathname.startsWith(path));
       if (!isPublic) {
+        window.dispatchEvent(new CustomEvent('auth:unauthorized'));
         window.location.href = '/connexion';
       }
     }
 
-    if (status >= 500) {
+    if (status >= 500 && process.env.NODE_ENV !== 'production') {
       console.error('[API] Erreur serveur :', error.response?.data?.message || error.message);
     }
 

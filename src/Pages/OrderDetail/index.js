@@ -23,7 +23,13 @@ const OrderDetail = () => {
     useEffect(() => {
         getSingleOrder(orderId)
             .then(res => setOrder(res.data.order))
-            .catch(() => setError('Commande introuvable.'))
+            .catch((err) => {
+                if (err.response?.status === 403) {
+                    setError("Vous n'avez pas accès à cette commande.");
+                } else {
+                    setError('Commande introuvable.');
+                }
+            })
             .finally(() => setLoading(false));
     }, [orderId]);
 

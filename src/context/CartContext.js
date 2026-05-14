@@ -8,7 +8,17 @@ const CartContext = createContext();
 const loadCart = () => {
     try {
         const data = localStorage.getItem(CART_KEY);
-        return data ? JSON.parse(data) : [];
+        if (!data) return [];
+        const items = JSON.parse(data);
+        // Rejeter si ce n'est pas un tableau
+        if (!Array.isArray(items)) return [];
+        // Filtrer les items malformés
+        return items.filter(i =>
+            i.variant_id &&
+            typeof i.quantity === 'number' &&
+            i.quantity > 0 &&
+            i.quantity <= 99
+        );
     } catch {
         return [];
     }
