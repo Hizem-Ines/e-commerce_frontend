@@ -1,5 +1,5 @@
 import React, { useState, useEffect , useCallback} from "react";
-import { FiEye, FiSearch, FiAlertCircle, FiCheckCircle, FiClock, FiX } from "react-icons/fi";
+import { FiEye, FiSearch, FiAlertCircle, FiCheckCircle, FiClock, FiX , FiCheck } from "react-icons/fi";
 import { getAllReclamations, respondToReclamation } from "../../../services/reclamationService";
 import { FiMessageSquare } from "react-icons/fi";
 import {
@@ -166,6 +166,26 @@ function RespondModal({ open, reclamation, form, onChange, onSubmit, onClose, lo
               placeholder="ex: 48"
               className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#4a8c42]"
             />
+            {form.status === "resolue" && (
+              <div>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <div
+                    onClick={() => onChange("avec_remboursement", !form.avec_remboursement)}
+                    className={`w-5 h-5 rounded flex items-center justify-center border-2 transition-all cursor-pointer shrink-0 ${
+                      form.avec_remboursement
+                        ? "border-[#166534] bg-[#166534]"
+                        : "border-gray-300 bg-white"
+                    }`}
+                  >
+                    {form.avec_remboursement && <FiCheck size={12} color="white" strokeWidth={3} />}
+                  </div>
+                  <span className="text-sm font-semibold text-[#2c2c2c]">Rembourser le client</span>
+                </label>
+                <p className="text-xs text-black/40 mt-1 ml-8">
+                  Un remboursement Stripe sera automatiquement émis.
+                </p>
+              </div>
+            )}
           </div>
         </div>
         <div className="px-7 py-5 border-t border-gray-100 flex gap-3">
@@ -240,6 +260,7 @@ const openRespondModal = (r) => {
     status: STATUS_OPTIONS_ADMIN[r.status] ? r.status : "en_cours", // ← fallback sur la première option valide
     admin_response: r.admin_response || "",
     resolution_delay: "",
+    avec_remboursement: false,
   });
 };
 

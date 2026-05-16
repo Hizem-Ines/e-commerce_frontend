@@ -473,8 +473,10 @@ useWSListener("profile-account-status", (data) => {
                                         <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                                         <input type="tel" value={profileData.phone}
                                             onChange={(e) => handleProfileChange('phone', e.target.value)}
-                                            className={`${inputBase} pl-10`} placeholder="+216 XX XXX XXX" />
+                                            className={`${inputBase} pl-10`} placeholder="+41 XX XXX XX XX" />
+                                        
                                     </div>
+                                    <p className="text-xs text-black/30 mt-1">Format suisse requis pour les commandes (+41...)</p>
                                 </div>
                             </div>
                         </div>
@@ -497,7 +499,7 @@ useWSListener("profile-account-status", (data) => {
                                 <div>
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">Téléphone</label>
                                     <input type="tel" name="shipping_phone" value={shippingData.shipping_phone}
-                                        onChange={handleShippingChange} placeholder="+216 XX XXX XXX"
+                                        onChange={handleShippingChange} placeholder="+41 79 XXX XX XX"
                                         className={inputBase} />
                                 </div>
                                 <div className="sm:col-span-2">
@@ -515,19 +517,19 @@ useWSListener("profile-account-status", (data) => {
                                 <div>
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">Ville</label>
                                     <input type="text" name="shipping_city" value={shippingData.shipping_city}
-                                        onChange={handleShippingChange} placeholder="Tunis"
+                                        onChange={handleShippingChange} placeholder="Lausanne"
                                         className={inputBase} />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Gouvernorat</label>
+                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Canton</label>
                                     <input type="text" name="shipping_governorate" value={shippingData.shipping_governorate}
-                                        onChange={handleShippingChange} placeholder="Tunis"
+                                        onChange={handleShippingChange} placeholder="VD"
                                         className={inputBase} />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">Pays</label>
                                     <input type="text" name="shipping_country" value={shippingData.shipping_country}
-                                        onChange={handleShippingChange} placeholder="TN"
+                                        onChange={handleShippingChange} placeholder="CH"
                                         className={inputBase} />
                                 </div>
                             </div>
@@ -565,7 +567,7 @@ useWSListener("profile-account-status", (data) => {
                                     <div>
                                         <label className="block text-xs font-bold text-gray-600 mb-1.5">Téléphone</label>
                                         <input type="tel" name="billing_phone" value={billingData.billing_phone}
-                                            onChange={handleBillingChange} placeholder="+216 XX XXX XXX"
+                                            onChange={handleBillingChange} placeholder="+41 79 XXX XX XX"
                                             className={inputBase} />
                                     </div>
                                     <div className="sm:col-span-2">
@@ -583,19 +585,19 @@ useWSListener("profile-account-status", (data) => {
                                     <div>
                                         <label className="block text-xs font-bold text-gray-600 mb-1.5">Ville</label>
                                         <input type="text" name="billing_city" value={billingData.billing_city}
-                                            onChange={handleBillingChange} placeholder="Tunis"
+                                            onChange={handleBillingChange} placeholder="Lausanne"
                                             className={inputBase} />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Gouvernorat</label>
+                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Canton</label>
                                         <input type="text" name="billing_governorate" value={billingData.billing_governorate}
-                                            onChange={handleBillingChange} placeholder="Tunis"
+                                            onChange={handleBillingChange} placeholder="VD"
                                             className={inputBase} />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold text-gray-600 mb-1.5">Pays</label>
                                         <input type="text" name="billing_country" value={billingData.billing_country}
-                                            onChange={handleBillingChange} placeholder="TN"
+                                            onChange={handleBillingChange} placeholder="CH"
                                             className={inputBase} />
                                     </div>
                                 </div>
@@ -848,8 +850,8 @@ useWSListener("profile-account-status", (data) => {
                         <form onSubmit={handlePasswordSubmit} className="space-y-5">
                             {[
                                 { field: 'currentPassword',  label: 'Mot de passe actuel',               placeholder: '••••••••', show: true  },
-                                { field: 'newPassword',      label: 'Nouveau mot de passe',              placeholder: '••••••••', show: false },
-                                { field: 'confirmPassword',  label: 'Confirmer le nouveau mot de passe', placeholder: '••••••••', show: false },
+                                { field: 'newPassword',      label: 'Nouveau mot de passe',              placeholder: '••••••••', show: true },
+                                { field: 'confirmPassword',  label: 'Confirmer le nouveau mot de passe', placeholder: '••••••••', show: true },
                             ].map(({ field, label, placeholder, show }) => (
                                 <div key={field}>
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">{label}</label>

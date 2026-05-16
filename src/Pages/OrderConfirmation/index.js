@@ -166,8 +166,8 @@ const OrderConfirmation = () => {
                             <div>
                                 <p className="text-xs text-black/40">Paiement</p>
                                 <p className="font-bold text-sm text-[#2c2c2c]">
-                                    {order.payment_method === 'cod'
-                                        ? '💵 Paiement à la livraison'
+                                    {order.payment_method === 'twint'
+                                        ? '📱 Twint'
                                         : '💳 Carte bancaire'}
                                 </p>
                             </div>
