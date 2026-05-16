@@ -37,7 +37,7 @@ const OrderDetail = () => {
     const getDeliveryStep = () => {
         const s = order?.delivery_status;
         if (s === 'livre') return 2;
-        if (s === 'expediee' || s === 'en_transit' || s === 'en_cours') return 1;
+        if (s === 'expedie' || s === 'en_transit' || s === 'en_cours') return 1;
         return 0;
     };
 

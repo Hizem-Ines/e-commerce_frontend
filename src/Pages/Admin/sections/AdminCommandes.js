@@ -42,23 +42,40 @@ const AdminCommandes = () => {
 
     const [deliveryForm, setDeliveryForm] = useState({ carrier: '', tracking_number: '', estimated_date: '', status: '' });
     const [deliveryLoading, setDeliveryLoading] = useState(false);
+    const [pendingStatus, setPendingStatus] = useState(null);
 
     const handleUpdateDelivery = async () => {
         if (!selectedOrder) return;
         setDeliveryLoading(true);
         try {
+            // 1. Apply order status change if pending and different
+            if (pendingStatus && pendingStatus !== selectedOrder.status) {
+                await updateOrderStatus(selectedOrder.id, pendingStatus);
+                applyStatusChange(selectedOrder.id, pendingStatus);
+            }
+
+            // 2. Save delivery info
             await updateDelivery(selectedOrder.id, deliveryForm);
 
-            // ✅ si livraison = livre, le backend passe l'order à livree
+            // 3. Frontend auto-sync mirrors backend logic:
+            // delivery 'livre'    → order becomes 'livree'
+            // delivery 'retourne' → order becomes 'retournee'
+            // order 'en_preparation' → delivery 'en_preparation' 
+            // order 'expediee'       → delivery 'expedie'        
+            // order 'livree'         → delivery 'livre'          
             if (deliveryForm.status === 'livre') {
                 applyStatusChange(selectedOrder.id, 'livree');
             }
+            if (deliveryForm.status === 'retourne') {
+                applyStatusChange(selectedOrder.id, 'retournee');
+            }
 
-            showSuccess('Livraison mise à jour.');
+            showSuccess('Modifications enregistrées.');
+            setPendingStatus(null);
             closeModal();
-            setRefreshKey(k => k + 1); // ✅ force refetch
+            setRefreshKey(k => k + 1);
         } catch (err) {
-            showError(err.response?.data?.message || 'Erreur livraison.');
+            showError(err.response?.data?.message || 'Erreur lors de la sauvegarde.');
         } finally {
             setDeliveryLoading(false);
         }
@@ -88,6 +105,7 @@ const AdminCommandes = () => {
         setSelectedOrder(commande);
         setOrderDetail(null);
         setDetailLoading(true);
+        setPendingStatus(null);
         try {
             const res = await api.get(`/orders/${commande.id}`);
             const detail = res.data.order;
@@ -108,23 +126,11 @@ const AdminCommandes = () => {
         }
     };
 
-    const closeModal = () => { setSelectedOrder(null); setOrderDetail(null); setModalMode('view'); };
-
-    // ── Changement de statut ──────────────────────────────
-    const handleStatusChange = async (orderId, newStatus) => {
-        // ✅ Annulation → modal avec raison obligatoire
-        if (newStatus === 'annulee') {
-            setCancelModal(orderId);
-            setCancelReason('');
-            return;
-        }
-        try {
-            await updateOrderStatus(orderId, newStatus);
-            applyStatusChange(orderId, newStatus);
-            showSuccess('Statut mis à jour avec succès.');
-        } catch (err) {
-            showError(err.response?.data?.message || 'Erreur lors de la mise à jour.');
-        }
+    const closeModal = () => {
+        setSelectedOrder(null);
+        setOrderDetail(null);
+        setModalMode('view');
+        setPendingStatus(null);
     };
 
     // ── Confirmer l'annulation ────────────────────────────
@@ -572,7 +578,13 @@ const AdminCommandes = () => {
                                             />
                                         <select
                                             value={deliveryForm.status}
-                                            onChange={e => setDeliveryForm(p => ({ ...p, status: e.target.value }))}
+                                            onChange={e => {
+                                                const val = e.target.value;
+                                                setDeliveryForm(p => ({ ...p, status: val }));
+                                                // Auto-sync delivery → pending order status
+                                                if (val === 'livre')    setPendingStatus('livree');
+                                                if (val === 'retourne') setPendingStatus('retournee');
+                                            }}
                                             className="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-[#4a8c42] outline-none"
                                         >
                                             {DELIVERY_STATUS_OPTIONS.map(({ value, label }) => (
@@ -586,13 +598,20 @@ const AdminCommandes = () => {
 
                             {/* Changer statut */}
                             {modalMode === 'edit' &&
-  !['annulee', 'livree', 'remboursee', 'en_reclamation', 'retournee'].includes(selectedOrder.status) && (
+                                !['annulee', 'livree', 'remboursee', 'en_reclamation', 'retournee'].includes(selectedOrder.status) && (
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 border-t border-gray-100">
                                     <span className="text-sm text-black/50 font-semibold">Changer le statut</span>
                                     <div className="flex gap-2">
                                         <select
-                                            value={selectedOrder.status}
-                                            onChange={(e) => handleStatusChange(selectedOrder.id, e.target.value)}
+                                            value={pendingStatus ?? selectedOrder.status}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                setPendingStatus(val);
+                                                // Auto-sync order → delivery form status
+                                                if (val === 'en_preparation') setDeliveryForm(p => ({ ...p, status: 'en_preparation' }));
+                                                if (val === 'expediee')       setDeliveryForm(p => ({ ...p, status: 'expedie' }));
+                                                if (val === 'livree')         setDeliveryForm(p => ({ ...p, status: 'livre' }));
+                                            }}
                                             className="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm font-bold focus:border-[#4a8c42] outline-none"
                                         >
                                             {STATUS_OPTIONS.map(s => (

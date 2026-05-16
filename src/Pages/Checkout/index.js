@@ -202,7 +202,7 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
     const [formData, setFormData] = useState({
         name:                 user?.name  || '',
         email:                user?.email || '',
-        phone:                user?.phone || '',
+        phone:                user?.shipping_phone || user?.phone || '',
         shipping_address:     user?.shipping_address || '',
         shipping_city:        user?.shipping_city || user?.city || '',
         shipping_postal_code: user?.shipping_postal_code || '',

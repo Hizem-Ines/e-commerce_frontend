@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/authContext';
-import { updateProfile, updatePassword } from '../../services/authService';
+import { updateProfile, updatePassword , updateAddresses} from '../../services/authService';
 import { getMyOrders } from '../../services/orderService';
 import {
     FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiSave,
@@ -25,7 +25,7 @@ import useWSListener from '../../hooks/useWSListener';
 
 
 const Profile = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, refreshUser } = useAuth();
     const { currency } = useSiteSettings();
 
     const VALID_TABS = ['profil', 'commandes', 'reclamations', 'securite'];
@@ -269,32 +269,36 @@ useWSListener("profile-account-status", (data) => {
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
+    const isSwissPhone = (v) => {
+        if (!v) return true; // optional field
+        const cleaned = String(v).replace(/\s/g, '');
+        return /^\+41[0-9]{9}$/.test(cleaned) || /^0[0-9]{9}$/.test(cleaned);
+    };
+
     // ── Submit profil ─────────────────────────────────────
     const handleProfileSubmit = async (e) => {
         e.preventDefault();
+        // ── Swiss phone validation ────────────────────────
+            if (profileData.phone && !isSwissPhone(profileData.phone)) {
+                showError('Téléphone invalide. Format suisse requis (+41... ou 0...)');
+                return;
+            }
+            if (shippingData.shipping_phone && !isSwissPhone(shippingData.shipping_phone)) {
+                showError('Téléphone de livraison invalide. Format suisse requis (+41... ou 0...)');
+                return;
+            }
+            if (!billingSameAsShipping && billingData.billing_phone && !isSwissPhone(billingData.billing_phone)) {
+                showError('Téléphone de facturation invalide. Format suisse requis (+41... ou 0...)');
+                return;
+            }
         setLoadingProfile(true);
         try {
+            // 1. Basic profile → PUT /auth/me (multipart)
             const fd = new FormData();
             fd.append('name',    profileData.name);
             fd.append('phone',   profileData.phone);
             fd.append('address', profileData.address);
             fd.append('city',    profileData.city);
-
-            // ✅ Champs shipping
-            Object.entries(shippingData).forEach(([k, v]) => fd.append(k, v || ''));
-
-            // ✅ Champs billing (ou copie depuis shipping si cochée)
-            if (billingSameAsShipping) {
-                fd.append('billing_full_name',   shippingData.shipping_full_name);
-                fd.append('billing_phone',        shippingData.shipping_phone);
-                fd.append('billing_address',      shippingData.shipping_address);
-                fd.append('billing_city',         shippingData.shipping_city);
-                fd.append('billing_governorate',  shippingData.shipping_governorate);
-                fd.append('billing_postal_code',  shippingData.shipping_postal_code);
-                fd.append('billing_country',      shippingData.shipping_country);
-            } else {
-                Object.entries(billingData).forEach(([k, v]) => fd.append(k, v || ''));
-            }
 
             if (fileInputRef.current?.files[0]) {
                 fd.append('avatar', fileInputRef.current.files[0]);
@@ -304,11 +308,83 @@ useWSListener("profile-account-status", (data) => {
 
             await updateProfile(fd);
 
-            // Marquer comme sauvegardé
-            savedProfileRef.current  = { name: profileData.name, phone: profileData.phone, address: profileData.address, city: profileData.city };
-            savedShippingRef.current = { ...shippingData };
-            savedBillingRef.current  = { ...billingData };
-            setProfileDirty(false); setAvatarDirty(false); setShippingDirty(false); setBillingDirty(false);
+            // 2. Shipping + billing addresses → PUT /auth/me/addresses (JSON)
+            const effectiveBilling = billingSameAsShipping ? {
+                billing_full_name:   shippingData.shipping_full_name,
+                billing_phone:       shippingData.shipping_phone,
+                billing_address:     shippingData.shipping_address,
+                billing_city:        shippingData.shipping_city,
+                billing_governorate: shippingData.shipping_governorate,
+                billing_postal_code: shippingData.shipping_postal_code,
+                billing_country:     shippingData.shipping_country,
+            } : billingData;
+
+            await updateAddresses({ ...shippingData, ...effectiveBilling });
+
+            // 3. Refresh user in context so checkout and all other pages see fresh data
+            const freshUser = await refreshUser();
+
+            // 4. Sync local form state from fresh user so profile shows updated values
+            if (freshUser) {
+                setProfileData({
+                    name:    freshUser.name    || '',
+                    email:   freshUser.email   || '',
+                    phone:   freshUser.phone   || '',
+                    address: freshUser.address || '',
+                    city:    freshUser.city    || '',
+                });
+                setShippingData({
+                    shipping_full_name:   freshUser.shipping_full_name   || '',
+                    shipping_phone:       freshUser.shipping_phone       || '',
+                    shipping_address:     freshUser.shipping_address     || '',
+                    shipping_city:        freshUser.shipping_city        || '',
+                    shipping_governorate: freshUser.shipping_governorate || '',
+                    shipping_postal_code: freshUser.shipping_postal_code || '',
+                    shipping_country:     freshUser.shipping_country     || 'CH',
+                });
+                setBillingData({
+                    billing_full_name:   freshUser.billing_full_name   || '',
+                    billing_phone:       freshUser.billing_phone       || '',
+                    billing_address:     freshUser.billing_address     || '',
+                    billing_city:        freshUser.billing_city        || '',
+                    billing_governorate: freshUser.billing_governorate || '',
+                    billing_postal_code: freshUser.billing_postal_code || '',
+                    billing_country:     freshUser.billing_country     || 'CH',
+                });
+                setAvatarPreview(freshUser.avatar || null);
+
+                // Update saved refs
+                savedProfileRef.current = {
+                    name:    freshUser.name    || '',
+                    phone:   freshUser.phone   || '',
+                    address: freshUser.address || '',
+                    city:    freshUser.city    || '',
+                };
+                savedShippingRef.current = {
+                    shipping_full_name:   freshUser.shipping_full_name   || '',
+                    shipping_phone:       freshUser.shipping_phone       || '',
+                    shipping_address:     freshUser.shipping_address     || '',
+                    shipping_city:        freshUser.shipping_city        || '',
+                    shipping_governorate: freshUser.shipping_governorate || '',
+                    shipping_postal_code: freshUser.shipping_postal_code || '',
+                    shipping_country:     freshUser.shipping_country     || 'CH',
+                };
+                savedBillingRef.current = {
+                    billing_full_name:   freshUser.billing_full_name   || '',
+                    billing_phone:       freshUser.billing_phone       || '',
+                    billing_address:     freshUser.billing_address     || '',
+                    billing_city:        freshUser.billing_city        || '',
+                    billing_governorate: freshUser.billing_governorate || '',
+                    billing_postal_code: freshUser.billing_postal_code || '',
+                    billing_country:     freshUser.billing_country     || 'CH',
+                };
+            }
+
+            setProfileDirty(false);
+            setAvatarDirty(false);
+            setShippingDirty(false);
+            setBillingDirty(false);
+            setDeleteAvatar(false);
             showSuccess('Profil mis à jour avec succès !');
         } catch (err) {
             showError(err.response?.data?.message || 'Erreur lors de la mise à jour');
