@@ -3,8 +3,7 @@ import {
   FiAlertCircle, FiMail, FiPhone,
   FiFileText, FiSend, FiCheckCircle, FiUser,
 } from "react-icons/fi";
-import { submitReclamation, createReclamation } from "../../services/reclamationService";
-import { getMyOrders } from "../../services/orderService";
+import { submitReclamation, createReclamation , getEligibleOrders } from "../../services/reclamationService";
 import { useAuth } from "../../context/authContext";
 import { useSiteSettings } from "../../context/SiteSettingsContext";
 
@@ -51,8 +50,8 @@ export default function Reclamations() {
   // ── Charger commandes et réclamations ─────────────────────
   useEffect(() => {
     if (user) {
-      getMyOrders()
-        .then((res) => setEligibleOrders(res.data.orders || []))
+      getEligibleOrders()
+        .then((res) => setEligibleOrders(res.orders || [])) 
         .catch((err) => console.error("Erreur commandes:", err));
 
     }
@@ -73,7 +72,7 @@ export default function Reclamations() {
         ? { order_id: form.order_id || null, complaint_type: form.complaint_type, message: form.message }
         : form;
 
-      const newRec = await (user ? createReclamation(payload) : submitReclamation(payload));
+      await (user ? createReclamation(payload) : submitReclamation(payload));
 
   
 
@@ -159,10 +158,10 @@ export default function Reclamations() {
                         placeholder="votre@email.com" className={`${inputCls} pl-9`} />
                     </div>
                   </Field>
-                  <Field label="N° de commande (si applicable)">
+                  <Field label="N° de commande">
                     <div className="relative">
                       <FiFileText className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
-                      <input type="text" name="order_number" value={form.order_number} onChange={handleChange}
+                      <input type="text" name="order_number" required value={form.order_number} onChange={handleChange}
                         placeholder="CMD-XXXXX" className={`${inputCls} pl-9`} />
                     </div>
                   </Field>

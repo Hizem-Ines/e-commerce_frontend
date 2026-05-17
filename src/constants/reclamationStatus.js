@@ -25,3 +25,8 @@ export const COMPLAINT_TYPE_ICONS = {
     remboursement:      '↩️',
     autre:              '💬',
 };
+
+export const RECLAMATION_REFUND_BADGE = {
+  label: '↩️ Remboursé',
+  color: 'bg-purple-100 text-purple-700',
+};
