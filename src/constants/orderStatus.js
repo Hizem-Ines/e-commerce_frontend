@@ -12,7 +12,7 @@ export const ORDER_STATUS_CONFIG = {
 
 // Statuts modifiables par l'admin (annulee gérée séparément via modal)
 export const ORDER_STATUS_OPTIONS = [
-    'en_attente', 'confirmee', 'en_preparation', 'expediee', 'livree', 'remboursee',
+    'en_attente', 'confirmee', 'en_preparation', 'expediee', 'livree', 
 ];
 
 export const PAYMENT_LABELS = {
@@ -22,7 +22,7 @@ export const PAYMENT_LABELS = {
 
 export const DELIVERY_STATUS_OPTIONS = [
     { value: 'en_preparation', label: 'En préparation' },
-    { value: 'expediee',       label: 'Expédiée'       },
+    { value: 'expedie'        , label: 'Expédiée' },
     { value: 'en_transit',     label: 'En transit'     },
     { value: 'livre',          label: 'Livrée'         },
     { value: 'echec',          label: 'Échec'          },

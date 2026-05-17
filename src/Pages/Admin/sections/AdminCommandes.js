@@ -11,6 +11,7 @@ import {
     ORDER_STATUS_OPTIONS as STATUS_OPTIONS,
     PAYMENT_LABELS,
     DELIVERY_STATUS_OPTIONS,
+    getDeliveryLabel,
 } from '../../../constants/orderStatus';
 import useToast from '../../../hooks/useToast';
 
@@ -49,12 +50,12 @@ const AdminCommandes = () => {
         setDeliveryLoading(true);
         try {
             // 1. Apply order status change if pending and different
-            if (pendingStatus && pendingStatus !== selectedOrder.status) {
+            const deliveryDriven = deliveryForm.status === 'livre' || deliveryForm.status === 'retourne';
+
+            if (pendingStatus && pendingStatus !== selectedOrder.status && !deliveryDriven) {
                 await updateOrderStatus(selectedOrder.id, pendingStatus);
                 applyStatusChange(selectedOrder.id, pendingStatus);
             }
-
-            // 2. Save delivery info
             await updateDelivery(selectedOrder.id, deliveryForm);
 
             // 3. Frontend auto-sync mirrors backend logic:
@@ -164,7 +165,7 @@ const AdminCommandes = () => {
     };
 
     // ── Tous les filtres (incl. annulée) ──────────────────
-    const ALL_FILTER_OPTIONS = [...STATUS_OPTIONS, 'en_reclamation', 'retournee', 'annulee'];
+    const ALL_FILTER_OPTIONS = [...STATUS_OPTIONS, 'remboursee', 'en_reclamation', 'retournee', 'annulee'];
 
     return (
         <div>
@@ -438,9 +439,9 @@ const AdminCommandes = () => {
                                                 ) || '—'}
                                             </p>
                                             {orderDetail.delivery_status && (
-                                                <span className={`text-xs font-bold px-2 py-0.5 rounded-full mt-2 inline-block ${STATUS_LABELS[orderDetail.delivery_status]?.color || 'bg-gray-100 text-gray-600'}`}>
-                                                    {STATUS_LABELS[orderDetail.delivery_status]?.label || orderDetail.delivery_status}
-                                                </span>
+                                                <span className="text-xs font-bold px-2 py-0.5 rounded-full mt-2 inline-block bg-gray-100 text-gray-600">
+                                                    {getDeliveryLabel(orderDetail.delivery_status)}
+                                                    </span>
                                             )}
                                             {orderDetail.tracking_number && (
                                                 <p className="text-xs text-black/40 mt-1">Suivi : {orderDetail.tracking_number}</p>
@@ -587,6 +588,7 @@ const AdminCommandes = () => {
                                             }}
                                             className="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-[#4a8c42] outline-none"
                                         >
+                                            <option value="">— Statut livraison —</option>
                                             {DELIVERY_STATUS_OPTIONS.map(({ value, label }) => (
                                                 <option key={value} value={value}>{label}</option>
                                             ))}
@@ -596,35 +598,38 @@ const AdminCommandes = () => {
                                 </div>
                             )}
 
-                            {/* Changer statut */}
+                            {/* ── Changer le statut (edit mode only) ── */}
                             {modalMode === 'edit' &&
                                 !['annulee', 'livree', 'remboursee', 'en_reclamation', 'retournee'].includes(selectedOrder.status) && (
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 border-t border-gray-100">
                                     <span className="text-sm text-black/50 font-semibold">Changer le statut</span>
-                                    <div className="flex gap-2">
-                                        <select
-                                            value={pendingStatus ?? selectedOrder.status}
-                                            onChange={(e) => {
-                                                const val = e.target.value;
-                                                setPendingStatus(val);
-                                                // Auto-sync order → delivery form status
-                                                if (val === 'en_preparation') setDeliveryForm(p => ({ ...p, status: 'en_preparation' }));
-                                                if (val === 'expediee')       setDeliveryForm(p => ({ ...p, status: 'expedie' }));
-                                                if (val === 'livree')         setDeliveryForm(p => ({ ...p, status: 'livre' }));
-                                            }}
-                                            className="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm font-bold focus:border-[#4a8c42] outline-none"
-                                        >
-                                            {STATUS_OPTIONS.map(s => (
-                                                <option key={s} value={s}>{STATUS_LABELS[s]?.label}</option>
-                                            ))}
-                                        </select>
-                                        <button
-                                            onClick={() => { closeModal(); setCancelModal(selectedOrder.id); setCancelReason(''); }}
-                                            className="px-3 py-2 rounded-xl bg-red-50 text-red-500 border-2 border-red-100 text-sm font-bold hover:bg-red-100 transition"
-                                        >
-                                             Annuler
-                                        </button>
-                                    </div>
+                                    <select
+                                        value={pendingStatus ?? selectedOrder.status}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setPendingStatus(val);
+                                            if (val === 'en_preparation') setDeliveryForm(p => ({ ...p, status: 'en_preparation' }));
+                                            if (val === 'expediee')       setDeliveryForm(p => ({ ...p, status: 'expedie' }));
+                                            if (val === 'livree')         setDeliveryForm(p => ({ ...p, status: 'livre' }));
+                                        }}
+                                        className="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm font-bold focus:border-[#4a8c42] outline-none"
+                                    >
+                                        {STATUS_OPTIONS.map(s => (
+                                            <option key={s} value={s}>{STATUS_LABELS[s]?.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
+                            {/* ── Annuler la commande (visible en view ET edit mode) ── */}
+                            {['en_attente', 'confirmee', 'en_preparation'].includes(selectedOrder.status) && (
+                                <div className="pt-4 border-t border-gray-100">
+                                    <button
+                                        onClick={() => { closeModal(); setCancelModal(selectedOrder.id); setCancelReason(''); }}
+                                        className="w-full sm:w-auto px-4 py-2 rounded-xl bg-red-50 text-red-600 border-2 border-red-200 text-sm font-bold hover:bg-red-100 transition"
+                                    >
+                                        🚫 Annuler la commande
+                                    </button>
                                 </div>
                             )}
                         </div>
@@ -634,7 +639,7 @@ const AdminCommandes = () => {
                                 onClick={closeModal}
                                 className="flex-1 border-2 border-gray-200 text-black/60 font-bold py-3 rounded-xl hover:bg-gray-100 transition text-sm"
                             >
-                                {modalMode === 'edit' ? 'Annuler' : 'Fermer'}
+                                {modalMode === 'edit' ? 'Fermer sans sauvegarder' : 'Fermer'}
                             </button>
                             {modalMode === 'edit' && (
                                 <button
