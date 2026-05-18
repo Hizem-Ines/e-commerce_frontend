@@ -182,53 +182,6 @@ const StripePaymentStep = ({ order, promoResult, onBack }) => {
     );
 };
 
-const AddressBlock = ({ prefix, data, onChange }) => {
-    const inputClass = "w-full px-4 py-3 rounded-xl text-sm focus:outline-none transition";
-    const inputStyle = { border: '2px solid #e5e7eb' };
-    const onFocus = e => (e.target.style.borderColor = '#166534');
-    const onBlur  = e => (e.target.style.borderColor = '#e5e7eb');
-    const n = (k) => `${prefix}_${k}`;
-    return (
-        <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-3">
-                <div className="col-span-2">
-                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Rue *</label>
-                    <input type="text" name={n('street')} value={data[n('street')] ?? data.shipping_street ?? ''}
-                        onChange={onChange} required placeholder="Rue du Marché"
-                        className={inputClass} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
-                </div>
-                <div>
-                    <label className="block text-xs font-bold text-gray-600 mb-1.5">N°</label>
-                    <input type="text" name={n('street_number')} value={data[n('street_number')] ?? data.shipping_street_number ?? ''}
-                        onChange={onChange} placeholder="12"
-                        className={inputClass} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
-                </div>
-            </div>
-            <div>
-                <label className="block text-xs font-bold text-gray-600 mb-1.5">
-                    Complément <span className="font-normal text-black/30">(appartement, c/o...)</span>
-                </label>
-                <input type="text" name={n('address2')} value={data[n('address2')] ?? data.shipping_address2 ?? ''}
-                    onChange={onChange} placeholder="App. 3B"
-                    className={inputClass} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-                <div>
-                    <label className="block text-xs font-bold text-gray-600 mb-1.5">NPA *</label>
-                    <input type="text" name={n('postal_code')} value={data[n('postal_code')] ?? ''}
-                        onChange={onChange} required placeholder="8001" maxLength={4}
-                        className={inputClass} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
-                </div>
-                <div className="col-span-2">
-                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Localité *</label>
-                    <input type="text" name={n('city')} value={data[n('city')] ?? ''}
-                        onChange={onChange} required placeholder="Zurich"
-                        className={inputClass} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
-                </div>
-            </div>
-        </div>
-    );
-};
 
 
 // ════════════════════════════════════════════════════════════
@@ -247,30 +200,26 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
 
     // ── Shipping ─────────────────────────────────────────
     const [formData, setFormData] = useState({
-        name:                   user?.name  || '',
-        email:                  user?.email || '',
-        phone:                  user?.phone || '',
-        shipping_street:        user?.shipping_address || '',
-        shipping_street_number: '',
-        shipping_address2:      '',
-        shipping_city:          user?.shipping_city || user?.city || '',
-        shipping_postal_code:   user?.shipping_postal_code || '',
-        notes:                  '',
+        name:                 user?.name  || '',
+        email:                user?.email || '',
+        phone:                user?.shipping_phone || user?.phone || '',
+        shipping_address:     user?.shipping_address || '',
+        shipping_city:        user?.shipping_city || user?.city || '',
+        shipping_postal_code: user?.shipping_postal_code || '',
+        notes:                '',
     });
 
     // ── Billing ─────────────────────────────────────────
     // ✅ true = copie depuis shipping (comportement par défaut)
     const [billingSameAsShipping, setBillingSameAsShipping] = useState(true);
 
-    const [billingData, setBillingData] = useState({
-        billing_full_name:    user?.billing_full_name  || '',
-        billing_phone:        user?.billing_phone      || '',
-        billing_street:       user?.billing_address    || '',
-        billing_street_number:'',
-        billing_address2:     '',
-        billing_city:         user?.billing_city       || '',
-        billing_postal_code:  user?.billing_postal_code|| '',
-    });
+   const [billingData, setBillingData] = useState({
+    billing_full_name:   user?.billing_full_name   || '',
+    billing_phone:       user?.billing_phone       || '',
+    billing_address:     user?.billing_address     || '',
+    billing_city:        user?.billing_city        || '',
+    billing_postal_code: user?.billing_postal_code || '',
+});
 
     // ── Promo ────────────────────────────────────────────
     const [promoInput,  setPromoInput]  = useState('');
@@ -349,9 +298,7 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
 
         const items = panier.map(item => ({ variant_id: item.variant_id, quantity: item.quantity }));
 
-        const shippingLine = [formData.shipping_street, formData.shipping_street_number].filter(Boolean).join(' ');
-        const shippingFull = formData.shipping_address2 ? `${shippingLine}, ${formData.shipping_address2}` : shippingLine;
-        const canton       = getCantonFromNPA(formData.shipping_postal_code) || undefined;
+        const canton = getCantonFromNPA(formData.shipping_postal_code) || formData.shipping_city || 'CH';
         const fullName     = user ? user.name : formData.name;
 
         // ✅ Construction selon billing_same_as_shipping
@@ -361,7 +308,7 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
 
             shipping_full_name:   fullName,
             shipping_phone:       formData.phone,
-            shipping_address:     shippingFull,
+            shipping_address: formData.shipping_address,
             shipping_city:        formData.shipping_city,
             shipping_governorate: canton,
             shipping_postal_code: formData.shipping_postal_code || undefined,
@@ -375,15 +322,14 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
 
         // ✅ Si billing différent : envoyer les champs billing séparément
         if (!billingSameAsShipping) {
-            const billingLine = [billingData.billing_street, billingData.billing_street_number].filter(Boolean).join(' ');
-            const billingFull = billingData.billing_address2 ? `${billingLine}, ${billingData.billing_address2}` : billingLine;
-            const billingCanton = getCantonFromNPA(billingData.billing_postal_code) || undefined;
+            
+            const billingCanton = getCantonFromNPA(billingData.billing_postal_code) || billingData.billing_city || 'CH';
 
             orderData = {
                 ...orderData,
                 billing_full_name:    billingData.billing_full_name || fullName,
                 billing_phone:        billingData.billing_phone     || formData.phone,
-                billing_address:      billingFull,
+                billing_address: billingData.billing_address,
                 billing_city:         billingData.billing_city,
                 billing_governorate:  billingCanton,
                 billing_postal_code:  billingData.billing_postal_code || undefined,
@@ -511,7 +457,54 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                         </div>
                                     </div>
                                 )}
-                                <AddressBlock prefix="shipping" data={formData} onChange={handleChange} />
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Adresse *</label>
+                                    <input
+                                        type="text"
+                                        name="shipping_address"
+                                        value={formData.shipping_address}
+                                        onChange={handleChange}
+                                        required
+                                        placeholder="Bahnhofstrasse 12, App 3B"
+                                        className={inputClass}
+                                        style={inputStyle}
+                                        onFocus={onFocus}
+                                        onBlur={onBlur}
+                                    />
+                                </div>
+                                <div className="grid grid-cols-3 gap-3 mt-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">NPA *</label>
+                                        <input
+                                            type="text"
+                                            name="shipping_postal_code"
+                                            value={formData.shipping_postal_code}
+                                            onChange={handleChange}
+                                            required
+                                            placeholder="8001"
+                                            maxLength={4}
+                                            className={inputClass}
+                                            style={inputStyle}
+                                            onFocus={onFocus}
+                                            onBlur={onBlur}
+                                        />
+                                    </div>
+                                    <div className="col-span-2">
+                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Localité *</label>
+                                        <input
+                                            type="text"
+                                            name="shipping_city"
+                                            value={formData.shipping_city}
+                                            onChange={handleChange}
+                                            required
+                                            placeholder="Zurich"
+                                            className={inputClass}
+                                            style={inputStyle}
+                                            onFocus={onFocus}
+                                            onBlur={onBlur}
+                                        />
+                                    </div>
+                                </div>
                                 <div className="mt-4">
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">Notes (optionnel)</label>
                                     <textarea name="notes" value={formData.notes} onChange={handleChange} rows={2}
@@ -566,7 +559,54 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                                 </div>
                                             </div>
                                         </div>
-                                        <AddressBlock prefix="billing" data={billingData} onChange={handleBillingChange} />
+                                        <div className="sm:col-span-2">
+                                            <label className="block text-xs font-bold text-gray-600 mb-1.5">Adresse *</label>
+                                            <input
+                                                type="text"
+                                                name="billing_address"
+                                                value={billingData.billing_address}
+                                                onChange={handleBillingChange}
+                                                required
+                                                placeholder="Bahnhofstrasse 12, App 3B"
+                                                className={inputClass}
+                                                style={inputStyle}
+                                                onFocus={onFocus}
+                                                onBlur={onBlur}
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-600 mb-1.5">NPA *</label>
+                                                <input
+                                                    type="text"
+                                                    name="billing_postal_code"
+                                                    value={billingData.billing_postal_code}
+                                                    onChange={handleBillingChange}
+                                                    required
+                                                    placeholder="8001"
+                                                    maxLength={4}
+                                                    className={inputClass}
+                                                    style={inputStyle}
+                                                    onFocus={onFocus}
+                                                    onBlur={onBlur}
+                                                />
+                                            </div>
+                                            <div className="col-span-2">
+                                                <label className="block text-xs font-bold text-gray-600 mb-1.5">Localité *</label>
+                                                <input
+                                                    type="text"
+                                                    name="billing_city"
+                                                    value={billingData.billing_city}
+                                                    onChange={handleBillingChange}
+                                                    required
+                                                    placeholder="Zurich"
+                                                    className={inputClass}
+                                                    style={inputStyle}
+                                                    onFocus={onFocus}
+                                                    onBlur={onBlur}
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
                             </div>

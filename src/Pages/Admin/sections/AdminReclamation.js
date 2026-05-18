@@ -1,5 +1,5 @@
 import React, { useState, useEffect , useCallback} from "react";
-import { FiEye, FiSearch, FiAlertCircle, FiCheckCircle, FiClock, FiX } from "react-icons/fi";
+import { FiEye, FiSearch, FiAlertCircle, FiCheckCircle, FiClock, FiX , FiCheck } from "react-icons/fi";
 import { getAllReclamations, respondToReclamation } from "../../../services/reclamationService";
 import { FiMessageSquare } from "react-icons/fi";
 import {
@@ -7,6 +7,7 @@ import {
     RECLAMATION_STATUS_OPTIONS_ADMIN as STATUS_OPTIONS_ADMIN,
     RECLAMATION_CLOSED_STATUSES,
     COMPLAINT_TYPE_ICONS as TYPE_ICONS,
+    RECLAMATION_REFUND_BADGE, 
 } from '../../../constants/reclamationStatus';
 import useToast from '../../../hooks/useToast';
 import useWSListener from '../../../hooks/useWSListener';
@@ -80,6 +81,14 @@ function DetailModal({ open, reclamation, onClose }) {
                 {STATUS_CONFIG[reclamation.status]?.label || "En attente"}
               </span>
             </div>
+            {reclamation.avec_remboursement && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-black/40">Remboursement :</span>
+                <span className={`text-xs font-bold px-3 py-1 rounded-full ${RECLAMATION_REFUND_BADGE.color}`}>
+                  {RECLAMATION_REFUND_BADGE.label}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Message */}
@@ -167,6 +176,27 @@ function RespondModal({ open, reclamation, form, onChange, onSubmit, onClose, lo
               className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#4a8c42]"
             />
           </div>
+
+          {form.status === "resolue" && (
+            <div className="bg-purple-50 border border-purple-100 rounded-xl p-4 space-y-1">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <div
+                  onClick={() => onChange("avec_remboursement", !form.avec_remboursement)}
+                  className={`w-5 h-5 rounded flex items-center justify-center border-2 transition-all cursor-pointer shrink-0 ${
+                    form.avec_remboursement
+                      ? "border-[#166534] bg-[#166534]"
+                      : "border-gray-300 bg-white"
+                  }`}
+                >
+                  {form.avec_remboursement && <FiCheck size={12} color="white" strokeWidth={3} />}
+                </div>
+                <span className="text-sm font-semibold text-[#2c2c2c]">Rembourser le client</span>
+              </label>
+              <p className="text-xs text-black/40 ml-8">
+                Un remboursement Stripe sera automatiquement émis.
+              </p>
+            </div>
+          )}
         </div>
         <div className="px-7 py-5 border-t border-gray-100 flex gap-3">
           <button onClick={onClose} className="flex-1 border-2 border-gray-200 text-black/60 font-bold py-3 rounded-xl hover:bg-gray-100 transition text-sm">
@@ -240,6 +270,7 @@ const openRespondModal = (r) => {
     status: STATUS_OPTIONS_ADMIN[r.status] ? r.status : "en_cours", // ← fallback sur la première option valide
     admin_response: r.admin_response || "",
     resolution_delay: "",
+    avec_remboursement: false,
   });
 };
 
@@ -254,7 +285,7 @@ const handleRespond = async () => {
     setReclamations((prev) =>
       prev.map((r) =>
         r.id === respondTarget.id
-          ? { ...r, status: respondForm.status, admin_response: respondForm.admin_response }
+          ? { ...r, status: respondForm.status, admin_response: respondForm.admin_response, avec_remboursement: respondForm.avec_remboursement }
           : r
       )
     );
@@ -407,9 +438,16 @@ const handleRespond = async () => {
                     )}
                   </td>
                   <td className="px-4 py-4 text-center">
-                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${STATUS_CONFIG[r.status]?.color || ""}`}>
-                      {STATUS_CONFIG[r.status]?.label || r.status}
-                    </span>
+                    <div className="flex flex-col items-center gap-1">
+                      <span className={`text-xs font-bold px-3 py-1 rounded-full ${STATUS_CONFIG[r.status]?.color || ""}`}>
+                        {STATUS_CONFIG[r.status]?.label || r.status}
+                      </span>
+                      {r.avec_remboursement && (
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${RECLAMATION_REFUND_BADGE.color}`}>
+                          {RECLAMATION_REFUND_BADGE.label}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-5 py-4 hidden lg:table-cell">
                     <div className="flex items-center gap-1.5 text-xs text-black/40">
@@ -458,9 +496,17 @@ const handleRespond = async () => {
                         <p className="text-xs text-black/40">{r.user_email}</p>
                       </div>
                     </div>
-                    <span className={`text-xs font-bold px-2 py-1 rounded-full shrink-0 ${STATUS_CONFIG[r.status]?.color || ''}`}>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                   <span className={`text-xs font-bold px-2 py-1 rounded-full ${STATUS_CONFIG[r.status]?.color || ''}`}>
                       {STATUS_CONFIG[r.status]?.label}
                     </span>
+                    {r.avec_remboursement && (
+                      <span className={`text-xs font-bold px-2 py-1 rounded-full ${RECLAMATION_REFUND_BADGE.color}`}>
+                        {RECLAMATION_REFUND_BADGE.label}
+                      </span>
+                    )}
+                  </div>
+
                   </div>
                   <p className="text-xs text-black/60">{TYPE_ICONS[r.complaint_type]} {r.complaint_type}</p>
                   {r.order_number && (
@@ -494,7 +540,7 @@ const handleRespond = async () => {
         open={!!respondTarget}
         reclamation={respondTarget}
         form={respondForm}
-        onChange={(key, val) => setRespondForm((f) => ({ ...f, [key]: val }))}
+        onChange={(key, val) => setRespondForm((f) => ({ ...f, [key]: val , ...(key === "status" && val !== "resolue" ? { avec_remboursement: false } : {}), }))}
         onSubmit={handleRespond}
         onClose={() => setRespondTarget(null)}
         loading={respondLoading}

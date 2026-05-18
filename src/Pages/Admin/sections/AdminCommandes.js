@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAllOrders, updateOrderStatus } from '../../../services/adminService';
+import { getAllOrders, updateOrderStatus } from '../../../services/orderService';
 import { cancelOrder } from '../../../services/orderService'; // ✅ route /cancel avec raison
 import api from '../../../services/api';
 import { FiEye , FiEdit } from 'react-icons/fi';
@@ -11,6 +11,7 @@ import {
     ORDER_STATUS_OPTIONS as STATUS_OPTIONS,
     PAYMENT_LABELS,
     DELIVERY_STATUS_OPTIONS,
+    getDeliveryLabel,
 } from '../../../constants/orderStatus';
 import useToast from '../../../hooks/useToast';
 
@@ -23,6 +24,7 @@ const StatusBadge = ({ status }) => (
 );
 
 const AdminCommandes = () => {
+    const [refreshKey, setRefreshKey] = useState(0);
     const [commandes, setCommandes]         = useState([]);
     const [loading, setLoading]             = useState(true);
     const [page, setPage]                   = useState(1);
@@ -41,16 +43,40 @@ const AdminCommandes = () => {
 
     const [deliveryForm, setDeliveryForm] = useState({ carrier: '', tracking_number: '', estimated_date: '', status: '' });
     const [deliveryLoading, setDeliveryLoading] = useState(false);
+    const [pendingStatus, setPendingStatus] = useState(null);
 
     const handleUpdateDelivery = async () => {
         if (!selectedOrder) return;
         setDeliveryLoading(true);
         try {
+            // 1. Apply order status change if pending and different
+            const deliveryDriven = deliveryForm.status === 'livre' || deliveryForm.status === 'retourne';
+
+            if (pendingStatus && pendingStatus !== selectedOrder.status && !deliveryDriven) {
+                await updateOrderStatus(selectedOrder.id, pendingStatus);
+                applyStatusChange(selectedOrder.id, pendingStatus);
+            }
             await updateDelivery(selectedOrder.id, deliveryForm);
-            showSuccess('Livraison mise à jour.');
+
+            // 3. Frontend auto-sync mirrors backend logic:
+            // delivery 'livre'    → order becomes 'livree'
+            // delivery 'retourne' → order becomes 'retournee'
+            // order 'en_preparation' → delivery 'en_preparation' 
+            // order 'expediee'       → delivery 'expedie'        
+            // order 'livree'         → delivery 'livre'          
+            if (deliveryForm.status === 'livre') {
+                applyStatusChange(selectedOrder.id, 'livree');
+            }
+            if (deliveryForm.status === 'retourne') {
+                applyStatusChange(selectedOrder.id, 'retournee');
+            }
+
+            showSuccess('Modifications enregistrées.');
+            setPendingStatus(null);
             closeModal();
+            setRefreshKey(k => k + 1);
         } catch (err) {
-            showError(err.response?.data?.message || 'Erreur livraison.');
+            showError(err.response?.data?.message || 'Erreur lors de la sauvegarde.');
         } finally {
             setDeliveryLoading(false);
         }
@@ -72,7 +98,7 @@ const AdminCommandes = () => {
             }
         };
         fetchCommandes();
-    }, [page, filterStatus, showError]);
+    }, [page, filterStatus, showError, refreshKey]);
 
     // ── Ouvrir modal détail ───────────────────────────────
     const openOrderDetail = async (commande, mode = 'view') => {
@@ -80,6 +106,7 @@ const AdminCommandes = () => {
         setSelectedOrder(commande);
         setOrderDetail(null);
         setDetailLoading(true);
+        setPendingStatus(null);
         try {
             const res = await api.get(`/orders/${commande.id}`);
             const detail = res.data.order;
@@ -91,6 +118,7 @@ const AdminCommandes = () => {
                     ? detail.estimated_date.split('T')[0]
                     : '',
                 status: detail.delivery_status || '',
+                notes:           detail.delivery_notes  || '', 
             });
         } catch (err) {
             console.error('Erreur chargement détail commande:', err);
@@ -99,23 +127,11 @@ const AdminCommandes = () => {
         }
     };
 
-    const closeModal = () => { setSelectedOrder(null); setOrderDetail(null); setModalMode('view'); };
-
-    // ── Changement de statut ──────────────────────────────
-    const handleStatusChange = async (orderId, newStatus) => {
-        // ✅ Annulation → modal avec raison obligatoire
-        if (newStatus === 'annulee') {
-            setCancelModal(orderId);
-            setCancelReason('');
-            return;
-        }
-        try {
-            await updateOrderStatus(orderId, newStatus);
-            applyStatusChange(orderId, newStatus);
-            showSuccess('Statut mis à jour avec succès.');
-        } catch (err) {
-            showError(err.response?.data?.message || 'Erreur lors de la mise à jour.');
-        }
+    const closeModal = () => {
+        setSelectedOrder(null);
+        setOrderDetail(null);
+        setModalMode('view');
+        setPendingStatus(null);
     };
 
     // ── Confirmer l'annulation ────────────────────────────
@@ -129,6 +145,7 @@ const AdminCommandes = () => {
             await cancelOrder(cancelModal, cancelReason.trim());
             applyStatusChange(cancelModal, 'annulee');
             showSuccess('Commande annulée avec succès.');
+            setRefreshKey(k => k + 1);
         } catch (err) {
             showError(err.response?.data?.message || "Erreur lors de l'annulation.");
         } finally {
@@ -148,7 +165,7 @@ const AdminCommandes = () => {
     };
 
     // ── Tous les filtres (incl. annulée) ──────────────────
-    const ALL_FILTER_OPTIONS = [...STATUS_OPTIONS, 'annulee'];
+    const ALL_FILTER_OPTIONS = [...STATUS_OPTIONS, 'remboursee', 'en_reclamation', 'retournee', 'annulee'];
 
     return (
         <div>
@@ -422,9 +439,9 @@ const AdminCommandes = () => {
                                                 ) || '—'}
                                             </p>
                                             {orderDetail.delivery_status && (
-                                                <span className={`text-xs font-bold px-2 py-0.5 rounded-full mt-2 inline-block ${STATUS_LABELS[orderDetail.delivery_status]?.color || 'bg-gray-100 text-gray-600'}`}>
-                                                    {STATUS_LABELS[orderDetail.delivery_status]?.label || orderDetail.delivery_status}
-                                                </span>
+                                                <span className="text-xs font-bold px-2 py-0.5 rounded-full mt-2 inline-block bg-gray-100 text-gray-600">
+                                                    {getDeliveryLabel(orderDetail.delivery_status)}
+                                                    </span>
                                             )}
                                             {orderDetail.tracking_number && (
                                                 <p className="text-xs text-black/40 mt-1">Suivi : {orderDetail.tracking_number}</p>
@@ -553,11 +570,25 @@ const AdminCommandes = () => {
                                             onChange={e => setDeliveryForm(p => ({ ...p, estimated_date: e.target.value }))}
                                             className="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-[#4a8c42] outline-none"
                                         />
+                                        <input
+                                            type="text"
+                                            placeholder="Notes livraison (optionnel)"
+                                            value={deliveryForm.notes || ''}
+                                            onChange={e => setDeliveryForm(p => ({ ...p, notes: e.target.value }))}
+                                            className="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-[#4a8c42] outline-none col-span-full"
+                                            />
                                         <select
                                             value={deliveryForm.status}
-                                            onChange={e => setDeliveryForm(p => ({ ...p, status: e.target.value }))}
+                                            onChange={e => {
+                                                const val = e.target.value;
+                                                setDeliveryForm(p => ({ ...p, status: val }));
+                                                // Auto-sync delivery → pending order status
+                                                if (val === 'livre')    setPendingStatus('livree');
+                                                if (val === 'retourne') setPendingStatus('retournee');
+                                            }}
                                             className="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-[#4a8c42] outline-none"
                                         >
+                                            <option value="">— Statut livraison —</option>
                                             {DELIVERY_STATUS_OPTIONS.map(({ value, label }) => (
                                                 <option key={value} value={value}>{label}</option>
                                             ))}
@@ -567,27 +598,38 @@ const AdminCommandes = () => {
                                 </div>
                             )}
 
-                            {/* Changer statut */}
-                            {modalMode === 'edit' && selectedOrder.status !== 'annulee' && selectedOrder.status !== 'livree' && selectedOrder.status !== 'remboursee' && (
+                            {/* ── Changer le statut (edit mode only) ── */}
+                            {modalMode === 'edit' &&
+                                !['annulee', 'livree', 'remboursee', 'en_reclamation', 'retournee'].includes(selectedOrder.status) && (
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 border-t border-gray-100">
                                     <span className="text-sm text-black/50 font-semibold">Changer le statut</span>
-                                    <div className="flex gap-2">
-                                        <select
-                                            value={selectedOrder.status}
-                                            onChange={(e) => handleStatusChange(selectedOrder.id, e.target.value)}
-                                            className="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm font-bold focus:border-[#4a8c42] outline-none"
-                                        >
-                                            {STATUS_OPTIONS.map(s => (
-                                                <option key={s} value={s}>{STATUS_LABELS[s]?.label}</option>
-                                            ))}
-                                        </select>
-                                        <button
-                                            onClick={() => { closeModal(); setCancelModal(selectedOrder.id); setCancelReason(''); }}
-                                            className="px-3 py-2 rounded-xl bg-red-50 text-red-500 border-2 border-red-100 text-sm font-bold hover:bg-red-100 transition"
-                                        >
-                                             Annuler
-                                        </button>
-                                    </div>
+                                    <select
+                                        value={pendingStatus ?? selectedOrder.status}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setPendingStatus(val);
+                                            if (val === 'en_preparation') setDeliveryForm(p => ({ ...p, status: 'en_preparation' }));
+                                            if (val === 'expediee')       setDeliveryForm(p => ({ ...p, status: 'expedie' }));
+                                            if (val === 'livree')         setDeliveryForm(p => ({ ...p, status: 'livre' }));
+                                        }}
+                                        className="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm font-bold focus:border-[#4a8c42] outline-none"
+                                    >
+                                        {STATUS_OPTIONS.map(s => (
+                                            <option key={s} value={s}>{STATUS_LABELS[s]?.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
+                            {/* ── Annuler la commande (visible en view ET edit mode) ── */}
+                            {['en_attente', 'confirmee', 'en_preparation'].includes(selectedOrder.status) && (
+                                <div className="pt-4 border-t border-gray-100">
+                                    <button
+                                        onClick={() => { closeModal(); setCancelModal(selectedOrder.id); setCancelReason(''); }}
+                                        className="w-full sm:w-auto px-4 py-2 rounded-xl bg-red-50 text-red-600 border-2 border-red-200 text-sm font-bold hover:bg-red-100 transition"
+                                    >
+                                        🚫 Annuler la commande
+                                    </button>
                                 </div>
                             )}
                         </div>
@@ -597,7 +639,7 @@ const AdminCommandes = () => {
                                 onClick={closeModal}
                                 className="flex-1 border-2 border-gray-200 text-black/60 font-bold py-3 rounded-xl hover:bg-gray-100 transition text-sm"
                             >
-                                {modalMode === 'edit' ? 'Annuler' : 'Fermer'}
+                                {modalMode === 'edit' ? 'Fermer sans sauvegarder' : 'Fermer'}
                             </button>
                             {modalMode === 'edit' && (
                                 <button

@@ -6,11 +6,13 @@ export const ORDER_STATUS_CONFIG = {
     livree:         { label: 'Livrée',      color: 'bg-emerald-100 text-emerald-700' },
     annulee:        { label: 'Annulée',     color: 'bg-red-100 text-red-700'         },
     remboursee:     { label: 'Remboursée',  color: 'bg-gray-100 text-gray-600'       },
+    en_reclamation: { label: 'En réclamation', color: 'bg-orange-100 text-orange-700' },
+    retournee:      { label: 'Retournée',       color: 'bg-slate-100 text-slate-600'  },
 };
 
 // Statuts modifiables par l'admin (annulee gérée séparément via modal)
 export const ORDER_STATUS_OPTIONS = [
-    'en_attente', 'confirmee', 'en_preparation', 'expediee', 'livree', 'remboursee',
+    'en_attente', 'confirmee', 'en_preparation', 'expediee', 'livree', 
 ];
 
 export const PAYMENT_LABELS = {
@@ -20,11 +22,12 @@ export const PAYMENT_LABELS = {
 
 export const DELIVERY_STATUS_OPTIONS = [
     { value: 'en_preparation', label: 'En préparation' },
-    { value: 'expediee',       label: 'Expédiée'       },
+    { value: 'expedie'        , label: 'Expédiée' },
     { value: 'en_transit',     label: 'En transit'     },
     { value: 'livre',          label: 'Livrée'         },
     { value: 'echec',          label: 'Échec'          },
     { value: 'retourne',       label: 'Retourné'       },
+    { value: 'en_cours', label: 'En cours de livraison' },
 ];
 
 // Format inline (hex) — utilisé dans Profile et OrderDetail
@@ -36,6 +39,8 @@ export const ORDER_STATUS_INLINE = {
     livree:         { label: 'Livrée',          color: '#166534', bg: '#dcfce7' },
     annulee:        { label: 'Annulée',         color: '#dc2626', bg: '#fee2e2' },
     remboursee:     { label: 'Remboursée',      color: '#6b7280', bg: '#f3f4f6' },
+    en_reclamation: { label: 'En réclamation', color: '#ea580c', bg: '#ffedd5' },
+    retournee:      { label: 'Retournée',       color: '#475569', bg: '#f1f5f9' },
 };
 
 // Couleurs hex pures — utilisées dans les charts (AdminStats)

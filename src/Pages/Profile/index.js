@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/authContext';
-import { updateProfile, updatePassword } from '../../services/authService';
+import { updateProfile, updatePassword , updateAddresses} from '../../services/authService';
 import { getMyOrders } from '../../services/orderService';
 import {
     FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiSave,
@@ -25,7 +25,7 @@ import useWSListener from '../../hooks/useWSListener';
 
 
 const Profile = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, refreshUser } = useAuth();
     const { currency } = useSiteSettings();
 
     const VALID_TABS = ['profil', 'commandes', 'reclamations', 'securite'];
@@ -269,32 +269,36 @@ useWSListener("profile-account-status", (data) => {
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
+    const isSwissPhone = (v) => {
+        if (!v) return true; // optional field
+        const cleaned = String(v).replace(/\s/g, '');
+        return /^\+41[0-9]{9}$/.test(cleaned) || /^0[0-9]{9}$/.test(cleaned);
+    };
+
     // ── Submit profil ─────────────────────────────────────
     const handleProfileSubmit = async (e) => {
         e.preventDefault();
+        // ── Swiss phone validation ────────────────────────
+            if (profileData.phone && !isSwissPhone(profileData.phone)) {
+                showError('Téléphone invalide. Format suisse requis (+41... ou 0...)');
+                return;
+            }
+            if (shippingData.shipping_phone && !isSwissPhone(shippingData.shipping_phone)) {
+                showError('Téléphone de livraison invalide. Format suisse requis (+41... ou 0...)');
+                return;
+            }
+            if (!billingSameAsShipping && billingData.billing_phone && !isSwissPhone(billingData.billing_phone)) {
+                showError('Téléphone de facturation invalide. Format suisse requis (+41... ou 0...)');
+                return;
+            }
         setLoadingProfile(true);
         try {
+            // 1. Basic profile → PUT /auth/me (multipart)
             const fd = new FormData();
             fd.append('name',    profileData.name);
             fd.append('phone',   profileData.phone);
             fd.append('address', profileData.address);
             fd.append('city',    profileData.city);
-
-            // ✅ Champs shipping
-            Object.entries(shippingData).forEach(([k, v]) => fd.append(k, v || ''));
-
-            // ✅ Champs billing (ou copie depuis shipping si cochée)
-            if (billingSameAsShipping) {
-                fd.append('billing_full_name',   shippingData.shipping_full_name);
-                fd.append('billing_phone',        shippingData.shipping_phone);
-                fd.append('billing_address',      shippingData.shipping_address);
-                fd.append('billing_city',         shippingData.shipping_city);
-                fd.append('billing_governorate',  shippingData.shipping_governorate);
-                fd.append('billing_postal_code',  shippingData.shipping_postal_code);
-                fd.append('billing_country',      shippingData.shipping_country);
-            } else {
-                Object.entries(billingData).forEach(([k, v]) => fd.append(k, v || ''));
-            }
 
             if (fileInputRef.current?.files[0]) {
                 fd.append('avatar', fileInputRef.current.files[0]);
@@ -304,11 +308,83 @@ useWSListener("profile-account-status", (data) => {
 
             await updateProfile(fd);
 
-            // Marquer comme sauvegardé
-            savedProfileRef.current  = { name: profileData.name, phone: profileData.phone, address: profileData.address, city: profileData.city };
-            savedShippingRef.current = { ...shippingData };
-            savedBillingRef.current  = { ...billingData };
-            setProfileDirty(false); setAvatarDirty(false); setShippingDirty(false); setBillingDirty(false);
+            // 2. Shipping + billing addresses → PUT /auth/me/addresses (JSON)
+            const effectiveBilling = billingSameAsShipping ? {
+                billing_full_name:   shippingData.shipping_full_name,
+                billing_phone:       shippingData.shipping_phone,
+                billing_address:     shippingData.shipping_address,
+                billing_city:        shippingData.shipping_city,
+                billing_governorate: shippingData.shipping_governorate,
+                billing_postal_code: shippingData.shipping_postal_code,
+                billing_country:     shippingData.shipping_country,
+            } : billingData;
+
+            await updateAddresses({ ...shippingData, ...effectiveBilling });
+
+            // 3. Refresh user in context so checkout and all other pages see fresh data
+            const freshUser = await refreshUser();
+
+            // 4. Sync local form state from fresh user so profile shows updated values
+            if (freshUser) {
+                setProfileData({
+                    name:    freshUser.name    || '',
+                    email:   freshUser.email   || '',
+                    phone:   freshUser.phone   || '',
+                    address: freshUser.address || '',
+                    city:    freshUser.city    || '',
+                });
+                setShippingData({
+                    shipping_full_name:   freshUser.shipping_full_name   || '',
+                    shipping_phone:       freshUser.shipping_phone       || '',
+                    shipping_address:     freshUser.shipping_address     || '',
+                    shipping_city:        freshUser.shipping_city        || '',
+                    shipping_governorate: freshUser.shipping_governorate || '',
+                    shipping_postal_code: freshUser.shipping_postal_code || '',
+                    shipping_country:     freshUser.shipping_country     || 'CH',
+                });
+                setBillingData({
+                    billing_full_name:   freshUser.billing_full_name   || '',
+                    billing_phone:       freshUser.billing_phone       || '',
+                    billing_address:     freshUser.billing_address     || '',
+                    billing_city:        freshUser.billing_city        || '',
+                    billing_governorate: freshUser.billing_governorate || '',
+                    billing_postal_code: freshUser.billing_postal_code || '',
+                    billing_country:     freshUser.billing_country     || 'CH',
+                });
+                setAvatarPreview(freshUser.avatar || null);
+
+                // Update saved refs
+                savedProfileRef.current = {
+                    name:    freshUser.name    || '',
+                    phone:   freshUser.phone   || '',
+                    address: freshUser.address || '',
+                    city:    freshUser.city    || '',
+                };
+                savedShippingRef.current = {
+                    shipping_full_name:   freshUser.shipping_full_name   || '',
+                    shipping_phone:       freshUser.shipping_phone       || '',
+                    shipping_address:     freshUser.shipping_address     || '',
+                    shipping_city:        freshUser.shipping_city        || '',
+                    shipping_governorate: freshUser.shipping_governorate || '',
+                    shipping_postal_code: freshUser.shipping_postal_code || '',
+                    shipping_country:     freshUser.shipping_country     || 'CH',
+                };
+                savedBillingRef.current = {
+                    billing_full_name:   freshUser.billing_full_name   || '',
+                    billing_phone:       freshUser.billing_phone       || '',
+                    billing_address:     freshUser.billing_address     || '',
+                    billing_city:        freshUser.billing_city        || '',
+                    billing_governorate: freshUser.billing_governorate || '',
+                    billing_postal_code: freshUser.billing_postal_code || '',
+                    billing_country:     freshUser.billing_country     || 'CH',
+                };
+            }
+
+            setProfileDirty(false);
+            setAvatarDirty(false);
+            setShippingDirty(false);
+            setBillingDirty(false);
+            setDeleteAvatar(false);
             showSuccess('Profil mis à jour avec succès !');
         } catch (err) {
             showError(err.response?.data?.message || 'Erreur lors de la mise à jour');
@@ -473,8 +549,10 @@ useWSListener("profile-account-status", (data) => {
                                         <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                                         <input type="tel" value={profileData.phone}
                                             onChange={(e) => handleProfileChange('phone', e.target.value)}
-                                            className={`${inputBase} pl-10`} placeholder="+216 XX XXX XXX" />
+                                            className={`${inputBase} pl-10`} placeholder="+41 XX XXX XX XX" />
+                                        
                                     </div>
+                                    <p className="text-xs text-black/30 mt-1">Format suisse requis pour les commandes (+41...)</p>
                                 </div>
                             </div>
                         </div>
@@ -497,7 +575,7 @@ useWSListener("profile-account-status", (data) => {
                                 <div>
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">Téléphone</label>
                                     <input type="tel" name="shipping_phone" value={shippingData.shipping_phone}
-                                        onChange={handleShippingChange} placeholder="+216 XX XXX XXX"
+                                        onChange={handleShippingChange} placeholder="+41 79 XXX XX XX"
                                         className={inputBase} />
                                 </div>
                                 <div className="sm:col-span-2">
@@ -515,19 +593,19 @@ useWSListener("profile-account-status", (data) => {
                                 <div>
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">Ville</label>
                                     <input type="text" name="shipping_city" value={shippingData.shipping_city}
-                                        onChange={handleShippingChange} placeholder="Tunis"
+                                        onChange={handleShippingChange} placeholder="Lausanne"
                                         className={inputBase} />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Gouvernorat</label>
+                                    <label className="block text-xs font-bold text-gray-600 mb-1.5">Canton</label>
                                     <input type="text" name="shipping_governorate" value={shippingData.shipping_governorate}
-                                        onChange={handleShippingChange} placeholder="Tunis"
+                                        onChange={handleShippingChange} placeholder="VD"
                                         className={inputBase} />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">Pays</label>
                                     <input type="text" name="shipping_country" value={shippingData.shipping_country}
-                                        onChange={handleShippingChange} placeholder="TN"
+                                        onChange={handleShippingChange} placeholder="CH"
                                         className={inputBase} />
                                 </div>
                             </div>
@@ -565,7 +643,7 @@ useWSListener("profile-account-status", (data) => {
                                     <div>
                                         <label className="block text-xs font-bold text-gray-600 mb-1.5">Téléphone</label>
                                         <input type="tel" name="billing_phone" value={billingData.billing_phone}
-                                            onChange={handleBillingChange} placeholder="+216 XX XXX XXX"
+                                            onChange={handleBillingChange} placeholder="+41 79 XXX XX XX"
                                             className={inputBase} />
                                     </div>
                                     <div className="sm:col-span-2">
@@ -583,19 +661,19 @@ useWSListener("profile-account-status", (data) => {
                                     <div>
                                         <label className="block text-xs font-bold text-gray-600 mb-1.5">Ville</label>
                                         <input type="text" name="billing_city" value={billingData.billing_city}
-                                            onChange={handleBillingChange} placeholder="Tunis"
+                                            onChange={handleBillingChange} placeholder="Lausanne"
                                             className={inputBase} />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Gouvernorat</label>
+                                        <label className="block text-xs font-bold text-gray-600 mb-1.5">Canton</label>
                                         <input type="text" name="billing_governorate" value={billingData.billing_governorate}
-                                            onChange={handleBillingChange} placeholder="Tunis"
+                                            onChange={handleBillingChange} placeholder="VD"
                                             className={inputBase} />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold text-gray-600 mb-1.5">Pays</label>
                                         <input type="text" name="billing_country" value={billingData.billing_country}
-                                            onChange={handleBillingChange} placeholder="TN"
+                                            onChange={handleBillingChange} placeholder="CH"
                                             className={inputBase} />
                                     </div>
                                 </div>
@@ -848,8 +926,8 @@ useWSListener("profile-account-status", (data) => {
                         <form onSubmit={handlePasswordSubmit} className="space-y-5">
                             {[
                                 { field: 'currentPassword',  label: 'Mot de passe actuel',               placeholder: '••••••••', show: true  },
-                                { field: 'newPassword',      label: 'Nouveau mot de passe',              placeholder: '••••••••', show: false },
-                                { field: 'confirmPassword',  label: 'Confirmer le nouveau mot de passe', placeholder: '••••••••', show: false },
+                                { field: 'newPassword',      label: 'Nouveau mot de passe',              placeholder: '••••••••', show: true },
+                                { field: 'confirmPassword',  label: 'Confirmer le nouveau mot de passe', placeholder: '••••••••', show: true },
                             ].map(({ field, label, placeholder, show }) => (
                                 <div key={field}>
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">{label}</label>

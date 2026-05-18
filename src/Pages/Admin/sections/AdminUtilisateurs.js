@@ -15,18 +15,25 @@ const AdminUtilisateurs = () => {
     const [editUser, setEditUser]         = useState(null);
     const [editForm, setEditForm]         = useState({});
     const [editLoading, setEditLoading]   = useState(false);
+    const [page, setPage]             = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalUsers, setTotalUsers] = useState(0);
 
     const fetchUsers = async () => {
         setLoading(true);
         try {
             const res = await api.get('/auth/users', {
                 params: {
-                    search: search   || undefined,
-                    role:   filterRole   || undefined,
-                    status: filterStatus || undefined,
+                    search:  search       || undefined,
+                    role:    filterRole   || undefined,
+                    status:  filterStatus || undefined,
+                    page,
+                    limit: 20,
                 },
             });
             setUsers(res.data.users);
+            setTotalPages(res.data.totalPages || 1);
+            setTotalUsers(res.data.total || 0);
         } catch (err) {
             console.error(err);
         } finally {
@@ -34,18 +41,39 @@ const AdminUtilisateurs = () => {
         }
     };
 
-    // Re-fetch automatically when filters change
-    useEffect(() => { fetchUsers(); }, [filterRole, filterStatus, search]); // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() => { setPage(1); }, [filterRole, filterStatus, search]);
+    useEffect(() => { fetchUsers(); }, [filterRole, filterStatus, search, page]); // eslint-disable-line
 
 
     const handleDelete = async (id) => {
         try {
             await api.delete(`/auth/users/${id}`);
             setUsers(prev => prev.filter(u => u.id !== id));
+            setTotalUsers(prev => prev - 1);
             showSuccess('Utilisateur supprimé avec succès.');
         } catch (err) {
             showError(err.response?.data?.message || 'Erreur lors de la suppression.');
         } finally { setDeleteConfirm(null); }
+    };
+
+    const handleSuspend = async (id) => {
+        try {
+            await api.patch(`/auth/users/${id}/suspend`);
+            setUsers(prev => prev.map(u => u.id === id ? { ...u, is_active: false } : u));
+            showSuccess('Utilisateur suspendu.');
+        } catch (err) {
+            showError(err.response?.data?.message || 'Erreur.');
+        }
+    };
+
+    const handleActivate = async (id) => {
+        try {
+            await api.patch(`/auth/users/${id}/activate`);
+            setUsers(prev => prev.map(u => u.id === id ? { ...u, is_active: true } : u));
+            showSuccess('Utilisateur activé.');
+        } catch (err) {
+            showError(err.response?.data?.message || 'Erreur.');
+        }
     };
 
 
@@ -88,7 +116,7 @@ const AdminUtilisateurs = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
                 <h2 className="text-2xl font-bold font-serif text-[#2c2c2c]">Gestion des Utilisateurs</h2>
                 <span className="bg-emerald-100 text-emerald-700 text-sm font-bold px-4 py-2 rounded-full">
-                    {users.length} utilisateur{users.length > 1 ? 's' : ''}
+                    {totalUsers} utilisateur{totalUsers > 1 ? 's' : ''}
                 </span>
             </div>
 
@@ -179,6 +207,7 @@ const AdminUtilisateurs = () => {
                                 <th className="text-left px-5 py-4 font-bold text-[#2c2c2c]">Email</th>
                                 <th className="text-center px-5 py-4 font-bold text-[#2c2c2c]">Rôle</th>
                                 <th className="text-center px-5 py-4 font-bold text-[#2c2c2c]">Vérifié</th>
+                                <th className="text-center px-5 py-4 font-bold text-[#2c2c2c]">Statut</th>
                                 <th className="text-left px-5 py-4 font-bold text-[#2c2c2c]">Inscription</th>
                                 <th className="text-center px-5 py-4 font-bold text-[#2c2c2c]">Actions</th>
                             </tr>
@@ -186,7 +215,7 @@ const AdminUtilisateurs = () => {
                         <tbody>
                             {users.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="text-center py-10 text-black/40">Aucun utilisateur trouvé</td>
+                                    <td colSpan={7} className="text-center py-10 text-black/40">Aucun utilisateur trouvé</td>
                                 </tr>
                             ) : users.map((user) => (
                                 <tr key={user.id} className="border-b border-gray-50 hover:bg-[#fdf6ec] transition">
@@ -225,11 +254,37 @@ const AdminUtilisateurs = () => {
                                             {user.is_verified ? '✅ Oui' : '⏳ Non'}
                                         </span>
                                     </td>
+                                    <td className="px-5 py-4 text-center">
+                                        <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+                                            user.is_active === false
+                                                ? 'bg-red-100 text-red-600'
+                                                : 'bg-emerald-100 text-emerald-700'
+                                        }`}>
+                                            {user.is_active === false ? '🔒 Suspendu' : '✅ Actif'}
+                                        </span>
+                                    </td>
                                     <td className="px-5 py-4 text-black/50 text-xs">
                                         {new Date(user.created_at).toLocaleDateString('fr-FR')}
                                     </td>
                                     <td className="px-5 py-4 text-center">
                                         <div className="flex items-center justify-center gap-1">
+                                            {user.is_active !== false ? (
+                                                <button
+                                                    onClick={() => handleSuspend(user.id)}
+                                                    className="p-2 hover:bg-orange-50 text-orange-400 rounded-xl transition"
+                                                    title="Suspendre"
+                                                >
+                                                    🔒
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    onClick={() => handleActivate(user.id)}
+                                                    className="p-2 hover:bg-emerald-50 text-emerald-500 rounded-xl transition"
+                                                    title="Activer"
+                                                >
+                                                    ✅
+                                                </button>
+                                            )}
                                             <button onClick={() => openEdit(user)} className="p-2 hover:bg-blue-50 text-blue-500 rounded-xl transition" title="Modifier">
                                                 <FiEdit size={15} />
                                             </button>
@@ -244,6 +299,24 @@ const AdminUtilisateurs = () => {
                     </table>
                 )}
             </div>
+
+            {totalPages > 1 && (
+                <div className="flex justify-center gap-2 mt-6">
+                    {[...Array(totalPages)].map((_, i) => (
+                        <button
+                            key={i}
+                            onClick={() => setPage(i + 1)}
+                            className={`w-10 h-10 rounded-full font-bold text-sm transition ${
+                                page === i + 1
+                                    ? 'bg-[#2d5a27] text-white'
+                                    : 'bg-white text-black/50 hover:bg-emerald-100'
+                            }`}
+                        >
+                            {i + 1}
+                        </button>
+                    ))}
+                </div>
+            )}
 
             {/* MODAL SUPPRESSION — unchanged */}
             {deleteConfirm && (
