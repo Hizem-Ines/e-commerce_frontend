@@ -6,6 +6,7 @@ import { GiCookingGlove } from "react-icons/gi";
 import { FaClipboardQuestion } from "react-icons/fa6";
 import { FaRegCommentDots } from "react-icons/fa";
 import { MdOutlineRateReview } from "react-icons/md";
+import { RiRobot3Fill } from "react-icons/ri";
 
 import AdminStats          from './sections/AdminStats';
 import AdminProduits       from './sections/AdminProduits';
@@ -19,9 +20,11 @@ import AdminEmailCampaigns from './sections/AdminEmailCampaigns';
 import AdminFaq            from './sections/AdminFaq';
 import AdminReclamations   from './sections/AdminReclamation';
 import AdminAvis           from './sections/AdminAvis';
+import AdminAIChat         from './sections/AdminAIChat';
 
 const SECTIONS = [
     { id: 'stats',        label: 'Tableau de bord',  icone: <FiGrid size={18} /> },
+    { id: 'assistant',    label: 'Assistant IA',      icone: <RiRobot3Fill  size={18} /> },
     { id: 'produits',     label: 'Produits',          icone: <FiPackage size={18} /> },
     { id: 'commandes',    label: 'Commandes',         icone: <FiShoppingBag size={18} /> },
     { id: 'utilisateurs', label: 'Utilisateurs',      icone: <FiUsers size={18} /> },
@@ -82,6 +85,7 @@ const Admin = () => {
             case 'faq':          return <AdminFaq />;
             case 'reclamation':  return <AdminReclamations />;
             case 'avis':         return <AdminAvis />;
+            case 'assistant' :   return <AdminAIChat />
             default:             return <AdminStats />;
         }
     };
