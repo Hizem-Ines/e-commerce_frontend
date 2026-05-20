@@ -97,6 +97,7 @@ const Auth = () => {
 
         } catch (err) {
             setAuthError(err.response?.data?.message || 'Code incorrect ou expiré. Réessayez.');
+            setOtp(''); // vide le champ pour ressaisir
         } finally {
             setIsSubmitting(false);
         }
@@ -168,7 +169,12 @@ const Auth = () => {
                                 </p>
                             </div>
 
-                            <form onSubmit={handleMfaSubmit} className="space-y-5">
+                            {authError && (
+                                    <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-semibold px-4 py-3 rounded-xl mb-4">
+                                        ⚠️ {authError}
+                                    </div>
+                                )}
+                                <form onSubmit={handleMfaSubmit} className="space-y-5">
                                 <div>
                                     
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5 text-center">
