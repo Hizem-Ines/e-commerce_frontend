@@ -277,11 +277,8 @@ export default function App() {
                                 <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} />
                                 <Route path="/reset-password/:token" element={<ResetPassword />} />
                                 <Route path="/login/success" element={<LoginSuccess />} />
-                                <Route path="/checkout" element={
-                                    <ProtectedRoute>
-                                        <Checkout />
-                                    </ProtectedRoute>
-                                } />
+                             <Route path="/checkout" element={<Checkout />} />
+
                                 <Route path="/commande-confirmee/:orderId" element={<OrderConfirmation />} />
                                 <Route path="/complete-account/:token" element={<CompleteAccount />} />
                                 <Route element={<Layout />}>
