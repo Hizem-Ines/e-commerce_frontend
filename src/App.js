@@ -256,6 +256,12 @@ export default function App() {
         setToasts(prev => prev.filter(t => t.id !== id));
     }, []);
 
+    useEffect(() => {
+        const handler = (e) => addToast(e.detail);
+        window.addEventListener('goffa:toast', handler);
+        return () => window.removeEventListener('goffa:toast', handler);
+    }, [addToast]);
+
     return (
         <BrowserRouter>
             <ScrollToTop />
