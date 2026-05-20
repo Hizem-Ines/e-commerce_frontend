@@ -5,7 +5,7 @@ import formatPrice from '../../../utils/formatPrice';
 import { useSiteSettings } from '../../../context/SiteSettingsContext';
 import api from '../../../services/api';
 import useToast from '../../../hooks/useToast';
-import { inputCls, textareaCls, selectCls } from '../../../constants/formStyles';
+import { inputCls, textareaCls } from '../../../constants/formStyles';
 import Field from '../../../Components/common/Field';
 import ConfirmDeleteModal from '../../../Components/common/ConfirmDeleteModal';
 
@@ -13,7 +13,7 @@ const BLANK_FORM = {
     name_fr: '', description_fr: '', ethical_info_fr: '', origin: '',
     usage_fr: '', ingredients_fr: '', precautions_fr: '', certifications: '',
     supplier_id: '', category_id: '', slug: '',
-    is_active: true, is_featured: false, is_new: false,
+    is_active: true, is_featured: false, is_new: true,
     low_stock_threshold: 5,
 };
 
@@ -541,16 +541,22 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
         }
 
         if (!isEdit) {
-                for (const v of variants) {
-                    for (const a of v.attributes) {
-                        if ((a.type_fr && !a.value_fr) || (!a.type_fr && a.value_fr)) {
-                            setError('Chaque attribut doit avoir un type et une valeur.');
-                            setTab('variants');
-                            return;
-                        }
+            for (const v of variants) {
+                const filledAttrs = v.attributes.filter(a => a.type_fr && a.value_fr);
+                if (filledAttrs.length === 0) {
+                    setError('Chaque variante doit avoir au moins un attribut (type et valeur).');
+                    setTab('variants');
+                    return;
+                }
+                for (const a of v.attributes) {
+                    if ((a.type_fr && !a.value_fr) || (!a.type_fr && a.value_fr)) {
+                        setError('Chaque attribut doit avoir un type et une valeur.');
+                        setTab('variants');
+                        return;
                     }
                 }
             }
+        }
 
         setLoading(true);
         try {

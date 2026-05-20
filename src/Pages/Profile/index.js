@@ -575,7 +575,7 @@ useWSListener("profile-account-status", (data) => {
                                 <div>
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">Téléphone</label>
                                     <input type="tel" name="shipping_phone" value={shippingData.shipping_phone}
-                                        onChange={handleShippingChange} placeholder="+41 79 XXX XX XX"
+                                        onChange={handleShippingChange} placeholder="+41 XX XXX XX XX"
                                         className={inputBase} />
                                 </div>
                                 <div className="sm:col-span-2">
@@ -643,7 +643,7 @@ useWSListener("profile-account-status", (data) => {
                                     <div>
                                         <label className="block text-xs font-bold text-gray-600 mb-1.5">Téléphone</label>
                                         <input type="tel" name="billing_phone" value={billingData.billing_phone}
-                                            onChange={handleBillingChange} placeholder="+41 79 XXX XX XX"
+                                            onChange={handleBillingChange} placeholder="+41 XX XXX XX XX"
                                             className={inputBase} />
                                     </div>
                                     <div className="sm:col-span-2">

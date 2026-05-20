@@ -149,8 +149,8 @@ const OrderConfirmation = () => {
                                 <p className="font-bold text-sm text-[#2c2c2c]">{order.shipping_full_name}</p>
                                 <p className="text-xs text-black/60">{order.shipping_address}</p>
                                 <p className="text-xs text-black/60">
-                                    {[order.shipping_city, order.shipping_governorate, order.shipping_postal_code]
-                                        .filter(Boolean).join(', ')}
+                                    {[order.shipping_postal_code, order.shipping_city, order.shipping_governorate && `(${order.shipping_governorate})`]
+                                        .filter(Boolean).join(' ')}
                                 </p>
                                 {order.shipping_phone && (
                                     <p className="text-xs text-black/60">📞 {order.shipping_phone}</p>
@@ -193,6 +193,12 @@ const OrderConfirmation = () => {
                                     </span>
                                 </div>
                             )}
+                           <div className="flex justify-between items-center mb-2">
+                                <span className="text-xs text-black/50">Livraison</span>
+                                <span className="text-xs font-semibold" style={{ color: '#166534' }}>
+                                    {parseFloat(order.shipping_cost) === 0 ? 'Gratuite' : fmt(order.shipping_cost)}
+                                </span>
+                            </div>
                             <div className="flex justify-between items-center">
                                 <span className="font-bold text-[#2c2c2c]">Total payé</span>
                                 <span className="text-xl font-black" style={{ color: '#166534' }}>

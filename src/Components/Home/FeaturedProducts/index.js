@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { useCart } from '../../../context/CartContext';
 import { useWishlist } from '../../../context/WishlistContext';
 import formatPrice from '../../../utils/formatPrice';
 import { useSiteSettings } from '../../../context/SiteSettingsContext';
@@ -7,7 +6,6 @@ import { FiHeart } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
 
 const FeaturedProducts = ({ produits, loading }) => {
-    const { ajouterAuPanier } = useCart();
     const { toggleFavori, estFavori } = useWishlist();
     const { currency } = useSiteSettings();
 
@@ -109,19 +107,12 @@ const FeaturedProducts = ({ produits, loading }) => {
                                                 {produit.min_price ? formatPrice(parseFloat(produit.min_price), currency) : 'Prix N/A'}
                                             </span>
                                         </div>
-                                        <button
-                                            onClick={() => ajouterAuPanier({
-                                                variant_id:   produit.cheapest_variant_id,
-                                                product_name: produit.name_fr,
-                                                price:        produit.min_price,
-                                                image:        produit.images?.[0]?.url || null,
-                                                attributes:   [],
-                                                stock:        produit.total_stock ?? 99,
-                                            })}
-                                            className="bg-[#c8872a] hover:bg-[#a86e1f] text-white text-sm font-bold px-5 py-2 rounded-xl transition-colors duration-300"
+                                        <Link
+                                            to={`/produits/${produit.slug || produit.id}`}
+                                            className="bg-[#c8872a] hover:bg-[#a86e1f] text-white text-sm font-bold px-5 py-2 rounded-xl transition-colors duration-300 no-underline"
                                         >
-                                            Ajouter
-                                        </button>
+                                            Voir le produit
+                                        </Link>
                                     </div>
                                 </div>
                             </div>

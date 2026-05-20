@@ -61,20 +61,26 @@ const TwintLogo = () => (
 // ── Déduire le canton depuis le NPA ────────────────────────────────────────
 const getCantonFromNPA = (npa) => {
     const code = parseInt(npa);
-    if (code >= 1000 && code <= 1299) return 'VD/GE';
+    if (code >= 1000 && code <= 1209) return 'GE';
+    if (code >= 1210 && code <= 1299) return 'VD';
     if (code >= 1300 && code <= 1699) return 'VD';
     if (code >= 1700 && code <= 1799) return 'FR';
-    if (code >= 1800 && code <= 1999) return 'VD';
+    if (code >= 1800 && code <= 1899) return 'VD';
+    if (code >= 1900 && code <= 1999) return 'VS';
     if (code >= 2000 && code <= 2099) return 'NE';
-    if (code >= 2300 && code <= 2999) return 'BE';
+    if (code >= 2300 && code <= 2399) return 'JU';
+    if (code >= 2400 && code <= 2999) return 'BE';
     if (code >= 3000 && code <= 3999) return 'BE';
-    if (code >= 4000 && code <= 4999) return 'BS';
+    if (code >= 4000 && code <= 4299) return 'BS';
+    if (code >= 4300 && code <= 4499) return 'BL';
+    if (code >= 4500 && code <= 4999) return 'SO';
     if (code >= 5000 && code <= 5999) return 'AG';
-    if (code >= 6000 && code <= 6999) return 'LU';
+    if (code >= 6000 && code <= 6499) return 'LU';
+    if (code >= 6500 && code <= 6999) return 'TI';
     if (code >= 7000 && code <= 7999) return 'GR';
     if (code >= 8000 && code <= 8999) return 'ZH';
     if (code >= 9000 && code <= 9999) return 'SG';
-    return null;
+    return 'CH';
 };
 
 // ════════════════════════════════════════════════════════════
@@ -157,7 +163,17 @@ const StripePaymentStep = ({ order, promoResult, onBack }) => {
                         <FiCreditCard size={18} style={{ color: '#166534' }} />
                         <h2 className="text-base font-bold text-[#2c2c2c]">Informations de paiement</h2>
                     </div>
-                    <PaymentElement options={{ layout: 'tabs' }} />
+                    <PaymentElement options={{
+                        layout: 'tabs',
+                        paymentMethodOrder: ['card', 'twint'],
+                        defaultValues: {
+                            billingDetails: {
+                                address: {
+                                    country: 'CH',
+                                },
+                            },
+                        },
+                    }} />
                     {error && (
                         <div className="mt-4 px-4 py-3 rounded-xl text-sm font-semibold" style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}>
                             ❌ {error}
@@ -432,7 +448,7 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                                 <div className="relative">
                                                     <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                                     <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required
-                                                        placeholder="+41 XX XXX XXX" className={`${inputClass} pl-10`}
+                                                        placeholder="+41 XX XXX XX XX" className={`${inputClass} pl-10`}
                                                         style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
                                                 </div>
                                             </div>
@@ -452,7 +468,7 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                         <div className="relative">
                                             <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                             <input type="tel" name="phone" value={formData.phone} onChange={handleChange}
-                                                placeholder="+41 79 XXX XX XX" className={`${inputClass} pl-10`}
+                                                placeholder="+41 XX XXX XX XX" className={`${inputClass} pl-10`}
                                                 style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
                                         </div>
                                     </div>
@@ -554,7 +570,7 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                                 <div className="relative">
                                                     <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                                     <input type="tel" name="billing_phone" value={billingData.billing_phone}
-                                                        onChange={handleBillingChange} placeholder="+41 XX XXX XXX"
+                                                        onChange={handleBillingChange} placeholder="+41 XX XXX XX XX"
                                                         className={`${inputClass} pl-10`} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
                                                 </div>
                                             </div>
