@@ -36,6 +36,16 @@ const OrderConfirmation = () => {
         }
     }, [orderId]); // eslint-disable-line
 
+    // Après le useEffect([orderId])
+        useEffect(() => {
+            if (!order) return;
+            if (isStripeRedirect && redirectStatus === 'failed') return;
+
+            window.dispatchEvent(new CustomEvent('goffa:toast', {
+                detail: { type: 'ORDER_CONFIRMED', order_number: order.order_number }
+            }));
+        }, [order?.order_number]); // eslint-disable-line
+
     // ── Chargement ────────────────────────────────────────
     if (loading) {
         return (
