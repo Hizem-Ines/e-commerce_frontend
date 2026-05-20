@@ -44,6 +44,7 @@ const Products = () => {
     const pageFromUrl = Number(new URLSearchParams(location.search).get('page')) || 1;
     const fetchProduits = async () => {
         setLoading(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         try {
             const res = await getAllProducts({
                 category_id: catId     || undefined,
@@ -150,7 +151,7 @@ const Products = () => {
 
                             {/* PRIX */}
                             <div className="mb-6">
-                                <h4 className="text-xs font-bold text-black/40 uppercase tracking-wider mb-3">Prix (DT)</h4>
+                                <h4 className="text-xs font-bold text-black/40 uppercase tracking-wider mb-3">Prix</h4>
                                 <div className="flex items-center gap-2">
                                     <input
                                         type="number"

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { getOffresData } from '../../services/offresService';
 import formatPrice from '../../utils/formatPrice';
@@ -9,7 +8,6 @@ import { FiHeart, FiTag, FiCopy, FiCheck } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
 
 const Offres = () => {
-    const { ajouterAuPanier } = useCart();
     const { toggleFavori, estFavori } = useWishlist();
     const { currency } = useSiteSettings();
 
@@ -93,19 +91,12 @@ const Offres = () => {
                             {produit.min_price ? formatPrice(parseFloat(produit.min_price), currency) : 'Prix N/A'}
                         </span>
                     </div>
-                    <button
-                        onClick={() => ajouterAuPanier({
-                            variant_id:   produit.cheapest_variant_id,
-                            product_name: produit.name_fr,
-                            price:        produit.min_price,
-                            image:        produit.images?.[0]?.url || null,
-                            attributes:   [],
-                            stock:        produit.total_stock ?? 99,
-                        })}
+                    <Link
+                        to={`/produits/${produit.slug || produit.id}`}
                         className="bg-[#2d5a27] hover:bg-[#4a8c42]  text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors duration-300"
                     >
-                        Ajouter
-                    </button>
+                        Voir le produit
+                    </Link>
                 </div>
             </div>
         </div>
@@ -163,8 +154,8 @@ const Offres = () => {
                                     </div>
                                     <p className="text-sm font-bold text-[#2c2c2c] mb-1">
                                         {promo.discount_type === 'percent'
-                                            ? `${promo.discount_value}% de réduction`
-                                            : `${promo.discount_value} DT de réduction`}
+                                            ? `${parseFloat(parseFloat(promo.discount_value).toFixed(2))}% de réduction`
+                                            : `${formatPrice(parseFloat(promo.discount_value), currency)} de réduction`}
                                     </p>
                                     {promo.description_fr && (
                                         <p className="text-xs text-black/50 mb-2">{promo.description_fr}</p>
@@ -209,7 +200,7 @@ const Offres = () => {
                                     produit={p}
                                     badge={{
                                         label: p.promo_type === 'percent'
-                                            ? `⚡ -${parseFloat(p.promo_value)}%`
+                                            ? `⚡ -${parseFloat(parseFloat(p.promo_value).toFixed(2))}%`
                                             : `⚡ -${formatPrice(parseFloat(p.promo_value), currency)}`,
                                         color: '#ef4444'
                                     }}

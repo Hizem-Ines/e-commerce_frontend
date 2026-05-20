@@ -234,8 +234,8 @@ const OrderDetail = () => {
                         <p className="text-sm text-[#2c2c2c] font-semibold">{order.shipping_full_name}</p>
                         <p className="text-sm text-black/50">{order.shipping_address}</p>
                         <p className="text-sm text-black/50">
-                            {[order.shipping_city, order.shipping_governorate, order.shipping_postal_code]
-                                .filter(Boolean).join(', ')}
+                            {[order.shipping_postal_code, order.shipping_city, order.shipping_governorate && `(${order.shipping_governorate})`]
+                                .filter(Boolean).join(' ')}
                         </p>
                         <p className="text-sm text-black/50">{order.shipping_country}</p>
                         {order.shipping_phone && (

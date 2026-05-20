@@ -329,7 +329,7 @@ const Auth = () => {
                                                 name="telephone"
                                                 value={formData.telephone}
                                                 onChange={handleChange}
-                                                placeholder="+41 79 XXX XX XX"
+                                                placeholder="+41 XX XXX XX XX"
                                                 className="w-full pl-10 pr-4 py-3 rounded-xl text-sm transition focus:outline-none"
                                                 style={inputStyle}
                                                 onFocus={focusBorder}

@@ -1,5 +1,6 @@
 {
   "name": "ecommerce-client",
+  "author": "Hizem Ines",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
