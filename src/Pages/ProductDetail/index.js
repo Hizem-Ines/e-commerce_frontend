@@ -30,7 +30,7 @@ const FormAvis = ({ productId, onSuccess }) => {
         try {
             await createReview(productId, { rating, comment });
             setSuccess(true);
-            onSuccess();
+            setTimeout(onSuccess, 2000); // laisse le temps au message de s'afficher
         } catch (err) {
             setError(err.response?.data?.message || 'Erreur lors de l\'envoi');
         } finally {
