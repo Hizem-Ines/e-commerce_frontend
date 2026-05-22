@@ -158,6 +158,18 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
     Object.entries(form).forEach(([k, v]) => fd.append(k, v));
     fd.append("ingredients", JSON.stringify(ingredients.filter(i => i.name_fr.trim())));
     fd.append("steps",       JSON.stringify(steps.filter(s => s.instruction_fr.trim())));
+  
+      if (ingredients.filter(i => i.name_fr.trim()).length === 0) {
+        setError("Au moins un ingrédient est requis.");
+        setTab("ingredients");
+        return;
+      }
+
+      if (!form.category) {
+        setError("Veuillez sélectionner une catégorie.");
+        setTab("general");
+        return;
+      }
     if (imageFile) fd.append("cover_image", imageFile);
 
     setSaving(true);
