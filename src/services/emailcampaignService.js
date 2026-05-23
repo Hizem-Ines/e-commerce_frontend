@@ -1,8 +1,8 @@
 import api from "./api" ;
 
 // ── Public ───────────────────────────────────────────────
-export const subscribeNewsletter = (email, name) =>
-  api.post("/email-campaigns/subscribe", { email, name });
+export const subscribeNewsletter = (email) =>
+  api.post("/email-campaigns/subscribe", { email });
 
 export const unsubscribeNewsletter = (email) =>
   api.post("/email-campaigns/unsubscribe", { email });

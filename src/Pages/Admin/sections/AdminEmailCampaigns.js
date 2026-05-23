@@ -31,7 +31,7 @@ const INITIAL_FORM = {
 const formatDate = (iso) =>
     iso ? new Date(iso).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
-const getInitials = (name, email) => {
+const getInitials = ( name,email,) => {
     if (name) return name.slice(0, 2).toUpperCase();
     return email.slice(0, 2).toUpperCase();
 };
@@ -391,10 +391,10 @@ const AdminEmailCampaigns = () => {
                                                 <td className="px-6 py-3">
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold shrink-0">
-                                                            {getInitials(s.name || s.user_name, s.email)}
+                                                            {getInitials(s.user_name, s.email)}
                                                         </div>
                                                         <span className="font-medium text-gray-800 truncate max-w-[140px]">
-                                                            {s.name || s.user_name || "—"}
+                                                            { s.user_name || "—"}
                                                         </span>
                                                     </div>
                                                 </td>
@@ -424,13 +424,13 @@ const AdminEmailCampaigns = () => {
                                     <div key={s.id} className="px-4 py-4 flex items-start gap-3">
                                         {/* Avatar */}
                                         <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-                                            {getInitials(s.name || s.user_name, s.email)}
+                                            {getInitials(s.user_name, s.email)}
                                         </div>
                                         {/* Info */}
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center justify-between gap-2">
                                                 <p className="font-semibold text-gray-800 text-sm truncate">
-                                                    {s.name || s.user_name || "Anonyme"}
+                                                    {s.user_name || "Anonyme"}
                                                 </p>
                                                 {s.is_active ? (
                                                     <span className="inline-flex items-center gap-1 text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold shrink-0">

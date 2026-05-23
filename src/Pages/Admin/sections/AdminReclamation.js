@@ -81,7 +81,7 @@ function DetailModal({ open, reclamation, onClose }) {
                 {STATUS_CONFIG[reclamation.status]?.label || "En attente"}
               </span>
             </div>
-            {reclamation.avec_remboursement && (
+            {reclamation.refundable && (
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-black/40">Remboursement :</span>
                 <span className={`text-xs font-bold px-3 py-1 rounded-full ${RECLAMATION_REFUND_BADGE.color}`}>
@@ -181,14 +181,14 @@ function RespondModal({ open, reclamation, form, onChange, onSubmit, onClose, lo
             <div className="bg-purple-50 border border-purple-100 rounded-xl p-4 space-y-1">
               <label className="flex items-center gap-3 cursor-pointer">
                 <div
-                  onClick={() => onChange("avec_remboursement", !form.avec_remboursement)}
+                  onClick={() => onChange("refundable", !form.refundable)}
                   className={`w-5 h-5 rounded flex items-center justify-center border-2 transition-all cursor-pointer shrink-0 ${
-                    form.avec_remboursement
+                    form.refundable
                       ? "border-[#166534] bg-[#166534]"
                       : "border-gray-300 bg-white"
                   }`}
                 >
-                  {form.avec_remboursement && <FiCheck size={12} color="white" strokeWidth={3} />}
+                  {form.refundable && <FiCheck size={12} color="white" strokeWidth={3} />}
                 </div>
                 <span className="text-sm font-semibold text-[#2c2c2c]">Rembourser le client</span>
               </label>
@@ -270,7 +270,7 @@ const openRespondModal = (r) => {
     status: STATUS_OPTIONS_ADMIN[r.status] ? r.status : "en_cours", // ← fallback sur la première option valide
     admin_response: r.admin_response || "",
     resolution_delay: "",
-    avec_remboursement: false,
+    refundable: false,
   });
 };
 
@@ -285,7 +285,7 @@ const handleRespond = async () => {
     setReclamations((prev) =>
       prev.map((r) =>
         r.id === respondTarget.id
-          ? { ...r, status: respondForm.status, admin_response: respondForm.admin_response, avec_remboursement: respondForm.avec_remboursement }
+          ? { ...r, status: respondForm.status, admin_response: respondForm.admin_response, refundable: respondForm.refundable }
           : r
       )
     );
@@ -442,7 +442,7 @@ const handleRespond = async () => {
                       <span className={`text-xs font-bold px-3 py-1 rounded-full ${STATUS_CONFIG[r.status]?.color || ""}`}>
                         {STATUS_CONFIG[r.status]?.label || r.status}
                       </span>
-                      {r.avec_remboursement && (
+                      {r.refundable && (
                         <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${RECLAMATION_REFUND_BADGE.color}`}>
                           {RECLAMATION_REFUND_BADGE.label}
                         </span>
@@ -500,7 +500,7 @@ const handleRespond = async () => {
                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${STATUS_CONFIG[r.status]?.color || ''}`}>
                       {STATUS_CONFIG[r.status]?.label}
                     </span>
-                    {r.avec_remboursement && (
+                    {r.refundable && (
                       <span className={`text-xs font-bold px-2 py-1 rounded-full ${RECLAMATION_REFUND_BADGE.color}`}>
                         {RECLAMATION_REFUND_BADGE.label}
                       </span>
@@ -540,7 +540,7 @@ const handleRespond = async () => {
         open={!!respondTarget}
         reclamation={respondTarget}
         form={respondForm}
-        onChange={(key, val) => setRespondForm((f) => ({ ...f, [key]: val , ...(key === "status" && val !== "resolue" ? { avec_remboursement: false } : {}), }))}
+        onChange={(key, val) => setRespondForm((f) => ({ ...f, [key]: val , ...(key === "status" && val !== "resolue" ? { refundable: false } : {}), }))}
         onSubmit={handleRespond}
         onClose={() => setRespondTarget(null)}
         loading={respondLoading}
