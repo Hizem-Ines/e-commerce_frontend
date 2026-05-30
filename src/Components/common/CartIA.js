@@ -4,6 +4,7 @@ import { FaHeart } from 'react-icons/fa';
 import { useWishlist } from '../../context/WishlistContext';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 import formatPrice from '../../utils/formatPrice';
+import { imageUrl } from '../../utils/imageUrl';
 
 const CarteIA = ({ produit }) => {
   const { toggleFavori, estFavori } = useWishlist();
@@ -20,7 +21,7 @@ const CarteIA = ({ produit }) => {
         <div className="relative h-44 bg-[#ecfdf5] flex items-center justify-center cursor-pointer overflow-hidden">
           {produit.images?.[0]?.url ? (
             <img
-              src={produit.images[0].url}
+              src={imageUrl(produit.images[0].url)}
               alt={produit.name_fr}
               className="h-full w-full object-cover"
             />

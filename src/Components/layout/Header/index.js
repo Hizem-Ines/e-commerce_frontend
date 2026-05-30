@@ -11,6 +11,7 @@ import { useAuth } from '../../../context/authContext';
 import { getAllProducts } from '../../../services/productService';
 import logo from '../../../assets/images/goffa-logo.png';
 import { BsStars } from "react-icons/bs";
+import { imageUrl } from '../../../utils/imageUrl';
 
 const Logo = () => (
     <Link to="/" className="shrink-0 no-underline flex items-center gap-2">
@@ -148,7 +149,7 @@ const Header = () => {
                                         <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0 overflow-hidden">
                                             {images[0]?.url ? (
                                                 <img
-                                                    src={images[0].url}
+                                                    src={imageUrl(images[0].url)}
                                                     alt={produit.name_fr}
                                                     className="w-full h-full object-cover"
                                                 />
@@ -223,7 +224,7 @@ const Header = () => {
                                 >
                                     <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-black overflow-hidden">
                                         {user.avatar ? (
-                                            <img src={user.avatar} alt={user.name} className="w-full h-full object-cover rounded-full" />
+                                            <img src={imageUrl(user.avatar)} alt={user.name} className="w-full h-full object-cover rounded-full" />
                                         ) : (
                                             user.name?.[0]?.toUpperCase()
                                         )}

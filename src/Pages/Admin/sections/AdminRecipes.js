@@ -12,7 +12,7 @@ import { inputCls, textareaCls, selectCls } from '../../../constants/formStyles'
 import Field from '../../../Components/common/Field';
 import ConfirmDeleteModal from '../../../Components/common/ConfirmDeleteModal';
 import { RECIPE_DIFFICULTIES as DIFFICULTIES, RECIPE_CATEGORIES as CATEGORIES } from '../../../constants/recipeConstants';
-
+import { imageUrl } from '../../../utils/imageUrl';
 
 const emptyForm = {
   title_fr: "",  description_fr: "", 
@@ -82,7 +82,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
             is_published:   r.is_published   || false,
             is_featured:    r.is_featured    || false,
           });
-          setPreview(r.cover_image || null);
+          setPreview(r.cover_image ? imageUrl(r.cover_image) : null);
           if (r.ingredients?.length) {
             setIngredients(r.ingredients.map(i => ({
               name_fr:  i.name_fr  || "",
@@ -115,7 +115,7 @@ function RecipeFormModal({ open, onClose, onSaved, editRecipe }) {
             is_published:   editRecipe.is_published   || false,
             is_featured:    editRecipe.is_featured    || false,
           });
-          setPreview(editRecipe.cover_image || null);
+          setPreview(editRecipe.cover_image ? imageUrl(editRecipe.cover_image) : null);
         })
         .finally(() => setFormLoading(false));
     } else {
@@ -601,7 +601,7 @@ export default function AdminRecettes() {
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center overflow-hidden shrink-0">
                         {recipe.cover_image ? (
-                          <img src={recipe.cover_image} alt={recipe.title_fr} className="w-full h-full object-cover" />
+                          <img src={imageUrl(recipe.cover_image)} alt={recipe.title_fr} className="w-full h-full object-cover" />
                         ) : (
                           <span className="text-lg">🍽️</span>
                         )}

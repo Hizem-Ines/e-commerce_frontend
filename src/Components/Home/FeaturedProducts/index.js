@@ -4,6 +4,7 @@ import formatPrice from '../../../utils/formatPrice';
 import { useSiteSettings } from '../../../context/SiteSettingsContext';
 import { FiHeart } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
+import { imageUrl } from '../../../utils/imageUrl';
 
 const FeaturedProducts = ({ produits, loading }) => {
     const { toggleFavori, estFavori } = useWishlist();
@@ -47,7 +48,7 @@ const FeaturedProducts = ({ produits, loading }) => {
                                 <Link to={`/produits/${produit.slug || produit.id}`} className="no-underline">
                                     <div className="relative h-52 bg-[#fff8ee] flex items-center justify-center cursor-pointer overflow-hidden">
                                         {produit.images?.[0]?.url ? (
-                                            <img src={produit.images[0].url} alt={produit.name_fr} className="h-full w-full object-cover" />
+                                            <img src={imageUrl(produit.images[0].url)} alt={produit.name_fr} className="h-full w-full object-cover" />
                                         ) : (
                                             <span className="text-7xl">🌿</span>
                                         )}

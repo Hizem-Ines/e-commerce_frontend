@@ -8,6 +8,7 @@ import useToast from '../../../hooks/useToast';
 import { inputCls, textareaCls } from '../../../constants/formStyles';
 import Field from '../../../Components/common/Field';
 import ConfirmDeleteModal from '../../../Components/common/ConfirmDeleteModal';
+import { imageUrl } from '../../../utils/imageUrl';
 
 const BLANK_FORM = {
     name_fr: '', description_fr: '', ethical_info_fr: '', origin: '',
@@ -857,7 +858,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                         {existingImages.map((img, i) => (
                                             <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-[#ecfdf5] group">
                                                 <img 
-                                                    src={img.url} 
+                                                    src={imageUrl(img.url)}
                                                     alt="" 
                                                     className="w-full h-full object-cover" 
                                                 />
@@ -1264,7 +1265,7 @@ const AdminProduits = () => {
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center overflow-hidden shrink-0">
                                                 {produit.images?.[0]?.url
-                                                    ? <img src={produit.images[0].url} alt={produit.name_fr} className="w-full h-full object-cover" />
+                                                    ? <img src={imageUrl(produit.images[0].url)} alt={produit.name_fr} className="w-full h-full object-cover" />
                                                     : <span className="text-lg">🌿</span>
                                                 }
                                             </div>

@@ -3,6 +3,7 @@ import api from '../../../services/api';
 import { FiTrash2, FiPlus, FiEdit } from 'react-icons/fi';
 import useToast from '../../../hooks/useToast';
 import ConfirmDeleteModal from '../../../Components/common/ConfirmDeleteModal';
+import { imageUrl } from '../../../utils/imageUrl';
 
 const AdminCategories = () => {
     const [categories, setCategories] = useState([]);       // flat list of ALL categories
@@ -157,7 +158,7 @@ setCategories(flat);
 
                                         <td className="px-5 py-3">
                                             {cat.images?.[0]
-                                                ? <img src={cat.images[0]} alt={cat.name_fr} className="w-10 h-10 object-cover rounded-lg border border-gray-100" />
+                                                ? <img src={imageUrl(cat.images[0])} alt={cat.name_fr} className="w-10 h-10 object-cover rounded-lg border border-gray-100" />
                                                 : <div className="w-10 h-10 bg-[#f9f5f0] rounded-lg border border-gray-100 flex items-center justify-center text-lg">🌿</div>
                                             }
                                         </td>
@@ -189,7 +190,7 @@ setCategories(flat);
                         {parentCategories.map(cat => (
                             <div key={cat.id} className="p-4 flex items-center gap-3">
                             {cat.images?.[0]
-                                ? <img src={cat.images[0]} alt={cat.name_fr} className="w-10 h-10 object-cover rounded-lg border border-gray-100" />
+                                ? <img src={imageUrl(cat.images[0])} alt={cat.name_fr} className="w-10 h-10 object-cover rounded-lg border border-gray-100" />
                                 : <div className="w-10 h-10 bg-[#f9f5f0] rounded-lg border border-gray-100 flex items-center justify-center text-lg">🌿</div>
                             }
                             <div className="flex-1 min-w-0">
@@ -229,7 +230,7 @@ setCategories(flat);
                                         <tr key={cat.id} className="border-b border-gray-50 hover:bg-[#fdf6ec] transition">
                                             <td className="px-5 py-3">
                                                 {cat.images?.[0]
-                                                    ? <img src={cat.images[0]} alt={cat.name_fr} className="w-10 h-10 object-cover rounded-lg border border-gray-100" />
+                                                    ? <img src={imageUrl(cat.images[0])} alt={cat.name_fr} className="w-10 h-10 object-cover rounded-lg border border-gray-100" />
                                                     : <div className="w-10 h-10 bg-[#f9f5f0] rounded-lg border border-gray-100 flex items-center justify-center text-lg">🌿</div>
                                                 }
                                             </td>
@@ -262,7 +263,7 @@ setCategories(flat);
                             {subCategories.map(cat => (
                                 <div key={cat.id} className="p-4 flex items-center gap-3">
                                 {cat.images?.[0]
-                                    ? <img src={cat.images[0]} alt={cat.name_fr} className="w-10 h-10 object-cover rounded-lg border border-gray-100" />
+                                    ? <img src={imageUrl(cat.images[0])} alt={cat.name_fr} className="w-10 h-10 object-cover rounded-lg border border-gray-100" />
                                     : <div className="w-10 h-10 bg-[#f9f5f0] rounded-lg border border-gray-100 flex items-center justify-center text-lg">🌿</div>
                                 }
                                 <div className="flex-1 min-w-0">
@@ -325,7 +326,7 @@ setCategories(flat);
                                 <label className="block text-xs font-bold text-gray-600 mb-1.5">Image (optionnel)</label>
                                 {formData.images?.[0] && !formData.imageFile && (
                                     <div className="mb-2 flex items-center gap-3">
-                                        <img src={formData.images[0]} alt="Actuelle" className="w-14 h-14 object-cover rounded-xl border border-gray-200" />
+                                        <img src={imageUrl(formData.images[0])} alt="Actuelle" className="w-14 h-14 object-cover rounded-xl border border-gray-200" />
                                         <span className="text-xs text-black/40">Image actuelle</span>
                                     </div>
                                 )}

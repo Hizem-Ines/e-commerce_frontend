@@ -5,6 +5,7 @@ import { MdVerified } from 'react-icons/md';
 import useToast from '../../../hooks/useToast';
 import api from '../../../services/api';
 import ConfirmDeleteModal from '../../../Components/common/ConfirmDeleteModal';
+import { imageUrl } from '../../../utils/imageUrl';
 
 const EMPTY_FORM = { name: '', description_fr: '', region: '', address: '', contact: '', email: '', website: '', is_certified_bio: false };
 
@@ -62,7 +63,7 @@ const AdminProducteurs = () => {
             is_certified_bio: p.is_certified_bio || false,
         });
         setImageFile(null);
-        setImagePreview(p.logo_url || null);
+        setImagePreview(p.logo_url ? imageUrl(p.logo_url) : null);
         setShowForm(true);
     };
 
@@ -174,7 +175,7 @@ const AdminProducteurs = () => {
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center overflow-hidden shrink-0">
                                         {p.logo_url
-                                            ? <img src={p.logo_url} alt={p.name} className="w-full h-full object-cover" />
+                                            ? <img src={imageUrl(p.logo_url)} alt={p.name} className="w-full h-full object-cover" />
                                             : <span className="text-xl">🌿</span>
                                         }
                                     </div>

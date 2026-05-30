@@ -14,6 +14,7 @@ import {
     getDeliveryLabel,
 } from '../../../constants/orderStatus';
 import useToast from '../../../hooks/useToast';
+import { imageUrl } from '../../../utils/imageUrl';
 
 const formatAddress = (...parts) => parts.filter(Boolean).join(', ');
 
@@ -508,7 +509,7 @@ const AdminCommandes = () => {
                                                 <div key={item.id || idx} className="flex items-start gap-4 bg-white border border-gray-100 rounded-xl px-4 py-3">
                                                     <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center text-xl flex-shrink-0 overflow-hidden">
                                                         {item.product_image
-                                                            ? <img src={item.product_image} alt={item.product_name_fr} className="w-full h-full object-cover" onError={e => { e.target.style.display='none'; }} />
+                                                            ? <img src={imageUrl(item.product_image)} alt={item.product_name_fr} className="w-full h-full object-cover" onError={e => { e.target.style.display='none'; }} />
                                                             : <span>🧺</span>
                                                         }
                                                     </div>

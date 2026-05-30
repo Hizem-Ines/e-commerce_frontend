@@ -4,6 +4,7 @@ import { BsFillBasket3Fill, BsBoxSeam } from 'react-icons/bs';
 import { useCart } from '../../../context/CartContext';
 import { useSiteSettings } from '../../../context/SiteSettingsContext';
 import formatPrice from '../../../utils/formatPrice';
+import { imageUrl } from '../../../utils/imageUrl';
 
 export default function CartSidebar() {
     const {
@@ -96,7 +97,7 @@ export default function CartSidebar() {
                                 <div className="w-16 h-16 rounded-lg overflow-hidden bg-stone-200 flex-shrink-0">
                                     {item.image ? (
                                         <img
-                                            src={item.image}
+                                            src={imageUrl(item.image)}
                                             alt={item.product_name}
                                             className="w-full h-full object-cover"
                                         />

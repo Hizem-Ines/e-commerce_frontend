@@ -3,6 +3,7 @@ import api from '../../../services/api';
 import { FiSearch, FiTrash2, FiEdit, FiX, FiCheck, FiFilter } from 'react-icons/fi';
 import { USER_ROLE_LABELS, USER_STATUS_FILTERS } from '../../../constants/userRoles';
 import useToast from '../../../hooks/useToast';
+import { imageUrl } from '../../../utils/imageUrl';
 
 const AdminUtilisateurs = () => {
     const [users, setUsers]               = useState([]);
@@ -223,7 +224,7 @@ const AdminUtilisateurs = () => {
                                         <div className="flex items-center gap-3">
                                             <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center text-[#2d5a27] font-black text-sm overflow-hidden shrink-0">
                                                 {user.avatar
-                                                    ? <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                                                    ? <img src={imageUrl(user.avatar)} alt={user.name} className="w-full h-full object-cover" />
                                                     : user.name?.[0]?.toUpperCase()
                                                 }
                                             </div>
@@ -341,7 +342,7 @@ const AdminUtilisateurs = () => {
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-[#2d5a27] font-black overflow-hidden shrink-0">
                                     {editUser.avatar
-                                        ? <img src={editUser.avatar} alt={editUser.name} className="w-full h-full object-cover" />
+                                        ? <img src={imageUrl(editUser.avatar)} alt={editUser.name} className="w-full h-full object-cover" />
                                         : editUser.name?.[0]?.toUpperCase()
                                     }
                                 </div>

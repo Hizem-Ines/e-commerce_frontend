@@ -11,6 +11,8 @@ import {
 } from 'react-icons/fi';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { imageUrl } from '../../utils/imageUrl';
+
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
@@ -728,7 +730,7 @@ const CheckoutForm = ({ onStripeOrderCreated }) => {
                                         <div key={item.variant_id} className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 flex items-center justify-center" style={{ background: '#ecfdf5' }}>
                                                 {item.image
-                                                    ? <img src={item.image} alt={item.product_name} className="w-full h-full object-cover" />
+                                                    ? <img src={imageUrl(item.image)} alt={item.product_name} className="w-full h-full object-cover" />
                                                     : <span className="text-lg">🌿</span>}
                                             </div>
                                             <div className="flex-1 min-w-0">

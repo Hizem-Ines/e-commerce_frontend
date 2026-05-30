@@ -5,6 +5,7 @@ import { useSiteSettings } from '../../context/SiteSettingsContext';
 import formatPrice from '../../utils/formatPrice';
 import { getShippingCost } from '../../services/orderService';
 import SuggestionsRecettes from '../../Components/cart/Suggestionrecettes';
+import { imageUrl } from '../../utils/imageUrl';
 
 const Cart = () => {
     const { panier, retirerDuPanier, changerQuantite, viderPanier, totalArticles, totalPrix } = useCart();
@@ -67,7 +68,7 @@ const Cart = () => {
                                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden shrink-0 flex items-center justify-center"
                                     style={{ background: '#ecfdf5' }}>
                                     {item.image ? (
-                                        <img src={item.image} alt={item.product_name} className="w-full h-full object-cover" />
+                                        <img src={imageUrl(item.image)} alt={item.product_name} className="w-full h-full object-cover" />
                                     ) : (
                                         <span className="text-3xl sm:text-4xl">🌿</span>
                                     )}

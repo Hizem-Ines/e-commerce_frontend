@@ -3,11 +3,12 @@ import { useState } from 'react';
 import api from '../../services/api';
 
 const CategoryImageUpload = ({ category, onUpdated }) => {
-    const [preview, setPreview] = useState(
-        Array.isArray(category.images) && category.images[0]?.url
-            ? category.images[0].url
-            : null
-    );
+    const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+        const [preview, setPreview] = useState(
+            Array.isArray(category.images) && category.images[0]?.url
+                ? `${BASE_URL}${category.images[0].url}`
+                : null
+        );
     const [loading, setLoading] = useState(false);
 
     const handleFileChange = async (e) => {
