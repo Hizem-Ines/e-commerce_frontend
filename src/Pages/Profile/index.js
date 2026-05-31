@@ -10,6 +10,7 @@ import {
 import { Link } from 'react-router-dom';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 import formatPrice from '../../utils/formatPrice';
+import { imageUrl } from '../../utils/imageUrl';
 import {
   getMyReclamations,
 } from '../../services/reclamationService';
@@ -439,7 +440,7 @@ useWSListener("profile-account-status", (data) => {
                 <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.07)] p-6 mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <div className="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center text-2xl font-black text-[#2d5a27] shrink-0 overflow-hidden">
                         {avatarPreview
-                            ? <img src={avatarPreview} alt={user?.name} className="w-full h-full object-cover" />
+                            ? <img src={imageUrl(avatarPreview)} alt={user?.name} className="w-full h-full object-cover" />
                             : user?.name?.[0]?.toUpperCase()}
                     </div>
                     <div className="flex-1">
@@ -502,7 +503,7 @@ useWSListener("profile-account-status", (data) => {
                                 <div className="relative">
                                     <div className={`w-20 h-20 rounded-2xl bg-emerald-100 flex items-center justify-center overflow-hidden border-2 transition ${avatarDirty ? 'border-amber-400' : 'border-[#b6eac7]'}`}>
                                         {avatarPreview
-                                            ? <img src={avatarPreview} alt="avatar" className="w-full h-full object-cover" />
+                                            ? <img src={imageUrl(avatarPreview)} alt="avatar" className="w-full h-full object-cover" />
                                             : <span className="text-3xl font-black text-[#2d5a27]">{user?.name?.[0]?.toUpperCase()}</span>}
                                     </div>
                                     <button type="button" onClick={() => fileInputRef.current.click()}
@@ -774,7 +775,7 @@ useWSListener("profile-account-status", (data) => {
                                                         <div key={idx} className="flex items-center gap-3 bg-white rounded-xl p-3 shadow-sm">
                                                             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden shrink-0 bg-gray-100 border border-gray-200">
                                                                 {item.product_image
-                                                                    ? <img src={item.product_image} alt={item.product_name} className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                                                                    ? <img src={imageUrl(item.product_image)} alt={item.product_name} className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
                                                                     : <div className="w-full h-full flex items-center justify-center text-2xl">🌿</div>}
                                                             </div>
                                                             <div className="flex-1 min-w-0">

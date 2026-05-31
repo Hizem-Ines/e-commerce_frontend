@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { fetchAllRecipes, fetchFeaturedRecipes } from "../../services/recipesService";
 import { FiClock, FiUsers, FiEye } from "react-icons/fi";
 import { GiPlantSeed } from "react-icons/gi";
+import { imageUrl } from '../../utils/imageUrl';
 
 const DIFFICULTIES = ["facile", "moyen", "difficile"];
 
@@ -33,7 +34,7 @@ function RecipeCard({ recipe }) {
         <div className="relative h-44 bg-[#ecfdf5] flex items-center justify-center cursor-pointer overflow-hidden">
           {recipe.cover_image ? (
             <img
-              src={recipe.cover_image}
+              src={imageUrl(recipe.cover_image)}
               alt={recipe.title_fr}
               className="h-full w-full object-cover hover:scale-105 transition-transform duration-500"
             />
@@ -208,7 +209,7 @@ export default function RecipesPage() {
             <div className="h-52 md:h-56 bg-[#2c2c2c]">
               {heroRecipe.cover_image ? (
                 <img
-                  src={heroRecipe.cover_image}
+                  src={imageUrl(heroRecipe.cover_image)}
                   alt={heroRecipe.title_fr}
                   className="w-full h-full object-cover opacity-60"
                 />

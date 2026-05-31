@@ -4,6 +4,7 @@ import { fetchSingleRecipe } from "../../services/recipesService";
 import { FiClock, FiUsers, FiEye, FiArrowLeft, FiCheckCircle } from "react-icons/fi";
 import { GiPlantSeed } from "react-icons/gi";
 import { BsStars } from "react-icons/bs";
+import { imageUrl } from '../../utils/imageUrl';
 
 const CATEGORY_LABELS = {
   "entree":         "Entrée",
@@ -99,7 +100,7 @@ export default function RecipeDetailPage() {
           <div className="h-64 md:h-80 bg-[#2c2c2c]">
             {recipe.cover_image ? (
               <img
-                src={recipe.cover_image}
+                src={imageUrl(recipe.cover_image)}
                 alt={recipe.title_fr}
                 className="w-full h-full object-cover opacity-70"
               />

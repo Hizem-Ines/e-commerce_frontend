@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getAllSuppliers } from '../../services/supplierService';
 import { MdVerified } from 'react-icons/md';
 import { FaLeaf } from 'react-icons/fa';
+import { imageUrl } from '../../utils/imageUrl';
 
 const Producers = () => {
     const [producteurs, setProducteurs] = useState([]);
@@ -68,7 +69,7 @@ const Producers = () => {
                                                 {/* ✅ Fixed: uses logo_url */}
                                                 {producteur.logo_url ? (
                                                     <img
-                                                        src={producteur.logo_url}
+                                                        src={imageUrl(producteur.logo_url)}
                                                         alt={producteur.name}
                                                         className="w-full h-full object-cover"
                                                     />

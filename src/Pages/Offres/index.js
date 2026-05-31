@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useWishlist } from '../../context/WishlistContext';
 import { getOffresData } from '../../services/offresService';
 import formatPrice from '../../utils/formatPrice';
+import { imageUrl } from '../../utils/imageUrl';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 import { FiHeart, FiTag, FiCopy, FiCheck } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
@@ -33,7 +34,7 @@ const Offres = () => {
             <Link to={`/produits/${produit.id}`} className="no-underline">
                 <div className="relative h-48 bg-[#ecfdf5] flex items-center justify-center overflow-hidden">
                     {produit.images?.[0]?.url ? (
-                        <img src={produit.images[0].url} alt={produit.name_fr} className="h-full w-full object-cover" />
+                        <img src={imageUrl(produit.images[0].url)} alt={produit.name_fr} className="h-full w-full object-cover" />
                     ) : (
                         <span className="text-6xl">🌿</span>
                     )}

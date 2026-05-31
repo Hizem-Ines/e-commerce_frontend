@@ -4,6 +4,7 @@ import { useWishlist } from '../../context/WishlistContext';
 import { getAllProducts } from '../../services/productService';
 import { getAllCategories } from '../../services/categoryService';
 import formatPrice from '../../utils/formatPrice';
+import { imageUrl } from '../../utils/imageUrl';
 import { BsStars } from "react-icons/bs";
 import { FiHeart } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
@@ -292,7 +293,7 @@ const Products = () => {
                                                 <div className="relative h-44 bg-[#ecfdf5] flex items-center justify-center cursor-pointer">
                                                     {produit.images?.[0]?.url ? (
                                                         <img
-                                                            src={produit.images[0].url}
+                                                            src={imageUrl(produit.images[0].url)}
                                                             alt={produit.name_fr}
                                                             className="h-full w-full object-cover"
                                                         />

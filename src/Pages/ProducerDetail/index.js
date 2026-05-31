@@ -6,6 +6,7 @@ import formatPrice from '../../utils/formatPrice';
 import { FiHeart } from 'react-icons/fi';
 import { FaHeart, FaLeaf } from 'react-icons/fa';
 import { MdVerified } from 'react-icons/md';
+import { imageUrl } from '../../utils/imageUrl';
 
 const ProducerDetail = () => {
     const { nom } = useParams();
@@ -63,7 +64,7 @@ const ProducerDetail = () => {
                         <div className="flex items-start justify-between mb-6">
                             <div className="w-20 h-20 bg-emerald-50 rounded-2xl shadow-lg flex items-center justify-center border-2 border-emerald-100 overflow-hidden">
                                 {producteur.logo_url ? (
-                                    <img src={producteur.logo_url} alt={producteur.name} className="w-full h-full object-cover" />
+                                    <img src={imageUrl(producteur.logo_url)} alt={producteur.name} className="w-full h-full object-cover" />
                                 ) : (
                                     <span className="text-4xl">🌿</span>
                                 )}
@@ -139,7 +140,7 @@ const ProducerDetail = () => {
                                     <Link to={`/produits/${produit.id}`} className="no-underline">
                                         <div className="relative h-44 bg-[#ecfdf5] flex items-center justify-center">
                                             {produit.images?.[0]?.url ? (
-                                                <img src={produit.images[0].url} alt={produit.name_fr} className="h-full w-full object-cover" />
+                                                <img src={imageUrl(produit.images[0].url)}alt={produit.name_fr} className="h-full w-full object-cover" />
                                             ) : (
                                                 <span className="text-6xl">🌿</span>
                                             )}

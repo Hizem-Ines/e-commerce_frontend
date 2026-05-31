@@ -1,6 +1,7 @@
 import { useWishlist } from '../../context/WishlistContext';
 import { useAuth } from '../../context/authContext';
 import formatPrice from '../../utils/formatPrice';
+import { imageUrl } from '../../utils/imageUrl';
 import { FaHeart,FaHeartBroken } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -83,7 +84,7 @@ const addToCart = (produit) => {
                                 <Link to={`/produits/${productId}`} className="no-underline">
                                     <div className="relative h-32 md:h-44 bg-[#ecfdf5] flex items-center justify-center cursor-pointer">
                                         {productImg ? (
-                                            <img src={productImg} alt={productName} className="h-full w-full object-cover" />
+                                            <img src={imageUrl(productImg)} alt={productName} className="h-full w-full object-cover" />
                                         ) : (
                                             <span className="text-4xl md:text-6xl">🌿</span>
                                         )}

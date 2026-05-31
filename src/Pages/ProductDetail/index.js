@@ -4,6 +4,7 @@ import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { getProductById, getAllProducts } from '../../services/productService';
 import formatPrice from '../../utils/formatPrice';
+import { imageUrl } from '../../utils/imageUrl';
 import { FiHeart } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
 import { useAuth } from '../../context/authContext';
@@ -188,7 +189,7 @@ const CarteAvis = ({ avis, currentUserId, onUpdated, onDeleted }) => {
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                     {avis.user_avatar ? (
-                        <img src={avis.user_avatar} alt={avis.user_name} className="w-10 h-10 rounded-full object-cover" />
+                        <img src={imageUrl(avis.user_avatar)} alt={avis.user_name} className="w-10 h-10 rounded-full object-cover" />
                     ) : (
                         <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-[#2d5a27] font-bold text-sm">
                             {avis.user_name?.[0]}
@@ -384,7 +385,7 @@ const fetchReviews = () => {
                         <div className="bg-[#ecfdf5] flex flex-col items-center justify-center p-4 md:p-8 gap-4 min-h-[400px]">
                             <div className="w-full aspect-square max-w-sm mx-auto">
                                 {images[imageActive]?.url ? (
-                                    <img src={images[imageActive].url} alt={produit.name_fr} className="w-full h-full object-cover rounded-xl" />
+                                    <img src={imageUrl(images[imageActive].url)} alt={produit.name_fr} className="w-full h-full object-cover rounded-xl" />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center">
                                         <span className="text-[100px]">🌿</span>
@@ -396,7 +397,7 @@ const fetchReviews = () => {
                                     {images.map((img, idx) => (
                                         <button key={idx} onClick={() => setImageActive(idx)}
                                             className={`w-14 h-14 rounded-xl overflow-hidden border-2 transition-all ${imageActive === idx ? 'border-[#2d5a27]' : 'border-gray-200'}`}>
-                                            <img src={img.url} alt="" className="w-full h-full object-cover" />
+                                            <img src={imageUrl(img.url)} alt="" className="w-full h-full object-cover" />
                                         </button>
                                     ))}
                                 </div>
@@ -718,7 +719,7 @@ const fetchReviews = () => {
                                     className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.07)] border-2 border-transparent hover:border-[#4a8c42] hover:-translate-y-1 transition-all duration-300 no-underline">
                                     <div className="h-32 bg-[#ecfdf5] flex items-center justify-center">
                                         {p.images?.[0]?.url
-                                            ? <img src={p.images[0].url} alt={p.name_fr} className="h-full w-full object-cover" />
+                                            ? <img src={imageUrl(p.images[0].url)} alt={p.name_fr} className="h-full w-full object-cover" />
                                             : <span className="text-5xl">🌿</span>}
                                     </div>
                                     <div className="p-3">

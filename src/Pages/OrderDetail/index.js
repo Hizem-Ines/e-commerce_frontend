@@ -4,6 +4,7 @@ import { getSingleOrder } from '../../services/orderService';
 import { FiArrowLeft, FiPackage, FiMapPin, FiCreditCard, FiTruck } from 'react-icons/fi';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 import formatPrice from '../../utils/formatPrice';
+import { imageUrl } from '../../utils/imageUrl';
 import {
     ORDER_STATUS_INLINE as STATUS_LABELS,
     DELIVERY_STEPS,
@@ -175,7 +176,7 @@ const OrderDetail = () => {
                                     <div key={i} className="flex items-center gap-4 pb-4 border-b border-gray-100 last:border-0 last:pb-0">
                                         <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 flex items-center justify-center" style={{ background: '#ecfdf5' }}>
                                             {image
-                                                ? <img src={image} alt={item.product_name_fr} className="w-full h-full object-cover" />
+                                                ? <img src={imageUrl(image)} alt={item.product_name_fr} className="w-full h-full object-cover" />
                                                 : <span className="text-2xl">🌿</span>}
                                         </div>
                                         <div className="flex-1 min-w-0">
