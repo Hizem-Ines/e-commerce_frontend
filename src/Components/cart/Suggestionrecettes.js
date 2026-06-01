@@ -112,15 +112,47 @@ export default function SuggestionsRecettes({ panier }) {
                                 <p className="text-xs font-bold text-[#2c2c2c] mb-2 uppercase tracking-wide">
                                     Ingrédients
                                 </p>
-                                <div className="flex flex-wrap gap-1.5">
-                                    {recette.ingredients.map((ing, i) => (
-                                        <span key={i}
-                                            className="text-xs px-2.5 py-1 rounded-full font-medium"
-                                            style={{ background: '#dcfce7', color: '#166534' }}>
-                                            {ing.quantite} {ing.nom}
-                                        </span>
-                                    ))}
+                                <div className="space-y-1.5">
+                                    {recette.ingredients.map((ing, i) => {
+                                        const isBasket   = ing.source === 'basket';
+                                        const isCatalogue = ing.source === 'catalogue';
+
+                                        const badge = isBasket
+                                            ? { bg: '#dcfce7', color: '#166534', label: '✓ panier' }
+                                            : isCatalogue
+                                            ? { bg: '#fef9c3', color: '#92400e', label: '🛒 GOFFA' }
+                                            : { bg: '#f3f4f6', color: '#6b7280', label: '⚠ externe' };
+
+                                        return (
+                                            <div key={i} className="flex items-center justify-between gap-2">
+                                                <span className="text-xs text-[#78716c]">
+                                                    <strong>{ing.quantite}</strong> {ing.nom}
+                                                </span>
+                                                <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold shrink-0"
+                                                    style={{ background: badge.bg, color: badge.color }}>
+                                                    {badge.label}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
+
+                                {/* Produits catalogue achetables */}
+                                {recette.ingredients.some(ing => ing.source === 'catalogue' && ing.produit) && (
+                                    <div className="mt-4">
+                                        <p className="text-xs font-bold text-[#2c2c2c] mb-3 uppercase tracking-wide">
+                                            🛒 Complétez votre recette avec GOFFA
+                                        </p>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            {recette.ingredients
+                                                .filter(ing => ing.source === 'catalogue' && ing.produit)
+                                                .map(ing => (
+                                                    <CarteIA key={ing.catalogue_id} produit={ing.produit} />
+                                                ))
+                                            }
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Étapes */}
@@ -140,20 +172,6 @@ export default function SuggestionsRecettes({ panier }) {
                                     ))}
                                 </ol>
                             </div>
-
-                            {/* Suggestions GOFFA */}
-                            {recette.suggestionGoffa?.length > 0 && (
-                                <div className="mt-4">
-                                    <p className="text-xs font-bold text-[#2c2c2c] mb-3 uppercase tracking-wide">
-                                        🛒 Complétez votre recette avec GOFFA
-                                    </p>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        {recette.suggestionGoffa.map((produit) => (
-                                            <CarteIA key={produit.id} produit={produit} />
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
 
                         </div>
                     </div>
