@@ -391,7 +391,7 @@ const AddVariantForm = ({ productId, onAdded, onCancel }) => {
                 </Field>
             </div>
             <div>
-                <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-2">Attributs</p>
+                <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-2">Attributs <span className="text-red-400">*</span></p>
                 <div className="space-y-2">
                     {v.attributes.map((a, ai) => (
                         <div key={ai} className="flex gap-2 items-center">
@@ -532,11 +532,20 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
     const removeVariant = (vi) => setVariants(vs => vs.filter((_, i) => i !== vi));
 
     const handleSubmit = async () => {
-        setError('');
-        if (!form.name_fr.trim())        { setError('Le nom  est obligatoire.');         setTab('general');  return; }
-        if (!form.description_fr.trim()) { setError('La description est obligatoire.'); setTab('general');  return; }
-        if (!form.category_id)           { setError('La catégorie est obligatoire.');         setTab('general');  return; }
-        if (!isEdit && variants.some(v => !v.price || parseFloat(v.price) < 0)) {
+    setError('');
+    if (!form.name_fr.trim())        { setError('Le nom est obligatoire.');          setTab('general');  return; }
+    if (!form.description_fr.trim()) { setError('La description est obligatoire.');  setTab('general');  return; }
+    if (!form.category_id)           { setError('La catégorie est obligatoire.');    setTab('general');  return; }
+    if (!isEdit) {
+        if (!form.supplier_id)            { setError('Le producteur est obligatoire.');        setTab('general');  return; }
+        if (!form.origin.trim())          { setError("L'origine est obligatoire.");            setTab('general');  return; }
+        if (!form.ethical_info_fr.trim()) { setError("L'info éthique est obligatoire.");       setTab('general');  return; }
+        if (!form.usage_fr.trim())        { setError("Le mode d'emploi est obligatoire.");     setTab('details');  return; }
+        if (!form.ingredients_fr.trim())  { setError('Les ingrédients sont obligatoires.');    setTab('details');  return; }
+        if (!form.precautions_fr.trim())  { setError('Les précautions sont obligatoires.');    setTab('details');  return; }
+        if (!form.certifications.trim())  { setError('Les certifications sont obligatoires.'); setTab('details');  return; }
+    }
+    if (!isEdit && variants.some(v => !v.price || parseFloat(v.price) < 0)) {
             setError('Chaque variante doit avoir un prix valide.'); setTab('variants'); return;
         }
 
@@ -708,38 +717,37 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                 <textarea className={textareaCls} rows={4} value={form.description_fr} onChange={e => set('description_fr', e.target.value)} placeholder="Décrivez le produit en détail..." />
                             </Field>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <Field label="Producteur">
+                                <Field label="Producteur" required>
                                     <select className={inputCls} value={form.supplier_id} onChange={e => set('supplier_id', e.target.value)}>
                                         <option value="">— Aucun —</option>
                                         {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                                     </select>
                                 </Field>
-                                <Field label="Origine">
+                                <Field label="Origine" required>
                                     <input className={inputCls} value={form.origin} onChange={e => set('origin', e.target.value)} placeholder="ex: Maroc, Tunisie..." />
                                 </Field>
                             </div>
-                            <Field label="Info éthique (FR)">
+                            <Field label="Info éthique (FR)" required>
                                 <textarea className={textareaCls} rows={2} value={form.ethical_info_fr} onChange={e => set('ethical_info_fr', e.target.value)} placeholder="Engagements éthiques, labels..." />
                             </Field>
                         </div>
 
                     {/* DÉTAILS */}
                     <div className={tab === 'details' ? 'space-y-5' : 'hidden'}>
-                            <Field label="Mode d'emploi (FR)">
+                            <Field label="Mode d'emploi (FR)" required>
+
                                 <textarea className={textareaCls} rows={3} value={form.usage_fr} onChange={e => set('usage_fr', e.target.value)} placeholder="Instructions d'utilisation..." />
                             </Field>
-                            <Field label="Ingrédients (FR)">
+                            <Field label="Ingrédients (FR)" required>
                                 <textarea className={textareaCls} rows={3} value={form.ingredients_fr} onChange={e => set('ingredients_fr', e.target.value)} placeholder="Liste des ingrédients..." />
                             </Field>
-                            <Field label="Précautions (FR)">
+                            <Field label="Précautions (FR)" required>
                                 <textarea className={textareaCls} rows={2} value={form.precautions_fr} onChange={e => set('precautions_fr', e.target.value)} placeholder="Précautions d'emploi..." />
                             </Field>
-                            <Field label="Certifications (séparées par virgule)">
+                            <Field label="Certifications (séparées par virgule)" required>
                                 <input className={inputCls} value={form.certifications} onChange={e => set('certifications', e.target.value)} placeholder="ex: bio, halal, vegan" />
                             </Field>
-                            <Field label="Slug URL">
-                                <input className={inputCls} value={form.slug} onChange={e => set('slug', e.target.value)} placeholder="auto-généré si vide" />
-                            </Field>
+    
                         </div>
 
                     {/* VARIANTES */}
@@ -807,7 +815,7 @@ const ProductFormModal = ({ product, categories, suppliers, onClose, onSaved }) 
                                                 </Field>
                                             </div>
                                             <div>
-                                                <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-2">Attributs</p>
+                                                <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-2">Attributs <span className="text-red-400">*</span></p>
                                                 <div className="space-y-2">
                                                     {v.attributes.map((a, ai) => (
                                                         <div key={ai} className="flex gap-2 items-center">

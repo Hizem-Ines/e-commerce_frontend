@@ -259,7 +259,7 @@ const Faq = () => {
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold mb-4">Questions fréquentes</h1>
           <p style={{ color: "#86efac" }} className="max-w-lg mx-auto text-sm leading-relaxed mb-8">
-            Tout ce que vous devez savoir sur nos produits artisanaux,
+            Tout ce que vous devez savoir sur nos produits,
             la livraison et votre commande.
           </p>
           <div className="relative max-w-md mx-auto">

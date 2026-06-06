@@ -36,7 +36,7 @@ const Footer = () => {
                     <div className="md:col-span-1">
                         <h3 className="text-3xl font-bold font-serif mb-3">GOFFA</h3>
                         <p className="text-white/60 text-sm leading-relaxed mb-5">
-                            Votre plateforme e-commerce de produits artisanaux et naturels , livrés en Suisse.
+                            Votre plateforme e-commerce de produits et naturels , livrés en Suisse.
                         </p>
                         <div className="flex flex-wrap gap-3">
                             <button

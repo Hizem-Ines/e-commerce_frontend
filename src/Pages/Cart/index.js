@@ -30,7 +30,7 @@ const Cart = () => {
                     Votre panier est vide
                 </h2>
                 <p className="text-black/50 mb-8 text-center">
-                    Découvrez nos produits artisanaux et ajoutez-les à votre panier
+                    Découvrez nos produits et ajoutez-les à votre panier
                 </p>
                 <Link to="/produits"
                     className="text-white font-bold px-8 py-3 rounded-full transition-colors duration-300 no-underline"
