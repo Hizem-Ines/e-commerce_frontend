@@ -99,6 +99,12 @@ const VariantPromotions = ({ variantId, productId }) => {
 
       {err && <p className="text-red-500 text-xs font-semibold">❌ {err}</p>}
 
+      {promos.some(p => isActivePromo(p)) && (
+            <p className="text-xs text-amber-600 font-semibold bg-amber-50 px-3 py-2 rounded-xl">
+                ⚠️ Créer une nouvelle promo désactivera automatiquement la promo en cours.
+            </p>
+            )}
+
       {showForm && (
         <div className="bg-emerald-50/50 border border-emerald-200 rounded-xl p-3 space-y-3">
           <div className="grid grid-cols-2 gap-2">
