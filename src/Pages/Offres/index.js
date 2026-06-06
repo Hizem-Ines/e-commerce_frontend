@@ -123,7 +123,7 @@ const Offres = () => {
                         Nos Meilleures Offres
                     </h1>
                     <p className="text-black/50 max-w-xl mx-auto">
-                        Profitez de nos réductions exclusives sur les produits artisanaux 
+                        Profitez de nos réductions exclusives sur les produits
                     </p>
                 </div>
 

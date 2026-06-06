@@ -218,7 +218,7 @@ export default function Reclamations() {
           <div className="bg-white rounded-2xl border border-gray-100 p-5">
             <FiPhone className="mx-auto mb-2" size={20} style={{ color: "#3a7232" }} />
             <p className="font-semibold text-gray-700 text-xs uppercase tracking-wide mb-1">Téléphone</p>
-            <p>+41 79 XXX XX XX</p>
+            <p>+41 79 123 45 67</p>
           </div>
         </div>
       </div>
